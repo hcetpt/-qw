@@ -1,0 +1,35 @@
+====================
+内核驱动 ds2482
+====================
+
+支持的芯片：
+
+  * Maxim DS2482-100，Maxim DS2482-800
+
+    前缀：'ds2482'
+
+    扫描地址：无
+
+    数据手册：
+
+        - http://datasheets.maxim-ic.com/en/ds/DS2482-100.pdf
+        - http://datasheets.maxim-ic.com/en/ds/DS2482-800.pdf
+
+作者：Ben Gardner <bgardner@wabtec.com>
+
+描述
+-----------
+
+Maxim/Dallas Semiconductor 的 DS2482 是一个 I2C 设备，提供
+一个（DS2482-100）或八个（DS2482-800）1-wire 总线。
+一般备注
+---------------
+
+有效的地址是 0x18、0x19、0x1a 和 0x1b，
+然而，在不向 I2C 总线写入的情况下无法检测到设备，因此没有进行检测。你应该明确地实例化设备
+::
+
+  $ modprobe ds2482
+  $ echo ds2482 0x18 > /sys/bus/i2c/devices/i2c-0/new_device
+
+这段文本描述了Linux内核中的一个驱动程序ds2482，它用于支持Maxim公司的DS2482系列芯片，包括DS2482-100和DS2482-800型号。这个驱动为I2C总线上的这些芯片提供了支持，它们可以作为单个或多个1-wire总线接口。由于设备检测需要向I2C总线写入数据，因此在没有显式配置的情况下，不会自动检测设备。用户需要通过modprobe加载驱动，并通过echo命令在/sys文件系统中创建设备节点来实例化设备。

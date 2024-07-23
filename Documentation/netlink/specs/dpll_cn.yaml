@@ -1,0 +1,169 @@
+# SPDX 许可证标识符: ((GPL-2.0 WITH Linux-syscall-note) 或 BSD-3-Clause)
+
+名称: dpll
+
+文档: DPLL 子系统
+定义:
+  -
+    类型: 枚举
+    名称: mode
+    文档: |
+      DPLL 可以支持的工作模式，区分 DPLL 是否以及如何选择其输入之一进行同步，是 DPLL_A_MODE 属性的有效值
+    条目:
+      -
+        名称: manual
+        文档: 输入只能通过向 DPLL 发送请求来选择
+        值: 1
+      -
+        名称: automatic
+        文档: 最高优先级的输入引脚由 DPLL 自动选择
+    渲染最大值: 真
+  -
+    类型: 枚举
+    名称: lock-status
+    文档: |
+      提供有关 DPLL 设备锁定状态的信息，是 DPLL_A_LOCK_STATUS 属性的有效值
+    条目:
+      -
+        名称: unlocked
+        文档: |
+          DPLL 尚未锁定到任何有效输入（或通过将 DPLL_A_MODE 设置为 DPLL_MODE_DETACHED 强制）
+        值: 1
+      -
+        名称: locked
+        文档: |
+          DPLL 锁定到有效信号，但没有保持操作可用
+      -
+        名称: locked-ho-acq
+        文档: |
+          DPLL 已锁定且已获取保持操作
+      -
+        名称: holdover
+        文档: |
+          DPLL 处于保持操作状态 - 丢失了有效的锁定或被强制
+          通过断开所有引脚（后者仅在
+          当 DPLL 锁定状态已经是 DPLL_LOCK_STATUS_LOCKED_HO_ACQ 时可能，
+          如果 DPLL 锁定状态不是 DPLL_LOCK_STATUS_LOCKED_HO_ACQ，则
+          DPLL 的锁定状态应保持为 DPLL_LOCK_STATUS_UNLOCKED）
+    渲染最大值: 真
+  -
+    类型: 枚举
+    名称: lock-status-error
+    文档: |
+      如果之前的状态更改是由于失败引起的，这提供了有关 DPLL 设备锁定状态错误的信息。
+      是 DPLL_A_LOCK_STATUS_ERROR 属性的有效值
+    条目:
+      -
+        名称: none
+        文档: |
+          DPLL 设备锁定状态在没有任何错误的情况下更改
+        值: 1
+      -
+        名称: undefined
+        文档: |
+          DPLL 设备锁定状态因未定义的错误而改变
+          驱动程序在此值无法获得合适的确切错误类型时填充此值
+      -
+        名称: media-down
+        文档: |
+          DPLL 设备锁定状态因关联的媒体停用而改变
+          这可能发生在例如如果 DPLL 设备先前
+          锁定在类型为 PIN_TYPE_SYNCE_ETH_PORT 的输入引脚上
+      -
+        名称: fractional-frequency-offset-too-high
+        文档: |
+          媒体上的 RX 和 TX 符号速率之间的 FFO（分数频率偏移）变得太高
+          这可能发生在例如如果 DPLL 设备先前
+          锁定在类型为 PIN_TYPE_SYNCE_ETH_PORT 的输入引脚上
+    渲染最大值: 真
+  -
+    类型: 常量
+    名称: temp-divider
+    值: 1000
+    文档: |
+      温度除数允许用户空间计算温度为带有三位小数精度的浮点数
+      (DPLL_A_TEMP / DPLL_TEMP_DIVIDER) 的值是温度值的整数部分
+The provided text describes a structured data model for configuring and managing DPLL (Digital Phase-Locked Loop) devices and their associated pins. Below is a translation into Chinese:
+
+- **温度值的小数部分**:
+  - `(DPLL_A_TEMP % DPLL_TEMP_DIVIDER)` 的值是温度值的小数部分。
+
+- **类型**:
+  - 名称: `type`
+  - 描述: DPLL的类型，`DPLL_A_TYPE` 属性的有效值。
+  - 枚举项:
+    - 名称: `pps`
+      - 描述: DPLL产生每秒一次脉冲信号。
+      - 值: 1
+    - 名称: `eec`
+      - 描述: DPLL驱动以太网设备时钟。
+  
+- **引脚类型**:
+  - 定义了可能的引脚类型，`DPLL_A_PIN_TYPE` 属性的有效值。
+  - 枚举项:
+    - 名称: `mux`
+      - 描述: 聚合另一层可选的引脚。
+      - 值: 1
+    - 名称: `ext`
+      - 描述: 外部输入。
+    - 名称: `synce-eth-port`
+      - 描述: 以太网端口PHY恢复的时钟。
+    - 名称: `int-oscillator`
+      - 描述: 设备内部振荡器。
+    - 名称: `gnss`
+      - 描述: GNSS恢复的时钟。
+
+- **引脚方向**:
+  - 定义了可能的引脚方向，`DPLL_A_PIN_DIRECTION` 属性的有效值。
+  - 枚举项:
+    - 名称: `input`
+      - 描述: 引脚用作信号的输入。
+      - 值: 1
+    - 名称: `output`
+      - 描述: 引脚用于输出信号。
+
+- **引脚频率常量**:
+  - 名称: `pin-frequency-1-hz`, 值: 1
+  - 名称: `pin-frequency-10-khz`, 值: 10000
+  - 名称: `pin-frequency-77_5-khz`, 值: 77500
+  - 名称: `pin-frequency-10-mhz`, 值: 10000000
+
+- **引脚状态**:
+  - 定义了可能的引脚状态，`DPLL_A_PIN_STATE` 属性的有效值。
+  - 枚举项:
+    - 名称: `connected`
+      - 描述: 引脚连接，作为锁相环的活动输入。
+      - 值: 1
+    - 名称: `disconnected`
+      - 描述: 引脚未连接，不被视为有效的输入。
+    - 名称: `selectable`
+      - 描述: 引脚启用自动输入选择。
+
+- **引脚能力**:
+  - 定义了可能的引脚能力，`DPLL_A_PIN_CAPABILITIES` 属性的有效标志位。
+  - 枚举项:
+    - 名称: `direction-can-change`
+      - 描述: 引脚的方向可以改变。
+    - 名称: `priority-can-change`
+      - 描述: 引脚的优先级可以改变。
+    - 名称: `state-can-change`
+      - 描述: 引脚的状态可以改变。
+
+- **相位偏移除数**:
+  - 名称: `phase-offset-divider`, 值: 1000
+  - 描述: 相位偏移除数允许用户空间计算引脚与DPLL设备之间的信号相位差值，具有三位小数精度。
+  - `(DPLL_A_PHASE_OFFSET / DPLL_PHASE_OFFSET_DIVIDER)` 的值是测量得到的相位偏移值的整数部分。
+  - `(DPLL_A_PHASE_OFFSET % DPLL_PHASE_OFFSET_DIVIDER)` 的值是测量得到的相位偏移值的小数部分。
+
+- **属性集**:
+  - 名称: `dpll`
+  - 名称: `pin`
+
+- **操作**:
+  - 包括了对DPLL设备和引脚的各种操作，如获取、设置、创建、删除通知等。
+
+- **多播组**:
+  - 列表:
+    - 名称: `monitor`
+
+此模型详细定义了如何管理和配置DPLL设备及其相关引脚，并提供了多种操作接口来实现这些功能。

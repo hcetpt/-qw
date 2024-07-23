@@ -1,0 +1,326 @@
+# SPDX 许可证标识符: ((GPL-2.0 WITH Linux-syscall-note) 或 BSD-3-Clause)
+
+名称: rt-route
+协议: netlink-raw
+协议号: 0
+
+文档:
+  通过 rtnetlink 进行路由配置
+定义:
+  -
+    名称: rtm-type
+    前缀名: rtn-
+    类型: 枚举
+    条目:
+      - unspec
+      - unicast
+      - local
+      - broadcast
+      - anycast
+      - multicast
+      - blackhole
+      - unreachable
+      - prohibit
+      - throw
+      - nat
+      - xresolve
+  -
+    名称: rtmsg
+    类型: 结构体
+    成员:
+      -
+        名称: rtm-family
+        类型: u8
+      -
+        名称: rtm-dst-len
+        类型: u8
+      -
+        名称: rtm-src-len
+        类型: u8
+      -
+        名称: rtm-tos
+        类型: u8
+      -
+        名称: rtm-table
+        类型: u8
+      -
+        名称: rtm-protocol
+        类型: u8
+      -
+        名称: rtm-scope
+        类型: u8
+      -
+        名称: rtm-type
+        类型: u8
+        枚举: rtm-type
+      -
+        名称: rtm-flags
+        类型: u32
+  -
+    名称: rta-cacheinfo
+    类型: 结构体
+    成员:
+      -
+        名称: rta-clntref
+        类型: u32
+      -
+        名称: rta-lastuse
+        类型: u32
+      -
+        名称: rta-expires
+        类型: u32
+      -
+        名称: rta-error
+        类型: u32
+      -
+        名称: rta-used
+        类型: u32
+
+属性集:
+  -
+    名称: route-attrs
+    属性:
+      -
+        名称: rta-dst
+        类型: 二进制
+        显示提示: ipv4
+      -
+        名称: rta-src
+        类型: 二进制
+        显示提示: ipv4
+      -
+        名称: rta-iif
+        类型: u32
+      -
+        名称: rta-oif
+        类型: u32
+      -
+        名称: rta-gateway
+        类型: 二进制
+        显示提示: ipv4
+      -
+        名称: rta-priority
+        类型: u32
+      -
+        名称: rta-prefsrc
+        类型: 二进制
+        显示提示: ipv4
+      -
+        名称: rta-metrics
+        类型: 嵌套
+        嵌套属性: rta-metrics
+      -
+        名称: rta-multipath
+        类型: 二进制
+      -
+        名称: rta-protoinfo # 不使用
+        类型: 二进制
+      -
+        名称: rta-flow
+        类型: u32
+      -
+        名称: rta-cacheinfo
+        类型: 二进制
+        结构体: rta-cacheinfo
+      -
+        名称: rta-session # 不使用
+        类型: 二进制
+      -
+        名称: rta-mp-algo # 不使用
+        类型: 二进制
+      -
+        名称: rta-table
+        类型: u32
+      -
+        名称: rta-mark
+        类型: u32
+      -
+        名称: rta-mfc-stats
+        类型: 二进制
+      -
+        名称: rta-via
+        类型: 二进制
+      -
+        名称: rta-newdst
+        类型: 二进制
+      -
+        名称: rta-pref
+        类型: u8
+      -
+        名称: rta-encap-type
+        类型: u16
+      -
+        名称: rta-encap
+        类型: 二进制 # 隧道特定嵌套
+      -
+        名称: rta-expires
+        类型: u32
+      -
+        名称: rta-pad
+        类型: 二进制
+      -
+        名称: rta-uid
+        类型: u32
+      -
+        名称: rta-ttl-propagate
+        类型: u8
+      -
+        名称: rta-ip-proto
+        类型: u8
+      -
+        名称: rta-sport
+        类型: u16
+      -
+        名称: rta-dport
+        类型: u16
+      -
+        名称: rta-nh-id
+        类型: u32
+  -
+    名称: rta-metrics
+    属性:
+      -
+        名称: rtax-unspec
+        类型: 未使用
+        值: 0
+      -
+        名称: rtax-lock
+        类型: u32
+      -
+        名称: rtax-mtu
+        类型: u32
+      -
+        名称: rtax-window
+        类型: u32
+      -
+        名称: rtax-rtt
+        类型: u32
+      -
+        名称: rtax-rttvar
+        类型: u32
+      -
+        名称: rtax-ssthresh
+        类型: u32
+      -
+        名称: rtax-cwnd
+        类型: u32
+      -
+        名称: rtax-advmss
+        类型: u32
+      -
+        名称: rtax-reordering
+        类型: u32
+      -
+        名称: rtax-hoplimit
+        类型: u32
+      -
+        名称: rtax-initcwnd
+        类型: u32
+      -
+        名称: rtax-features
+        类型: u32
+      -
+        名称: rtax-rto-min
+        类型: u32
+      -
+        名称: rtax-initrwnd
+        类型: u32
+      -
+        名称: rtax-quickack
+        类型: u32
+      -
+        名称: rtax-cc-algo
+        类型: 字符串
+      -
+        名称: rtax-fastopen-no-cookie
+        类型: u32
+
+操作:
+  枚举模型: 方向性
+  列表:
+    -
+      名称: getroute
+      文档: 导出路由信息
+      属性集: route-attrs
+      固定头: rtmsg
+      执行:
+        请求:
+          值: 26
+          属性:
+            - rtm-family
+            - rta-src
+            - rtm-src-len
+            - rta-dst
+            - rtm-dst-len
+            - rta-iif
+            - rta-oif
+            - rta-ip-proto
+            - rta-sport
+            - rta-dport
+            - rta-mark
+            - rta-uid
+        回复:
+          值: 24
+          属性: &all-route-attrs
+            - rtm-family
+            - rtm-dst-len
+            - rtm-src-len
+            - rtm-tos
+            - rtm-table
+            - rtm-protocol
+            - rtm-scope
+            - rtm-type
+            - rtm-flags
+            - rta-dst
+            - rta-src
+            - rta-iif
+            - rta-oif
+            - rta-gateway
+            - rta-priority
+            - rta-prefsrc
+            - rta-metrics
+            - rta-multipath
+            - rta-flow
+            - rta-cacheinfo
+            - rta-table
+            - rta-mark
+            - rta-mfc-stats
+            - rta-via
+            - rta-newdst
+            - rta-pref
+            - rta-encap-type
+            - rta-encap
+            - rta-expires
+            - rta-pad
+            - rta-uid
+            - rta-ttl-propagate
+            - rta-ip-proto
+            - rta-sport
+            - rta-dport
+            - rta-nh-id
+      导出:
+        请求:
+          值: 26
+          属性:
+            - rtm-family
+        回复:
+          值: 24
+          属性: *all-route-attrs
+    -
+      名称: newroute
+      文档: 创建一条新路由
+      属性集: route-attrs
+      固定头: rtmsg
+      执行:
+        请求:
+          值: 24
+          属性: *all-route-attrs
+    -
+      名称: delroute
+      文档: 删除现有路由
+      属性集: route-attrs
+      固定头: rtmsg
+      执行:
+        请求:
+          值: 25
+          属性: *all-route-attrs

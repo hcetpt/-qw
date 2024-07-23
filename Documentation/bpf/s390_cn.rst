@@ -1,0 +1,190 @@
+在s390上测试BPF
+===================
+
+1. 引言
+***************
+
+IBM Z是大型机，它们源自1964年的IBM System/360。Linux内核以"s390"的名称支持它们。本文档描述了如何在s390 QEMU虚拟机中测试BPF。
+
+2. 一次性设置
+*****************
+
+构建和运行测试套件需要以下条件：
+
+  * s390 GCC
+  * s390开发头文件和库
+  * 支持BPF的Clang
+  * 支持s390的QEMU
+  * 包含s390根文件系统的磁盘映像
+
+Debian原生支持安装s390的编译器和库。其他发行版的用户可以使用debootstrap来设置Debian chroot：
+
+  sudo debootstrap \
+    --variant=minbase \
+    --include=sudo \
+    testing \
+    ./s390-toolchain
+  sudo mount --rbind /dev ./s390-toolchain/dev
+  sudo mount --rbind /proc ./s390-toolchain/proc
+  sudo mount --rbind /sys ./s390-toolchain/sys
+  sudo chroot ./s390-toolchain
+
+在Debian上，构建先决条件可以按如下方式安装：
+
+  sudo dpkg --add-architecture s390x
+  sudo apt-get update
+  sudo apt-get install \
+    bc \
+    bison \
+    cmake \
+    debootstrap \
+    dwarves \
+    flex \
+    g++ \
+    gcc \
+    g++-s390x-linux-gnu \
+    gcc-s390x-linux-gnu \
+    gdb-multiarch \
+    git \
+    make \
+    python3 \
+    qemu-system-misc \
+    qemu-utils \
+    rsync \
+    libcap-dev:s390x \
+    libelf-dev:s390x \
+    libncurses-dev
+
+最新支持BPF的Clang可以按如下方式安装：
+
+  git clone https://github.com/llvm/llvm-project.git
+  ln -s ../../clang llvm-project/llvm/tools/
+  mkdir llvm-project-build
+  cd llvm-project-build
+  cmake \
+    -DLLVM_TARGETS_TO_BUILD=BPF \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=/opt/clang-bpf \
+    ../llvm-project/llvm
+  make
+  sudo make install
+  export PATH=/opt/clang-bpf/bin:$PATH
+
+磁盘映像可以使用循环挂载和debootstrap准备：
+
+  qemu-img create -f raw ./s390.img 1G
+  sudo losetup -f ./s390.img
+  sudo mkfs.ext4 /dev/loopX
+  mkdir ./s390.rootfs
+  sudo mount /dev/loopX ./s390.rootfs
+  sudo debootstrap \
+    --foreign \
+    --arch=s390x \
+    --variant=minbase \
+    --include=" \
+      iproute2, \
+      iputils-ping, \
+      isc-dhcp-client, \
+      kmod, \
+      libcap2, \
+      libelf1, \
+      netcat, \
+      procps" \
+    testing \
+    ./s390.rootfs
+  sudo umount ./s390.rootfs
+  sudo losetup -d /dev/loopX
+
+3. 编译
+**************
+
+除了通常需要运行BPF测试套件的Kconfig选项之外，选择以下配置也很有帮助：
+
+  CONFIG_NET_9P=y
+  CONFIG_9P_FS=y
+  CONFIG_NET_9P_VIRTIO=y
+  CONFIG_VIRTIO_PCI=y
+
+这将启用与s390虚拟机共享文件的非常简单的方法。
+使用以下命令编译内核、模块和测试套件，以及准备gdb脚本来简化调试：
+
+  make ARCH=s390 CROSS_COMPILE=s390x-linux-gnu- menuconfig
+  make ARCH=s390 CROSS_COMPILE=s390x-linux-gnu- bzImage modules scripts_gdb
+  make ARCH=s390 CROSS_COMPILE=s390x-linux-gnu- \
+    -C tools/testing/selftests \
+    TARGETS=bpf \
+    INSTALL_PATH=$PWD/tools/testing/selftests/kselftest_install \
+    install
+
+4. 运行测试套件
+*************************
+
+虚拟机可以按如下方式启动：
+
+  qemu-system-s390x \
+    -cpu max,zpci=on \
+    -smp 2 \
+    -m 4G \
+    -kernel linux/arch/s390/boot/compressed/vmlinux \
+    -drive file=./s390.img,if=virtio,format=raw \
+    -nographic \
+    -append 'root=/dev/vda rw console=ttyS1' \
+    -virtfs local,path=./linux,security_model=none,mount_tag=linux \
+    -object rng-random,filename=/dev/urandom,id=rng0 \
+    -device virtio-rng-ccw,rng=rng0 \
+    -netdev user,id=net0 \
+    -device virtio-net-ccw,netdev=net0
+
+在真实的IBM Z上使用时，可以添加`-enable-kvm`以获得更好的性能。第一次启动虚拟机时，必须使用以下命令完成磁盘映像设置：
+
+  /debootstrap/debootstrap --second-stage
+
+主机上构建的代码目录以及`/proc`和`/sys`需要按如下方式挂载：
+
+  mkdir -p /linux
+  mount -t 9p linux /linux
+  mount -t proc proc /proc
+  mount -t sysfs sys /sys
+
+之后，可以使用以下命令运行测试套件：
+
+  cd /linux/tools/testing/selftests/kselftest_install
+  ./run_kselftest.sh
+
+如常，测试也可以单独运行：
+
+  cd /linux/tools/testing/selftests/bpf
+  ./test_verifier
+
+5. 调试
+************
+
+可以使用QEMU GDB stub调试s390内核，通过向QEMU传递`-s`激活它。
+
+为了使gdb知道在内存中哪里找到内核映像，最好关闭KASLR，通过以下方式构建内核：
+
+  RANDOMIZE_BASE=n
+
+然后可以使用以下命令附加gdb：
+
+  gdb-multiarch -ex 'target remote localhost:1234' ./vmlinux
+
+6. 网络
+**********
+
+如果需要在虚拟机中使用网络（例如，安装额外的软件包），可以使用以下命令进行配置：
+
+  dhclient eth0
+
+7. 链接
+********
+
+本文档是技术的汇编，更全面的描述可以通过以下链接找到：
+
+- `Debootstrap <https://wiki.debian.org/EmDebian/CrossDebootstrap>`_
+- `Multiarch <https://wiki.debian.org/Multiarch/HOWTO>`_
+- `Building LLVM <https://llvm.org/docs/CMake.html>`_
+- `Cross-compiling the kernel <https://wiki.gentoo.org/wiki/Embedded_Handbook/General/Cross-compiling_the_kernel>`_
+- `QEMU s390x Guest Support <https://wiki.qemu.org/Documentation/Platforms/S390X>`_
+- `Plan 9 folder sharing over Virtio <https://wiki.qemu.org/Documentation/9psetup>`_
+- `Using GDB with QEMU <https://wiki.osdev.org/Kernel_Debugging#Use_GDB_with_QEMU>`_

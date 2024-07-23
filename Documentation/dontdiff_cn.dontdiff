@@ -1,0 +1,267 @@
+这些文件扩展名和文件名模式主要来自于 Linux 内核构建过程中产生的各种文件。下面是对这些模式的中文翻译，需要注意的是，部分文件名并不是标准的文件类型，而是特定于内核构建过程中的文件或脚本，因此直接翻译文件名可能意义不大。下面是按类别整理的翻译：
+
+### 文件类型
+
+- `*.a`：归档文件（静态库）
+- `*.aux`：辅助文件（LaTeX编译时产生）
+- `*.bc`：位码文件（如 LLVM 生成的中间表示）
+- `*.bin`：二进制文件
+- `*.bz2`：BZip2 压缩文件
+- `*.cpio`：CPIO 归档文件
+- `*.csp`：未知文件类型
+- `*.dsp`：项目文件（一些IDE使用）
+- `*.dvi`：设备无关文件（LaTeX输出格式）
+- `*.elf`：可执行和链接格式文件
+- `*.eps`：封装的PostScript文件
+- `*.fw`：固件文件
+- `*.gcno`：GCC编译器产生的调试信息文件
+- `*.gcov`：代码覆盖率信息文件
+- `*.gif`：图形交换格式文件
+- `*.html`：超文本标记语言文件
+- `*.jpeg`：JPEG 图像文件
+- `*.ko`：Linux 内核模块
+- `*.ll`：LLVM IR 文件
+- `*.log`：日志文件
+- `*.lst`：列表文件
+- `*.lzma`：LZMA 压缩文件
+- `*.lzo`：LZO 压缩文件
+- `*.mo`：二进制消息目录文件（用于本地化）
+- `*.moc`：未知文件类型
+- `*.mod`：模块文件
+- `*.mod.c`：模块源代码文件
+- `*.o`：目标文件
+- `*.o.*`：目标文件的变种
+- `*.order`：依赖顺序文件
+- `*.orig`：原始备份文件
+- `*.out`：输出文件
+- `*.pdf`：便携文档格式文件
+- `*.plist`：属性列表文件（苹果系统中常用）
+- `*.png`：便携网络图形文件
+- `*.pot`：模板文件（用于本地化）
+- `*.ps`：PostScript 文件
+- `*.rej`：拒绝文件（diff工具生成）
+- `*.sgml`：标准通用标记语言文件
+- `*.so`：共享对象文件（动态库）
+- `*.so.dbg`：调试信息文件
+- `*.symtypes`：符号类型文件
+- `*.tab.c`：表格数据 C 语言源文件
+- `*.tab.h`：表格数据头文件
+- `*.tex`：TeX 文档
+- `*.ver`：版本文件
+- `*.xml`：可扩展标记语言文件
+- `*.xz`：XZ 压缩文件
+- `*.zst`：Zstandard 压缩文件
+
+### 特殊文件/脚本
+
+- `*_MODULES`：模块相关文件
+- `*_vga16.c`：与 VGA 相关的 C 源文件
+- `*~`：备份文件
+- `\#*#`：备份文件
+- `*.9`：未知文件类型
+- `.*`：隐藏文件
+- `.*.d`：未知文件类型
+- `mm`：内存管理相关文件
+- `53c700_d.h`：特定硬件相关的头文件
+- `CVS`：版本控制系统文件夹
+- `ChangeSet`：版本控制相关信息
+- `GPATH`：路径信息文件
+- `GRTAGS`：标签文件
+- `GSYMS`：符号文件
+- `GTAGS`：标签文件
+- `Image`：内核镜像文件
+- `Module.markers`：模块标记文件
+- `Module.symvers`：模块符号版本文件
+- `PENDING`：待处理文件
+- `SCCS`：源代码控制管理系统文件夹
+- `System.map*`：内核映射文件
+- `TAGS`：标签文件
+- `aconf`：配置文件
+- `af_names.h`：未知头文件
+- `aic7*reg.h*`：特定硬件相关的头文件
+- `aic7*reg_print.c*`：特定硬件相关的 C 源文件
+- `aic7*seq.h*`：特定硬件相关的头文件
+- `aicasm`：特定硬件相关的汇编文件
+- `aicdb.h*`：特定硬件相关的头文件
+- `altivec*.c`：特定硬件相关的 C 源文件
+- `asm-offsets.h`：汇编偏移量头文件
+- `asm_offsets.h`：汇编偏移量头文件
+- `autoconf.h*`：自动配置头文件
+- `av_permissions.h`：权限相关头文件
+- `bbootsect`：引导扇区相关文件
+- `binkernel.spec`：二进制内核规范文件
+- `bootsect`：引导扇区相关文件
+- `bounds.h`：边界检查头文件
+- `bsetup`：设置相关脚本
+- `btfixupprep`：未知脚本
+- `build`：构建脚本
+- `bvmlinux`：未知文件
+- `bzImage*`：压缩的内核镜像文件
+- `capability_names.h`：权限名称头文件
+- `capflags.c`：权限标志 C 源文件
+- `classlist.h*`：类列表头文件
+- `comp*.log`：编译日志文件
+- `compile.h*`：编译相关头文件
+- `conf`：配置文件
+- `config`：配置文件
+- `config-*`：配置文件
+- `config.mak`：配置 Makefile 文件
+- `config.mak.autogen`：自动生成的配置 Makefile 文件
+- `conmakehash`：Makefile 哈希值文件
+- `consolemap_deftbl.c*`：控制台映射表 C 源文件
+- `cpustr.h`：CPU 字符串头文件
+- `crc32table.h*`：CRC32 表头文件
+- `cscope.*`：代码搜索相关文件
+- `defkeymap.c`：默认键盘映射 C 源文件
+- `devlist.h*`：设备列表头文件
+- `devicetable-offsets.h`：设备表偏移量头文件
+- `dnotify_test`：通知测试脚本
+- `dslm`：未知文件
+- `dtc`：Device Tree Compiler
+- `elf2ecoff`：ELF 到 ECOFF 转换工具
+- `elfconfig.h*`：ELF 配置头文件
+- `evergreen_reg_safe.h`：特定硬件相关的头文件
+- `fixdep`：依赖修复脚本
+- `flask.h`：Flask 相关头文件
+- `fore200e_mkfirm`：固件构建脚本
+- `fore200e_pca_fw.c*`：特定硬件相关的 C 源文件
+- `gconf`：配置文件
+- `gconf-cfg`：配置文件
+- `gen-devlist`：生成设备列表脚本
+- `gen_crc32table`：生成 CRC32 表脚本
+- `gen_init_cpio`：生成初始 CPIO 归档文件脚本
+- `generated`：生成的文件文件夹
+- `genheaders`：生成头文件脚本
+- `genksyms`：生成符号信息脚本
+- `*_gray256.c`：特定硬件相关的 C 源文件
+- `hpet_example`：HPET 示例文件
+- `hugepage-mmap`：大页内存映射脚本
+- `hugepage-shm`：大页共享内存脚本
+- `ihex2fw`：HEX 到固件转换脚本
+- `inat-tables.c`：NAT 表 C 源文件
+- `initramfs_list`：初始 RAM 文件系统列表文件
+- `int16.c`：16 位整数操作 C 源文件
+- `int1.c`：1 位整数操作 C 源文件
+- `int2.c`：2 位整数操作 C 源文件
+- `int32.c`：32 位整数操作 C 源文件
+- `int4.c`：4 位整数操作 C 源文件
+- `int8.c`：8 位整数操作 C 源文件
+- `kallsyms`：所有符号表
+- `keywords.c`：关键字 C 源文件
+- `ksym.c*`：符号相关 C 源文件
+- `ksym.h*`：符号相关头文件
+- `*lex.c`：词法分析器 C 源文件
+- `*lex.*.c`：词法分析器 C 源文件
+- `linux`：Linux 内核相关文件
+- `logo_*.c`：Logo 图标 C 源文件
+- `logo_*_clut224.c`：Logo 图标 C 源文件
+- `logo_*_mono.c`：Logo 图标 C 源文件
+- `mach-types`：机器类型文件
+- `mach-types.h`：机器类型头文件
+- `machtypes.h`：机器类型头文件
+- `map`：映射文件
+- `map_hugetlb`：大页映射文件
+- `mconf`：配置文件
+- `mconf-cfg`：配置文件
+- `miboot*`：引导加载程序相关文件
+- `mk_elfconfig`：生成 ELF 配置文件脚本
+- `mkboot`：构建脚本
+- `mkbugboot`：构建 bug 引导文件脚本
+- `mkcpustr`：构建 CPU 字符串脚本
+- `mkdep`：构建依赖关系脚本
+- `mkregtable`：构建寄存器表脚本
+- `mktables`：构建表文件脚本
+- `mktree`：构建树形结构脚本
+- `mkutf8data`：构建 UTF-8 数据脚本
+- `modpost`：模块后处理脚本
+- `modules-only.symvers`：仅模块符号版本文件
+- `modules.builtin`：内置模块文件
+- `modules.builtin.modinfo`：内置模块信息文件
+- `modules.nsdeps`：模块命名空间依赖文件
+- `modules.order`：模块排序文件
+- `modversions.h*`：模块版本头文件
+- `nconf`：配置文件
+- `nconf-cfg`：配置文件
+- `ncscope.*`：未知文件
+- `offset.h`：偏移量头文件
+- `oui.c*`：组织唯一标识符 C 源文件
+- `page-types`：页面类型文件
+- `parse.c`：解析 C 源文件
+- `parse.h`：解析头文件
+- `patches*`：补丁文件
+- `pca200e.bin`：特定硬件相关的二进制文件
+- `pca200e_ecd.bin2`：特定硬件相关的二进制文件
+- `perf.data`：性能数据文件
+- `perf.data.old`：旧的性能数据文件
+- `perf-archive`：性能数据存档文件夹
+- `piggyback`：附带文件
+- `piggy.gzip`：GZip 压缩的附带文件
+- `piggy.S`：附带汇编文件
+- `pnmtologo`：PNM 到 Logo 转换工具
+- `ppc_defs.h*`：PowerPC 定义头文件
+- `pss_boot.h`：启动相关头文件
+- `qconf`：配置文件
+- `qconf-cfg`：配置文件
+- `r100_reg_safe.h`：特定硬件相关的头文件
+- `r200_reg_safe.h`：特定硬件相关的头文件
+- `r300_reg_safe.h`：特定硬件相关的头文件
+- `r420_reg_safe.h`：特定硬件相关的头文件
+- `r600_reg_safe.h`：特定硬件相关的头文件
+- `randstruct.seed`：随机结构种子文件
+- `randomize_layout_hash.h`：布局随机化哈希头文件
+- `randomize_layout_seed.h`：布局随机化种子头文件
+- `recordmcount`：记录计数文件
+- `relocs`：重定位文件
+- `rlim_names.h`：资源限制名称头文件
+- `rn50_reg_safe.h`：特定硬件相关的头文件
+- `rs600_reg_safe.h`：特定硬件相关的头文件
+- `rv515_reg_safe.h`：特定硬件相关的头文件
+- `series`：系列文件
+- `setup`：设置文件
+- `setup.bin`：设置二进制文件
+- `setup.elf`：设置 ELF 文件
+- `sortextable`：排序扩展表文件
+- `sImage`：系统镜像文件
+- `sm_tbl*`：状态机表文件
+- `split-include`：分割包含文件
+- `syscalltab.h`：系统调用表头文件
+- `tables.c`：表 C 源文件
+- `tags`：标签文件
+- `test_get_len`：获取长度测试文件
+- `tftpboot.img`：TFTP 引导图像文件
+- `timeconst.h`：时间常量头文件
+- `times.h*`：时间相关头文件
+- `trix_boot.h`：启动相关头文件
+- `utsrelease.h*`：UTS 发布头文件
+- `vdso-syms.lds`：VDSO 符号链接脚本
+- `vdso.lds`：VDSO 链接脚本
+- `vdso32-int80-syms.lds`：VDSO 32 位 INT80 符号链接脚本
+- `vdso32-syms.lds`：VDSO 32 位符号链接脚本
+- `vdso32-syscall-syms.lds`：VDSO 32 位系统调用符号链接脚本
+- `vdso32-sysenter-syms.lds`：VDSO 32 位 SYSENTER 符号链接脚本
+- `vdso32.lds`：VDSO 32 位链接脚本
+- `vdso32.so.dbg`：VDSO 32 位调试信息文件
+- `vdso64.lds`：VDSO 64 位链接脚本
+- `vdso64.so.dbg`：VDSO 64 位调试信息文件
+- `version.h*`：版本头文件
+- `vmImage`：虚拟内存镜像文件
+- `vmlinux`：内核镜像文件
+- `vmlinux-*`：内核镜像文件
+- `vmlinux.aout`：AOUT 格式的内核镜像文件
+- `vmlinux.bin.all`：内核镜像二进制文件
+- `vmlinux.lds`：内核镜像链接脚本
+- `vmlinux.map`：内核映射文件
+- `vmlinux.symvers`：内核符号版本文件
+- `vmlinuz`：压缩的内核镜像文件
+- `voffset.h`：虚拟偏移量头文件
+- `vsyscall.lds`：VSYSCALL 链接脚本
+- `vsyscall_32.lds`：VSYSCALL 32 位链接脚本
+- `wanxlfw.inc`：未知头文件
+- `uImage`：U-Boot 映像文件
+- `unifdef`：去除未定义宏工具
+- `utf8data.h`：UTF-8 数据头文件
+- `wakeup.bin`：唤醒二进制文件
+- `wakeup.elf`：唤醒 ELF 文件
+- `wakeup.lds`：唤醒链接脚本
+- `zImage*`：压缩的内核镜像文件
+- `zoffset.h`：压缩偏移量头文件
