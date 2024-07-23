@@ -42,8 +42,8 @@ def segment_document(file_path):
         for i, segment in enumerate(output_segments):
             get_response("翻译成中文:"+segment)
             #print(segment)
-            if i < len(output_segments) - 1:
-                print('%%%' * 40)
+            #if i < len(output_segments) - 1:
+            #    print('%%%' * 40)
             
     except FileNotFoundError:
         print(f"文件 {file_path} 未找到。")
