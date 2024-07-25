@@ -10,7 +10,7 @@ def get_response(question):
         base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",  # 填写DashScope SDK的base_url
     )
     completion = client.chat.completions.create(
-        model="ziya-llama-13-v1",
+        model="qwen-long",
         messages=[{'role': 'system', 'content': 'You are a helpful assistant.'},
                   {'role': 'user', 'content': question}]
         )
