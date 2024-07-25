@@ -59,5 +59,6 @@ else
     # 遍历文件数组，并将每个文件路径作为参数传递给 create_cn_version 函数
     for file in "${files[@]}"; do
         create_cn_version "$file"
+	python a.py "$file" | jq -M -r '.choices[0].message.content' > "$new_file_path"
     done
 fi
