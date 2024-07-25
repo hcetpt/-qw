@@ -22,7 +22,7 @@ create_cn_version() {
     fi
 
     # 构建新文件路径
-    local new_file_path=$(dirname "$original_file")"/"${new_file_name}
+    new_file_path=$(dirname "$original_file")"/"${new_file_name}
 
     # 检查是否已经存在该文件并且不为空
     if [ -f "$new_file_path" ] && [ ! -z "$(cat "$new_file_path")" ]; then
