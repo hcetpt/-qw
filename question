@@ -1,0 +1,4 @@
+for ($i=1; $i -le 50; $i++) {
+    adb shell "/data/busybox-armv7l  dd if=/dev/zero of=/data/output_file bs=1048576 count=4096 conv=noerror,notrunc,sync"
+	Write-Output "$i finish"
+}
