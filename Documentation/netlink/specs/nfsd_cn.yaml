@@ -1,0 +1,95 @@
+### SPDX 许可证标识符: ((GPL-2.0 WITH Linux-syscall-note) OR BSD-3-Clause)
+
+**名称:** nfsd  
+**协议:** genetlink  
+**用户空间 API 头文件:** linux/nfsd_netlink.h  
+
+**文档:** 通过通用 netlink 配置 NFSD  
+
+**属性集:**
+- **rpc-status**
+  - **xid** (类型: u32, 字节顺序: 大端)
+  - **flags** (类型: u32)
+  - **prog** (类型: u32)
+  - **version** (类型: u8)
+  - **proc** (类型: u32)
+  - **service_time** (类型: s64)
+  - **pad** (类型: 填充)
+  - **saddr4** (类型: u32, 字节顺序: 大端, 显示提示: IPv4)
+  - **daddr4** (类型: u32, 字节顺序: 大端, 显示提示: IPv4)
+  - **saddr6** (类型: 二进制, 显示提示: IPv6)
+  - **daddr6** (类型: 二进制, 显示提示: IPv6)
+  - **sport** (类型: u16, 字节顺序: 大端)
+  - **dport** (类型: u16, 字节顺序: 大端)
+  - **compound-ops** (类型: u32, 多属性: 真)
+- **server**
+  - **threads** (类型: u32, 多属性: 真)
+  - **gracetime** (类型: u32)
+  - **leasetime** (类型: u32)
+  - **scope** (类型: 字符串)
+- **version**
+  - **major** (类型: u32)
+  - **minor** (类型: u32)
+  - **enabled** (类型: 标志)
+- **server-proto**
+  - **version** (类型: 嵌套, 嵌套属性: version, 多属性: 真)
+- **sock**
+  - **addr** (类型: 二进制)
+  - **transport-name** (类型: 字符串)
+- **server-sock**
+  - **addr** (类型: 嵌套, 嵌套属性: sock, 多属性: 真)
+- **pool-mode**
+  - **mode** (类型: 字符串)
+  - **npools** (类型: u32)
+
+**操作:**
+- **list**
+  - **rpc-status-get**
+    - **文档:** 导出待处理的 nfsd RPC
+    - **属性集:** rpc-status
+    - **回复**
+      - 属性: xid, flags, prog, version, proc, service_time, saddr4, daddr4, saddr6, daddr6, sport, dport, compound-ops
+  - **threads-set**
+    - **文档:** 设置运行线程的数量
+    - **属性集:** server
+    - **标志:** [admin-perm]
+    - **请求**
+      - 属性: threads, gracetime, leasetime, scope
+  - **threads-get**
+    - **文档:** 获取运行线程的数量
+    - **属性集:** server
+    - **回复**
+      - 属性: threads, gracetime, leasetime, scope
+  - **version-set**
+    - **文档:** 设置启用的 NFS 版本
+    - **属性集:** server-proto
+    - **标志:** [admin-perm]
+    - **请求**
+      - 属性: version
+  - **version-get**
+    - **文档:** 获取启用的 NFS 版本
+    - **属性集:** server-proto
+    - **回复**
+      - 属性: version
+  - **listener-set**
+    - **文档:** 设置 NFS 运行套接字
+    - **属性集:** server-sock
+    - **标志:** [admin-perm]
+    - **请求**
+      - 属性: addr
+  - **listener-get**
+    - **文档:** 获取 NFS 运行监听器
+    - **属性集:** server-sock
+    - **回复**
+      - 属性: addr
+  - **pool-mode-set**
+    - **文档:** 设置当前服务器池模式
+    - **属性集:** pool-mode
+    - **标志:** [admin-perm]
+    - **请求**
+      - 属性: mode
+  - **pool-mode-get**
+    - **文档:** 获取有关服务器池模式的信息
+    - **属性集:** pool-mode
+    - **回复**
+      - 属性: mode, npools

@@ -1,0 +1,273 @@
+这些文件扩展名和文件名模式主要来自于 Linux 内核构建过程中的各种临时文件、配置文件、工具脚本等。下面是对这些模式的中文翻译或解释：
+
+*.a —— 静态库文件
+*.aux —— LaTeX 辅助文件
+*.bc —— Bitcode 文件
+*.bin —— 二进制文件
+*.bz2 —— Bzip2 压缩文件
+*.c.[012]*.* —— C 语言源代码文件的不同版本
+*.cis —— 未知类型，可能是某种配置或信息文件
+*.cpio —— CPIO 归档文件
+*.csp —— 未知类型，可能是某种配置或设置文件
+*.dsp —— 设计者项目文件 (Designer Project File)
+*.dvi —— Device Independent 文件（LaTeX 输出格式）
+*.elf —— 可执行和链接格式文件
+*.eps —— Encapsulated PostScript 文件
+*.fw —— 固件文件
+*.gcno —— GCC 覆盖信息文件
+*.gcov —— GCC 覆盖率数据文件
+*.gen.S —— 生成的汇编语言文件
+*.gif —— 图像文件格式
+*.grep —— grep 搜索结果文件
+*.grp —— 未知类型，可能与图形相关
+*.gz —— gzip 压缩文件
+*.html —— HTML 文件
+*.i —— 预处理后的 C 源文件
+*.jpeg —— JPEG 图像文件
+*.ko —— Linux 内核模块
+*.ll —— LLVM IR 文件
+*.log —— 日志文件
+*.lst —— 列表文件
+*.lzma —— LZMA 压缩文件
+*.lzo —— LZO 压缩文件
+*.mo —— 机器可读的翻译文件
+*.moc —— 未知类型，可能是某种编译后的资源文件
+*.mod —— 未知类型，可能是模块文件
+*.mod.c —— 与模块相关的 C 源文件
+*.o —— 对象文件
+*.o.* —— 不同类型的对象文件
+*.order —— 构建顺序文件
+*.orig —— 原始文件备份
+*.out —— 输出文件
+*.patch —— 补丁文件
+*.pdf —— PDF 文件
+*.plist —— 属性列表文件
+*.png —— PNG 图像文件
+*.pot —— 翻译模板文件
+*.ps —— PostScript 文件
+*.rej —— diff 拒绝文件
+*.s —— 汇编语言源文件
+*.sgml —— SGML 文档
+*.so —— 共享对象文件
+*.so.dbg —— 调试信息文件
+*.symtypes —— 符号类型文件
+*.tab.c —— 生成的 C 语言源文件
+*.tab.h —— 生成的头文件
+*.tex —— TeX 源文件
+*.ver —— 版本文件
+*.xml —— XML 文件
+*.xz —— XZ 压缩文件
+*.zst —— Zstandard 压缩文件
+*_MODULES —— 与内核模块相关的文件
+*_vga16.c —— VGA 相关的 C 语言源文件
+*~ —— 自动保存的文件副本
+\#*# —— 未知类型
+*.9 —— 未知类型
+.* —— 隐藏文件
+.*.d —— 依赖文件
+.mm —— Objective-C++ 源文件
+53c700_d.h —— 内核头文件
+CVS —— CVS 版本控制系统目录
+ChangeSet —— 变更集文件
+GPATH —— GNUMakefile 路径文件
+GRTAGS —— 标签文件
+GSYMS —— 符号文件
+GTAGS —— 标签文件
+Image —— 内核映像文件
+Module.markers —— 内核模块标记文件
+Module.symvers —— 内核模块符号版本文件
+PENDING —— 待处理文件
+SCCS —— SCCS 版本控制系统目录
+System.map* —— 内核符号映射文件
+TAGS —— 标签文件
+aconf —— Autoconf 配置文件
+af_names.h —— 内核头文件
+aic7*reg.h* —— 内核头文件
+aic7*reg_print.c* —— 内核 C 语言源文件
+aic7*seq.h* —— 内核头文件
+aicasm —— 内核汇编语言源文件
+aicdb.h* —— 内核头文件
+altivec*.c —— 使用 Altivec 的 C 语言源文件
+asm-offsets.h —— 内核头文件
+asm_offsets.h —— 内核头文件
+autoconf.h* —— Autoconf 配置文件
+av_permissions.h —— 权限相关的头文件
+bbootsect —— 引导扇区相关文件
+binkernel.spec —— 规格文件
+bootsect —— 引导扇区相关文件
+bounds.h —— 内核头文件
+bsetup —— 构建脚本
+btfixupprep —— 构建脚本
+build —— 构建脚本
+bvmlinux —— 内核构建产物
+bzImage* —— 内核压缩映像文件
+capability_names.h —— 内核头文件
+capflags.c —— 内核 C 语言源文件
+classlist.h* —— 内核头文件
+comp*.log —— 编译日志文件
+compile.h* —— 内核头文件
+conf —— 配置文件
+config —— 配置文件
+config-* —— 配置文件
+config.mak —— 配置文件
+config.mak.autogen —— 自动生成的配置文件
+conmakehash —— 构建哈希文件
+consolemap_deftbl.c* —— 内核 C 语言源文件
+cpustr.h —— 内核头文件
+crc32table.h* —— 内核头文件
+cscope.* —— cscope 数据文件
+defkeymap.c —— 内核 C 语言源文件
+devlist.h* —— 内核头文件
+devicetable-offsets.h —— 内核头文件
+dnotify_test —— 测试程序
+dslm —— 构建脚本
+dtc —— Device Tree Compiler 工具
+elf2ecoff —— 转换工具
+elfconfig.h* —— 内核头文件
+evergreen_reg_safe.h —— 内核头文件
+fixdep —— 构建脚本
+flask.h —— 内核头文件
+fore200e_mkfirm —— 构建脚本
+fore200e_pca_fw.c* —— 内核 C 语言源文件
+gconf —— 配置文件
+gconf-cfg —— 配置文件
+gen-devlist —— 构建脚本
+gen_crc32table —— 构建脚本
+gen_init_cpio —— 构建脚本
+generated —— 生成的文件目录
+genheaders —— 构建脚本
+genksyms —— 构建脚本
+*_gray256.c —— 内核 C 语言源文件
+hpet_example —— 示例程序
+hugepage-mmap —— 测试程序
+hugepage-shm —— 测试程序
+ihex2fw —— 转换工具
+inat-tables.c —— 内核 C 语言源文件
+initramfs_list —— 初始 RAM 文件系统列表文件
+int16.c —— 内核 C 语言源文件
+int1.c —— 内核 C 语言源文件
+int2.c —— 内核 C 语言源文件
+int32.c —— 内核 C 语言源文件
+int4.c —— 内核 C 语言源文件
+int8.c —— 内核 C 语言源文件
+kallsyms —— 内核符号表
+keywords.c —— 内核 C 语言源文件
+ksym.c* —— 内核 C 语言源文件
+ksym.h* —— 内核头文件
+*lex.c —— 词法分析器生成的 C 语言源文件
+*lex.*.c —— 词法分析器生成的 C 语言源文件
+linux —— Linux 内核源码目录
+logo_*.c —— 内核 C 语言源文件
+logo_*_clut224.c —— 内核 C 语言源文件
+logo_*_mono.c —— 内核 C 语言源文件
+mach-types —— 内核配置文件
+mach-types.h —— 内核头文件
+machtypes.h —— 内核头文件
+map —— 映射文件
+map_hugetlb —— 测试程序
+mconf —— 配置文件
+mconf-cfg —— 配置文件
+miboot* —— 引导加载程序
+mk_elfconfig —— 构建脚本
+mkboot —— 构建脚本
+mkbugboot —— 构建脚本
+mkcpustr —— 构建脚本
+mkdep —— 构建脚本
+mkregtable —— 构建脚本
+mktables —— 构建脚本
+mktree —— 构建脚本
+mkutf8data —— 构建脚本
+modpost —— 构建脚本
+modules-only.symvers —— 内核模块符号版本文件
+modules.builtin —— 内核模块列表文件
+modules.builtin.modinfo —— 内核模块信息文件
+modules.nsdeps —— 内核模块依赖关系文件
+modules.order —— 内核模块顺序文件
+modversions.h* —— 内核头文件
+nconf —— 配置文件
+nconf-cfg —— 配置文件
+ncscope.* —— cscope 数据文件
+offset.h —— 内核头文件
+oui.c* —— 内核 C 语言源文件
+page-types —— 内核配置文件
+parse.c —— 内核 C 语言源文件
+parse.h —— 内核头文件
+patches* —— 补丁文件
+pca200e.bin —— 二进制文件
+pca200e_ecd.bin2 —— 二进制文件
+perf.data —— 性能数据文件
+perf.data.old —— 性能数据文件
+perf-archive —— 性能数据文件
+piggyback —— 构建脚本
+piggy.gzip —— 压缩文件
+piggy.S —— 内核汇编语言源文件
+pnmtologo —— 转换工具
+ppc_defs.h* —— 内核头文件
+pss_boot.h —— 内核头文件
+qconf —— 配置文件
+qconf-cfg —— 配置文件
+r100_reg_safe.h —— 内核头文件
+r200_reg_safe.h —— 内核头文件
+r300_reg_safe.h —— 内核头文件
+r420_reg_safe.h —— 内核头文件
+r600_reg_safe.h —— 内核头文件
+randstruct.seed —— 随机结构种子文件
+randomize_layout_hash.h —— 内核头文件
+randomize_layout_seed.h —— 内核头文件
+recordmcount —— 构建脚本
+relocs —— 构建脚本
+rlim_names.h —— 内核头文件
+rn50_reg_safe.h —— 内核头文件
+rs600_reg_safe.h —— 内核头文件
+rv515_reg_safe.h —— 内核头文件
+series —— 提交记录文件
+setup —— 构建脚本
+setup.bin —— 二进制文件
+setup.elf —— ELF 文件
+sortextable —— 构建脚本
+sImage —— 内核映像文件
+sm_tbl* —— 内核 C 语言源文件
+split-include —— 构建脚本
+syscalltab.h —— 内核头文件
+tables.c —— 内核 C 语言源文件
+tags —— 标签文件
+test_get_len —— 测试程序
+tftpboot.img —— TFTP 引导文件
+timeconst.h —— 内核头文件
+times.h* —— 内核头文件
+trix_boot.h —— 内核头文件
+utsrelease.h* —— 内核头文件
+vdso-syms.lds —— 内核链接脚本
+vdso.lds —— 内核链接脚本
+vdso32-int80-syms.lds —— 内核链接脚本
+vdso32-syms.lds —— 内核链接脚本
+vdso32-syscall-syms.lds —— 内核链接脚本
+vdso32-sysenter-syms.lds —— 内核链接脚本
+vdso32.lds —— 内核链接脚本
+vdso32.so.dbg —— 调试信息文件
+vdso64.lds —— 内核链接脚本
+vdso64.so.dbg —— 调试信息文件
+version.h* —— 内核头文件
+vmImage —— 内核映像文件
+vmlinux —— 内核映像文件
+vmlinux-* —— 内核映像文件
+vmlinux.aout —— 内核映像文件
+vmlinux.bin.all —— 内核映像文件
+vmlinux.lds —— 内核链接脚本
+vmlinux.map —— 内核映射文件
+vmlinux.symvers —— 内核符号版本文件
+vmlinuz —— 内核映像文件
+voffset.h —— 内核头文件
+vsyscall.lds —— 内核链接脚本
+vsyscall_32.lds —— 内核链接脚本
+wanxlfw.inc —— 内核头文件
+uImage —— 内核映像文件
+unifdef —— 构建脚本
+utf8data.h —— 内核头文件
+wakeup.bin —— 二进制文件
+wakeup.elf —— ELF 文件
+wakeup.lds —— 内核链接脚本
+zImage* —— 内核压缩映像文件
+zoffset.h —— 内核头文件
+
+以上是一些常见的文件扩展名及特定文件名模式的翻译或解释。请注意，某些文件的具体用途可能需要参考具体的上下文或文档来理解。

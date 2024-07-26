@@ -1,0 +1,65 @@
+提供一致的用户空间接口在某种程度上是重要的。LED设备在这方面有一个问题，那就是/sys/class/leds中的目录命名。如果用户空间能知道特定LED功能的正确“名称”当然很好，但情况变得更为复杂了。
+无论如何，如果不需要向后兼容的话，新代码应该使用此列表中的一个“好的”名称，并且你应该在适用的情况下扩展该列表。
+遗留名称也被列出；如果你正在编写想要使用特定特性的应用程序，你应该首先探测好的名称，然后也尝试遗留名称。
+请注意，在include/dt-bindings/leds/common.h中有一份功能列表。
+
+* 游戏手柄和游戏杆
+
+游戏控制器可能具有LED来指示玩家编号。这在多个控制器可以连接到系统的游戏机上很常见。
+“玩家LED”随后被编程以某种模式来表示特定的玩家。例如，一个有4个LED的游戏控制器，可能会被编程为"x---"来表示玩家1，“-x--”来表示玩家2等等，其中"x"表示亮起。
+输入驱动程序可以利用LED类来暴露游戏控制器的各个玩家LED，使用函数"player"。
+注意：玩家ID的跟踪和管理是用户空间的责任，尽管驱动程序可以选择一个默认值。
+好的名称: "input*:*:player-{1,2,3,4,5}"
+
+* 键盘
+
+好的名称: "input*:*:capslock"
+好的名称: "input*:*:scrolllock"
+好的名称: "input*:*:numlock"
+遗留名称: "shift-key-light"（如Motorola Droid 4上的capslock）
+
+这是一组常见的键盘LED，可以追溯到PC AT时代或更早。
+遗留名称: "tpacpi::thinklight"（IBM/Lenovo Thinkpad笔记本电脑）
+遗留名称: "lp5523:kb{1,2,3,4,5,6}"（如Nokia N900）
+
+主键盘的前灯/背光
+### 遗留配置："按钮背光"（Motorola Droid 4）
+
+一些手机在屏幕下方有触摸按钮；这与主键盘不同。这是这些按钮的背光。
+* **声音子系统**
+
+良好示例："platform:*:mute"
+良好示例："platform:*:micmute"
+
+笔记本电脑上的 LED 灯，指示声音输入/输出已被静音。
+* **系统通知**
+
+良好示例："rgb:status"
+遗留配置："status-led:{red,green,blue}"（Motorola Droid 4）
+遗留配置："lp5523:{r,g,b}"（Nokia N900）
+
+手机通常具有多色状态 LED。
+* **电源管理**
+
+良好示例："platform:*:charging"（allwinner sun50i, leds-cht-wcove）
+* **屏幕**
+
+良好示例：":backlight"（Motorola Droid 4）
+* **以太网 LED**
+
+目前支持两种类型的网络 LED，由 PHY 控制的和由 MAC 控制的。理论上两者可以同时存在于一个 Linux 网络设备中，因此 MAC 和 PHY 的名称需要有所区别。
+不要使用网络设备名，如 eth0、enp1s0。这些名称不稳定且不唯一，也无法区分 MAC 和 PHY。
+**MAC LED**
+
+良好示例：f1070000.ethernet:white:WAN
+良好示例：mdio_mux-0.1:00:green:left
+良好示例：0000:02:00.0:yellow:top
+
+第一部分必须唯一命名 MAC 控制器。之后是颜色。对于单个 LED 应使用 WAN/LAN。如果有多个 LED，则使用 left/right 或 top/bottom 来表示它们在 RJ45 插座上的位置。
+**PHY LED**
+
+良好示例：f1072004.mdio-mii:00: white:WAN
+良好示例：!mdio-mux!mdio@2!switch@0!mdio:01:green:right
+良好示例：r8169-0-200:00:yellow:bottom
+
+第一部分必须唯一命名 PHY。这通常意味着要唯一标识 MDIO 总线控制器及其总线地址。

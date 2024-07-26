@@ -1,0 +1,102 @@
+SPDX 许可证标识符: GPL-2.0
+
+===================
+SB100 设备驱动程序
+===================
+
+sb1000 是一个模块化的网络设备驱动程序，用于通用仪器（也称为 NextLevel）SURFboard1000 内置电缆调制解调器板。这是一张 ISA 卡，被多家有线电视公司用来提供电缆调制解调器接入服务。它是一个单向的下游专用电缆调制解调器，意味着您的上游网络连接是由常规电话调制解调器提供的。
+该驱动程序由 Franco Venturi <fventuri@mediaone.net> 编写。他为这个出色的代码贡献了许多，值得大家感谢！
+
+所需工具
+============
+
+现在，对这个设备的支持已经成为了标准 Linux 内核的一部分。驱动程序源代码文件位于 `drivers/net/sb1000.c`。除了这个文件之外，您还需要：
+
+1. “cmconfig” 程序。这是一个补充 “ifconfig” 的实用程序，用于配置电缆调制解调器和网络接口（通常称为“cm0”）；
+   
+2. 存放在 `/etc/ppp` 目录下的几个 PPP 脚本，使您能够轻松地通过电缆调制解调器连接网络。这些工具可以从以下位置获取：
+   
+      http://www.jacksonville.net/~fventuri/
+      
+   在 Franco 的原始源代码分发 `.tar.gz` 文件中。关于 sb1000 驱动程序的支持信息可以在以下位置找到：
+      
+      - http://web.archive.org/web/%2E/http://home.adelphia.net/~siglercm/sb1000.html
+      - http://web.archive.org/web/%2E/http://linuxpower.cx/~cable/
+      
+   这些工具随同这些实用程序一起提供。
+3. 标准的 isapnp 工具。这些工具对于在启动时（或之后手动操作）配置您的 SB1000 卡是必需的，因为它是一张即插即用卡。
+   如果您没有将这些工具作为标准 Linux 发行版的一部分安装，您可以从以下位置获取它们：
+   
+      http://www.roestock.demon.co.uk/isapnptools/
+      
+   或者检查您的 Linux 发行版二进制 CD 或其网站。有关 isapnp、pnpdump 或 `/etc/isapnp.conf` 的帮助，请访问：
+   
+      http://www.roestock.demon.co.uk/isapnptools/isapnpfaq.html
+
+使用驱动程序
+==============
+
+要使 SB1000 卡正常工作，请按照以下步骤操作：
+
+1. 在顶级内核目录下运行 `make config`、`make menuconfig` 或 `make xconfig`（根据个人喜好选择其中之一），以设置内核配置。确保对“提示开发驱动程序”选择 "Y"，并对 sb1000 驱动程序选择 "M"。同样需要对所有标准网络问题选择 "Y" 或 "M" 以获得 TCP/IP 和 PPP 网络支持。
+2. **在构建内核之前**，编辑 `drivers/net/sb1000.c`。确保重新定义 `READ_DATA_PORT` 的值，使其与 isapnp 用于访问您的即插即用卡的 I/O 地址相匹配。这应该是 `/etc/isapnp.conf` 中的 `READPORT` 值，或者可以通过 pnpdump 输出得到。
+3. 如常构建和安装内核及模块。
+4. 按照常规流程启动新内核。
+5. 通过捕获 “pnpdump” 的输出到文件并编辑此文件来设置正确的 I/O 端口、IRQ 和 DMA 设置，以便配置新的 SB1000 即插即用卡。确保没有任何设置冲突。然后使用新的配置文件作为输入运行 “isapnp” 命令进行测试。检查错误并按需修复。（顺便说一下，我为我的 SB1000 卡使用了 I/O 端口 0x110 和 0x310 以及 IRQ 11，并且这些对我非常有效。但结果可能会因人而异。）
+   然后将完成的配置文件保存为 `/etc/isapnp.conf`，以便在后续重启时正确配置。
+6. 从Franco的网站或上述提到的其他站点下载原始文件sb1000-1.1.2.tar.gz。以root用户身份将其解压到一个临时目录中，并执行`make cmconfig`，然后执行`install -c cmconfig /usr/local/sbin`。
+不要执行`make install`，因为它期望找到所有已构建并准备好安装的工具，而不仅仅是cmconfig。
+7. 以root用户身份，将Franco的tar文件中的ppp/子目录下的所有文件复制到/etc/ppp中，注意不要覆盖已经存在的文件。然后修改ppp@gi-on以设置正确的登录名、电话号码和电缆调制解调器的频率。同时编辑pap-secrets以指定您的登录名、密码以及任何特定于站点的信息。
+8. 确保修改/etc/ppp/firewall以使用ipchains而不是2.0.x内核中的旧版ipfwadm命令。有一个有用的工具可以将ipfwadm命令转换为ipchains命令：
+
+   http://users.dhp.com/~whisper/ipfwadm2ipchains/
+
+   您可能还希望修改防火墙脚本以实现不同的防火墙方案。
+9. 通过/etc/ppp/ppp@gi-on脚本来启动PPP连接。您必须是root用户才能这样做。如果可能的话，最好使用像sudo这样的工具来以root权限执行这类频繁使用的命令。如果连接成功，电缆调制解调器接口将被激活，并且您将在控制台上看到类似以下的驱动程序消息：
+
+   cm0: sb1000 at (0x110,0x310), csn 1, S/N 0x2a0d16d8, IRQ 11
+   sb1000.c:v1.1.2 6/01/98 (fventuri@mediaone.net)
+
+   “ifconfig”命令应该会显示两个新的接口，ppp0和cm0。命令“cmconfig cm0”将为您提供有关电缆调制解调器接口的信息。
+10. 尝试通过`ping -c 5 www.yahoo.com`之类的命令来ping某个站点。您应该能看到接收到的数据包。
+11. 如果无法将站点名称（如www.yahoo.com）解析为IP地址（如204.71.200.67），请确保您的/etc/resolv.conf文件没有语法错误，并包含正确的域名服务器IP地址。如果这没有帮助，请尝试类似`ping -c 5 204.71.200.67`的命令，以查看网络是否运行正常，但问题出在DNS解析上。
+如果仍然存在问题，请访问上述提及的支持网站并阅读其中的信息和文档。
+
+常见问题
+==========
+
+1. 数据包能够从 ppp0 接口发出，但无法通过 cm0 接口返回。看起来我已经连接上了网络，但实际上我甚至无法 ping 到任何数字形式的 IP 地址。（这种现象主要出现在 Debian 系统中，由于默认的启动配置脚本导致。）
+
+解决方案
+   以 root 身份执行 `echo 0 > /proc/sys/net/ipv4/conf/cm0/rp_filter`，以便它能与 ppp0 接口共享同一个 IP 地址。请注意，此命令应该被添加到 `/etc/ppp/cablemodem` 脚本中，在 `/sbin/ifconfig` 和 `/sbin/cmconfig` 命令之间。
+您可能还需要对 `/proc/sys/net/ipv4/conf/ppp0/rp_filter` 执行同样的操作。
+如果您在每次重启时对 `/proc/sys/net/ipv4/conf/default/rp_filter`（例如在 `rc.local` 文件中）执行此操作，则任何接口都可以共享相同的 IP 地址。
+2. 当我执行 `insmod sb1000.o` 时出现“未解析符号”错误消息。
+解决方案
+   您可能安装了与内核不匹配的内核源代码树以及 `/usr/include/linux` 和 `/usr/include/asm` 头文件。请确保在这两个目录中安装正确的头文件版本。
+然后重新构建并重新安装内核。
+3. 运行 isapnp 时报告错误，并且我的 SB1000 卡无法正常工作。
+解决方案
+   较新版本的 isapnp 在分配 SB1000 卡的两个 I/O 地址时使用了 "(CHECK)" 选项，这会导致问题。这个问题最早出现在 RH 6.0 中。删除 SB1000 I/O 地址分配行中的 "(CHECK)"。
+确保它们不会与其他任何硬件设备发生冲突！然后重新运行isapnp并从那里开始。
+4. 我无法执行/etc/ppp/ppp@gi-on文件
+解决方法
+   以root身份执行`chmod ug+x /etc/ppp/ppp@gi-on`
+5. 防火墙脚本无法工作（在2.2.x及更高版本的内核中）
+解决方法
+   使用上面提到的ipfwadm2ipchains脚本来将/etc/ppp/firewall脚本从已废弃的ipfwadm命令转换为ipchains命令。
+6. 我在/var/kern.log、/var/messages和/或/var/syslog文件中收到了大量的防火墙拒绝消息，并且这些文件正在填满我的/var分区！！
+
+解决方法
+   首先，告知您的ISP您正在遭受拒绝服务（DoS）攻击和/或端口扫描（UDP连接尝试）攻击！查看拒绝消息以确定攻击的类型及其来源。接下来，编辑/etc/ppp/cablemodem并确保在"cmconfig"命令中启用了",nobroadcast"选项（取消注释该行）。如果您未在广播接口上接收到这些被拒绝的数据包（IP地址通常为xxx.yyy.zzz.255），则有人正在专门针对您的机器进行攻击。请务必小心...
+7. 所有功能似乎都正常，但我的计算机在一段时间后会锁定（并且通常是在通过电缆调制解调器进行长时间下载时）！
+
+解决方法
+   您可能需要在驱动程序中添加一个短暂的延迟来“减慢”SURFboard的速度，因为您的PC可能无法跟上SB1000的传输速率。为此，最好是下载Franco的sb1000-1.1.2.tar.gz归档文件并手动构建和安装sb1000.o。您需要编辑'Makefile'并查找'SB1000_DELAY'定义。取消注释那些'CFLAGS'行（并注释掉默认的行），尝试将延迟设置为类似60微秒：'-DSB1000_DELAY=60'。然后执行`make`，以root身份执行`make install`并尝试使用它。如果仍然不起作用或您喜欢调试驱动程序，则可以尝试其他数字。但是请注意，延迟越高，驱动程序速度越慢（当它处于活动使用状态时也会减慢整个PC的速度）。感谢Ed Daiga提供的这个提示！
+
+致谢
+=====
+
+此README文档来源于Franco Venturi的原始README文件，该文件仍随其驱动程序.tar.gz归档文件一起提供。我和所有其他sb1000用户对Franco表示由衷的“感谢！”此外，还要感谢Carl Patten和Ralph Bonnell，他们现在负责管理Linux SB1000网站，以及报告并帮助调试上述常见问题的SB1000用户。
+Clemmitt Sigler
+					csigler@vt.edu

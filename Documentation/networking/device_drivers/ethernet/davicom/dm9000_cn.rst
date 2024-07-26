@@ -1,0 +1,131 @@
+SPDX 许可声明标识符: GPL-2.0
+
+=====================
+DM9000 网络驱动程序
+=====================
+
+版权所有 2008 Simtec Electronics,
+
+	  Ben Dooks <ben@simtec.co.uk> <ben-linux@fluff.org>
+
+简介
+------------
+
+本文件描述了如何使用包含在文件 `drivers/net/dm9000.c` 和 `drivers/net/dm9000.h` 中的基于 DM9000 平台设备的网络驱动程序。
+该驱动程序支持三种 DM9000 变体，即 DM9000E（这是首先支持的芯片）以及较新的 DM9000A 和 DM9000B 设备。目前由 Ben Dooks 维护和测试，任何针对此驱动程序的补丁都应该抄送给 Ben Dooks。
+定义平台设备
+----------------------------
+
+平台设备至少需要以下资源：
+
+    1) 地址寄存器的物理地址
+    2) 数据寄存器的物理地址
+    3) 设备中断引脚连接到的中断请求线（IRQ 线）
+这些资源应该按上述顺序指定，因为两个地址区域的顺序很重要（驱动程序期望这些是地址然后数据）
+一个来自 `arch/arm/mach-s3c/mach-bast.c` 的示例如下所示：
+
+```c
+static struct resource bast_dm9k_resource[] = {
+	[0] = {
+		.start = S3C2410_CS5 + BAST_PA_DM9000,
+		.end   = S3C2410_CS5 + BAST_PA_DM9000 + 3,
+		.flags = IORESOURCE_MEM,
+	},
+	[1] = {
+		.start = S3C2410_CS5 + BAST_PA_DM9000 + 0x40,
+		.end   = S3C2410_CS5 + BAST_PA_DM9000 + 0x40 + 0x3f,
+		.flags = IORESOURCE_MEM,
+	},
+	[2] = {
+		.start = IRQ_DM9000,
+		.end   = IRQ_DM9000,
+		.flags = IORESOURCE_IRQ | IORESOURCE_IRQ_HIGHLEVEL,
+	}
+};
+
+static struct platform_device bast_device_dm9k = {
+	.name		= "dm9000",
+	.id		= 0,
+	.num_resources	= ARRAY_SIZE(bast_dm9k_resource),
+	.resource	= bast_dm9k_resource,
+};
+```
+
+注意 `bast_dm9k_resource[2].flags` 中的 IRQ 触发标志设置，如果没有这个标志将会生成警告。从 `flags` 字段中的触发标志将在注册 IRQ 处理程序时传递给 `request_irq()` 来确保 IRQ 设置正确。
+
+这显示了一个典型的平台设备，没有提供可选的配置平台数据。下一个示例使用相同的资源，但添加了可选的平台数据来传递额外的配置数据：
+
+```c
+static struct dm9000_plat_data bast_dm9k_platdata = {
+	.flags		= DM9000_PLATF_16BITONLY,
+};
+
+static struct platform_device bast_device_dm9k = {
+	.name		= "dm9000",
+	.id		= 0,
+	.num_resources	= ARRAY_SIZE(bast_dm9k_resource),
+	.resource	= bast_dm9k_resource,
+	.dev		= {
+		.platform_data = &bast_dm9k_platdata,
+	}
+};
+```
+
+平台数据在 `include/linux/dm9000.h` 中定义，并在下面进行描述。
+平台数据
+-------------
+
+DM9000 的额外平台数据可以描述到设备的 IO 总线宽度、是否连接有外部 PHY 以及是否有可用的外部配置 EEPROM。
+平台数据 `.flags` 字段的标志如下：
+
+DM9000_PLATF_8BITONLY
+
+	IO 应该使用 8 位操作完成
+DM9000_PLATF_16BITONLY
+
+	IO 应该使用 16 位操作完成
+DM9000_PLATF_32BITONLY
+
+	IO 应该使用 32 位操作完成
+这些符号分别表示：
+DM9000_PLATF_EXT_PHY
+
+该芯片连接到了一个外部物理层（PHY）设备。
+
+DM9000_PLATF_NO_EEPROM
+
+这可以用来表明板子上没有电可擦可编程只读存储器（EEPROM），或者EEPROM应该对用户隐藏。
+
+DM9000_PLATF_SIMPLE_PHY
+
+切换到使用更简单的物理层（PHY）轮询方法，这种方法不会定期尝试读取介质独立接口（MII）物理层状态。此选项仅在使用内部物理层时可用。更多信息请参见链路状态轮询部分。
+
+配置符号DM9000_FORCE_SIMPLE_PHY_POLL，Kconfig项 "强制使用简单的NSR基于物理层的轮询" 允许在构建时强制启用此标志。
+
+物理层链路状态轮询
+----------------------
+
+驱动程序会跟踪链路状态，并向网络核心报告链路（载波）可用性信息。根据芯片版本和使用的物理层的不同，这通过几种不同的方法来管理。
+
+对于内部物理层，原始的方法（当前默认）是读取MII状态，如果芯片支持必要的中断，则在状态改变时读取，或每隔两秒通过周期性定时器读取。
+
+为了减少内部物理层的开销，现在可以选择使用DM9000_FORCE_SIMPLE_PHY_POLL配置，或平台数据选项DM9000_PLATF_SIMPLE_PHY，以无需昂贵的MII访问的方式来读取汇总信息。此方法更快，但提供的信息较少。
+
+当使用外部物理层时，驱动程序目前必须轮询MII链路状态，因为没有方法可以在链路状态变化时获得中断。
+
+DM9000A / DM9000B
+------------------
+
+这些芯片与DM9000E功能相似，可以由相同的驱动程序轻松支持。其特性包括：
+
+1) 当使用内部物理层时，内部物理层状态变化时产生中断。这意味着在这些设备上使用内部物理层时，可以禁用物理层状态的周期性轮询。
+
+2) 支持TCP/UDP校验和卸载，但当前驱动程序不支持这一特性。
+---
+
+驱动程序支持通过 ethtool 接口访问驱动程序状态信息、PHY 状态和 EEPROM。
+
+ethtool
+-------
+
+该驱动支持 ethtool 接口，用于访问驱动的状态信息、PHY（物理层）状态以及 EEPROM。

@@ -1,0 +1,111 @@
+### 许可证说明
+SPDX 许可证标识符: ((GPL-2.0 WITH Linux-syscall-note) OR BSD-3-Clause)
+
+#### 名称
+rt-addr
+
+#### 协议
+netlink-raw
+
+#### 协议号
+0
+
+#### 文档
+通过 rtnetlink 进行地址配置。
+
+#### 定义
+
+##### ifaddrmsg 结构体
+- **ifa-family**: `u8` 类型，表示地址族。
+- **ifa-prefixlen**: `u8` 类型，表示前缀长度。
+- **ifa-flags**: `u8` 类型，表示标志位。使用 `ifa-flags` 枚举，并将其作为标志位处理。
+- **ifa-scope**: `u8` 类型，表示作用域。
+- **ifa-index**: `u32` 类型，表示接口索引。
+
+##### ifa-cacheinfo 结构体
+- **ifa-prefered**: `u32` 类型，表示优选时间。
+- **ifa-valid**: `u32` 类型，表示有效时间。
+- **cstamp**: `u32` 类型，表示创建时间戳。
+- **tstamp**: `u32` 类型，表示更新时间戳。
+
+##### ifa-flags 标志位
+- **secondary**
+- **nodad**
+- **optimistic**
+- **dadfailed**
+- **homeaddress**
+- **deprecated**
+- **tentative**
+- **permanent**
+- **managetempaddr**
+- **noprefixroute**
+- **mcautojoin**
+- **stable-privacy**
+
+#### 属性集
+- **addr-attrs**
+  - **ifa-address**: `binary` 类型，IPv4 地址。
+  - **ifa-local**: `binary` 类型，本地 IPv4 地址。
+  - **ifa-label**: `string` 类型，标签。
+  - **ifa-broadcast**: `binary` 类型，广播 IPv4 地址。
+  - **ifa-anycast**: `binary` 类型，任意播地址。
+  - **ifa-cacheinfo**: `binary` 类型，包含 `ifa-cacheinfo` 结构体的数据。
+  - **ifa-multicast**: `binary` 类型，多播地址。
+  - **ifa-flags**: `u32` 类型，标志位。使用 `ifa-flags` 枚举，并将其作为标志位处理。
+  - **ifa-rt-priority**: `u32` 类型，路由优先级。
+  - **ifa-target-netnsid**: `binary` 类型，目标网络命名空间 ID。
+  - **ifa-proto**: `u8` 类型，协议类型。
+
+#### 操作
+
+- **newaddr** (添加新地址)
+  - **属性集**: `addr-attrs`
+  - **请求**:
+    - 值: 20
+    - 属性:
+      - ifa-family
+      - ifa-flags
+      - ifa-prefixlen
+      - ifa-scope
+      - ifa-index
+      - ifa-address
+      - ifa-label
+      - ifa-local
+      - ifa-cacheinfo
+
+- **deladdr** (删除地址)
+  - **属性集**: `addr-attrs`
+  - **请求**:
+    - 值: 21
+    - 属性:
+      - ifa-family
+      - ifa-flags
+      - ifa-prefixlen
+      - ifa-scope
+      - ifa-index
+      - ifa-address
+      - ifa-local
+
+- **getaddr** (获取地址信息)
+  - **属性集**: `addr-attrs`
+  - **请求**:
+    - 值: 22
+    - 属性:
+      - ifa-index
+  - **响应**:
+    - 值: 20
+    - 属性:
+      - ifa-family
+      - ifa-flags
+      - ifa-prefixlen
+      - ifa-scope
+      - ifa-index
+      - ifa-address
+      - ifa-label
+      - ifa-local
+      - ifa-cacheinfo
+
+#### 多播组
+
+- **rtnlgrp-ipv4-ifaddr**: 值为 5 的 IPv4 地址多播组。
+- **rtnlgrp-ipv6-ifaddr**: 值为 9 的 IPv6 地址多播组。

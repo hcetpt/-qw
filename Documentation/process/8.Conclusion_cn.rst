@@ -1,0 +1,29 @@
+更多信息
+========
+
+关于 Linux 内核开发及相关主题的信息来源众多。首要的信息来源总是内核源码分发包中的“Documentation”目录。您可以从顶级的 :ref:`process/howto.rst <process_howto>` 开始；同时阅读 :ref:`process/submitting-patches.rst <submittingpatches>`。许多内部内核API使用kerneldoc机制进行文档说明；可以通过“make htmldocs”或“make pdfdocs”来生成这些文档的HTML或PDF格式（尽管某些发行版中附带的TeX版本会遇到内部限制，无法正确处理这些文档）。各种网站以不同详细程度讨论内核开发。作者谦虚地推荐 https://lwn.net/ 作为信息来源；通过LWN内核索引可以找到许多特定内核主题的信息：
+
+	https://lwn.net/Kernel/Index/
+
+除此之外，对于内核开发者来说一个宝贵的资源是：
+
+	https://kernelnewbies.org/
+
+当然，不应忘记 https://kernel.org/，这是获取内核发布信息的权威地点。
+有关内核开发的书籍有：
+
+	Linux 设备驱动程序，第3版（Jonathan Corbet、Alessandro Rubini 和 Greg Kroah-Hartman）。在线可访问 https://lwn.net/Kernel/LDD3/
+Linux 内核开发（Robert Love）
+理解 Linux 内核（Daniel Bovet 和 Marco Cesati）
+不过，所有这些书籍都有一个共同的问题：当它们出版时往往已经有些过时了，并且现在已经出版一段时间了。即便如此，其中仍包含大量有用的信息。
+有关git的文档可以在以下位置找到：
+
+	https://www.kernel.org/pub/software/scm/git/docs/
+	https://www.kernel.org/pub/software/scm/git/docs/user-manual.html
+
+结论
+====
+
+祝贺所有能够读完这份冗长文档的人。希望它为您提供了对 Linux 内核是如何开发以及如何参与这一过程的有益理解。
+最终，真正重要的是参与。任何开源软件项目都不过是其贡献者投入之和。Linux 内核之所以能够快速且良好地发展，是因为得到了一大批开发者的帮助，他们都致力于使其变得更好。内核是成千上万的人共同努力实现共同目标所能达成成果的一个典范。
+然而，内核始终可以从更大的开发者群体中受益。总有更多的工作要做。但同样重要的是，大多数其他参与 Linux 生态系统的人都能通过为内核做出贡献而获益。将代码合并到主线是提高代码质量、降低维护和分发成本、增强对内核发展方向影响以及更多方面的关键。这是一个多方共赢的局面。启动您的编辑器加入我们吧；您将受到热烈欢迎。

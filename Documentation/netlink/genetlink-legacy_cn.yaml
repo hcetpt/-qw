@@ -1,0 +1,481 @@
+下面是提供的 YAML 内容翻译为中文：
+
+# SPDX 许可证标识符: ((GPL-2.0 WITH Linux-syscall-note) 或 BSD-3-Clause)
+%YAML 1.2
+---
+$id: http://kernel.org/schemas/netlink/genetlink-legacy.yaml#
+$schema: https://json-schema.org/draft-07/schema
+
+# 公共定义
+$defs:
+  uint:
+    类型: 整数
+    最小值: 0
+  len-or-define:
+    类型: [ 字符串, 整数 ]
+    正则表达式: ^[0-9A-Za-z_-]+( - 1)?$ 
+    最小值: 0
+  len-or-limit:
+    # 实际整数或基于固定宽度类型限制，例如：u8-min, u16-max 等
+    类型: [ 字符串, 整数 ]
+    正则表达式: ^[su](8|16|32|64)-(min|max)$
+    最小值: 0
+
+# 规范模式
+title: 协议
+description: genetlink 协议的规范
+类型: 对象
+必需字段: [ name, doc, attribute-sets, operations ]
+不允许额外属性: True
+属性:
+  name:
+    描述: genetlink 家族名称
+    类型: 字符串
+  doc:
+    类型: 字符串
+  protocol:
+    描述: 模式兼容性级别。默认是 "genetlink"
+    枚举: [ genetlink, genetlink-c, genetlink-legacy ] # 精简
+  uapi-header:
+    描述: uAPI 头文件路径，默认为 linux/${family-name}.h
+    类型: 字符串
+  # 开始 genetlink-c
+  c-family-name:
+    描述: 家族名称的宏定义名称
+    类型: 字符串
+  c-version-name:
+    描述: 家族版本的宏定义名称
+    类型: 字符串
+  max-by-define:
+    描述: 通过宏定义而不是枚举值来指定属性和命令的数量
+    类型: 布尔值
+  cmd-max-name:
+    描述: 列表中最后一个操作的宏定义名称
+    类型: 字符串
+  cmd-cnt-name:
+    描述: 明确指定用于保存操作数量（最后一个操作+1）的常量名称
+    类型: 字符串
+  # 结束 genetlink-c
+  # 开始 genetlink-legacy
+  kernel-policy:
+    描述: |
+      定义内核中的输入策略是全局的、每个操作特定的还是按操作类型拆分
+      默认是拆分
+下面是提供的英文内容翻译成中文的结果：
+
+枚举: [split, per-op, global]
+版本:
+  描述: 通用Netlink家族版本。默认值为1
+类型: 整数
+  最小值: 1
+# 结束 genetlink-legacy
+
+定义:
+  描述: 类型和常量定义（枚举、标志、定义）的列表
+类型: 数组
+  元素:
+    类型: 对象
+    必需字段: [type, name]
+    不允许额外属性
+    属性:
+      name:
+        类型: 字符串
+      header:
+        描述: 对于C兼容语言，已经定义该值的头文件
+类型: 字符串
+      type:
+        枚举: [const, enum, flags, struct] # 剪裁
+      doc:
+        类型: 字符串
+      # 对于const
+      value:
+        描述: 对于const - 定义的值
+类型: [字符串, 整数]
+      # 对于enum和flags
+      value-start:
+        描述: 对于enum或flags，第一个值的字面初始化值
+类型: [字符串, 整数]
+      entries:
+        描述: 对于enum或flags，值的数组
+类型: 数组
+        元素:
+          oneOf:
+            - 类型: 字符串
+            - 类型: 对象
+              必需字段: [name]
+              不允许额外属性
+              属性:
+                name:
+                  类型: 字符串
+                value:
+                  类型: 整数
+                doc:
+                  类型: 字符串
+      render-max:
+        描述: 是否渲染此枚举的最大成员
+类型: 布尔
+      # 开始 genetlink-c
+      enum-name:
+        描述: 枚举名称，如果为空则不使用名称
+类型: [字符串, "null"]
+      name-prefix:
+        描述: 对于enum，值的前缀，可选
+类型: 字符串
+      # 结束 genetlink-c
+      # 开始 genetlink-legacy
+      members:
+        描述: 结构体成员列表。仅允许标量和字符串成员
+下面是提供的 YAML 片段的中文翻译：
+
+类型：数组
+元素：
+  类型：对象
+  必需字段：[name, type]
+  不允许额外属性：False
+  属性：
+    name:
+      类型：字符串
+    type:
+      描述：Netlink 属性类型
+      枚举：[u8, u16, u32, u64, s8, s16, s32, s64, string, binary]
+    len:
+      引用：'#/$defs/len-or-define'
+    byte-order:
+      枚举：[little-endian, big-endian]
+    doc:
+      描述：结构成员属性的文档说明
+      类型：字符串
+    enum:
+      描述：用于属性的枚举类型的名称
+      类型：字符串
+    display-hint: *display-hint
+      描述：|
+        可选格式指示符，仅用于选择正确的格式化机制以显示此类型的值
+      枚举：[hex, mac, fddi, ipv4, ipv6, uuid]
+    # 结束 genetlink-legacy
+
+  attribute-sets:
+    描述：为该族定义的属性空间
+    类型：数组
+    元素：
+      描述：单个属性空间的定义
+      类型：对象
+      必需字段：[name, attributes]
+      不允许额外属性：False
+      属性：
+        name:
+          描述：|
+            在其他定义中引用此空间时使用的名称，在规范之外不使用
+          类型：字符串
+        name-prefix:
+          描述：|
+            属性的 C 枚举名称的前缀。默认为 family[name]-set[name]-a-
+          类型：字符串
+        enum-name:
+          描述：|
+            属性的枚举类型的名称，如果为空则不使用名称
+          类型：[字符串, "null"]
+        doc:
+          描述：空间的文档说明
+          类型：字符串
+        subset-of:
+          描述：|
+            此空间作为逻辑部分所属的另一个空间的名称。子空间可用于定义在巢中使用的有限组属性
+          类型：字符串
+        # 开始 genetlink-c
+        attr-cnt-name:
+          描述：持有属性计数（最后一个属性+1）的常量的显式名称
+下面是提供的 YAML 结构翻译成中文：
+
+类型: 字符串
+        attr-max-name:
+          描述: 为属性枚举中的最后一个成员指定的名称
+类型: 字符串
+        # End genetlink-c
+        属性:
+          描述: 空间中的属性列表
+类型: 数组
+          项:
+            类型: 对象
+            必需: [名称]
+            额外属性: 假
+            属性:
+              名称:
+                类型: 字符串
+              类型: 
+                描述: Netlink 属性类型
+                枚举: [未使用, 填充, 标志, 二进制, 32位位字段,
+                        无符号整数, 符号整数, u8, u16, u32, u64, s32, s64,
+                        字符串, 嵌套, 索引数组, 嵌套类型值]
+              文档:
+                描述: 属性的文档说明
+类型: 字符串
+              值:
+                描述: 在用户 API 中代表此属性的枚举项的值
+$ref: '#/$defs/无符号整数'
+              类型值:
+                描述: 从嵌套类型值属性的类型中提取的值的名称
+类型: 数组
+                项:
+                  类型: 字符串
+              字节序:
+                枚举: [小端, 大端]
+              多属性:
+                类型: 布尔值
+              嵌套属性:
+                描述: 用于属性内部的空间（子空间）的名称
+类型: 字符串
+              枚举:
+                描述: 用于属性的枚举类型的名称
+类型: 字符串
+              枚举作为标志:
+                描述: |
+                  将枚举视为标志。在大多数情况下，枚举要么用作标志，要么用作值。
+然而，在某些情况下，两者都是必要的，在这种情况下，头文件包含枚举
+                  形式，而特定属性可能要求将值转换为位字段
+类型: 布尔值
+              检查:
+                描述: 内核输入验证
+下面是提供的 YAML 片段的中文翻译：
+
+类型: 对象
+    额外属性: 假
+    属性:
+      flags-mask:
+        描述: 作为掩码基础的标志常量名称（仅适用于无符号标量类型）
+类型: 字符串
+      min:
+        描述: 整型属性的最小值
+$引用: '#/$defs/len-or-limit'
+      max:
+        描述: 整型属性的最大值
+$引用: '#/$defs/len-or-limit'
+      min-len:
+        描述: 二进制属性的最小长度
+$引用: '#/$defs/len-or-define'
+      max-len:
+        描述: 字符串或二进制属性的最大长度
+$引用: '#/$defs/len-or-define'
+      exact-len:
+        描述: 字符串或二进制属性的确切长度
+$引用: '#/$defs/len-or-define'
+      unterminated-ok:
+        描述: |
+          对于字符串属性，不检查属性是否包含终止的空字符
+类型: 布尔
+      子类型: *attr-type
+      显示提示: *display-hint
+      # 开始 genetlink-c
+      名称前缀:
+        类型: 字符串
+      # 结束 genetlink-c
+      # 开始 genetlink-legacy
+      结构:
+        描述: 用于属性的结构体类型的名称
+类型: 字符串
+      # 结束 genetlink-legacy
+
+# 确保名称前缀不出现在子集中（子集继承命名）
+依赖:
+  名称前缀:
+    不是:
+      必需: [subset-of]
+  subset-of:
+    不是:
+      必需: [名称前缀]
+
+# 类型属性仅在非子集定义中为必需
+如果:
+  属性:
+    subset-of:
+      不是:
+        类型: 字符串
+然后:
+  属性:
+    属性:
+      项:
+        必需: [类型]
+
+操作:
+  描述: 协议支持的操作
+类型: 对象
+  必需: [列表]
+  额外属性: 假
+  属性:
+    枚举模型:
+      描述: |
+        操作值分配的模型
+"unified" 是推荐的模型，其中所有消息类型都属于单一枚举。
+"directional" 将发送到内核和从内核发出的消息分别进行枚举。
+
+枚举: [ unified, directional ] # 修剪
+      name-prefix:
+        描述: |
+          命令C枚举名称的前缀。名称通过将前缀与命令的大写名称拼接而成，其中破折号被替换为下划线。
+类型: 字符串
+      enum-name:
+        描述: |
+          包含命令的枚举类型的名称，如果为空，则不使用名称
+类型: [ 字符串, "null" ]
+      async-prefix:
+        描述: 与 name-prefix 相同，但用于呈现通知和事件到单独的枚举中
+类型: 字符串
+      async-enum:
+        描述: |
+          包含命令的枚举类型的名称，如果为空，则不使用名称
+类型: [ 字符串, "null" ]
+      # 开始 genetlink-legacy
+      fixed-header: &fixed-header
+        描述: |
+          定义可选固定长度协议头结构的名称。此头部位于消息中的 netlink 和 genetlink 头部之后、任何属性之前。
+类型: 字符串
+      # 结束 genetlink-legacy
+      list:
+        描述: 命令列表
+        类型: 数组
+        元素:
+          类型: 对象
+          不允许额外属性: False
+          必需: [ name, doc ]
+          属性:
+            name:
+              描述: 操作的名称，同时也定义了其在 uAPI 中的 C 枚举值
+类型: 字符串
+            doc:
+              描述: 命令的文档说明
+类型: 字符串
+            value:
+              描述: 在 uAPI 中的枚举值
+类型: 字符串
+以下是提供的 YAML 内容翻译为中文：
+
+```yaml
+$ref: '#/$defs/uint'  # 引用无符号整数定义
+attribute-set:
+  description: |
+    定义此命令请求与响应中直接使用的属性空间
+type: string
+flags: *cmd_flags
+  description: 命令标志
+type: array
+  items:
+    enum: [ 管理权限, 非管理权限 ]
+dont-validate:
+  description: 内核属性验证标志
+type: array
+  items:
+    enum: [ 严格, 显示, 显示严格 ]
+config-cond:
+  description: |
+    控制操作存在的内核配置选项名称（不含 CONFIG_ 前缀）
+type: string
+# 开始 genetlink-legacy
+fixed-header: *fixed-header
+# 结束 genetlink-legacy
+do: *subop-type
+  description: 主命令处理程序
+type: object
+  additionalProperties: False
+  properties:
+    request: *subop-attr-list
+      description: 给定命令的请求消息定义
+    type: object
+      additionalProperties: False
+      properties:
+        attributes:
+          description: |
+            来自属性集的属性名称（不是完整的属性定义，仅是名称）
+    type: array
+      items:
+        type: string
+    # 开始 genetlink-legacy
+    value:
+      description: |
+        如果请求和响应的值不同，则为该消息指定ID，即请求和响应具有不同的消息枚举
+    $ref: '#/$defs/uint'
+    # 结束 genetlink-legacy
+    reply: *subop-attr-list
+    pre:
+      description: 在主回调函数之前运行的钩子函数（pre_doit 或 start）
+    type: string
+    post:
+      description: 在主回调函数之后运行的钩子函数（post_doit 或 done）
+    type: string
+```
+
+请注意，这里将英文的 `enum` 和 `type` 保留为英文，因为这些词在 YAML 或 JSON 中通常表示特定的含义。此外，“$ref” 也保持不变，因为它是一个 YAML/JSON 参考引用的关键字。
+下面是您提供的 YAML 结构翻译为中文：
+
+```yaml
+# 类型: 字符串
+类型: 字符串
+转储: *subop-type
+通知:
+  描述: 与该通知共享回复类型的命令名称
+
+# 类型: 字符串
+类型: 字符串
+事件:
+  类型: 对象
+  额外属性: 假
+  属性:
+    属性列表:
+      描述: 通知的属性明确列表
+    # 类型: 数组
+      项目:
+        类型: 字符串
+
+多播组:
+  描述: 生成给定通知的多播组名称
+# 类型: 字符串
+类型: 字符串
+多播组列表:
+  描述: 多播组列表
+# 类型: 对象
+类型: 对象
+必需: [列表]
+额外属性: 假
+属性:
+  列表:
+    描述: 组列表
+# 类型: 数组
+类型: 数组
+项目:
+  类型: 对象
+  必需: [名称]
+  额外属性: 假
+  属性:
+    名称:
+      描述: |
+        用于形成定义及其值的组名称
+# 类型: 字符串
+类型: 字符串
+    # 开始 genetlink-c
+    定义名 (C):
+      描述: 覆盖 C 用户 API 中定义的名称
+# 类型: 字符串
+类型: 字符串
+    # 结束 genetlink-c
+    标志: *cmd_flags
+
+内核家族:
+  描述: 用于生成内核 C 代码的额外全局属性
+# 类型: 对象
+类型: 对象
+额外属性: 假
+属性:
+  头文件:
+    描述: |
+      应包含在生成代码源中的额外头文件列表
+# 类型: 数组
+类型: 数组
+项目:
+  类型: 字符串
+  套接字权限:
+    描述: |
+      在内核中用于存储套接字状态的类型的字面量名称。该类型/结构是内核内部的，
+      并且不在规范中定义。
+```
+
+请注意，上述翻译尽量保持了原文的格式和结构，并将英文描述翻译成了中文。如果有任何特定的技术术语需要进一步解释或调整，请随时告知。
+类型：字符串

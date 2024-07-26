@@ -1,0 +1,994 @@
+### SPDX 许可证标识符: ((GPL-2.0 WITH Linux-syscall-note) OR BSD-3-Clause)
+
+名称: ovs_flow
+版本: 1
+协议: genetlink-legacy
+UAPI 头文件: linux/openvswitch.h
+
+文档:
+  通过通用 netlink 的 OVS 流配置
+
+定义:
+  - 
+    名称: ovs-header
+    类型: 结构体
+    文档: |
+      OVS 通用 netlink 消息的头部
+    成员:
+      - 
+        名称: dp-ifindex
+        类型: u32
+        文档: |
+          数据路径本地端口的 ifindex（0 表示不针对特定数据路径的请求）
+
+  - 
+    名称: ovs-flow-stats
+    类型: 结构体
+    成员:
+      - 
+        名称: n-packets
+        类型: u64
+        文档: 匹配的数据包数量
+      - 
+        名称: n-bytes
+        类型: u64
+        文档: 匹配的字节数量
+
+  - 
+    名称: ovs-key-ethernet
+    类型: 结构体
+    成员:
+      - 
+        名称: eth-src
+        类型: 二进制
+        长度: 6
+        显示提示: MAC
+      - 
+        名称: eth-dst
+        类型: 二进制
+        长度: 6
+        显示提示: MAC
+
+  - 
+    名称: ovs-key-mpls
+    类型: 结构体
+    成员:
+      - 
+        名称: mpls-lse
+        类型: u32
+        字节顺序: 大端
+
+  - 
+    名称: ovs-key-ipv4
+    类型: 结构体
+    成员:
+      - 
+        名称: ipv4-src
+        类型: u32
+        字节顺序: 大端
+        显示提示: IPv4
+      - 
+        名称: ipv4-dst
+        类型: u32
+        字节顺序: 大端
+        显示提示: IPv4
+      - 
+        名称: ipv4-proto
+        类型: u8
+      - 
+        名称: ipv4-tos
+        类型: u8
+      - 
+        名称: ipv4-ttl
+        类型: u8
+      - 
+        名称: ipv4-frag
+        类型: u8
+        枚举: ovs-frag-type
+
+  - 
+    名称: ovs-key-ipv6
+    类型: 结构体
+    成员:
+      - 
+        名称: ipv6-src
+        类型: 二进制
+        长度: 16
+        字节顺序: 大端
+        显示提示: IPv6
+      - 
+        名称: ipv6-dst
+        类型: 二进制
+        长度: 16
+        字节顺序: 大端
+        显示提示: IPv6
+      - 
+        名称: ipv6-label
+        类型: u32
+        字节顺序: 大端
+      - 
+        名称: ipv6-proto
+        类型: u8
+      - 
+        名称: ipv6-tclass
+        类型: u8
+      - 
+        名称: ipv6-hlimit
+        类型: u8
+      - 
+        名称: ipv6-frag
+        类型: u8
+
+  - 
+    名称: ovs-key-ipv6-exthdrs
+    类型: 结构体
+    成员:
+      - 
+        名称: hdrs
+        类型: u16
+
+  - 
+    名称: ovs-frag-type
+    前缀名: ovs-frag-type-
+    枚举名: ovs-frag-type
+    类型: 枚举
+    条目:
+      - 
+        名称: none
+        文档: 数据包不是分片
+      - 
+        名称: first
+        文档: 数据包是偏移为 0 的分片
+      - 
+        名称: later
+        文档: 数据包是非零偏移的分片
+      - 
+        名称: any
+        值: 255
+
+  - 
+    名称: ovs-key-tcp
+    类型: 结构体
+    成员:
+      - 
+        名称: tcp-src
+        类型: u16
+        字节顺序: 大端
+      - 
+        名称: tcp-dst
+        类型: u16
+        字节顺序: 大端
+
+  - 
+    名称: ovs-key-udp
+    类型: 结构体
+    成员:
+      - 
+        名称: udp-src
+        类型: u16
+        字节顺序: 大端
+      - 
+        名称: udp-dst
+        类型: u16
+        字节顺序: 大端
+
+  - 
+    名称: ovs-key-sctp
+    类型: 结构体
+    成员:
+      - 
+        名称: sctp-src
+        类型: u16
+        字节顺序: 大端
+      - 
+        名称: sctp-dst
+        类型: u16
+        字节顺序: 大端
+
+  - 
+    名称: ovs-key-icmp
+    类型: 结构体
+    成员:
+      - 
+        名称: icmp-type
+        类型: u8
+      - 
+        名称: icmp-code
+        类型: u8
+
+  - 
+    名称: ovs-key-arp
+    类型: 结构体
+    成员:
+      - 
+        名称: arp-sip
+        类型: u32
+        字节顺序: 大端
+      - 
+        名称: arp-tip
+        类型: u32
+        字节顺序: 大端
+      - 
+        名称: arp-op
+        类型: u16
+        字节顺序: 大端
+      - 
+        名称: arp-sha
+        类型: 二进制
+        长度: 6
+        显示提示: MAC
+      - 
+        名称: arp-tha
+        类型: 二进制
+        长度: 6
+        显示提示: MAC
+
+  - 
+    名称: ovs-key-nd
+    类型: 结构体
+    成员:
+      - 
+        名称: nd_target
+        类型: 二进制
+        长度: 16
+        字节顺序: 大端
+      - 
+        名称: nd-sll
+        类型: 二进制
+        长度: 6
+        显示提示: MAC
+      - 
+        名称: nd-tll
+        类型: 二进制
+        长度: 6
+        显示提示: MAC
+
+  - 
+    名称: ovs-key-ct-tuple-ipv4
+    类型: 结构体
+    成员:
+      - 
+        名称: ipv4-src
+        类型: u32
+        字节顺序: 大端
+      - 
+        名称: ipv4-dst
+        类型: u32
+        字节顺序: 大端
+      - 
+        名称: src-port
+        类型: u16
+        字节顺序: 大端
+      - 
+        名称: dst-port
+        类型: u16
+        字节顺序: 大端
+      - 
+        名称: ipv4-proto
+        类型: u8
+
+  - 
+    名称: ovs-action-push-vlan
+    类型: 结构体
+    成员:
+      - 
+        名称: vlan_tpid
+        类型: u16
+        字节顺序: 大端
+        文档: 推送的标签协议标识符 (TPID)
+      - 
+        名称: vlan_tci
+        类型: u16
+        字节顺序: 大端
+        文档: 推送的标签控制标识符 (TCI)
+下面是给定内容的中文翻译：
+
+---
+- name: ovs-ufid-flags
+  name-prefix: ovs-ufid-f-
+  enum-name:
+  type: flags
+  entries:
+    - omit-key
+    - omit-mask
+    - omit-actions
+- 
+  name: ovs-action-hash
+  type: struct
+  members:
+    - 
+      name: hash-alg
+      type: u32
+      doc: 在循环前用于计算哈希值的算法
+    - 
+      name: hash-basis
+      type: u32
+      doc: 用于计算哈希值的基础
+- 
+  name: ovs-hash-alg
+  enum-name: ovs-hash-alg
+  type: enum
+  doc: |
+    数据路径哈希算法，用于计算数据路径哈希。算法类型仅指定了流中的哪些字段将被用作哈希的一部分。每个数据路径可以自由使用自己的哈希算法。哈希值对用户空间守护进程来说是不透明的。
+  entries:
+    - ovs-hash-alg-l4
+- 
+  name: ovs-action-push-mpls
+  type: struct
+  members:
+    - 
+      name: mpls-lse
+      type: u32
+      byte-order: big-endian
+      doc: |
+        需要压入的MPLS标签栈条目
+    - 
+      name: mpls-ethertype
+      type: u32
+      byte-order: big-endian
+      doc: |
+        设置在封装以太网帧中的Ethertype。Ethertype应给定的唯一值为ETH_P_MPLS_UC和ETH_P_MPLS_MC，分别表示MPLS单播或组播。其他值将被拒绝。
+- 
+  name: ovs-action-add-mpls
+  type: struct
+  members:
+    - 
+      name: mpls-lse
+      type: u32
+      byte-order: big-endian
+      doc: |
+        需要压入的MPLS标签栈条目
+    - 
+      name: mpls-ethertype
+      type: u32
+      byte-order: big-endian
+      doc: |
+        设置在封装以太网帧中的Ethertype。Ethertype应给定的唯一值为ETH_P_MPLS_UC和ETH_P_MPLS_MC，分别表示MPLS单播或组播。其他值将被拒绝。
+    - 
+      name: tun-flags
+      type: u16
+      doc: |
+        MPLS隧道属性
+- 
+  name: ct-state-flags
+  enum-name:
+  type: flags
+  name-prefix: ovs-cs-f-
+  entries:
+    - 
+      name: new
+      doc: 新连接的开始
+    - 
+      name: established
+      doc: 现有连接的一部分
+    - 
+      name: related
+      doc: 与现有连接相关联
+    - 
+      name: reply-dir
+      doc: 流处于回复方向
+    - 
+      name: invalid
+      doc: 无法跟踪连接
+翻译如下：
+
+```
+- 
+  name: tracked
+  doc: 已发生连接跟踪
+- 
+  name: src-nat
+  doc: 数据包的源地址/端口已被NAT转换
+- 
+  name: dst-nat
+  doc: 数据包的目的地址/端口已被NAT转换
+
+属性集:
+  - 
+    name: flow-attrs
+    枚举名称: ovs-flow-attr
+    名称前缀: ovs-flow-attr-
+    属性:
+      - 
+        name: key
+        类型: 嵌套
+        嵌套属性: key-attrs
+        doc: |
+          指定流键的嵌套属性。总是在通知中出现。对于所有请求（除了转储）都是必需的。
+      - 
+        name: actions
+        类型: 嵌套
+        嵌套属性: action-attrs
+        doc: |
+          指定与键匹配的数据包所采取的动作的嵌套属性。总是在通知中出现。对于OVS_FLOW_CMD_NEW请求是必需的，对于OVS_FLOW_CMD_SET请求是可选的。没有 OVS_FLOW_ATTR_ACTIONS 的 OVS_FLOW_CMD_SET 不会修改动作。要清除动作，必须给出不含任何嵌套属性的 OVS_FLOW_ATTR_ACTIONS。
+      - 
+        name: stats
+        类型: 二进制
+        结构: ovs-flow-stats
+        doc: |
+          此流的统计信息。如果统计数据非零，则在通知中出现。在请求中被忽略。
+      - 
+        name: tcp-flags
+        类型: u8
+        doc: |
+          一个8位值，给出了此流中所有TCP标志的或运算结果。仅在TCP流的通知中出现，并且仅当该值非零时。在请求中被忽略。
+      - 
+        name: used
+        类型: u64
+        doc: |
+          一个64位整数，给出了系统单调时钟上最后一次处理此流的数据包的时间（以毫秒为单位）。仅在已处理此流的数据包的通知中出现。在请求中被忽略。
+      - 
+        name: clear
+        类型: 标记
+        doc: |
+          如果在OVS_FLOW_CMD_SET请求中出现，则清除最后使用时间、累积的TCP标志和此流的统计信息。否则，在请求中被忽略。在通知中从不出现。
+      - 
+        name: mask
+        类型: 嵌套
+        嵌套属性: key-attrs
+        doc: |
+          指定通配符流匹配的掩码位的嵌套属性。掩码位值'1'指定与相应的流键位精确匹配，而掩码位值'0'指定通配符匹配。省略属性被视为将所有相应字段设置为通配符。对于所有请求都是可选的。如果不提供，则所有流键位都被视为精确匹配位。
+```
+Here's the translation into Chinese:
+
+- 
+  name: probe
+  type: binary
+  doc: |
+    流操作是一个特性探测，应该抑制错误日志记录
+- 
+  name: ufid
+  type: binary
+  doc: |
+    一个1到16字节之间的值，用于指定流的唯一标识符。
+    使该流根据此值而非OVS_FLOW_ATTR_KEY属性的值进行索引。对于所有请求都是可选的。
+    如果创建流时使用了此属性，则在通知中会存在。
+  display-hint: uuid
+- 
+  name: ufid-flags
+  type: u32
+  enum: ovs-ufid-flags
+  doc: |
+    一个32位的值，由或运算（OR）组合的标志，为流的安装和检索提供替代语义。对于所有请求都是可选的
+- 
+  name: pad
+  type: binary
+
+- 
+  name: key-attrs
+  enum-name: ovs-key-attr
+  name-prefix: ovs-key-attr-
+  attributes:
+    - 
+      name: encap
+      type: nest
+      nested-attributes: key-attrs
+    - 
+      name: priority
+      type: u32
+    - 
+      name: in-port
+      type: u32
+    - 
+      name: ethernet
+      type: binary
+      struct: ovs-key-ethernet
+      doc: 结构ovs_key_ethernet
+    - 
+      name: vlan
+      type: u16
+      byte-order: big-endian
+    - 
+      name: ethertype
+      type: u16
+      byte-order: big-endian
+    - 
+      name: ipv4
+      type: binary
+      struct: ovs-key-ipv4
+    - 
+      name: ipv6
+      type: binary
+      struct: ovs-key-ipv6
+      doc: 结构ovs_key_ipv6
+    - 
+      name: tcp
+      type: binary
+      struct: ovs-key-tcp
+    - 
+      name: udp
+      type: binary
+      struct: ovs-key-udp
+    - 
+      name: icmp
+      type: binary
+      struct: ovs-key-icmp
+    - 
+      name: icmpv6
+      type: binary
+      struct: ovs-key-icmp
+    - 
+      name: arp
+      type: binary
+      struct: ovs-key-arp
+      doc: 结构ovs_key_arp
+    - 
+      name: nd
+      type: binary
+      struct: ovs-key-nd
+      doc: 结构ovs_key_nd
+    - 
+      name: skb-mark
+      type: u32
+    - 
+      name: tunnel
+      type: nest
+      nested-attributes: tunnel-key-attrs
+    - 
+      name: sctp
+      type: binary
+      struct: ovs-key-sctp
+    - 
+      name: tcp-flags
+      type: u16
+      byte-order: big-endian
+    - 
+      name: dp-hash
+      type: u32
+      doc: 值0表示哈希值未由数据平面计算
+- 
+  name: recirc-id
+  type: u32
+- 
+  name: mpls
+  type: binary
+  struct: ovs-key-mpls
+- 
+  name: ct-state
+  type: u32
+  enum: ct-state-flags
+  enum-as-flags: true
+- 
+  name: ct-zone
+  type: u16
+  doc: 连接跟踪区域
+- 
+  name: ct-mark
+  type: u32
+  doc: 连接跟踪标记
+- 
+  name: ct-labels
+  type: binary
+  display-hint: hex
+  doc: 16字节连接跟踪标签
+- 
+  name: ct-orig-tuple-ipv4
+  type: binary
+  struct: ovs-key-ct-tuple-ipv4
+- 
+  name: ct-orig-tuple-ipv6
+  type: binary
+  doc: 结构ovs_key_ct_tuple_ipv6
+- 
+  name: nsh
+  type: nest
+  nested-attributes: ovs-nsh-key-attrs
+- 
+  name: packet-type
+  type: u32
+  byte-order: big-endian
+  doc: 不应发送到内核
+- 
+  name: nd-extensions
+  type: binary
+  doc: 不应发送到内核
+- 
+  name: tunnel-info
+  type: binary
+  doc: 结构ip_tunnel_info
+- 
+  name: ipv6-exthdrs
+  type: binary
+  struct: ovs-key-ipv6-exthdrs
+  doc: 结构ovs_key_ipv6_exthdr
+
+- 
+  name: action-attrs
+  enum-name: ovs-action-attr
+  name-prefix: ovs-action-attr-
+  attributes:
+    - 
+      name: output
+      type: u32
+      doc: 数据平面中的ovs端口号
+    - 
+      name: userspace
+      type: nest
+      nested-attributes: userspace-attrs
+    - 
+      name: set
+      type: nest
+      nested-attributes: key-attrs
+      doc: 替换现有头部的内容。嵌套属性指定要修改的头部及其值
+- 
+  name: push-vlan
+  type: binary
+  struct: ovs-action-push-vlan
+  doc: 在包上推一个新的最外层802.1Q或802.1ad头
+- 
+  name: pop-vlan
+  type: flag
+  doc: 从包中弹出最外层的802.1Q或802.1ad头
+- 
+  name: sample
+  type: nest
+  nested-attributes: sample-attrs
+  doc: |
+    概率性执行动作，如嵌套属性中所指定
+- 
+  name: recirc
+  type: u32
+  doc: 循环ID
+- 
+  name: hash
+  type: binary
+  struct: ovs-action-hash
+- 
+  name: push-mpls
+  type: binary
+  struct: ovs-action-push-mpls
+  doc: |
+    将新的MPLS标签堆栈条目推到包的MPLS标签堆栈顶部。
+    设置封装帧的以太类型为ETH_P_MPLS_UC或ETH_P_MPLS_MC以指示新包内容
+- 
+  name: pop-mpls
+  type: u16
+  byte-order: big-endian
+  doc: 以太类型
+- 
+  name: set-masked
+  type: nest
+  nested-attributes: key-attrs
+  doc: |
+    替换现有头部的内容。嵌套属性指定要修改的头部、其值以及掩码。
+    对于掩码中设置的每一位，将相应位值从值复制到包头部字段，其余位保持不变。
+    未被掩码的值位必须作为零传递。不支持对OVS_KEY_ATTR_TUNNEL属性进行掩码处理
+下面是提供的配置描述的中文翻译：
+
+- 
+    name: ct
+    type: nest
+    nested-attributes: ct-attrs
+    doc: |
+      跟踪连接。填充流键中与连接跟踪相关的条目。
+- 
+    name: trunc
+    type: u32
+    doc: 结构 ovs_action_trunc 是一个 u32 最大长度。
+- 
+    name: push-eth
+    type: binary
+    doc: 结构 ovs_action_push_eth。
+- 
+    name: pop-eth
+    type: flag
+- 
+    name: ct-clear
+    type: flag
+- 
+    name: push-nsh
+    type: nest
+    nested-attributes: ovs-nsh-key-attrs
+    doc: |
+      将 NSH 标头推送到数据包。
+- 
+    name: pop-nsh
+    type: flag
+    doc: |
+      移除数据包最外层的 NSH 标头。
+- 
+    name: meter
+    type: u32
+    doc: |
+      让数据包通过一个限速器，该限速器可能会丢弃数据包或修改数据包（例如，更改 DSCP 字段）。
+- 
+    name: clone
+    type: nest
+    nested-attributes: action-attrs
+    doc: |
+      复制数据包并执行一系列操作而不影响原始数据包和键。
+- 
+    name: check-pkt-len
+    type: nest
+    nested-attributes: check-pkt-len-attrs
+    doc: |
+      检查数据包长度，如果长度大于指定的数据包长度，则执行一组操作；否则执行另一组操作。
+- 
+    name: add-mpls
+    type: binary
+    struct: ovs-action-add-mpls
+    doc: |
+      在数据包开始处或 L3 标头开始处根据此 OVS_ACTION_ATTR_ADD_MPLS 参数中的 l3 隧道标志值推入一个新的 MPLS 标签栈条目。
+- 
+    name: dec-ttl
+    type: nest
+    nested-attributes: dec-ttl-attrs
+- 
+    name: psample
+    type: nest
+    nested-attributes: psample-attrs
+    doc: |
+      将数据包样本发送到 psample 以供外部观察。
+
+- 
+    name: tunnel-key-attrs
+    enum-name: ovs-tunnel-key-attr
+    name-prefix: ovs-tunnel-key-attr-
+    attributes:
+- 
+    name: id
+    type: u64
+    byte-order: big-endian
+    value: 0
+- 
+    name: ipv4-src
+    type: u32
+    byte-order: big-endian
+- 
+    name: ipv4-dst
+    type: u32
+    byte-order: big-endian
+- 
+    name: tos
+    type: u8
+- 
+    name: ttl
+    type: u8
+- 
+    name: dont-fragment
+    type: flag
+- 
+    name: csum
+    type: flag
+- 
+    name: oam
+    type: flag
+- 
+    name: geneve-opts
+    type: binary
+    sub-type: u32
+- 
+    name: tp-src
+    type: u16
+    byte-order: big-endian
+- 
+    name: tp-dst
+    type: u16
+    byte-order: big-endian
+- 
+    name: vxlan-opts
+    type: nest
+    nested-attributes: vxlan-ext-attrs
+- 
+    name: ipv6-src
+    type: binary
+    doc: |
+      结构 in6_addr 源 IPv6 地址。
+- 
+    name: ipv6-dst
+    type: binary
+    doc: |
+      结构 in6_addr 目标 IPv6 地址。
+- 
+    name: pad
+    type: binary
+- 
+    name: erspan-opts
+    type: binary
+    doc: |
+      结构 erspan_metadata。
+- 
+    name: ipv4-info-bridge
+    type: flag
+
+- 
+    name: check-pkt-len-attrs
+    enum-name: ovs-check-pkt-len-attr
+    name-prefix: ovs-check-pkt-len-attr-
+    attributes:
+- 
+    name: pkt-len
+    type: u16
+- 
+    name: actions-if-greater
+    type: nest
+    nested-attributes: action-attrs
+- 
+    name: actions-if-less-equal
+    type: nest
+    nested-attributes: action-attrs
+
+- 
+    name: sample-attrs
+    enum-name: ovs-sample-attr
+    name-prefix: ovs-sample-attr-
+    attributes:
+- 
+    name: probability
+    type: u32
+- 
+    name: actions
+    type: nest
+    nested-attributes: action-attrs
+
+- 
+    name: userspace-attrs
+    enum-name: ovs-userspace-attr
+    name-prefix: ovs-userspace-attr-
+    attributes:
+- 
+    name: pid
+    type: u32
+- 
+    name: userdata
+    type: binary
+- 
+    name: egress-tun-port
+    type: u32
+- 
+    name: actions
+    type: flag
+
+- 
+    name: ovs-nsh-key-attrs
+    enum-name: ovs-nsh-key-attr
+    name-prefix: ovs-nsh-key-attr-
+    attributes:
+- 
+    name: base
+    type: binary
+- 
+    name: md1
+    type: binary
+- 
+    name: md2
+    type: binary
+
+- 
+    name: ct-attrs
+    enum-name: ovs-ct-attr
+    name-prefix: ovs-ct-attr-
+    attributes:
+- 
+    name: commit
+    type: flag
+- 
+    name: zone
+    type: u16
+- 
+    name: mark
+    type: binary
+- 
+    name: labels
+    type: binary
+- 
+    name: helper
+    type: string
+- 
+    name: nat
+    type: nest
+    nested-attributes: nat-attrs
+- 
+    name: force-commit
+    type: flag
+- 
+    name: eventmask
+    type: u32
+- 
+    name: timeout
+    type: string
+
+- 
+    name: nat-attrs
+    enum-name: ovs-nat-attr
+    name-prefix: ovs-nat-attr-
+    attributes:
+- 
+    name: src
+    type: flag
+- 
+    name: dst
+    type: flag
+- 
+    name: ip-min
+    type: binary
+- 
+    name: ip-max
+    type: binary
+- 
+    name: proto-min
+    type: u16
+- 
+    name: proto-max
+    type: u16
+- 
+    name: persistent
+    type: flag
+- 
+    name: proto-hash
+    type: flag
+- 
+    name: proto-random
+    type: flag
+
+- 
+    name: dec-ttl-attrs
+    enum-name: ovs-dec-ttl-attr
+    name-prefix: ovs-dec-ttl-attr-
+    attributes:
+- 
+    name: action
+    type: nest
+    nested-attributes: action-attrs
+
+- 
+    name: vxlan-ext-attrs
+    enum-name: ovs-vxlan-ext-
+    name-prefix: ovs-vxlan-ext-
+    attributes:
+- 
+    name: gbp
+    type: u32
+
+- 
+    name: psample-attrs
+    enum-name: ovs-psample-attr
+    name-prefix: ovs-psample-attr-
+    attributes:
+- 
+    name: group
+    type: u32
+- 
+    name: cookie
+    type: binary
+
+operations:
+  name-prefix: ovs-flow-cmd-
+  fixed-header: ovs-header
+  list:
+- 
+    name: get
+    doc: 获取/转储 OVS 流配置和状态
+    value: 3
+    attribute-set: flow-attrs
+    do: &flow-get-op
+      request:
+        attributes:
+          - key
+          - ufid
+          - ufid-flags
+      reply:
+        attributes:
+          - key
+          - ufid
+          - mask
+          - stats
+          - actions
+    dump: *flow-get-op
+- 
+    name: new
+    doc: 在数据路径中创建 OVS 流配置
+    value: 1
+    attribute-set: flow-attrs
+    do:
+      request:
+        attributes:
+          - key
+          - ufid
+          - mask
+          - actions
+
+mcast-groups:
+  list:
+- 
+    name: ovs_flow

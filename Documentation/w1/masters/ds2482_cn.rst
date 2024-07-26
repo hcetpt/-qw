@@ -1,0 +1,30 @@
+===== 核心驱动程序 ds2482 =====
+
+支持的芯片：
+
+  * Maxim DS2482-100，Maxim DS2482-800
+
+    前缀: 'ds2482'
+
+    扫描地址: 无
+
+    数据手册:
+
+        - http://datasheets.maxim-ic.com/en/ds/DS2482-100.pdf
+        - http://datasheets.maxim-ic.com/en/ds/DS2482-800.pdf
+
+作者: Ben Gardner <bgardner@wabtec.com>
+
+描述
+-----------
+
+Maxim/Dallas Semiconductor 的 DS2482 是一个 I2C 设备，它提供了一个（DS2482-100）或八个（DS2482-800）1-Wire 总线。
+一般说明
+---------------
+
+有效的地址是 0x18、0x19、0x1a 和 0x1b。
+然而，在不向 I2C 总线写入的情况下无法检测到该设备，因此不做任何检测。你应该显式地实例化此设备:
+```
+$ modprobe ds2482
+$ echo ds2482 0x18 > /sys/bus/i2c/devices/i2c-0/new_device
+```

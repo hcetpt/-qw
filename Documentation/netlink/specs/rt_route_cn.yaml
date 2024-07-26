@@ -1,0 +1,158 @@
+### 许可证说明:
+SPDX 许可证标识符: ((GPL-2.0 WITH Linux-syscall-note) OR BSD-3-Clause)
+
+### 定义:
+
+- **名称**: rt-route
+- **协议**: netlink-raw
+- **协议编号**: 0
+
+### 文档:
+通过 rtnetlink 进行路由配置。
+
+### 定义:
+
+#### rtm-type (枚举类型)
+- **前缀**: rtn-
+- **条目**:
+  - unspec
+  - unicast
+  - local
+  - broadcast
+  - anycast
+  - multicast
+  - blackhole
+  - unreachable
+  - prohibit
+  - throw
+  - nat
+  - xresolve
+
+#### rtmsg (结构体)
+- **成员**:
+  - **rtm-family**: u8
+  - **rtm-dst-len**: u8
+  - **rtm-src-len**: u8
+  - **rtm-tos**: u8
+  - **rtm-table**: u8
+  - **rtm-protocol**: u8
+  - **rtm-scope**: u8
+  - **rtm-type**: u8, 枚举类型: rtm-type
+  - **rtm-flags**: u32
+
+#### rta-cacheinfo (结构体)
+- **成员**:
+  - **rta-clntref**: u32
+  - **rta-lastuse**: u32
+  - **rta-expires**: u32
+  - **rta-error**: u32
+  - **rta-used**: u32
+
+### 属性集:
+
+#### route-attrs
+- **属性**:
+  - **rta-dst**: 二进制, 显示提示: IPv4
+  - **rta-src**: 二进制, 显示提示: IPv4
+  - **rta-iif**: u32
+  - **rta-oif**: u32
+  - **rta-gateway**: 二进制, 显示提示: IPv4
+  - **rta-priority**: u32
+  - **rta-prefsrc**: 二进制, 显示提示: IPv4
+  - **rta-metrics**: 嵌套, 嵌套属性: rta-metrics
+  - **rta-multipath**: 二进制
+  - **rta-protoinfo**: 二进制 (未使用)
+  - **rta-flow**: u32
+  - **rta-cacheinfo**: 二进制, 结构体: rta-cacheinfo
+  - **rta-session**: 二进制 (未使用)
+  - **rta-mp-algo**: 二进制 (未使用)
+  - **rta-table**: u32
+  - **rta-mark**: u32
+  - **rta-mfc-stats**: 二进制
+  - **rta-via**: 二进制
+  - **rta-newdst**: 二进制
+  - **rta-pref**: u8
+  - **rta-encap-type**: u16
+  - **rta-encap**: 二进制 (隧道特定嵌套)
+  - **rta-expires**: u32
+  - **rta-pad**: 二进制
+  - **rta-uid**: u32
+  - **rta-ttl-propagate**: u8
+  - **rta-ip-proto**: u8
+  - **rta-sport**: u16
+  - **rta-dport**: u16
+  - **rta-nh-id**: u32
+
+#### rta-metrics
+- **属性**:
+  - **rtax-unspec**: 未使用, 值: 0
+  - **rtax-lock**: u32
+  - **rtax-mtu**: u32
+  - **rtax-window**: u32
+  - **rtax-rtt**: u32
+  - **rtax-rttvar**: u32
+  - **rtax-ssthresh**: u32
+  - **rtax-cwnd**: u32
+  - **rtax-advmss**: u32
+  - **rtax-reordering**: u32
+  - **rtax-hoplimit**: u32
+  - **rtax-initcwnd**: u32
+  - **rtax-features**: u32
+  - **rtax-rto-min**: u32
+  - **rtax-initrwnd**: u32
+  - **rtax-quickack**: u32
+  - **rtax-cc-algo**: 字符串
+  - **rtax-fastopen-no-cookie**: u32
+
+### 操作:
+
+#### 模型: 方向性
+
+#### 列表:
+- **getroute**
+  - **文档**: 倾倒路由信息
+  - **属性集**: route-attrs
+  - **固定头部**: rtmsg
+  - **执行**:
+    - **请求**:
+      - **值**: 26
+      - **属性**:
+        - rtm-family
+        - rta-src
+        - rtm-src-len
+        - rta-dst
+        - rtm-dst-len
+        - rta-iif
+        - rta-oif
+        - rta-ip-proto
+        - rta-sport
+        - rta-dport
+        - rta-mark
+        - rta-uid
+    - **回复**:
+      - **值**: 24
+      - **属性**: *all-route-attrs
+  - **倾倒**:
+    - **请求**:
+      - **值**: 26
+      - **属性**:
+        - rtm-family
+    - **回复**:
+      - **值**: 24
+      - **属性**: *all-route-attrs
+- **newroute**
+  - **文档**: 创建一个新的路由
+  - **属性集**: route-attrs
+  - **固定头部**: rtmsg
+  - **执行**:
+    - **请求**:
+      - **值**: 24
+      - **属性**: *all-route-attrs
+- **delroute**
+  - **文档**: 删除一个现有路由
+  - **属性集**: route-attrs
+  - **固定头部**: rtmsg
+  - **执行**:
+    - **请求**:
+      - **值**: 25
+      - **属性**: *all-route-attrs

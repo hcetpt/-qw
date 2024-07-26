@@ -1,0 +1,202 @@
+### SPDX 许可证标识符: ((GPL-2.0 WITH Linux-syscall-note) OR BSD-3-Clause)
+
+名称: dpll
+
+文档: DPLL 子系统
+
+定义:
+  - 
+    类型: 枚举
+    名称: mode
+    文档: |
+      DPLL 可以支持的工作模式，区分 DPLL 是否以及如何选择其输入之一进行同步。DPLL_A_MODE 属性的有效值。
+    项:
+      - 
+        名称: manual
+        文档: 输入只能通过向 DPLL 发送请求来选择。
+        值: 1
+      - 
+        名称: automatic
+        文档: 最高优先级的输入引脚由 DPLL 自动选择。
+    渲染最大值: true
+  - 
+    类型: 枚举
+    名称: lock-status
+    文档: |
+      提供有关 DPLL 设备锁定状态的信息。DPLL_A_LOCK_STATUS 属性的有效值。
+    项:
+      - 
+        名称: unlocked
+        文档: |
+          DPLL 尚未锁定到任何有效输入（或通过将 DPLL_A_MODE 设置为 DPLL_MODE_DETACHED 强制解锁）。
+        值: 1
+      - 
+        名称: locked
+        文档: |
+          DPLL 已锁定到有效信号，但没有保持功能可用。
+      - 
+        名称: locked-ho-acq
+        文档: |
+          DPLL 已锁定且已获取保持功能。
+      - 
+        名称: holdover
+        文档: |
+          DPLL 处于保持状态——丢失了有效的锁定或由于断开所有引脚而被强制（后者仅当 DPLL 的锁定状态已经是 DPLL_LOCK_STATUS_LOCKED_HO_ACQ 时才可能发生；如果 DPLL 的锁定状态不是 DPLL_LOCK_STATUS_LOCKED_HO_ACQ，则 DPLL 的锁定状态应保持为 DPLL_LOCK_STATUS_UNLOCKED）。
+    渲染最大值: true
+  - 
+    类型: 枚举
+    名称: lock-status-error
+    文档: |
+      如果先前的状态更改是由于故障引起的，则提供有关 DPLL 设备锁定状态错误的信息。DPLL_A_LOCK_STATUS_ERROR 属性的有效值。
+    项:
+      - 
+        名称: none
+        文档: |
+          DPLL 设备锁定状态更改时没有发生任何错误。
+        值: 1
+      - 
+        名称: undefined
+        文档: |
+          DPLL 设备锁定状态因未知错误而改变。驱动程序在无法获取合适的精确错误类型时填写此值。
+      - 
+        名称: media-down
+        文档: |
+          DPLL 设备锁定状态因为关联媒体关闭而改变。
+          这可能发生在例如 DPLL 设备之前锁定到类型为 PIN_TYPE_SYNCE_ETH_PORT 的输入引脚上。
+      - 
+        名称: fractional-frequency-offset-too-high
+        文档: |
+          媒体上的 RX 和 TX 符号率之间的 FFO（分数频率偏移）过高。
+          这可能发生在例如 DPLL 设备之前锁定到类型为 PIN_TYPE_SYNCE_ETH_PORT 的输入引脚上。
+    渲染最大值: true
+  - 
+    类型: 常量
+    名称: temp-divider
+    值: 1000
+    文档: |
+      温度分频器允许用户空间计算出具有三位小数精度的浮点温度值。
+      (DPLL_A_TEMP / DPLL_TEMP_DIVIDER) 的值是温度值的整数部分。
+The provided text describes a structured data model for configuring and managing DPLL (Digital Phase-Locked Loop) devices and their associated pins. Below is a translation into Chinese:
+
+- **温度值的小数部分**:
+  - `(DPLL_A_TEMP % DPLL_TEMP_DIVIDER)` 的值是温度值的小数部分。
+
+- **类型**:
+  - 名称: `type`
+  - 文档: DPLL的类型，`DPLL_A_TYPE` 属性的有效值。
+  - 枚举项:
+    - 名称: `pps`
+      - 文档: DPLL产生脉冲每秒信号。
+      - 值: 1
+    - 名称: `eec`
+      - 文档: DPLL驱动以太网设备时钟。
+  
+- **引脚类型**:
+  - 定义可能的引脚类型，`DPLL_A_PIN_TYPE` 属性的有效值。
+  - 枚举项:
+    - 名称: `mux`
+      - 文档: 聚合另一层可选引脚。
+      - 值: 1
+    - 名称: `ext`
+      - 文档: 外部输入。
+    - 名称: `synce-eth-port`
+      - 文档: 以太网端口PHY的恢复时钟。
+    - 名称: `int-oscillator`
+      - 文档: 设备内部振荡器。
+    - 名称: `gnss`
+      - 文档: GNSS恢复时钟。
+
+- **引脚方向**:
+  - 定义可能的引脚方向，`DPLL_A_PIN_DIRECTION` 属性的有效值。
+  - 枚举项:
+    - 名称: `input`
+      - 文档: 用作信号输入的引脚。
+      - 值: 1
+    - 名称: `output`
+      - 文档: 用于输出信号的引脚。
+
+- **引脚频率常量**:
+  - 名称: `pin-frequency-1-hz`
+    - 值: 1
+  - 名称: `pin-frequency-10-khz`
+    - 值: 10000
+  - 名称: `pin-frequency-77_5-khz`
+    - 值: 77500
+  - 名称: `pin-frequency-10-mhz`
+    - 值: 10000000
+
+- **引脚状态**:
+  - 定义可能的引脚状态，`DPLL_A_PIN_STATE` 属性的有效值。
+  - 枚举项:
+    - 名称: `connected`
+      - 文档: 引脚连接，相位锁定环路的活动输入。
+      - 值: 1
+    - 名称: `disconnected`
+      - 文档: 引脚断开连接，不被视为有效输入。
+    - 名称: `selectable`
+      - 文档: 引脚启用自动输入选择。
+
+- **引脚功能**:
+  - 定义可能的引脚功能，`DPLL_A_PIN_CAPABILITIES` 属性的有效标志。
+  - 枚举项:
+    - 名称: `direction-can-change`
+      - 文档: 引脚方向可以改变。
+    - 名称: `priority-can-change`
+      - 文档: 引脚优先级可以改变。
+    - 名称: `state-can-change`
+      - 文档: 引脚状态可以改变。
+
+- **相位偏移分频器**:
+  - 名称: `phase-offset-divider`
+    - 值: 1000
+    - 文档: 相位偏移分频器允许用户空间计算引脚和DPLL设备之间测量信号相位差的值为具有三位小数精度的分数值。
+  - `(DPLL_A_PHASE_OFFSET / DPLL_PHASE_OFFSET_DIVIDER)` 的值是测量相位偏移值的整数部分。
+  - `(DPLL_A_PHASE_OFFSET % DPLL_PHASE_OFFSET_DIVIDER)` 的值是测量相位偏移值的小数部分。
+
+- **属性集**:
+  - 名称: `dpll`
+    - 属性:
+      - 名称: `id`
+      - 名称: `module-name`
+      - 名称: `pad`
+      - 名称: `clock-id`
+      - 名称: `mode`
+      - 名称: `mode-supported`
+      - 名称: `lock-status`
+      - 名称: `temp`
+      - 名称: `type`
+      - 名称: `lock-status-error`
+
+  - 名称: `pin`
+    - 属性:
+      - 名称: `id`
+      - 名称: `parent-id`
+      - 名称: `module-name`
+      - 名称: `pad`
+      - 名称: `clock-id`
+      - 名称: `board-label`
+      - 名称: `panel-label`
+      - 名称: `package-label`
+      - 名称: `type`
+      - 名称: `direction`
+      - 名称: `frequency`
+      - 名称: `frequency-supported`
+      - 名称: `frequency-min`
+      - 名称: `frequency-max`
+      - 名称: `prio`
+      - 名称: `state`
+      - 名称: `capabilities`
+      - 名称: `parent-device`
+      - 名称: `parent-pin`
+      - 名称: `phase-adjust-min`
+      - 名称: `phase-adjust-max`
+      - 名称: `phase-adjust`
+      - 名称: `phase-offset`
+      - 名称: `fractional-frequency-offset`
+
+- **操作**:
+  - 包括获取设备ID、获取设备信息、设置设备属性、创建/删除/更改通知等操作。
+
+- **多播组**:
+  - 列表:
+    - 名称: `monitor`
