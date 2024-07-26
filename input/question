@@ -1,0 +1,8 @@
+7/26
+DCDのAI
+2番目ソフト
+GPIO19問題発生時のfailsafe処理対応
+kernel-4.9/drivers/pinctrl/mediatek/pinctrl-mtk-common.c 中のfailsafe処理参照する
+GPIO15～20間にGPIO19を追加
+ソフトを作る
+7/30まで原因特定できなければ、push進めます

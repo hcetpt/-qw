@@ -49,7 +49,7 @@ else
     for file in "${files[@]}"; do
         #./qw "$file"
 	create_cn_version "$file"
-	python a.py "$file" | jq -M -r '.choices[0].message.content' > "$new_file_path"
+	python script/a.py "$file" | jq -M -r '.choices[0].message.content' > "$new_file_path"
     done
 fi
 

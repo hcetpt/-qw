@@ -9,7 +9,7 @@ fi
 # 存储输入的路径
 path="$1"
 
-python fa.py "$path" | jq -M -r '.choices[0].message.content'
+python script/fa.py "$path" | jq -M -r '.choices[0].message.content'
 
 
 # 示例使用
