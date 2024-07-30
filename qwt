@@ -32,6 +32,7 @@ create_cn_version() {
 # 检查是否提供了一个路径参数
 if [ "$#" -ne 1 ]; then
     echo "使用方法: $0 <路径>"
+    python script/ta.py input/translate | jq -M -r '.choices[0].message.content'
     exit 1
 fi
 
@@ -49,7 +50,7 @@ else
     for file in "${files[@]}"; do
         #./qw "$file"
 	create_cn_version "$file"
-	python script/a.py "$file" | jq -M -r '.choices[0].message.content' > "$new_file_path"
+	python script/ta.py "$file" | jq -M -r '.choices[0].message.content' > "$new_file_path"
     done
 fi
 

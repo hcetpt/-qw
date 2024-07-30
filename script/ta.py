@@ -40,7 +40,7 @@ def segment_document(file_path):
             output_segments.append(current_segment.rstrip())
         
         for i, segment in enumerate(output_segments):
-            get_response(segment)
+            get_response("中文解释:"+segment)
             #print(segment)
             #if i < len(output_segments) - 1:
             #    print('%%%' * 40)
