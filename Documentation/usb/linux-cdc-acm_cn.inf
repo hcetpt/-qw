@@ -1,0 +1,108 @@
+此文本是用于配置Windows系统以识别并安装USB设备（特别是CDC ACM类型的串行通信设备）的INF文件的一部分。下面是该文本的中文翻译：
+
+```
+; Windows USB CDC ACM 设备驱动安装文件
+
+; 基于以下INF模板：
+;     版权所有 © 2000 Microsoft公司
+;     版权所有 © 2007 Microchip技术有限公司
+; 很可能遵循微软公共许可证（MLPL），详情请参见：
+;    <http://msdn.microsoft.com/en-us/cc300389.aspx#MLPL>
+; 仅限于在Windows操作系统上使用
+
+[Version]
+Signature="$Windows NT$"
+Class=Ports
+ClassGuid={4D36E978-E325-11CE-BFC1-08002BE10318}
+Provider=%Linux%
+DriverVer=11/15/2007,5.1.2600.0
+
+[Manufacturer]
+%Linux%=DeviceList, NTamd64
+
+[DestinationDirs]
+DefaultDestDir=12
+
+
+;------------------------------------------------------------------------------
+;  Windows 2000/XP/Vista-32位部分
+;------------------------------------------------------------------------------
+
+[DriverInstall.nt]
+include=mdmcpq.inf
+CopyFiles=DriverCopyFiles.nt
+AddReg=DriverInstall.nt.AddReg
+
+[DriverCopyFiles.nt]
+usbser.sys,,,0x20
+
+[DriverInstall.nt.AddReg]
+HKR,,DevLoader,,*ntkern
+HKR,,NTMPDriver,,USBSER.sys
+HKR,,EnumPropPages32,,"MsPorts.dll,SerialPortPropPageProvider"
+
+[DriverInstall.nt.Services]
+AddService=usbser, 0x00000002, DriverService.nt
+
+[DriverService.nt]
+DisplayName=%SERVICE%
+ServiceType=1
+StartType=3
+ErrorControl=1
+ServiceBinary=%12%\USBSER.sys
+
+;------------------------------------------------------------------------------
+;  Vista-64位部分
+;------------------------------------------------------------------------------
+
+[DriverInstall.NTamd64]
+include=mdmcpq.inf
+CopyFiles=DriverCopyFiles.NTamd64
+AddReg=DriverInstall.NTamd64.AddReg
+
+[DriverCopyFiles.NTamd64]
+USBSER.sys,,,0x20
+
+[DriverInstall.NTamd64.AddReg]
+HKR,,DevLoader,,*ntkern
+HKR,,NTMPDriver,,USBSER.sys
+HKR,,EnumPropPages32,,"MsPorts.dll,SerialPortPropPageProvider"
+
+[DriverInstall.NTamd64.Services]
+AddService=usbser, 0x00000002, DriverService.NTamd64
+
+[DriverService.NTamd64]
+DisplayName=%SERVICE%
+ServiceType=1
+StartType=3
+ErrorControl=1
+ServiceBinary=%12%\USBSER.sys
+
+
+;------------------------------------------------------------------------------
+;  厂商和产品ID定义
+;------------------------------------------------------------------------------
+; 在开发您的USB设备时，PC端应用程序中使用的VID和PID必须与微控制器上的固件相匹配。
+; 修改下面的行来使用您的VID和PID。请使用如下格式：
+; 注意：一个INF文件可以用于多个具有不同VID和PID的设备。对于每个支持的设备，在行末尾追加
+;       ",USB\VID_xxxx&PID_yyyy"
+;------------------------------------------------------------------------------
+[SourceDisksFiles]
+[SourceDisksNames]
+[DeviceList]
+%DESCRIPTION%=DriverInstall, USB\VID_0525&PID_A4A7, USB\VID_1D6B&PID_0104&MI_02, USB\VID_1D6B&PID_0106&MI_00
+
+[DeviceList.NTamd64]
+%DESCRIPTION%=DriverInstall, USB\VID_0525&PID_A4A7, USB\VID_1D6B&PID_0104&MI_02, USB\VID_1D6B&PID_0106&MI_00
+
+
+;------------------------------------------------------------------------------
+;  字符串定义
+;------------------------------------------------------------------------------
+; 自定义您的设备，请修改这些字符串
+;------------------------------------------------------------------------------
+[Strings]
+Linux               = "Linux开发者社区"
+DESCRIPTION         = "Gadget串口"
+SERVICE             = "USB RS-232仿真驱动程序"
+```
