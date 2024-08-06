@@ -1,0 +1,13 @@
+* 所罗门 SSD1289 帧缓冲驱动
+
+所需属性：
+  - compatible（兼容性）：应为 "solomon,ssd1289fb"。目前唯一支持的总线是 LBC。
+- reg（寄存器）：应包含 LBC 总线上控制器的地址。详细信息请参阅文档/设备树/绑定/powerpc/fsl/lbc.txt。
+
+示例：
+```
+display@2,0 {
+	compatible = "solomon,ssd1289fb";
+	reg = <0x2 0x0000 0x0004>;
+};
+```

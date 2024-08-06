@@ -1,0 +1,188 @@
+# SPDX-许可证标识符: GPL-2.0-only 或 BSD-2-Clause
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/mfd/gateworks-gsc.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: Gateworks 系统控制器
+
+description: |
+  Gateworks 系统控制器 (GSC) 是一个设备，存在于多个 Gateworks 产品系列中，
+  提供了一系列与系统相关的功能，例如以下功能（请参考板卡硬件用户手册以查看具备哪些功能）：
+   - 看门狗定时器
+   - GPIO
+   - 按钮控制器
+   - 带有温度和电压轨的 ADC 的硬件监控器以及风扇控制器
+
+maintainers:
+  - Tim Harvey <tharvey@gateworks.com>
+
+properties:
+  $nodename:
+    pattern: "gsc@[0-9a-f]{1,2}"
+  compatible:
+    const: gw,gsc
+
+  reg:
+    description: I2C 设备地址
+    maxItems: 1
+
+  interrupts:
+    maxItems: 1
+
+  interrupt-controller: true
+
+  "#interrupt-cells":
+    const: 1
+
+  "#address-cells":
+    const: 1
+
+  "#size-cells":
+    const: 0
+
+  adc:
+    type: object
+    additionalProperties: false
+    description: 可选的硬件监控模块
+
+    properties:
+      compatible:
+        const: gw,gsc-adc
+
+      "#address-cells":
+        const: 1
+
+      "#size-cells":
+        const: 0
+
+    patternProperties:
+      "^channel@[0-9a-f]+$":
+        type: object
+        additionalProperties: false
+        description: |
+          单个 ADC 的属性，可以报告处理后的值
+          （例如基于热敏电阻的温度传感器），原始值
+          （例如带有预分压电阻的电压轨）
+properties:
+          reg:
+            description: ADC 寄存器
+            maxItems: 1
+
+          label:
+            description: ADC 输入名称
+
+          gw,mode:
+            description: |
+              转换模式：
+                0 - 温度，单位为摄氏度 * 10
+                1 - 预分压的 24 位电压值
+                2 - 基于可选分压电阻和可选偏移量的电压值
+                3 - 预分压的 16 位电压值
+                4 - 风扇转速输入以报告转数每分钟
+            $ref: /schemas/types.yaml#/definitions/uint32
+            enum: [0, 1, 2, 3, 4]
+
+          gw,voltage-divider-ohms:
+            description: 分压器上原始 ADC 输入的电阻值
+            maxItems: 2
+            items:
+              minimum: 1000
+              maximum: 1000000
+
+          gw,voltage-offset-microvolt:
+            description: |
+              应用于原始 ADC 的正电压偏移
+              （例如补偿二极管压降）
+minimum: 0
+            maximum: 1000000
+
+        required:
+          - gw,mode
+          - reg
+          - label
+
+    required:
+      - compatible
+      - "#address-cells"
+      - "#size-cells"
+
+patternProperties:
+  "^fan-controller@[0-9a-f]+$":
+    type: object
+    additionalProperties: false
+    description: 可选的风扇控制器
+
+    properties:
+      compatible:
+        const: gw,gsc-fan
+
+      reg:
+        description: 风扇控制器基地址
+        maxItems: 1
+
+    required:
+      - compatible
+      - reg
+
+required:
+  - compatible
+  - reg
+  - interrupts
+  - interrupt-controller
+  - "#interrupt-cells"
+  - "#address-cells"
+  - "#size-cells"
+
+additionalProperties: false
+
+examples:
+  - |
+    #include <dt-bindings/gpio/gpio.h>
+    #include <dt-bindings/interrupt-controller/irq.h>
+    i2c {
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        gsc@20 {
+            compatible = "gw,gsc";
+            reg = <0x20>;
+            interrupt-parent = <&gpio1>;
+            interrupts = <4 IRQ_TYPE_LEVEL_LOW>;
+            interrupt-controller;
+            #interrupt-cells = <1>;
+            #address-cells = <1>;
+            #size-cells = <0>;
+
+            adc {
+                compatible = "gw,gsc-adc";
+                #address-cells = <1>;
+                #size-cells = <0>;
+
+                channel@0 { /* A0: 板载温度 */
+                    reg = <0x00>;
+                    label = "temp";
+                    gw,mode = <0>;
+                };
+
+                channel@2 { /* A1: 输入电压（原始 ADC） */
+                    reg = <0x02>;
+                    label = "vdd_vin";
+                    gw,mode = <1>;
+                    gw,voltage-divider-ohms = <22100 1000>;
+                    gw,voltage-offset-microvolt = <800000>;
+                };
+
+                channel@b { /* A2: 电池电压 */
+                    reg = <0x0b>;
+                    label = "vdd_bat";
+                    gw,mode = <1>;
+                };
+            };
+
+            fan-controller@2c {
+                compatible = "gw,gsc-fan";
+                reg = <0x2c>;
+            };
+        };
+    };

@@ -1,0 +1,58 @@
+```yaml
+# SPDX-许可证标识符: (GPL-2.0 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/power/supply/richtek,rt5033-battery.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: Richtek RT5033 PMIC 燃料计量表
+
+maintainers:
+  - Stephan Gerhold <stephan@gerhold.net>
+
+allOf:
+  - $ref: power-supply.yaml#
+
+properties:
+  compatible:
+    const: richtek,rt5033-battery
+
+  reg:
+    maxItems: 1
+
+  interrupts:
+    maxItems: 1
+
+required:
+  - compatible
+  - reg
+
+unevaluatedProperties: false
+
+examples:
+  - |
+    i2c {
+      #address-cells = <1>;
+      #size-cells = <0>;
+
+      battery@35 {
+        compatible = "richtek,rt5033-battery";
+        reg = <0x35>;
+      };
+    };
+  - |
+    #include <dt-bindings/interrupt-controller/irq.h>
+    i2c {
+      #address-cells = <1>;
+      #size-cells = <0>;
+
+      battery@35 {
+        compatible = "richtek,rt5033-battery";
+        reg = <0x35>;
+        interrupt-parent = <&msmgpio>;
+        interrupts = <121 IRQ_TYPE_EDGE_FALLING>;
+      };
+    };
+```
+
+请注意，上述内容是直接翻译，其中的代码示例和注释保留了其原有的英文形式。这是因为这些内容通常在技术文档中以英文提供，并且在这种上下文中，它们保持原样是标准做法。

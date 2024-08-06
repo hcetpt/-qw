@@ -1,0 +1,17 @@
+* Microchip PIC32 实时钟和日历
+
+RTCC 以小时、分钟、秒以及半秒的形式记录时间。它提供了星期几、日期、月份和年份的日历功能。此外，它还提供了一个可配置的闹钟功能。
+所需属性：
+- compatible（兼容性）：应为 "microchip,pic32mzda-rtc"
+- reg（寄存器）：控制器的物理基地址及内存映射区域的长度
+- interrupts（中断）：RTC 报警/事件中断
+- clocks（时钟）：时钟句柄
+
+示例：
+
+	rtc: rtc@1f8c0000 { // RTC 设备位于 0x1f8c0000
+		compatible = "microchip,pic32mzda-rtc"; // 兼容性设置
+		reg = <0x1f8c0000 0x60>; // 寄存器基地址为 0x1f8c0000，内存映射区域长度为 0x60
+		interrupts = <166 IRQ_TYPE_EDGE_RISING>; // 中断号为 166，触发类型为上升沿
+		clocks = <&PBCLK6>; // 使用 PBCLK6 作为时钟源
+	};

@@ -1,0 +1,180 @@
+* ams AS3722 电源管理集成电路 (IC)
+所需属性：
+-------------------
+- compatible: 必须为 "ams,as3722"
+- reg: I2C 设备地址
+- interrupt-controller: AS3722 内置中断控制器，该控制器接收来自内部子模块（如实时时钟 (RTC)、稳压器、通用输入输出 (GPIO) 等）以及外部输入的中断请求
+- #interrupt-cells: 应设置为 2，分别用于中断编号和标志位
+  第一个单元是中断编号。AS3722 不同中断源的中断编号定义在 dt-bindings/mfd/as3722.h 中
+  第二个单元是标志位，根据中断文档 interrupts.txt 中的触发掩码编码，并使用 dt-bindings/irq 进行表示
+可选属性：
+--------------------
+- ams,enable-internal-int-pullup: 布尔属性，用于启用中断引脚上的内部上拉电阻。如果缺少此属性，则禁用 INT 引脚上的内部上拉电阻
+- ams,enable-internal-i2c-pullup: 布尔属性，用于启用 I2C SCL/SDA 引脚上的内部上拉电阻。如果缺少此属性，则禁用 I2C SCL/SDA 线路上的内部上拉电阻
+- ams,enable-ac-ok-power-on: 布尔属性，用于启用通过 AC_OK 引脚退出关机模式的功能（即在关机模式下使能该引脚）
+可选子模块及其属性：
+=======================================
+引脚复用与 GPIO：
+===============
+该设备有 8 个 GPIO 引脚，这些引脚可以配置为 GPIO 或特殊 I/O 功能
+请参阅本目录下的 `pinctrl-bindings.txt` 文件以了解客户端设备常用的 pinctrl 绑定的详细信息，包括“引脚配置节点”这一术语的含义。
+如果需要 GPIO 和 pinmux 功能，则需要以下属性：
+### 必需属性：
+- `gpio-controller`: 标记该设备节点为 GPIO 控制器
+- `#gpio-cells`: GPIO 单元的数量。请参考绑定文档 `gpio/gpio.txt`
+
+### 可选属性：
+如果在启动时需要设置引脚控制，则需要以下属性：
+- `pinctrl-names`: 应定义一个名为“default”的 pinctrl 状态，使用 `pinctrl/pinctrl-bindings.txt` 中的绑定
+- `pinctrl[0...n]`: 包含指向不同引脚控制设置节点的 phandle 的属性。这些节点表示从状态 0 到状态 n 的引脚控制设置。每个这样的节点包含不同的子节点来表示一系列引脚的一些期望配置。这种配置可以包括选定的那些引脚上的复用功能以及各种引脚配置参数，如上拉、开漏等
+每个子节点具有以下属性：
+#### 必需属性：
+- `pins`: 引脚列表。引脚属性的有效值为：
+  - gpio0, gpio1, gpio2, gpio3, gpio4, gpio5,
+  - gpio6, gpio7
+
+#### 可选属性：
+- `function`, `bias-disable`, `bias-pull-up`, `bias-pull-down`,
+  `bias-high-impedance`, `drive-open-drain`
+`function` 属性的有效值为：
+  - gpio, interrupt-out, gpio-in-interrupt,
+  - vsup-vbat-low-undebounce-out,
+  - vsup-vbat-low-debounce-out,
+  - voltage-in-standby, oc-pg-sd0, oc-pg-sd6,
+  - powergood-out, pwm-in, pwm-out, clk32k-out,
+  - watchdog-in, soft-reset-in
+
+### 电压调节器：
+====
+设备具有多个 DCDC 和 LDO。如果需要电压调节器功能，则需要 `regulators` 节点。
+以下是电压调节器子节点的属性：
+#### 可选属性：
+电压调节器的输入电源是电压调节器节点上的可选属性。这些电压调节器的输入电源通过以下属性提供：
+- `vsup-sd2-supply`: SD2 的输入电源
+- `vsup-sd3-supply`: SD3 的输入电源
+vsup-sd4-supply: 为 SD4 提供的输入电源
+vsup-sd5-supply: 为 SD5 提供的输入电源
+vin-ldo0-supply: 为 LDO0 提供的输入电源
+vin-ldo1-6-supply: 为 LDO1 和 LDO6 提供的输入电源
+vin-ldo2-5-7-supply: 为 LDO2、LDO5 和 LDO7 提供的输入电源
+vin-ldo3-4-supply: 为 LDO3 和 LDO4 提供的输入电源
+vin-ldo9-10-supply: 为 LDO9 和 LDO10 提供的输入电源
+vin-ldo11-supply: 为 LDO11 提供的输入电源
+
+可选的电压调节器子节点：
+---------------------------------
+子节点的名称就是该电压调节器的名称，必须是以下之一：
+sd[0-6]、ldo[0-7]、ldo[9-11]
+
+每个子节点应该包含对该电压调节器的约束和初始化信息。有关这些子节点的标准属性描述，请参阅 regulator.txt
+下面列出了额外的可选自定义属性。
+这段文档描述了如何在设备树(Device Tree, DT)中配置 AS3722 芯片，特别是关于其外部控制和电源关闭功能的部分。下面是翻译的内容：
+
+### 外部控制 (ams,ext-control)
+用于外部控制该电源轨的属性。此属性的值将指定哪个外部输入正在控制该电源轨。有效值为 0、1、2 和 3：
+- 0: 此电源轨没有外部控制。
+- 1: 通过 ENABLE1 输入引脚控制电源轨。
+- 2: 通过 ENABLE2 输入引脚控制电源轨。
+- 3: 通过 ENABLE3 输入引脚控制电源轨。
+如果设备树(Device Tree, DT)中缺失此属性，则默认认为没有外部控制。外部控制引脚的宏定义位于 `dt-bindings/mfd/as3722.h` 文件中。
+
+### 与 SD1 同步跟踪 (ams,enable-tracking)
+仅支持 LDO3 的与 SD1 进行同步跟踪的功能。
+
+### 电源关闭
+#### 系统电源关闭
+AS3722 支持通过关闭所有电源轨来实现系统电源关闭。为了启用此功能，设备节点应该包含以下属性：
+- ams,system-power-controller: 布尔值，用于通过此设备启用电源关闭功能。
+
+### 示例
+```dtl
+#include <dt-bindings/mfd/as3722.h>
+...
+
+ams3722 {
+	compatible = "ams,as3722";
+	reg = <0x48>;
+
+	ams,system-power-controller;
+
+	interrupt-parent = <&intc>;
+	interrupt-controller;
+	#interrupt-cells = <2>;
+
+	gpio-controller;
+	#gpio-cells = <2>;
+
+	pinctrl-names = "default";
+	pinctrl-0 = <&as3722_default>;
+
+	as3722_default: pinmux {
+			gpio0 {
+				pins = "gpio0";
+				function = "gpio";
+				bias-pull-down;
+			};
+
+			gpio1_2_4_7 {
+				pins = "gpio1", "gpio2", "gpio4", "gpio7";
+				function = "gpio";
+				bias-pull-up;
+			};
+
+			gpio5 {
+				pins = "gpio5";
+				function = "clk32k_out";
+			};
+	}
+
+	regulators {
+			vsup-sd2-supply = <...>;
+			...
+}
+```
+
+在这个示例中，`ams3722` 是 AS3722 芯片的设备树节点名称。该节点包含了必要的配置以启用 AS3722 的功能，包括电源关闭功能和其他GPIO设置。
+这段文本描述了设备树(Device Tree)中的电源管理配置，用于定义不同硬件组件的电压供应特性。下面是翻译后的中文版本：
+
+```plaintext
+sd0 {
+    regulator-name = "vdd_cpu";  // 电压调节器名称为 "vdd_cpu"
+    regulator-min-microvolt = <700000>;  // 最小输出电压为 700000 微伏特
+    regulator-max-microvolt = <1400000>;  // 最大输出电压为 1400000 微伏特
+    regulator-always-on;  // 该电压调节器始终开启
+    ams,ext-control = <2>;  // 使用外部控制，值为 2
+};
+
+sd1 {
+    regulator-name = "vdd_core";  // 电压调节器名称为 "vdd_core"
+    regulator-min-microvolt = <700000>;  // 最小输出电压为 700000 微伏特
+    regulator-max-microvolt = <1400000>;  // 最大输出电压为 1400000 微伏特
+    regulator-always-on;  // 该电压调节器始终开启
+    ams,ext-control = <1>;  // 使用外部控制，值为 1
+};
+
+sd2 {
+    regulator-name = "vddio_ddr";  // 电压调节器名称为 "vddio_ddr"
+    regulator-min-microvolt = <1350000>;  // 最小输出电压为 1350000 微伏特
+    regulator-max-microvolt = <1350000>;  // 最大输出电压为 1350000 微伏特
+    regulator-always-on;  // 该电压调节器始终开启
+};
+
+sd4 {
+    regulator-name = "avdd-hdmi-pex";  // 电压调节器名称为 "avdd-hdmi-pex"
+    regulator-min-microvolt = <1050000>;  // 最小输出电压为 1050000 微伏特
+    regulator-max-microvolt = <1050000>;  // 最大输出电压为 1050000 微伏特
+    regulator-always-on;  // 该电压调节器始终开启
+};
+
+sd5 {
+    regulator-name = "vdd-1v8";  // 电压调节器名称为 "vdd-1v8"
+    regulator-min-microvolt = <1800000>;  // 最小输出电压为 1800000 微伏特
+    regulator-max-microvolt = <1800000>;  // 最大输出电压为 1800000 微伏特
+    regulator-always-on;  // 该电压调节器始终开启
+};
+
+// 其他类似的配置项
+};
+```
+
+这段配置定义了不同的电压调节器及其参数，如最小和最大输出电压等，并指定了这些调节器始终处于开启状态。这对于确保系统稳定运行至关重要。

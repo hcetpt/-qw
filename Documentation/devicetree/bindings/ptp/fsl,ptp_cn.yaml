@@ -1,0 +1,118 @@
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/ptp/fsl,ptp.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: Freescale QorIQ 基于 1588 定时器的 PTP 时钟
+
+维护者:
+  - Frank Li <Frank.Li@nxp.com>
+
+属性:
+  compatible:
+    枚举:
+      - fsl,etsec-ptp
+      - fsl,fman-ptp-timer
+      - fsl,dpaa2-ptp
+      - fsl,enetc-ptp
+
+  reg:
+    最大项数: 1
+
+  interrupts:
+    最大项数: 1
+
+  clocks:
+    最大项数: 1
+
+  fsl,cksel:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    描述: |
+      定时器参考时钟源
+      参考时钟源由 TMR_CTRL 寄存器中的 CKSEL 位所保存的值决定。"fsl,cksel" 属性保留了将直接写入这些位的值，因此根据参考手册，可以使用以下时钟源：
+
+      对于 eTSEC，
+      <0> - 外部高精度定时器参考时钟 (TSEC_TMR_CLK 输入用于此目的)；
+      <1> - eTSEC 系统时钟；
+      <2> - eTSEC1 发送时钟；
+      <3> - RTC 时钟输入
+      对于 DPAA FMan，
+      <0> - 外部高精度定时器参考时钟 (TMR_1588_CLK)
+      <1> - MAC 系统时钟 (1/2 FMan 时钟)
+      <2> - 保留
+      <3> - RTC 时钟振荡器
+
+  fsl,tclk-period:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    描述: 定时器参考时钟周期（纳秒）
+  fsl,tmr-prsc:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    描述: 预分频器，对输出时钟进行分频
+  fsl,tmr-add:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    描述: 频率补偿值
+  fsl,tmr-fiper1:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    描述: 固定间隔周期脉冲发生器
+  fsl,tmr-fiper2:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    描述: 固定间隔周期脉冲发生器
+  fsl,tmr-fiper3:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    描述:
+      固定间隔周期脉冲发生器
+      仅在 DPAA2 和 ENETC 硬件上支持
+  fsl,max-adj:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    描述: |
+      频率调整的最大值（每十亿分之一）
+These properties set the operational parameters for the Precision Time Protocol (PTP) clock. You must choose these carefully for the clock to work correctly. Here is how to calculate appropriate values:
+
+- `TimerOsc` = selected reference clock (in MHz)
+- `tclk_period` = desired clock period (in nanoseconds)
+- `NominalFreq` = 1000 / `tclk_period` (in MHz)
+- `FreqDivRatio` = `TimerOsc` / `NominalFreq` (must be greater than 1.0)
+- `tmr_add` = ceiling(2^32 / `FreqDivRatio`)
+- `OutputClock` = `NominalFreq` / `tmr_prsc` (in MHz)
+- `PulseWidth` = 1 / `OutputClock` (in microseconds)
+- `FiperFreq1` = desired frequency (in Hz)
+- `FiperDiv1` = 1000000 * `OutputClock` / `FiperFreq1`
+- `tmr_fiper1` = `tmr_prsc` * `tclk_period` * `FiperDiv1` - `tclk_period`
+- `max_adj` = 1000000000 * (`FreqDivRatio` - 1.0) - 1
+
+The calculation for `tmr_fiper2` is the same as for `tmr_fiper1`. The driver expects that `tmr_fiper1` will be correctly set to produce a 1 Pulse Per Second (PPS) signal, since this will be offered to the PPS subsystem to synchronize the Linux clock.
+
+When this attribute is not used, the IEEE 1588 timer reference clock will use the eTSEC system clock (for Gianfar) or the MAC system clock (for DPAA).
+
+`fsl,extts-fifo`:  
+This property indicates hardware support for the external trigger stamp FIFO.
+
+`little-endian`:  
+This property indicates that the 1588 timer supports the external trigger stamp FIFO and operates in little-endian mode. The default endian mode is big-endian.
+
+Required properties:
+- `compatible`
+- `reg`
+
+Additional properties are not allowed.
+
+Example:
+```yaml
+#include <dt-bindings/interrupt-controller/irq.h>
+
+phc@24e00 {
+    compatible = "fsl,etsec-ptp";
+    reg = <0x24e00 0xb0>;
+    interrupts = <12 IRQ_TYPE_LEVEL_LOW>;
+    interrupt-parent = <&ipic>;
+    fsl,cksel       = <1>;
+    fsl,tclk-period = <10>;
+    fsl,tmr-prsc    = <100>;
+    fsl,tmr-add     = <0x999999a4>;
+    fsl,tmr-fiper1  = <0x3b9ac9f6>;
+    fsl,tmr-fiper2  = <0x00018696>;
+    fsl,max-adj     = <659999998>;
+};
+```
+This example demonstrates the configuration of a PTP clock with specific settings.

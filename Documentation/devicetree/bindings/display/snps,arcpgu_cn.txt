@@ -1,0 +1,33 @@
+ARC PGU 是一种显示控制器，可以在由新思科技（Synopsys）生产的多个开发板上找到。ARC PGU 是一个 RGB 流处理器，它从帧缓冲区读取数据，并将其发送到单个数字编码器（通常是 HDMI 编码器）。下面是 ARC PGU 的一些必需属性和子节点：
+
+**必需的属性：**
+- `compatible`: 必须为 "snps,arcpgu"
+- `reg`: 控制器寄存器的物理基地址及其长度
+- `clocks`: 一个 phandle 和时钟指定符对列表，每个条目对应 `clock-names` 中的一个条目
+- `clock-names`: 对于 ARC PGU，应该包含：
+  - `"pxlclk"`: 用于提供给控制器输出 PLL 的时钟
+
+**必需的子节点：**
+- `port`: PGU 到编码器芯片的连接
+
+**示例：**
+
+```device-tree
+/ {
+	...
+	pgu@XXXXXXXX {  // XXXXXXXX 需要替换为实际的十六进制地址
+		compatible = "snps,arcpgu";  // 兼容性字符串
+		reg = <0xXXXXXXXX 0x400>;  // 控制器寄存器的物理基地址和长度
+		clocks = <&clock_node>;  // 时钟节点引用
+		clock-names = "pxlclk";  // 时钟名称
+
+		port {  // PGU 连接到编码器芯片的端口
+			pgu_output: endpoint {  // 端点名称
+				remote-endpoint = <&hdmi_enc_input>;  // 指向 HDMI 编码器输入端点的引用
+			};
+		};
+	};
+};
+```
+
+请注意，上述示例中的 `0xXXXXXXXX` 和 `&clock_node` 都需要根据实际情况进行替换。例如，`0xXXXXXXXX` 应该被替换成控制器的实际物理基地址，而 `&clock_node` 应指向设备树中定义的时钟节点。

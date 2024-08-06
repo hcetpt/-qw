@@ -1,0 +1,24 @@
+Sitronix ST7586 显示屏面板的配置节点如下：
+
+**必需属性：**
+- `compatible`：兼容性字符串，对于此设备应为 `"lego,ev3-lcd"`。
+- `a0-gpios`：A0信号（由于此绑定用于串行模式，因此这是控制器上标记为D1的引脚，而非标记为A0的引脚）。
+- `reset-gpios`：复位引脚。
+
+此驱动程序对应的节点必须是SPI控制器子节点，因此在`../spi/spi-bus.txt`中描述的所有强制性属性都必须指定。
+
+**可选属性：**
+- `rotation`：以逆时针方向表示的面板旋转角度（0、90、180、270度）。
+
+**示例：**
+```yaml
+display@0 {
+    compatible = "lego,ev3-lcd";
+    reg = <0>;  // SPI设备地址
+    spi-max-frequency = <10000000>;  // SPI最大频率
+    a0-gpios = <&gpio 43 GPIO_ACTIVE_HIGH>;  // A0信号，连接到GPIO 43，高电平有效
+    reset-gpios = <&gpio 80 GPIO_ACTIVE_HIGH>;  // 复位信号，连接到GPIO 80，高电平有效
+};
+```
+
+这个配置定义了一个与`ev3-lcd`兼容的显示屏节点，该节点位于SPI控制器下。它指定了A0和复位引脚，以及SPI的最大工作频率。

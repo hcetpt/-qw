@@ -1,0 +1,18 @@
+*Dove Thermal*
+
+此驱动程序适用于包含温度传感器的Dove系统级芯片（SoC）。
+所需属性：
+- compatible（兼容性）: "marvell,dove-thermal"
+- reg（寄存器区域）: 温度寄存器的地址范围
+
+`reg` 属性应包含两个范围。第一个范围用于三个 Thermal Manager 寄存器，而第二个范围则包含了 Thermal Diode Control 寄存器。
+示例：
+
+```plaintext
+thermal@10078 { 
+	compatible = "marvell,dove-thermal"; 
+	reg = <0xd001c 0x0c>, <0xd005c 0x08>; 
+};
+```
+
+这里的 `thermal@10078` 表示该设备的基地址为 `10078`，`compatible = "marvell,dove-thermal"` 指定此设备与 `"marvell,dove-thermal"` 兼容，而 `reg` 则定义了两个寄存器区域：`<0xd001c 0x0c>` 和 `<0xd005c 0x08>`，分别对应 Thermal Manager 寄存器和 Thermal Diode Control 寄存器。

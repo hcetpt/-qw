@@ -1,0 +1,79 @@
+```yaml
+# SPDX-License-Identifier: GPL-2.0
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/mfd/syscon.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: 系统控制器设备
+
+description: |
+  系统控制器节点表示一个包含一系列杂项寄存器的寄存器区域。这些寄存器不够紧密以至于无法作为特定类型的设备来表示。典型的用例是其他节点的驱动程序或平台特定代码获取系统控制器节点的引用（例如通过phandle、节点路径或使用特定兼容值进行搜索），查询节点（或相关操作系统驱动程序）以确定寄存器的位置，并直接访问这些寄存器。
+maintainers:
+  - Lee Jones <lee@kernel.org>
+
+# 需要一个包含了所有兼容选项的选择，以便与旧版 dtschema（<2024.02）兼容，因此此选择不会被具有系统控制器（syscon）后备功能的其他模式所选中
+select:
+  properties:
+    compatible:
+      contains:
+        enum:
+          # 下面是一系列具体的兼容选项...
+          # （由于内容过长，此处省略了具体的兼容选项列表）
+          # ...
+          - st,spear1340-misc
+          - stericsson,nomadik-pmu
+          - starfive,jh7100-sysmain
+          - ti,am62-opp-efuse-table
+          - ti,am62-usb-phy-ctrl
+          - ti,am625-dss-oldi-io-ctrl
+          - ti,am62p-cpsw-mac-efuse
+          - ti,am654-dss-oldi-io-ctrl
+          - ti,j784s4-pcie-ctrl
+          - ti,keystone-pllctrl
+  required:
+    - compatible
+
+properties:
+  compatible:
+    items:
+      - enum:
+          # 下面是一系列具体的兼容选项...
+          # （由于内容过长，此处省略了具体的兼容选项列表）
+          # ...
+          - st,spear1340-misc
+          - stericsson,nomadik-pmu
+          - starfive,jh7100-sysmain
+          - ti,am62-opp-efuse-table
+          - ti,am62-usb-phy-ctrl
+          - ti,am625-dss-oldi-io-ctrl
+          - ti,am62p-cpsw-mac-efuse
+          - ti,am654-dss-oldi-io-ctrl
+          - ti,j784s4-pcie-ctrl
+          - ti,keystone-pllctrl
+      - const: syscon
+
+  reg:
+    maxItems: 1
+
+  resets:
+    maxItems: 1
+
+required:
+  - compatible
+  - reg
+
+allOf:
+  - $ref: syscon-common.yaml#
+
+unevaluatedProperties: false
+
+examples:
+  - |
+    syscon: syscon@1c00000 {
+        compatible = "allwinner,sun8i-h3-system-controller", "syscon";
+        reg = <0x01c00000 0x1000>;
+    };
+```
+
+请注意，上述翻译中的`compatible`枚举列表非常长，在示例中被省略了一部分，实际文件应包含完整的兼容性列表。

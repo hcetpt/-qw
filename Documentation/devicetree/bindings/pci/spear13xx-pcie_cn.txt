@@ -1,0 +1,12 @@
+SPEAr13XX PCIe DT 详情：
+================================
+
+SPEAr13XX 使用 Synopsys DesignWare PCIe 控制器和 ST MiPHY 作为 PHY 控制器。
+必需的属性：
+- compatible    ：应为 "st,spear1340-pcie"、"snps,dw-pcie"
+- phys          ：与 PCIe 控制器关联的 PHY 节点的 phandle
+- phy-names     ：必须是 "pcie-phy"
+- 所有其他定义遵循通用 PCI 绑定
+
+可选属性：
+- st,pcie-is-gen1 表示需要强制初始化为第一代 (Gen1)

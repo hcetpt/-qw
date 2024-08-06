@@ -1,0 +1,65 @@
+这是针对TI LCDC (Tilcdc) DRM 通用面板输出驱动的设备树绑定说明。以下是对各个属性的中文解释：
+
+### 必需属性
+- `compatible`: 值应为 `"ti,tilcdc,panel"`。
+- `panel-info`: 配置信息，用于正确配置LCDC以适配面板。
+  - `ac-bias`: AC偏置引脚频率。
+  - `ac-bias-intrpt`: 每次中断时AC偏置引脚的转换次数。
+  - `dma-burst-sz`: DMA突发大小。
+  - `bpp`: 每像素位数。
+  - `fdd`: FIFO DMA请求延迟。
+  - `sync-edge`: 水平和垂直同步边沿：0=上升沿，1=下降沿。
+  - `sync-ctrl`: 水平和垂直同步控制：0=忽略。
+  - `raster-order`: 光栅数据顺序选择：1=从高位到低位，0=从低位到高位。
+  - `fifo-th`: DMA FIFO阈值。
+- `display-timings`: LCD面板的典型视频模式。如果面板支持多种时序，则可以列出多个视频模式，但`native-mode`应该是首选/默认分辨率。详情请参阅文档 `Documentation/devicetree/bindings/display/panel/display-timing.txt`。
+
+### 可选属性
+- `backlight`: 面板上背光设备的phandle。
+- `enable-gpios`: 用于启用或禁用面板的GPIO引脚。
+
+### 推荐属性
+- `pinctrl-names`, `pinctrl-0`: 用于配置连接到TFP410设备的引脚的多路复用设置。
+
+### 示例
+
+```devicetree
+/* CDTech_S035Q01 / LCD3扩展板的设置: */
+lcd3 {
+	compatible = "ti,tilcdc,panel";
+	pinctrl-names = "default";
+	pinctrl-0 = <&bone_lcd3_cape_lcd_pins>;
+	backlight = <&backlight>;
+	enable-gpios = <&gpio3 19 0>;
+
+	panel-info {
+		ac-bias           = <255>;
+		ac-bias-intrpt    = <0>;
+		dma-burst-sz      = <16>;
+		bpp               = <16>;
+		fdd               = <0x80>;
+		sync-edge         = <0>;
+		sync-ctrl         = <1>;
+		raster-order      = <0>;
+		fifo-th           = <0>;
+	};
+	display-timings {
+		native-mode = <&timing0>;
+		timing0: 320x240 {
+			hactive         = <320>;
+			vactive         = <240>;
+			hback-porch     = <21>;
+			hfront-porch    = <58>;
+			hsync-len       = <47>;
+			vback-porch     = <11>;
+			vfront-porch    = <23>;
+			vsync-len       = <2>;
+			clock-frequency = <8000000>;
+			hsync-active    = <0>;
+			vsync-active    = <0>;
+		};
+	};
+};
+```
+
+这个示例展示了如何在设备树中定义一个特定于CDTech_S035Q01 / LCD3扩展板的配置。

@@ -1,0 +1,67 @@
+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/display/tegra/nvidia,tegra20-isp.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: NVIDIA Tegra 图像信号处理器 (ISP)
+
+maintainers:
+  - Thierry Reding <thierry.reding@gmail.com>
+  - Jon Hunter <jonathanh@nvidia.com>
+
+properties:
+  compatible:
+    enum:
+      - nvidia,tegra20-isp
+      - nvidia,tegra30-isp
+      - nvidia,tegra210-isp
+
+  reg:
+    maxItems: 1
+
+  interrupts:
+    maxItems: 1
+
+  clocks:
+    items:
+      - description: 模块时钟
+
+  resets:
+    items:
+      - description: 模块复位
+
+  reset-names:
+    items:
+      - const: isp
+
+  iommus:
+    maxItems: 1
+
+  interconnects:
+    items:
+      - description: 内存写客户端
+
+  interconnect-names:
+    items:
+      - const: dma-mem # 写
+
+  power-domains:
+    items:
+      - description: VENC 或核心电源域的 phandle
+
+additionalProperties: false
+
+examples:
+  - |
+    #include <dt-bindings/clock/tegra20-car.h>
+    #include <dt-bindings/interrupt-controller/arm-gic.h>
+
+    isp@54100000 {
+        compatible = "nvidia,tegra20-isp";
+        reg = <0x54100000 0x00040000>;
+        interrupts = <GIC_SPI 71 IRQ_TYPE_LEVEL_HIGH>;
+        clocks = <&tegra_car TEGRA20_CLK_ISP>;
+        resets = <&tegra_car 23>;
+        reset-names = "isp";
+    };

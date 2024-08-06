@@ -1,0 +1,297 @@
+# SPDX-许可证标识符: (GPL-2.0 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/leds/backlight/qcom-wled.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: Qualcomm Technologies, Inc. 的 WLED 驱动程序
+
+维护者:
+  - Bjorn Andersson <andersson@kernel.org>
+  - Kiran Gunda <quic_kgunda@quicinc.com>
+
+描述: |
+  WLED（白色发光二极管）驱动程序用于控制作为 Qualcomm Technologies, Inc. 参考平台上电源管理 IC (PMIC) 一部分的显示背光。该 PMIC 通过 SPMI 总线与主机处理器相连。
+属性:
+  compatible:
+    枚举:
+      - qcom,pm8941-wled
+      - qcom,pmi8950-wled
+      - qcom,pmi8994-wled
+      - qcom,pmi8998-wled
+      - qcom,pm660l-wled
+      - qcom,pm6150l-wled
+      - qcom,pm8150l-wled
+
+  reg:
+    minItems: 1
+    maxItems: 2
+
+  default-brightness:
+    描述: |
+      启动时的亮度值
+    label: true
+
+  max-brightness:
+    描述: |
+      最大亮度级别
+
+  qcom,cs-out:
+    描述: |
+      启用电流阱输出
+    此属性仅在 WLED3 中支持
+    类型: 布尔值
+
+  qcom,cabc:
+    描述: |
+      启用内容自适应背光控制
+    类型: 布尔值
+
+  qcom,ext-gen:
+    描述: |
+      使用外部生成的调制信号进行调光
+    此属性仅在 WLED3 中支持
+    类型: 布尔值
+
+  qcom,current-limit:
+    描述: |
+      mA；每串电流限制
+    此属性仅在 WLED3 中支持
+这段文本定义了一系列与特定硬件配置相关的属性，主要针对Qualcomm（QCOM）的WLED设备。下面是这些属性的中文翻译：
+
+```yaml
+# uint32 类型引用
+$ref: /schemas/types.yaml#/definitions/uint32
+    # 默认值
+    default: 20
+    # 最小值
+    minimum: 0
+    # 最大值
+    maximum: 25
+
+# qcom,current-limit-microamp 属性
+qcom,current-limit-microamp:
+    # 描述：每串的微安 (uA) 电流限制
+    description: |
+      uA; 每串的电流限制
+    # 默认值
+    default: 25
+    # 最小值
+    minimum: 0
+    # 最大值
+    maximum: 30000
+    # 必须为该数的倍数
+    multipleOf: 25
+
+# qcom,current-boost-limit 属性
+qcom,current-boost-limit:
+    # 描述：毫安 (mA) 提升电流限制
+    description: |
+      mA; 提升电流限制
+    # 类型引用
+    $ref: /schemas/types.yaml#/definitions/uint32
+
+# qcom,switching-freq 属性
+qcom,switching-freq:
+    # 描述：千赫兹 (kHz) 开关频率
+    description: |
+      kHz; 开关频率
+    # 类型引用
+    $ref: /schemas/types.yaml#/definitions/uint32
+    # 枚举值
+    enum: [ 600, 640, 685, 738, 800, 872, 960, 1066, 1200, 1371, 1600, 1920,
+            2400, 3200, 4800, 9600 ]
+
+# qcom,ovp 属性
+qcom,ovp:
+    # 描述：伏特 (V) 过压保护限值；此属性仅支持 WLED3
+    description: |
+      V; 过电压保护限值。此属性仅适用于 WLED3。
+    # 类型引用
+    $ref: /schemas/types.yaml#/definitions/uint32
+    # 枚举值
+    enum: [ 27, 29, 32, 35 ]
+    # 默认值
+    default: 29
+
+# qcom,ovp-millivolt 属性
+qcom,ovp-millivolt:
+    # 描述：过压保护限值；此属性仅适用于 WLED4
+    description: |
+      过电压保护限值。此属性仅适用于 WLED4。
+    # 类型引用
+    $ref: /schemas/types.yaml#/definitions/uint32
+    # 枚举值
+    enum: [ 18100, 19600, 29600, 31100 ]
+    # 默认值
+    default: 29600
+
+# qcom,num-strings 属性
+qcom,num-strings:
+    # 描述：连接的 LED 串的数量
+    description: |
+      连接的 LED 串的数量
+    # 类型引用
+    $ref: /schemas/types.yaml#/definitions/uint32
+
+# qcom,enabled-strings 属性
+qcom,enabled-strings:
+    # 描述：启用的 LED 串数组，编号从 0 到 3。每串 LED 都单独运行。指定设备使用的 LED 串列表。可以使用任意组合的 LED 串。
+    description: |
+      数组中的 WLED 串编号从 0 到 3。每个 LED 串都单独运行。指定设备使用的 LED 串列表。可以使用任意组合的 LED 串。
+    # 类型引用
+    $ref: /schemas/types.yaml#/definitions/uint32-array
+    # 最小项数
+    minItems: 1
+    # 最大项数
+    maxItems: 4
+
+# qcom,external-pfet 属性
+qcom,external-pfet:
+    # 描述：指定是否使用外部 PFET 控制以实现短路保护。此属性仅适用于 WLED4。
+    description: |
+      指定是否使用外部 PFET 控制以实现短路保护。此属性仅适用于 WLED4。
+    # 类型：布尔值
+    type: boolean
+
+# qcom,auto-string-detection 属性
+qcom,auto-string-detection:
+    # 描述：启用 WLED 串配置的自动检测
+    description: |
+      启用 WLED 串配置的自动检测
+```
+
+请注意，上述翻译已尽量保持原文格式和结构，以便于理解各属性的具体含义。
+此特性不支持WLED3类型：布尔
+
+中断：
+    最少项目：1
+    项目：
+      - 描述：过电压保护中断
+      - 描述：短路中断
+中断名称：
+    最少项目：1
+    项目：
+      - 常量：ovp
+      - 常量：short
+
+`qcom,modulator-sel`：
+    描述： |
+      选择用于亮度调制的调制器
+允许的值为：
+           0 - 调制器 A
+           1 - 调制器 B
+      此属性仅适用于WLED5外设
+$ref: /schemas/types.yaml#/definitions/uint32
+    枚举：[ 0, 1 ]
+    默认：0
+
+`qcom,cabc-sel`：
+    描述： |
+      选择用于亮度调制的CABC引脚信号
+允许的值为：
+           0 - 禁用CABC
+           1 - CABC 1
+           2 - CABC 2
+           3 - 使用外部信号（例如LPG）进行调光
+      此属性仅适用于WLED5外设
+$ref: /schemas/types.yaml#/definitions/uint32
+    枚举：[ 0, 1, 2, 3 ]
+
+全部满足以下条件之一：
+  - 如果：
+      属性：
+        兼容性：
+          包含：
+            常量：qcom,pm8941-wled
+
+    那么：
+      属性：
+        reg：
+          最大项目：1
+
+        `qcom,current-boost-limit`：
+          枚举：[ 105, 385, 525, 805, 980, 1260, 1400, 1680 ]
+          默认：805
+
+        `qcom,switching-freq`：
+          默认：1600
+
+        `qcom,num-strings`：
+          枚举：[ 1, 2, 3 ]
+
+        中断：
+          最大项目：1
+
+        中断名称：
+          最大项目：1
+
+    否则：
+      属性：
+        reg：
+          最少项目：2
+
+        `qcom,current-boost-limit`：
+          枚举：[ 105, 280, 450, 620, 970, 1150, 1300, 1500 ]
+          默认：970
+
+        `qcom,switching-freq`：
+          默认：800
+
+        `qcom,num-strings`：
+          枚举：[ 1, 2, 3, 4 ]
+
+        中断：
+          最少项目：2
+
+        中断名称：
+          最少项目：2
+  - 如果：
+      属性：
+        兼容性：
+          包含：
+            枚举：
+              - qcom,pm8150l-wled
+
+    那么：
+      属性：
+        default-brightness：
+          最小值：0
+          最大值：32767
+
+        max-brightness：
+          最小值：0
+          最大值：32767
+
+    否则：
+      属性：
+        default-brightness：
+          最小值：0
+          最大值：4095
+
+        max-brightness：
+          最小值：0
+          最大值：4095
+
+必需：
+  - 兼容性
+  - reg
+  - 标签
+
+不允许额外属性
+
+示例：
+  - |
+    backlight@d800 {
+        兼容性 = "qcom,pm8941-wled";
+        reg = <0xd800 0x100>;
+        标签 = "backlight";
+
+        qcom,cs-out;
+        qcom,current-limit = <20>;
+        qcom,current-boost-limit = <805>;
+        qcom,switching-freq = <1600>;
+        qcom,ovp = <29>;
+        qcom,num-strings = <2>;
+        qcom,enabled-strings = <0 1>;
+    };

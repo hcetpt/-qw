@@ -1,0 +1,51 @@
+# SPDX-许可证标识符: GPL-2.0-only
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/power/reset/syscon-reboot-mode.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: 通用 SYSCON 重启模式驱动程序
+
+维护者:
+  - Sebastian Reichel <sre@kernel.org>
+
+描述: |
+  此驱动程序从重启模式驱动程序获取重启模式的魔法值，
+  并将其存储在映射到SYSCON的寄存器中。然后，引导加载程序
+  可以读取它，并根据存储的魔法值采取不同的行动。
+  映射到SYSCON的寄存器通过父dt节点加上偏移量来获取。
+  因此，SYSCON重启模式节点应该表示为“syscon”、“simple-mfd”节点的子节点。
+
+属性:
+  compatible:
+    常量: syscon-reboot-mode
+
+  mask:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    描述: 仅更新由掩码(32位)定义的寄存器位
+
+  offset:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    描述: 模式寄存器在寄存器映射中的偏移量（以字节为单位）
+
+allOf:
+  - $ref: reboot-mode.yaml#
+
+未评估的属性: false
+
+必需:
+  - compatible
+  - offset
+
+示例:
+  - |
+    #include <dt-bindings/soc/rockchip,boot-mode.h>
+
+    reboot-mode {
+      compatible = "syscon-reboot-mode";
+      offset = <0x40>;
+      mode-normal = <BOOT_NORMAL>;
+      mode-recovery = <BOOT_RECOVERY>;
+      mode-bootloader = <BOOT_FASTBOOT>;
+      mode-loader = <BOOT_BL_DOWNLOAD>;
+    };

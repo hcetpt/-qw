@@ -1,0 +1,43 @@
+# SPDX-许可证标识符: GPL-2.0
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/display/brcm,bcm2835-v3d.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: Broadcom VC4 (VideoCore4) V3D 图形处理单元
+
+维护者:
+  - Eric Anholt <eric@anholt.net>
+
+属性:
+  compatible:
+    枚举:
+      - brcm,bcm2835-v3d
+      - brcm,cygnus-v3d
+
+  reg:
+    最大项目数: 1
+
+  clocks:
+    最大项目数: 1
+
+  interrupts:
+    最大项目数: 1
+
+  power-domains:
+    最大项目数: 1
+
+必需:
+  - compatible
+  - reg
+  - interrupts
+
+额外属性: false
+
+示例:
+  - |
+    v3d: v3d@7ec00000 {
+        compatible = "brcm,bcm2835-v3d";
+        reg = <0x7ec00000 0x1000>;
+        interrupts = <1 10>;
+    };

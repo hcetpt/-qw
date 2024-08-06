@@ -1,0 +1,50 @@
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/soc/fsl/fsl,bman-portal.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: QorIQ DPAA 队列管理器端口
+
+维护者:
+  - Frank Li <Frank.Li@nxp.com>
+
+描述:
+  QorIQ DPAA 缓冲管理器端口
+
+  端口是到 BMan 的内存映射接口，允许在处理器核心、加速器和网络接口上运行的软件与 BMan 进行低延迟、无锁的交互。
+
+属性:
+  compatible:
+    oneOf:
+      - const: fsl,bman-portal
+      - items:
+          - enum:
+              - fsl,bman-portal-1.0.0
+              - fsl,ls1043a-bmap-portal
+              - fsl,ls1046a-bmap-portal
+          - const: fsl,bman-portal
+  reg:
+    items:
+      - description: 端口的启用缓存区域
+      - description: 端口的禁用缓存区域
+
+  interrupts:
+    maxItems: 1
+
+必需:
+  - compatible
+  - reg
+  - interrupts
+
+附加属性: false
+
+示例:
+  - |
+    #include <dt-bindings/interrupt-controller/irq.h>
+
+    bman-portal@0 {
+        compatible = "fsl,bman-portal-1.0.0", "fsl,bman-portal";
+        reg = <0x0 0x4000>, <0x100000 0x1000>;
+        interrupts = <105 IRQ_TYPE_EDGE_FALLING 0 0>;
+    };

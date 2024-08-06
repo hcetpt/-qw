@@ -1,0 +1,61 @@
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/bus/fsl,spba-bus.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: 共享外设总线接口
+
+维护者:
+  - Shawn Guo <shawnguo@kernel.org>
+
+描述: |
+  一个简单的总线，用于访问共享外设。
+"spba-bus" 遵循 Devicetree 规范中指定的 "simple-bus" 属性集。它是 "simple-bus" 的扩展，因为 SDMA 控制器使用此兼容性标志来确定哪些外设对它可用以及 SDMA 可以访问的范围。总线上没有特殊的时钟，因为 SDMA 控制器本身有自己的中断和时钟分配。
+选择:
+  属性:
+    compatible:
+      包含:
+        常量: fsl,spba-bus
+  必需:
+    - compatible
+
+属性:
+  $nodename:
+    模式: "^spba-bus(@[0-9a-f]+)?$"
+
+  compatible:
+    项目:
+      - 常量: fsl,spba-bus
+      - 常量: simple-bus
+
+  '#address-cells':
+    枚举: [ 1, 2 ]
+
+  '#size-cells':
+    枚举: [ 1, 2 ]
+
+  reg:
+    最大项数: 1
+
+  ranges: 真
+
+必需:
+  - compatible
+  - '#address-cells'
+  - '#size-cells'
+  - reg
+  - ranges
+
+附加属性:
+  类型: 对象
+
+示例:
+  - |
+    spba-bus@30000000 {
+        compatible = "fsl,spba-bus", "simple-bus";
+        #address-cells = <1>;
+        #size-cells = <1>;
+        reg = <0x30000000 0x100000>;
+        ranges;
+    };

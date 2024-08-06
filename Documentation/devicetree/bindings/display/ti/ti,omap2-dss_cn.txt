@@ -1,0 +1,48 @@
+### 德州仪器 OMAP2 显示子系统
+
+请参阅 `Documentation/devicetree/bindings/display/ti/ti,omap-dss.txt` 获取有关 OMAP 显示子系统的通用描述。
+
+#### DSS 核心
+
+**必需属性：**
+- `compatible`: `"ti,omap2-dss"`
+- `reg`: 寄存器空间的地址和长度
+- `ti,hwmods`: `"dss_core"`
+
+**可选节点：**
+- 用于 DPI 输出的视频端口
+
+**DPI 端点必需属性：**
+- `data-lines`: 使用的线路数量
+
+#### DISPC
+
+**必需属性：**
+- `compatible`: `"ti,omap2-dispc"`
+- `reg`: 寄存器空间的地址和长度
+- `ti,hwmods`: `"dss_dispc"`
+- `interrupts`: DISPC 中断
+
+**可选属性：**
+- `max-memory-bandwidth`: 从主内存到 DISPC 的输入内存带宽限制（每秒字节数）
+
+#### RFBI
+
+**必需属性：**
+- `compatible`: `"ti,omap2-rfbi"`
+- `reg`: 寄存器空间的地址和长度
+- `ti,hwmods`: `"dss_rfbi"`
+
+#### VENC
+
+**必需属性：**
+- `compatible`: `"ti,omap2-venc"`
+- `reg`: 寄存器空间的地址和长度
+- `ti,hwmods`: `"dss_venc"`
+- `vdda-supply`: DAC 的电源供应
+
+**VENC 端点必需属性：**
+
+**必需属性：**
+- `ti,invert-polarity`: 反转视频信号的极性
+- `ti,channels`: 1 表示复合视频，2 表示 S-Video

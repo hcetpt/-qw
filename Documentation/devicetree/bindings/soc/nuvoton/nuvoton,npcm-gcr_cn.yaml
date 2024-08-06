@@ -1,0 +1,49 @@
+# SPDX-许可证标识符: GPL-2.0-only 或 BSD-2-Clause
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/soc/nuvoton/nuvoton,npcm-gcr.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: Nuvoton SoC 中的全局控制寄存器模块
+
+maintainers:
+  - Jonathan Neuschäfer <j.neuschaefer@gmx.net>
+  - Tomer Maimon <tmaimon77@gmail.com>
+
+description:
+  全局控制寄存器 (GCR) 是 Nuvoton 系统级芯片 (SoC) 中的一组寄存器块，
+  提供了诸如芯片型号和版本信息、引脚复用设置等功能。
+
+properties:
+  compatible:
+    items:
+      - enum:
+          - nuvoton,wpcm450-gcr
+          - nuvoton,npcm750-gcr
+          - nuvoton,npcm845-gcr
+      - const: syscon
+      - const: simple-mfd
+
+  reg:
+    maxItems: 1
+
+required:
+  - compatible
+  - reg
+
+additionalProperties:
+  type: object
+
+examples:
+  - |
+    gcr: syscon@800000 {
+      compatible = "nuvoton,npcm750-gcr", "syscon", "simple-mfd";
+      reg = <0x800000 0x1000>;
+
+      mux-controller {
+        compatible = "mmio-mux";
+        #mux-control-cells = <1>;
+        mux-reg-masks = <0x38 0x07>;
+        idle-states = <2>;
+      };
+    };

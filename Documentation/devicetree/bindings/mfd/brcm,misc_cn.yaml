@@ -1,0 +1,57 @@
+# SPDX-许可证标识符: GPL-2.0-only 或 BSD-2-Clause
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/mfd/brcm,misc.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: Broadcom 的 MISC 块
+
+维护者:
+  - Rafał Miłecki <rafal@milecki.pl>
+
+描述: |
+  Broadcom 的 MISC 是一个在某些系统级芯片上使用的硬件块（例如 bcm63xx 和 bcm4908）。它用于实现一些简单的功能，如看门狗、PCIe 重置、UniMAC 控制等。
+属性:
+  compatible:
+    items:
+      - 常量: brcm,misc
+      - 常量: simple-mfd
+
+  reg:
+    描述: MISC 块寄存器
+
+  ranges: 真
+
+  "#address-cells":
+    常量: 1
+
+  "#size-cells":
+    常量: 1
+
+模式属性:
+  '^reset-controller@[a-f0-9]+$':
+    $ref: /schemas/reset/brcm,bcm4908-misc-pcie-reset.yaml
+
+其他属性: 假
+
+必需:
+  - reg
+  - '#address-cells'
+  - '#size-cells'
+
+示例:
+  - |
+    misc@ff802600 {
+        compatible = "brcm,misc", "simple-mfd";
+        reg = <0xff802600 0xe4>;
+
+        #address-cells = <1>;
+        #size-cells = <1>;
+        ranges = <0x0 0x0 0xe4>;
+
+        reset-controller@44 {
+            compatible = "brcm,bcm4908-misc-pcie-reset";
+            reg = <0x44 0x4>;
+            #reset-cells = <1>;
+        };
+    };

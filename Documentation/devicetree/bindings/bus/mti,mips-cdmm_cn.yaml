@@ -1,0 +1,38 @@
+```yaml
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/bus/mti,mips-cdmm.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: MIPS 公共设备内存映射
+
+description: |
+  定义了 MIPS 公共设备内存映射寄存器的位置
+maintainers:
+  - James Hogan <jhogan@kernel.org>
+
+properties:
+  compatible:
+    const: mti,mips-cdmm
+
+  reg:
+    description: |
+      未占用内存区域的基地址和大小，将用于映射 MIPS CDMM 寄存器块
+maxItems: 1
+
+required:
+  - compatible
+  - reg
+
+additionalProperties: false
+
+examples:
+  - |
+    cdmm@1bde8000 {
+      compatible = "mti,mips-cdmm";
+      reg = <0x1bde8000 0x8000>;
+    };
+```
+
+这段 YAML 文件描述了一个设备树配置，定义了 MIPS 架构中的公共设备内存映射（MIPS Common Device Memory Map）的相关属性。具体包括了必需的兼容字符串和内存区域的注册信息。

@@ -1,0 +1,42 @@
+德州仪器TWL系列（twl4030）音频模块
+
+TWL系列中的音频模块包含一个音频编解码器和一个振动驱动程序。
+必需属性：
+- compatible：必须为"ti,twl4030-audio"
+
+可选属性，节点：
+
+音频功能：
+- codec { }: 如果使用音频功能，则需要存在。在该部分中可以使用以下选项：
+- ti,digimic_delay: 在启用数字麦克风后所需的延迟，以减少录音样本开头的伪影（毫秒）
+- ti,ramp_delay_value: 高速斜坡延迟配置，以降低爆音
+- ti,hs_extmute: 使用外部静音来降低高速爆音
+- ti,hs_extmute_gpio: 使用外部GPIO来控制外部静音
+- ti,offset_cncl_path: 偏移消除路径选择，参阅技术参考手册获取有效值
+
+振动功能
+- ti,enable-vibra: 如果使用振动功能，则需要设置为<1>。如果缺失或为0，则禁用振动功能
+
+示例：
+``` 
+&i2c1 {
+    clock-frequency = <2600000>;
+
+    twl: twl@48 {
+        reg = <0x48>;
+        interrupts = <7>; /* SYS_NIRQ级联到intc */
+        interrupt-parent = <&intc>;
+
+        twl_audio: audio {
+            compatible = "ti,twl4030-audio";
+
+            ti,enable-vibra = <1>;
+
+            codec {
+                ti,ramp_delay_value = <3>;
+            };
+
+        };
+    };
+};
+```

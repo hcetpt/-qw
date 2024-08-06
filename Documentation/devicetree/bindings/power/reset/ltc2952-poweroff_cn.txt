@@ -1,0 +1,24 @@
+LTC2952 PowerPath 控制器的绑定
+
+此芯片用于外部触发系统关闭。一旦触发信号被发送，需要重置芯片的看门狗以优雅地关闭系统。
+完整的电源关闭可以通过 kill 信号触发。
+必需属性：
+
+- compatible: 必须包含："lltc,ltc2952"
+- watchdog-gpios: 芯片看门狗线所连接的GPIO的句柄和GPIO指定符
+- kill-gpios: 芯片kill线所连接的GPIO的句柄和GPIO指定符
+
+可选属性：
+- trigger-gpios: 芯片触发线所连接的GPIO的句柄和GPIO指定符。如果未设置此属性，则忽略触发功能，并且在接收到明确的kill信号之前保持芯片处于活动状态
+- trigger-delay-ms: 在执行关机过程前，在触发线被激活后等待的毫秒数。默认值为2500ms
+
+示例：
+
+ltc2952 {
+	compatible = "lltc,ltc2952";
+
+	trigger-gpios = <&gpio0 1 GPIO_ACTIVE_LOW>;
+	trigger-delay-ms = <2000>;
+	watchdog-gpios = <&gpio1 2 GPIO_ACTIVE_HIGH>;
+	kill-gpios = <&gpio0 2 GPIO_ACTIVE_LOW>;
+};

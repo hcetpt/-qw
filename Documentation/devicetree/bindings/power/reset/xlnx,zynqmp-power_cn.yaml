@@ -1,0 +1,75 @@
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/power/reset/xlnx,zynqmp-power.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: Xilinx Zynq MPSoC 电源管理
+
+维护者:
+  - Michal Simek <michal.simek@amd.com>
+
+描述: |
+  zynqmp-power 节点描述了电源管理配置。
+  它将控制远程挂起/关机接口。
+
+属性:
+  compatible:
+    常量: xlnx,zynqmp-power
+
+  interrupts:
+    最大项数: 1
+
+  mboxes:
+    描述: |
+      标准属性用于指定邮箱。mboxes 属性的每个值应包含指向邮箱控制器设备节点的 phandle 和一个参数指定符，
+      这个指定符将是用于通信的预期子邮箱节点的 phandle。有关通用邮箱控制器和客户端驱动程序绑定的更多详细信息，请参阅
+      文档/devicetree/bindings/mailbox/mailbox.txt。有关通常用于与本系统控制器通信的控制器的更多信息，请参阅
+      文档/devicetree/bindings/mailbox/xlnx,zynqmp-ipi-mailbox.txt。
+    项:
+      - 描述: 发送通道
+      - 描述: 接收通道
+
+  mbox-names:
+    描述:
+      在 'mboxes' 属性中看到的通道名称
+    项:
+      - 常量: tx
+      - 常量: rx
+
+必需:
+  - compatible
+  - interrupts
+
+额外属性: false
+
+示例:
+  - |+
+
+    // 使用中断方法的示例：
+
+    firmware {
+      zynqmp-firmware {
+        power-management {
+          compatible = "xlnx,zynqmp-power";
+          interrupts = <0 35 4>;
+        };
+      };
+    };
+
+  - |+
+
+    // 使用 IPI 邮箱方法的示例：
+
+    firmware {
+      zynqmp-firmware {
+        power-management {
+          compatible = "xlnx,zynqmp-power";
+          interrupt-parent = <&gic>;
+          interrupts = <0 35 4>;
+          mboxes = <&ipi_mailbox_pmu1 0>,
+                   <&ipi_mailbox_pmu1 1>;
+          mbox-names = "tx", "rx";
+        };
+      };
+    };

@@ -1,0 +1,65 @@
+```yaml
+# SPDX-许可证标识符: (GPL-2.0 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/display/panel/innolux,ej030na.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: Innolux EJ030NA 3.0" (320x480 像素) 24位 TFT 液晶屏
+
+maintainers:
+  - Paul Cercueil <paul@crapouillou.net>
+
+allOf:
+  - $ref: panel-common.yaml#
+  - $ref: /schemas/spi/spi-peripheral-props.yaml#
+
+properties:
+  compatible:
+    const: innolux,ej030na
+
+  reg:
+    maxItems: 1
+
+  backlight: true
+  port: true
+  power-supply: true
+  reset-gpios: true
+
+required:
+  - compatible
+  - reg
+  - power-supply
+  - reset-gpios
+
+unevaluatedProperties: false
+
+examples:
+  - |
+    #include <dt-bindings/gpio/gpio.h>
+
+    spi {
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        panel@0 {
+            compatible = "innolux,ej030na";
+            reg = <0>;
+
+            spi-max-frequency = <10000000>;
+
+            reset-gpios = <&gpe 4 GPIO_ACTIVE_LOW>;
+            power-supply = <&lcd_power>;
+
+            backlight = <&backlight>;
+
+            port {
+                panel_input: endpoint {
+                    remote-endpoint = <&panel_output>;
+                };
+            };
+        };
+    };
+```
+
+请注意，此翻译保持了原有的 YAML 结构和语法，并将描述性文本翻译成了中文。此外，代码示例中的注释和绑定语法保持不变，因为它们是特定于硬件配置的，通常不会进行翻译。

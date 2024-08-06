@@ -1,0 +1,44 @@
+ARM AXI总线的驱动程序，包含 Broadcom 插件 (bcma)
+
+必需属性：
+
+- `compatible`：应为 `brcm,bus-axi`
+
+- `reg`：芯片通用核心的内存地址范围
+
+AXI 总线上的核心由 bcma 根据它们使用的内存范围自动检测，并随后注册。对于 BCM47xx/BCM53xx ARM 系统级芯片 (SoC)，IRQ 编号的自动检测无法正常工作。为了给核心分配 IRQ 编号，需要通过设备树手动提供这些编号。使用中断映射 (`interrupt-map`) 来指定总线上设备所用的 IRQ。第一个地址仅仅是一个索引，因为我们没有特殊的寄存器。顶级的 AXI 总线可能包含表示连接的核心（设备）的子节点。这是必要的，因为一些硬件细节无法自动检测（例如 IRQ 编号）。此外，某些核心可能负责额外的任务，例如 ChipCommon 提供对 GPIO 芯片的访问。
+示例：
+
+```plaintext
+axi@18000000 {
+	compatible = "brcm,bus-axi";
+	reg = <0x18000000 0x1000>;
+	ranges = <0x00000000 0x18000000 0x00100000>;
+	#address-cells = <1>;
+	#size-cells = <1>;
+	#interrupt-cells = <1>;
+	interrupt-map-mask = <0x000fffff 0xffff>;
+	interrupt-map =
+		/* 以太网控制器 0 */
+		<0x00024000 0 &gic GIC_SPI 147 IRQ_TYPE_LEVEL_HIGH>,
+
+		/* 以太网控制器 1 */
+		<0x00025000 0 &gic GIC_SPI 148 IRQ_TYPE_LEVEL_HIGH>;
+
+		/* PCIe 控制器 0 */
+		<0x00012000 0 &gic GIC_SPI 126 IRQ_TYPE_LEVEL_HIGH>,
+		<0x00012000 1 &gic GIC_SPI 127 IRQ_TYPE_LEVEL_HIGH>,
+		<0x00012000 2 &gic GIC_SPI 128 IRQ_TYPE_LEVEL_HIGH>,
+		<0x00012000 3 &gic GIC_SPI 129 IRQ_TYPE_LEVEL_HIGH>,
+		<0x00012000 4 &gic GIC_SPI 130 IRQ_TYPE_LEVEL_HIGH>,
+		<0x00012000 5 &gic GIC_SPI 131 IRQ_TYPE_LEVEL_HIGH>;
+
+	chipcommon {
+		reg = <0x00000000 0x1000>;
+
+		gpio-controller;
+		#gpio-cells = <2>;
+	};
+};
+```
+这段代码描述了如何在设备树中定义一个 AXI 总线及其子节点，包括了以太网控制器和 PCIe 控制器的 IRQ 映射配置以及 ChipCommon 的 GPIO 配置。

@@ -1,0 +1,113 @@
+# SPDX-文件许可人: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/rtc/ingenic,rtc.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: Ingenic SoCs 实时时钟
+
+维护者:
+  - Paul Cercueil <paul@crapouillou.net>
+
+allOf:
+  - $ref: rtc.yaml#
+  - 如果:
+      不是:
+        属性:
+          兼容性:
+            包含:
+              枚举:
+                - ingenic,jz4770-rtc
+                - ingenic,jz4780-rtc
+    否则:
+      属性:
+        "#clock-cells": false
+
+属性:
+  兼容性:
+    一种情况为:
+      - 枚举:
+          - ingenic,jz4740-rtc
+          - ingenic,jz4760-rtc
+      - 项目:
+          - 常量: ingenic,jz4725b-rtc
+          - 常量: ingenic,jz4740-rtc
+      - 项目:
+          - 枚举:
+              - ingenic,jz4770-rtc
+              - ingenic,jz4780-rtc
+          - 常量: ingenic,jz4760-rtc
+
+  reg:
+    最大项数: 1
+
+  中断:
+    最大项数: 1
+
+  时钟:
+    最大项数: 1
+
+  时钟名称:
+    常量: rtc
+
+  "#clock-cells":
+    常量: 0
+
+  系统电源控制器:
+    描述: |
+      表明RTC负责关闭系统电源
+类型: 布尔值
+
+  ingenic,reset-pin-assert-time-ms:
+    最小值: 0
+    最大值: 125
+    默认: 60
+    描述: |
+      在唤醒后重置引脚低电平的持续时间
+      （假设RTC时钟频率为32kHz）
+
+  ingenic,min-wakeup-pin-assert-time-ms:
+    最小值: 0
+    最大值: 2000
+    默认: 100
+    描述: |
+      最小唤醒引脚断言时间
+      （假设RTC时钟频率为32kHz）
+
+必需:
+  - 兼容性
+  - reg
+  - 中断
+  - 时钟
+  - 时钟名称
+
+未评估属性: false
+
+示例:
+  - |
+    #include <dt-bindings/clock/ingenic,jz4740-cgu.h>
+    rtc_dev: rtc@10003000 {
+      兼容性 = "ingenic,jz4740-rtc";
+      reg = <0x10003000 0x40>;
+
+      interrupt-parent = <&intc>;
+      中断 = <15>;
+
+      时钟 = <&cgu JZ4740_CLK_RTC>;
+      时钟名称 = "rtc";
+    };
+
+  - |
+    #include <dt-bindings/clock/ingenic,jz4780-cgu.h>
+    rtc: rtc@10003000 {
+      兼容性 = "ingenic,jz4780-rtc", "ingenic,jz4760-rtc";
+      reg = <0x10003000 0x4c>;
+
+      interrupt-parent = <&intc>;
+      中断 = <32>;
+
+      时钟 = <&cgu JZ4780_CLK_RTCLK>;
+      时钟名称 = "rtc";
+
+      #clock-cells = <0>;
+    };

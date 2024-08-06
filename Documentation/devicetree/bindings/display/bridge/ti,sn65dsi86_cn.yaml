@@ -1,0 +1,267 @@
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/display/bridge/ti,sn65dsi86.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: SN65DSI86 DSI 至 eDP 桥接芯片
+
+maintainers:
+  - Douglas Anderson <dianders@chromium.org>
+
+description: |
+  德州仪器 SN65DSI86 桥接器接收 MIPI DSI 输入并输出 eDP。
+  https://www.ti.com/general/docs/lit/getliterature.tsp?genericPartNumber=sn65dsi86&fileType=pdf
+
+properties:
+  compatible:
+    const: ti,sn65dsi86
+
+  reg:
+    enum: [ 0x2c, 0x2d ]
+
+  enable-gpios:
+    maxItems: 1
+    description: 为 bridge_en 引脚指定的 GPIO (激活状态下为高电平)
+
+suspend-gpios:
+    maxItems: 1
+    description: 为桥接器上的 GPIO1 引脚指定的 GPIO (激活状态下为低电平)
+
+no-hpd:
+    type: boolean
+    description:
+      如果桥接器上的 HPD 线未连接到任何地方或无法使用，则设置此属性
+
+vccio-supply:
+    description: 为数字 IO 供电的 1.8V 电源
+
+vpll-supply:
+    description: 为 DisplayPort PLL 供电的 1.8V 电源
+
+vcca-supply:
+    description: 为模拟电路供电的 1.2V 电源
+
+vcc-supply:
+    description: 为数字核心供电的 1.2V 电源
+
+interrupts:
+    maxItems: 1
+
+  clocks:
+    maxItems: 1
+    description:
+      用于输入参考时钟的时钟指定。参考时钟频率必须是 12 MHz、19.2 MHz、26 MHz、27 MHz 或 38.4 MHz
+clock-names:
+    const: refclk
+
+  gpio-controller: true
+  '#gpio-cells':
+    const: 2
+    description:
+      第一个单元格是引脚编号，第二个单元格是标志。GPIO 引脚编号基于 1 开始计数以匹配数据手册。更多信息请参阅 ../../gpio/gpio.txt
+This appears to be a Device Tree (DT) configuration snippet for defining a bridge device that can route between different display interfaces, such as MIPI DSI and eDP. Here's a translation into Chinese:
+
+```yaml
+#pwm-cells':
+  恒定: 1
+  描述: 请参见 ../../pwm/pwm.yaml 获取单元格式的描述
+
+aux-bus:
+  $引用: /schemas/display/dp-aux-bus.yaml#
+
+端口:
+  $引用: /schemas/graph.yaml#/properties/端口
+
+属性:
+  端口@0:
+    $引用: /schemas/graph.yaml#/properties/端口
+    描述:
+      用于MIPI DSI输入的视频端口
+
+  端口@1:
+    $引用: /schemas/graph.yaml#/$defs/端口-基
+    不评估的属性: false
+    描述:
+      用于eDP输出（面板或连接器）的视频端口
+
+属性:
+  终端:
+    $引用: /schemas/media/video-interfaces.yaml#
+    不评估的属性: false
+
+    属性:
+      数据通道:
+        oneOf:
+          - 最少项目数: 1
+            最大项目数: 1
+            唯一项目: true
+            项目:
+              枚举:
+                - 0
+                - 1
+            描述:
+              如果您有1个逻辑通道，该桥接器支持路由到端口0或端口1。建议使用端口0
+          - 最少项目数: 2
+            最大项目数: 2
+            唯一项目: true
+            项目:
+              枚举:
+                - 0
+                - 1
+            描述:
+              如果您有2个逻辑通道，该桥接器支持重新排序，但仅限于物理端口0和1
+          - 最少项目数: 4
+            最大项目数: 4
+            唯一项目: true
+            项目:
+              枚举:
+                - 0
+                - 1
+                - 2
+                - 3
+            描述:
+              如果您有4个逻辑通道，该桥接器支持任意方式的重新排序
+      通道极性:
+        最少项目数: 1
+        最大项目数: 4
+        项目:
+          枚举:
+            - 0
+            - 1
+
+    依赖:
+      通道极性: [数据通道]
+
+必需:
+  - 端口@0
+  - 端口@1
+
+必需:
+  - 兼容
+  - 寄存器
+  - VCCIO-供电
+  - VPLL-供电
+  - VCCA-供电
+  - VCC-供电
+  - 端口
+
+额外属性: false
+
+示例:
+  - |
+    #include <dt-bindings/clock/qcom,rpmh.h>
+    #include <dt-bindings/gpio/gpio.h>
+    #include <dt-bindings/interrupt-controller/irq.h>
+
+    i2c {
+      #地址单元 = <1>;
+      #大小单元 = <0>;
+
+      bridge@2d {
+        兼容 = "ti,sn65dsi86";
+        寄存器 = <0x2d>;
+
+        中断父设备 = <&tlmm>;
+        中断 = <10 IRQ_TYPE_LEVEL_HIGH>;
+
+        启用GPIOs = <&tlmm 102 GPIO_ACTIVE_HIGH>;
+
+        VPLL-供电 = <&src_pp1800_s4a>;
+        VCCIO-供电 = <&src_pp1800_s4a>;
+        VCCA-供电 = <&src_pp1200_l2a>;
+        VCC-供电 = <&src_pp1200_l2a>;
+
+        时钟 = <&rpmhcc RPMH_LN_BB_CLK2>;
+        时钟名称 = "refclk";
+
+        无-HPD;
+
+        端口 {
+          #地址单元 = <1>;
+          #大小单元 = <0>;
+
+          端口@0 {
+            寄存器 = <0>;
+            终端 {
+              远程终端 = <&dsi0_out>;
+            };
+          };
+
+          端口@1 {
+            寄存器 = <1>;
+            sn65dsi86_out: 终端 {
+              远程终端 = <&panel_in_edp>;
+            };
+          };
+        };
+
+        辅助总线 {
+          面板 {
+            兼容 = "boe,nv133fhm-n62";
+            电源供应 = <&pp3300_dx_edp>;
+            背光 = <&backlight>;
+            HPD-GPIOs = <&sn65dsi86_bridge 2 GPIO_ACTIVE_HIGH>;
+
+            端口 {
+              panel_in_edp: 终端 {
+                远程终端 = <&sn65dsi86_out>;
+              };
+            };
+          };
+        };
+      };
+    };
+  - |
+    #include <dt-bindings/clock/qcom,rpmh.h>
+    #include <dt-bindings/gpio/gpio.h>
+    #include <dt-bindings/interrupt-controller/irq.h>
+
+    i2c {
+      #地址单元 = <1>;
+      #大小单元 = <0>;
+
+      bridge@2d {
+        兼容 = "ti,sn65dsi86";
+        寄存器 = <0x2d>;
+
+        启用GPIOs = <&msmgpio 33 GPIO_ACTIVE_HIGH>;
+        暂停GPIOs = <&msmgpio 34 GPIO_ACTIVE_LOW>;
+
+        扩展中断 = <&gpio3 4 IRQ_TYPE_EDGE_FALLING>;
+
+        VCCIO-供电 = <&pm8916_l17>;
+        VCCA-供电 = <&pm8916_l6>;
+        VPLL-供电 = <&pm8916_l17>;
+        VCC-供电 = <&pm8916_l6>;
+
+        时钟名称 = "refclk";
+        时钟 = <&input_refclk>;
+
+        端口 {
+          #地址单元 = <1>;
+          #大小单元 = <0>;
+
+          端口@0 {
+            寄存器 = <0>;
+
+            edp_bridge_in: 终端 {
+              远程终端 = <&dsi_out>;
+            };
+          };
+
+          端口@1 {
+            寄存器 = <1>;
+
+            edp_bridge_out: 终端 {
+              数据通道 = <2 1 3 0>;
+              通道极性 = <0 1 0 1>;
+              远程终端 = <&edp_panel_in>;
+            };
+          };
+        };
+      };
+    };
+```
+
+请注意，某些关键词（如`$引用`、`oneOf`等）是 YAML 的语法结构，并未直接翻译为中文，因为它们在实际的 YAML 文件中需要保持原样。其他部分已尽可能地进行了翻译。

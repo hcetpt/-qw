@@ -1,0 +1,92 @@
+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/soc/imx/fsl,imx8mm-disp-blk-ctrl.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: NXP i.MX8MM DISP blk-ctrl
+
+维护者:
+  - Lucas Stach <l.stach@pengutronix.de>
+
+描述:
+  i.MX8MM DISP blk-ctrl 是一个顶级外设，提供对 NoC 的访问，并确保位于 SoC 的 DISP 域中的显示和 MIPI CSI 外设的正确电源排序。
+
+属性:
+  compatible:
+    项目:
+      - 常量: fsl,imx8mm-disp-blk-ctrl
+      - 常量: syscon
+
+  reg:
+    最大项目数: 1
+
+  '#power-domain-cells':
+    常量: 1
+
+  power-domains:
+    最小项目数: 5
+    最大项目数: 5
+
+  power-domain-names:
+    项目:
+      - 常量: bus
+      - 常量: csi-bridge
+      - 常量: lcdif
+      - 常量: mipi-dsi
+      - 常量: mipi-csi
+
+  clocks:
+    最小项目数: 10
+    最大项目数: 10
+
+  clock-names:
+    项目:
+      - 常量: csi-bridge-axi
+      - 常量: csi-bridge-apb
+      - 常量: csi-bridge-core
+      - 常量: lcdif-axi
+      - 常量: lcdif-apb
+      - 常量: lcdif-pix
+      - 常量: dsi-pclk
+      - 常量: dsi-ref
+      - 常量: csi-aclk
+      - 常量: csi-pclk
+
+必需:
+  - compatible
+  - reg
+  - power-domains
+  - power-domain-names
+  - clocks
+  - clock-names
+
+额外属性: false
+
+示例:
+  - |
+    #include <dt-bindings/clock/imx8mm-clock.h>
+    #include <dt-bindings/power/imx8mm-power.h>
+
+    blk-ctrl@32e28000 {
+      compatible = "fsl,imx8mm-disp-blk-ctrl", "syscon";
+      reg = <0x32e28000 0x100>;
+      power-domains = <&pgc_dispmix>, <&pgc_dispmix>, <&pgc_dispmix>,
+                      <&pgc_mipi>, <&pgc_mipi>;
+      power-domain-names = "bus", "csi-bridge", "lcdif",
+                           "mipi-dsi", "mipi-csi";
+      clocks = <&clk IMX8MM_CLK_DISP_AXI_ROOT>,
+               <&clk IMX8MM_CLK_DISP_APB_ROOT>,
+               <&clk IMX8MM_CLK_CSI1_ROOT>,
+               <&clk IMX8MM_CLK_DISP_AXI_ROOT>,
+               <&clk IMX8MM_CLK_DISP_APB_ROOT>,
+               <&clk IMX8MM_CLK_DISP_ROOT>,
+               <&clk IMX8MM_CLK_DSI_CORE>,
+               <&clk IMX8MM_CLK_DSI_PHY_REF>,
+               <&clk IMX8MM_CLK_CSI1_CORE>,
+               <&clk IMX8MM_CLK_CSI1_PHY_REF>;
+       clock-names = "csi-bridge-axi", "csi-bridge-apb", "csi-bridge-core",
+                     "lcdif-axi", "lcdif-apb", "lcdif-pix", "dsi-pclk",
+                     "dsi-ref", "csi-aclk", "csi-pclk";
+       #power-domain-cells = <1>;
+    };

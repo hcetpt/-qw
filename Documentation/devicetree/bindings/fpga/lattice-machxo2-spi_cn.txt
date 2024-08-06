@@ -1,0 +1,29 @@
+Lattice MachXO2 从属 SPI FPGA 管理器
+
+Lattice MachXO2 FPGA 支持通过“从属 SPI”接口加载位流的方法。
+请参阅 www.latticesemi.com 上的《MachXO2编程与配置使用指南.pdf》。
+
+必需属性：
+- compatible：应包含 "lattice,machxo2-slave-spi"
+- reg：FPGA 的 SPI 芯片选择
+
+完整的 FPGA 配置示例：
+
+```ini
+fpga-region0 {
+    compatible = "fpga-region";
+    fpga-mgr = <&fpga_mgr_spi>;
+    #address-cells = <0x1>;
+    #size-cells = <0x1>;
+};
+
+spi1: spi@2000 {
+    ..
+fpga_mgr_spi: fpga-mgr@0 {
+        compatible = "lattice,machxo2-slave-spi";
+        spi-max-frequency = <8000000>;
+        reg = <0>;
+    };
+};
+```
+请注意，上述代码示例中的某些部分（如 `spi@2000` 和其他具体实现细节）需要根据实际硬件配置进行调整。

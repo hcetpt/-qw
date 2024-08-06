@@ -1,0 +1,28 @@
+# SPDX-许可证标识符: GPL-2.0
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/power/supply/olpc-battery.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: OLPC 电池
+
+维护者:
+  - Sebastian Reichel <sre@kernel.org>
+
+allOf:
+  - $ref: power-supply.yaml#
+
+属性:
+  compatible:
+    oneOf:
+      - items:
+          - const: olpc,xo1.5-battery
+          - const: olpc,xo1-battery
+      - items:
+          - const: olpc,xo1-battery
+
+必需:
+  - compatible
+
+额外属性: false
+请注意，上述翻译尽量保持了原文件的结构和内容，但某些术语如“$ref”、“oneOf”等在中文环境中并无确切对应词，因此保留了原文。此外，“标题”和“维护者”等词汇是为了适应中文环境而进行的翻译，在具体的技术文档中可能有特定的习惯用语。

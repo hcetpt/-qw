@@ -1,0 +1,166 @@
+下面是给定 YAML 文档的中文翻译：
+
+# SPDX-许可证标识符: GPL-2.0+
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/mfd/allwinner,sun8i-a23-prcm.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: Allwinner A23 PRCM
+
+maintainers:
+  - 陈宇蔡 <wens@csie.org>
+  - 马克西姆·里帕德 <mripard@kernel.org>
+
+deprecated: true
+
+properties:
+  compatible:
+    const: allwinner,sun8i-a23-prcm
+
+  reg:
+    maxItems: 1
+
+patternProperties:
+  "^.*(clk|rst|codec).*$":
+    type: object
+    unevaluatedProperties: false
+
+    properties:
+      compatible:
+        enum:
+          - 固定因子时钟
+          - allwinner,sun8i-a23-apb0-clk
+          - allwinner,sun8i-a23-apb0-gates-clk
+          - allwinner,sun6i-a31-clock-reset
+          - allwinner,sun8i-a23-codec-analog
+
+    required:
+      - compatible
+
+    allOf:
+      - if:
+          properties:
+            compatible:
+              contains:
+                const: 固定因子时钟
+
+        then:
+          $ref: /schemas/clock/fixed-factor-clock.yaml#
+
+      - if:
+          properties:
+            compatible:
+              contains:
+                const: allwinner,sun8i-a23-apb0-clk
+
+        then:
+          properties:
+            "#clock-cells":
+              const: 0
+
+            clocks:
+              maxItems: 1
+
+            clock-output-names:
+              maxItems: 1
+
+          required:
+            - "#clock-cells"
+            - clocks
+            - clock-output-names
+
+      - if:
+          properties:
+            compatible:
+              contains:
+                const: allwinner,sun8i-a23-apb0-gates-clk
+
+        then:
+          properties:
+            "#clock-cells":
+              const: 1
+              description: >
+                这个附加参数传递给该时钟，是
+                控制这个特定门控位在寄存器中的偏移量。
+            clocks:
+              maxItems: 1
+
+            clock-output-names:
+              minItems: 1
+              maxItems: 32
+
+          required:
+            - "#clock-cells"
+            - clocks
+            - clock-output-names
+
+      - if:
+          properties:
+            compatible:
+              contains:
+                const: allwinner,sun6i-a31-clock-reset
+
+        then:
+          properties:
+            "#reset-cells":
+              const: 1
+
+          required:
+            - "#reset-cells"
+
+required:
+  - compatible
+  - reg
+
+additionalProperties: false
+
+examples:
+  - |
+    prcm@1f01400 {
+        compatible = "allwinner,sun8i-a23-prcm";
+        reg = <0x01f01400 0x200>;
+
+        ar100: ar100_clk {
+            compatible = "固定因子时钟";
+            #clock-cells = <0>;
+            clock-div = <1>;
+            clock-mult = <1>;
+            clocks = <&osc24M>;
+            clock-output-names = "ar100";
+        };
+
+        ahb0: ahb0_clk {
+            compatible = "固定因子时钟";
+            #clock-cells = <0>;
+            clock-div = <1>;
+            clock-mult = <1>;
+            clocks = <&ar100>;
+            clock-output-names = "ahb0";
+        };
+
+        apb0: apb0_clk {
+            compatible = "allwinner,sun8i-a23-apb0-clk";
+            #clock-cells = <0>;
+            clocks = <&ahb0>;
+            clock-output-names = "apb0";
+        };
+
+        apb0_gates: apb0_gates_clk {
+            compatible = "allwinner,sun8i-a23-apb0-gates-clk";
+            #clock-cells = <1>;
+            clocks = <&apb0>;
+            clock-output-names = "apb0_pio", "apb0_timer",
+                                 "apb0_rsb", "apb0_uart",
+                                 "apb0_i2c";
+        };
+
+        apb0_rst: apb0_rst {
+            compatible = "allwinner,sun6i-a31-clock-reset";
+            #reset-cells = <1>;
+        };
+
+        codec_analog: codec-analog {
+            compatible = "allwinner,sun8i-a23-codec-analog";
+        };
+    };

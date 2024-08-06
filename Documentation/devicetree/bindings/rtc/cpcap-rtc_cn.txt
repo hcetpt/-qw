@@ -1,0 +1,16 @@
+这是CPCAP模块的一部分。关于整个芯片的更多详细信息，请参阅 `Documentation/devicetree/bindings/mfd/motorola-cpcap.txt`。
+所需节点属性：
+- compatible（兼容性）：应当包含"motorola,cpcap-rtc"
+- interrupts（中断）：为报警和1 Hz中断提供中断指定
+
+示例：
+
+```dt
+&cpcap { // 这里的"&"表示该节点在设备树中的标识符
+	cpcap_rtc: rtc { // rtc是这个RTC模块的标签
+		compatible = "motorola,cpcap-rtc"; // 兼容性字符串
+		interrupts = <39 IRQ_TYPE_NONE>, <26 IRQ_TYPE_NONE>; // 中断配置，39号和26号中断，类型为无
+	};
+};
+```
+此示例展示了如何在设备树中定义一个与Motorola CPCAP PMIC RTC模块相关的节点。

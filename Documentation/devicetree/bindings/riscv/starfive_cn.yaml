@@ -1,0 +1,37 @@
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/riscv/starfive.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: 基于StarFive系统级芯片(SoC)的开发板
+
+维护者:
+  - Michael Zhu <michael.zhu@starfivetech.com>
+  - Drew Fustini <drew@beagleboard.org>
+
+描述:
+  基于StarFive系统级芯片(SoC)的开发板
+
+属性:
+  $nodename:
+    常量: '/'
+  compatible:
+    oneOf:
+      - items:
+          - 枚举:
+              - beagle,beaglev-starlight-jh7100-r0
+              - starfive,visionfive-v1
+          - 常量: starfive,jh7100
+
+      - items:
+          - 枚举:
+              - milkv,mars
+              - pine64,star64
+              - starfive,visionfive-2-v1.2a
+              - starfive,visionfive-2-v1.3b
+          - 常量: starfive,jh7110
+
+其他属性: true
+
+..

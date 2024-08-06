@@ -1,0 +1,99 @@
+下面是提供的 YAML 文件的中文翻译：
+
+---
+
+# SPDX 许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/display/bridge/analogix,anx7814.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: Analogix ANX7814 SlimPort (全高清发射器)
+
+maintainers:
+  - Andrzej Hajda <andrzej.hajda@intel.com>
+  - Neil Armstrong <neil.armstrong@linaro.org>
+  - Robert Foss <robert.foss@linaro.org>
+
+properties:
+  compatible:
+    enum:
+      - analogix,anx7808
+      - analogix,anx7812
+      - analogix,anx7814
+      - analogix,anx7816
+      - analogix,anx7818
+
+  reg:
+    maxItems: 1
+    description: 设备的 I2C 地址
+  interrupts:
+    maxItems: 1
+    description: 应包含 INTP 中断
+  hpd-gpios:
+    deprecated: true
+    maxItems: 1
+    description: 用于 HPD 的 GPIO
+  pd-gpios:
+    maxItems: 1
+    description: 用于电源关闭的 GPIO
+  reset-gpios:
+    maxItems: 1
+    description: 用于复位的 GPIO
+  dvdd10-supply:
+    description: 1.0V 数字核心电源调节器
+  ports:
+    $ref: /schemas/graph.yaml#/properties/ports
+
+    properties:
+      port@0:
+        $ref: /schemas/graph.yaml#/properties/port
+        description: HDMI 输入视频端口
+      port@1:
+        $ref: /schemas/graph.yaml#/properties/port
+        description: SlimPort、DisplayPort、eDP 或 MyDP 输出视频端口
+
+required:
+  - compatible
+  - reg
+  - ports
+
+additionalProperties: false
+
+examples:
+  - |
+    #include <dt-bindings/interrupt-controller/arm-gic.h>
+    #include <dt-bindings/gpio/gpio.h>
+
+    i2c {
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        anx7814: bridge@38 {
+            compatible = "analogix,anx7814";
+            reg = <0x38>;
+            interrupt-parent = <&gpio0>;
+            interrupts = <99 IRQ_TYPE_LEVEL_LOW>;   /* INTP */
+            pd-gpios = <&pio 33 GPIO_ACTIVE_HIGH>;
+            reset-gpios = <&pio 98 GPIO_ACTIVE_HIGH>;
+
+            ports {
+                #address-cells = <1>;
+                #size-cells = <0>;
+
+                port@0 {
+                    reg = <0>;
+                    anx7814_in: endpoint {
+                        remote-endpoint = <&hdmi0_out>;
+                    };
+                };
+
+                port@1 {
+                    reg = <1>;
+                    anx7814_out: endpoint {
+                        remote-endpoint = <&edp_out>;
+                    };
+                };
+            };
+        };
+    };

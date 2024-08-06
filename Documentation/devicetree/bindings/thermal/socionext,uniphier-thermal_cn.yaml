@@ -1,0 +1,51 @@
+```yaml
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/thermal/socionext,uniphier-thermal.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: Socionext UniPhier 温度监控器
+
+description: |
+  这描述了用于温度监控器的设备树绑定，该温度监控器由在 Socionext UniPhier 系统级芯片上实现的过程、电压和温度(PVT)监控单元支持。
+maintainers:
+  - Kunihiko Hayashi <hayashi.kunihiko@socionext.com>
+
+$ref: thermal-sensor.yaml#
+
+properties:
+  compatible:
+    enum:
+      - socionext,uniphier-pxs2-thermal
+      - socionext,uniphier-ld20-thermal
+      - socionext,uniphier-pxs3-thermal
+      - socionext,uniphier-nx1-thermal
+
+  interrupts:
+    maxItems: 1
+
+  "#thermal-sensor-cells":
+    const: 0
+
+  socionext,tmod-calibration:
+    $ref: /schemas/types.yaml#/definitions/uint32-array
+    maxItems: 2
+    description:
+      当 SoC 上未设置值时（例如参考板），从 PVT 引用的一对校准值
+required:
+  - compatible
+  - interrupts
+
+unevaluatedProperties: false
+
+examples:
+  - |
+    // UniPhier 温度传感器应该是 "syscon" 兼容节点的子节点
+#include <dt-bindings/interrupt-controller/arm-gic.h>
+    pvtctl: thermal-sensor {
+        compatible = "socionext,uniphier-ld20-thermal";
+        interrupts = <GIC_SPI 3 IRQ_TYPE_LEVEL_HIGH>;
+        #thermal-sensor-cells = <0>;
+    };
+```

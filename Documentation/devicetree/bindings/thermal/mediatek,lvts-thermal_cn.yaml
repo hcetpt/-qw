@@ -1,0 +1,146 @@
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/thermal/mediatek,lvts-thermal.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: MediaTek SoC 低压温度传感器 (LVTS)
+
+维护者:
+  - Balsam CHIHI <bchihi@baylibre.com>
+
+描述: |
+  LVTS 是一种由三个子系统组成的热管理架构，包括：
+  感知设备 - 热感知微电路单元 (TSMCU)，
+  转换器 - 低压温度传感器转换器 (LVTS)，以及
+  数字控制器 (LVTS_CTRL)。
+属性:
+  compatible:
+    枚举:
+      - mediatek,mt7988-lvts-ap
+      - mediatek,mt8186-lvts
+      - mediatek,mt8188-lvts-ap
+      - mediatek,mt8188-lvts-mcu
+      - mediatek,mt8192-lvts-ap
+      - mediatek,mt8192-lvts-mcu
+      - mediatek,mt8195-lvts-ap
+      - mediatek,mt8195-lvts-mcu
+
+  reg:
+    最大项数: 1
+
+  interrupts:
+    最大项数: 1
+
+  clocks:
+    最大项数: 1
+
+  resets:
+    最大项数: 1
+    描述: 用于清除 AP/MCU 上临时数据的 LVTS 复位
+nvmem-cells:
+    最小项数: 1
+    项:
+      - 描述: 用于 LVTS 的校准 eFuse 数据 1
+      - 描述: 用于 LVTS 的校准 eFuse 数据 2
+
+  nvmem-cell-names:
+    最小项数: 1
+    项:
+      - 常量: lvts-calib-data-1
+      - 常量: lvts-calib-data-2
+
+  "#thermal-sensor-cells":
+    常量: 1
+
+allOf:
+  - $ref: thermal-sensor.yaml#
+
+  - 如果:
+      属性:
+        compatible:
+          包含:
+            枚举:
+              - mediatek,mt8188-lvts-ap
+              - mediatek,mt8188-lvts-mcu
+              - mediatek,mt8192-lvts-ap
+              - mediatek,mt8192-lvts-mcu
+    那么:
+      属性:
+        nvmem-cells:
+          最大项数: 1
+
+        nvmem-cell-names:
+          最大项数: 1
+
+  - 如果:
+      属性:
+        compatible:
+          包含:
+            枚举:
+              - mediatek,mt8186-lvts
+              - mediatek,mt8195-lvts-ap
+              - mediatek,mt8195-lvts-mcu
+    那么:
+      属性:
+        nvmem-cells:
+          最小项数: 2
+
+        nvmem-cell-names:
+          最小项数: 2
+
+必需:
+  - compatible
+  - reg
+  - interrupts
+  - clocks
+  - resets
+  - nvmem-cells
+  - nvmem-cell-names
+
+附加属性: false
+
+示例:
+  - |
+    #include <dt-bindings/interrupt-controller/arm-gic.h>
+    #include <dt-bindings/clock/mt8195-clk.h>
+    #include <dt-bindings/reset/mt8195-resets.h>
+    #include <dt-bindings/thermal/mediatek,lvts-thermal.h>
+
+    soc {
+      #address-cells = <2>;
+      #size-cells = <2>;
+
+      lvts_mcu: thermal-sensor@11278000 {
+        compatible = "mediatek,mt8195-lvts-mcu";
+        reg = <0 0x11278000 0 0x1000>;
+        interrupts = <GIC_SPI 170 IRQ_TYPE_LEVEL_HIGH 0>;
+        clocks = <&infracfg_ao CLK_INFRA_AO_THERM>;
+        resets = <&infracfg_ao MT8195_INFRA_RST4_THERM_CTRL_MCU_SWRST>;
+        nvmem-cells = <&lvts_efuse_data1 &lvts_efuse_data2>;
+        nvmem-cell-names = "lvts-calib-data-1", "lvts-calib-data-2";
+        #thermal-sensor-cells = <1>;
+      };
+    };
+
+    thermal_zones: thermal-zones {
+      cpu0-thermal {
+        polling-delay = <1000>;
+        polling-delay-passive = <250>;
+        thermal-sensors = <&lvts_mcu MT8195_MCU_LITTLE_CPU0>;
+
+        trips {
+          cpu0_alert: trip-alert {
+            temperature = <85000>;
+            hysteresis = <2000>;
+            type = "passive";
+          };
+
+          cpu0_crit: trip-crit {
+            temperature = <100000>;
+            hysteresis = <2000>;
+            type = "critical";
+          };
+        };
+      };
+    };

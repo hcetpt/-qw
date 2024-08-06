@@ -1,0 +1,88 @@
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/soc/mediatek/mtk-svs.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: MediaTek 智能电压调节 (SVS)
+
+维护者:
+  - Roger Lu <roger.lu@mediatek.com>
+  - Matthias Brugger <matthias.bgg@gmail.com>
+  - Kevin Hilman <khilman@kernel.org>
+
+描述: |+
+  SVS 引擎是一块硬件，它包含多个控制器（银行），用于根据芯片工艺角、温度和其他因素计算适合不同电源域（CPU/GPU/CCI）的电压。然后，DVFS 驱动程序可以将 SVS 控制器的电压应用于 PMIC/降压转换器。
+
+属性:
+  compatible:
+    枚举:
+      - mediatek,mt8183-svs
+      - mediatek,mt8186-svs
+      - mediatek,mt8188-svs
+      - mediatek,mt8192-svs
+      - mediatek,mt8195-svs
+
+  reg:
+    最大项数: 1
+    描述: MTK SVS 控制器的地址范围
+中断:
+    最大项数: 1
+
+  clocks:
+    最大项数: 1
+    描述: MTK SVS 控制器工作的主时钟
+clock-names:
+    常量: main
+
+  nvmem-cells:
+    最少项数: 1
+    描述:
+      由非易失性内存设备提供的校准数据的 phandle
+项:
+      - 描述: SVS 控制器的 SVS efuse
+      - 描述: SVS 控制器的热 efuse
+
+  nvmem-cell-names:
+    项:
+      - 常量: svs-calibration-data
+      - 常量: t-calibration-data
+
+  resets:
+    最大项数: 1
+
+  reset-names:
+    项:
+      - 常量: svs_rst
+
+必需:
+  - compatible
+  - reg
+  - interrupts
+  - clocks
+  - clock-names
+  - nvmem-cells
+  - nvmem-cell-names
+
+附加属性: false
+
+示例:
+  - |
+    #include <dt-bindings/clock/mt8183-clk.h>
+    #include <dt-bindings/interrupt-controller/arm-gic.h>
+    #include <dt-bindings/interrupt-controller/irq.h>
+
+    soc {
+        #address-cells = <2>;
+        #size-cells = <2>;
+
+        svs@1100b000 {
+            compatible = "mediatek,mt8183-svs";
+            reg = <0 0x1100b000 0 0x1000>;
+            interrupts = <GIC_SPI 127 IRQ_TYPE_LEVEL_LOW>;
+            clocks = <&infracfg CLK_INFRA_THERM>;
+            clock-names = "main";
+            nvmem-cells = <&svs_calibration>, <&thermal_calibration>;
+            nvmem-cell-names = "svs-calibration-data", "t-calibration-data";
+        };
+    };

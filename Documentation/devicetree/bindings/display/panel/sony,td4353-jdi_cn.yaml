@@ -1,0 +1,86 @@
+```yaml
+# SPDX-文件许可标识: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/display/panel/sony,td4353-jdi.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: 索尼 TD4353 JDI 5 / 5.7 英寸 2160x1080 MIPI-DSI 显示屏面板
+
+maintainers:
+  - Konrad Dybcio <konrad.dybcio@somainline.org>
+
+description: |
+  索尼 TD4353 JDI 是一款用于 Xperia XZ2 和 XZ2 Compact 智能手机的 5 (XZ2c) / 5.7 (XZ2) 英寸 2160x1080
+  MIPI-DSI 面板
+allOf:
+  - $ref: panel-common.yaml#
+
+properties:
+  compatible:
+    const: sony,td4353-jdi-tama
+
+  reg:
+    maxItems: 1
+
+  backlight: true
+  width-mm: true
+  height-mm: true
+
+  vddio-supply:
+    description: VDDIO 1.8V 供电
+
+  vsp-supply:
+    description: 正向 5.5V 供电
+
+  vsn-supply:
+    description: 负向 5.5V 供电
+
+  panel-reset-gpios:
+    description: 显示面板复位引脚
+
+  touch-reset-gpios:
+    description: 触摸面板复位引脚
+
+  port: true
+
+required:
+  - compatible
+  - reg
+  - vddio-supply
+  - vsp-supply
+  - vsn-supply
+  - panel-reset-gpios
+  - touch-reset-gpios
+  - port
+
+additionalProperties: false
+
+examples:
+  - |
+    #include <dt-bindings/gpio/gpio.h>
+
+    dsi {
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        panel: panel@0 {
+            compatible = "sony,td4353-jdi-tama";
+            reg = <0>;
+
+            backlight = <&pmi8998_wled>;
+            vddio-supply = <&vreg_l14a_1p8>;
+            vsp-supply = <&lab>;
+            vsn-supply = <&ibb>;
+            panel-reset-gpios = <&tlmm 6 GPIO_ACTIVE_HIGH>;
+            touch-reset-gpios = <&tlmm 99 GPIO_ACTIVE_HIGH>;
+
+            port {
+                panel_in: endpoint {
+                    remote-endpoint = <&dsi0_out>;
+                };
+            };
+        };
+    };
+..
+```

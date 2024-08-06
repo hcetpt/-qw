@@ -1,0 +1,77 @@
+```yaml
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/display/tegra/nvidia,tegra20-gr2d.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: NVIDIA 2D 图形引擎
+
+维护者:
+  - Thierry Reding <thierry.reding@gmail.com>
+  - Jon Hunter <jonathanh@nvidia.com>
+
+属性:
+  $nodename:
+    pattern: "^gr2d@[0-9a-f]+$"
+
+  compatible:
+    枚举:
+      - nvidia,tegra20-gr2d
+      - nvidia,tegra30-gr2d
+      - nvidia,tegra114-gr2d
+
+  reg:
+    maxItems: 1
+
+  interrupts:
+    maxItems: 1
+
+  clocks:
+    项目:
+      - 描述: 模块时钟
+
+  resets:
+    项目:
+      - 描述: 模块复位
+      - 描述: 内存客户端热刷新复位
+
+  reset-names:
+    项目:
+      - 常量: 2d
+      - 常量: mc
+
+  iommus:
+    maxItems: 1
+
+  interconnects:
+    maxItems: 4
+
+  interconnect-names:
+    maxItems: 4
+
+  operating-points-v2: true
+
+  power-domains:
+    项目:
+      - 描述: 指向 HEG 或核心电源域的 phandle
+
+additionalProperties: false
+
+示例:
+  - |
+    #include <dt-bindings/clock/tegra20-car.h>
+    #include <dt-bindings/interrupt-controller/arm-gic.h>
+    #include <dt-bindings/memory/tegra20-mc.h>
+
+    gr2d@54140000 {
+        compatible = "nvidia,tegra20-gr2d";
+        reg = <0x54140000 0x00040000>;
+        interrupts = <GIC_SPI 72 IRQ_TYPE_LEVEL_HIGH>;
+        clocks = <&tegra_car TEGRA20_CLK_GR2D>;
+        resets = <&tegra_car 21>, <&mc TEGRA20_MC_RESET_2D>;
+        reset-names = "2d", "mc";
+    };
+```
+
+请注意，某些术语可能没有标准的中文翻译，特别是对于技术文档。因此，这里的翻译尽可能保持了技术上的准确性。

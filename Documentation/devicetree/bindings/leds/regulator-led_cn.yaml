@@ -1,0 +1,49 @@
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/leds/regulator-led.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: 电压调节器控制的 LED
+
+maintainers:
+  - Linus Walleij <linus.walleij@linaro.org>
+
+description: |
+  由单个电压调节器供电的 LED 可以通过启用或禁用该调节器来打开或关闭。
+  可用的亮度设置将根据调节器上的可用电压进行推断，并且任何关于电压或电流的约束都需要在调节器上指定。
+allOf:
+  - $ref: common.yaml#
+
+properties:
+  $nodename:
+    pattern: '^led.*$'
+
+  compatible:
+    const: regulator-led
+
+  vled-supply:
+    description:
+      控制 LED 电流的电压调节器
+    function: true
+  color: true
+  linux,default-trigger: true
+  default-state: true
+
+required:
+  - compatible
+  - vled-supply
+
+additionalProperties: false
+
+examples:
+  - |
+    #include <dt-bindings/leds/common.h>
+
+    led-heartbeat {
+        compatible = "regulator-led";
+        vled-supply = <&regulator>;
+        function = LED_FUNCTION_STATUS;
+        color = <LED_COLOR_ID_BLUE>;
+        linux,default-trigger = "heartbeat";
+    };

@@ -1,0 +1,11 @@
+翻译成中文:
+
+# SPDX 许可证标识符: 仅限 GPL-2.0
+*.example.dts
+/processed-schema*.yaml
+/processed-schema*.json
+
+#
+# 即使以下是点文件，我们也不希望忽略它们
+#
+!.yamllint

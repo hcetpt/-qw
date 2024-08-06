@@ -1,0 +1,169 @@
+# SPDX-License-Identifier: (GPL-2.0 OR BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/display/bridge/cdns,mhdp8546.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: Cadence MHDP8546 桥接器
+
+maintainers:
+  - Swapnil Jakhade <sjakhade@cadence.com>
+  - Yuti Amonkar <yamonkar@cadence.com>
+
+properties:
+  compatible:
+    enum:
+      - cdns,mhdp8546
+      - ti,j721e-mhdp8546
+
+  reg:
+    minItems: 1
+    items:
+      - description:
+          MHDPTX APB 寄存器块到 PHY 映射区域 (AUX_CONFIG_P) 的寄存器范围。
+          AUX 和 PMA 寄存器不属于此范围，而是包含在关联的 PHY 中。
+      - description:
+          对于 TI J7 系统芯片 (SoC)，DSS_EDP0_INTG_CFG_VP 寄存器块的寄存器范围。
+      - description:
+          MHDPTX SAPB 寄存器块的寄存器范围。
+
+  reg-names:
+    minItems: 1
+    items:
+      - const: mhdptx
+      - const: j721e-intg
+      - const: mhdptx-sapb
+
+  clocks:
+    maxItems: 1
+    description:
+      DP 桥接时钟，用于 IP 了解如何将一定数量的时钟周期转换为时间（这用于符合 DP 标准定时和延迟）。
+
+  phys:
+    maxItems: 1
+    description:
+      显示端口 PHY 的 phandle。
+
+  phy-names:
+    items:
+      - const: dpphy
+
+  power-domains:
+    maxItems: 1
+
+  interrupts:
+    maxItems: 1
+
+  ports:
+    $ref: /schemas/graph.yaml#/properties/ports
+
+    properties:
+      port@0:
+        $ref: /schemas/graph.yaml#/properties/port
+        description:
+          第一个输入端口，代表 DP 桥接器的输入端。
+      port@1:
+        $ref: /schemas/graph.yaml#/properties/port
+        description:
+          第二个输入端口，代表 DP 桥接器的输入端。
+      port@2:
+        $ref: /schemas/graph.yaml#/properties/port
+        description:
+          第三个输入端口，代表 DP 桥接器的输入端。
+      port@3:
+        $ref: /schemas/graph.yaml#/properties/port
+        description:
+          第四个输入端口，代表 DP 桥接器的输入端。
+这段内容描述了一个设备树(Device Tree)的配置片段，主要用于定义一个显示端口（DP）桥接器。下面是该配置的中文翻译：
+
+`port@4:`  
+   `$ref`: `/schemas/graph.yaml#//properties/port`  
+   `description`:  
+     输出端口表示DP桥接器的输出  
+
+`required:`  
+  `- port@0`  
+  `- port@4`  
+
+`allOf:`  
+  `- 如果:`  
+    `properties:`  
+      `compatible:`  
+        `contains:`  
+          `const`: `ti,j721e-mhdp8546`  
+    `则:`  
+      `properties:`  
+        `reg:`  
+          `minItems`: `2`  
+          `maxItems`: `3`  
+        `reg-names:`  
+          `minItems`: `2`  
+          `maxItems`: `3`  
+    `否则:`  
+      `properties:`  
+        `reg:`  
+          `minItems`: `1`  
+          `maxItems`: `2`  
+        `reg-names:`  
+          `minItems`: `1`  
+          `maxItems`: `2`  
+
+`required:`  
+ `- compatible`  
+ `- clocks`  
+ `- reg`  
+ `- reg-names`  
+ `- phys`  
+ `- phy-names`  
+ `- interrupts`  
+ `- ports`  
+
+`additionalProperties`: `false`  
+
+`examples:`  
+ `- |`  
+    `#include <dt-bindings/interrupt-controller/arm-gic.h>`  
+    `bus {`  
+        `#address-cells = <2>;`  
+        `#size-cells = <2>;`  
+  
+        `mhdp: dp-bridge@f0fb000000 {`  
+            `compatible = "cdns,mhdp8546";`  
+            `reg = <0xf0 0xfb000000 0x0 0x1000000>;`  
+            `reg-names = "mhdptx";`  
+            `clocks = <&mhdp_clock>;`  
+            `phys = <&dp_phy>;`  
+            `phy-names = "dpphy";`  
+            `interrupts = <GIC_SPI 614 IRQ_TYPE_LEVEL_HIGH>;`  
+  
+            `ports {`  
+                `#address-cells = <1>;`  
+                `#size-cells = <0>;`  
+  
+                `port@0 {`  
+                    `reg = <0>;`  
+                    `dp_bridge_input: endpoint {`  
+                        `remote-endpoint = <&xxx_dpi_output>;`  
+                    `};`  
+                `};`  
+  
+                `port@4 {`  
+                    `reg = <4>;`  
+                    `dp_bridge_output: endpoint {`  
+                        `remote-endpoint = <&xxx_dp_connector_input>;`  
+                    `};`  
+                `};`  
+            `};`  
+        `};`  
+    `};`  
+  `..`  
+
+### 翻译说明：
+- `port@4:` 表示端口号为4的配置。
+- `description:` 描述了端口的功能。
+- `required:` 列出了必需的字段。
+- `allOf:` 定义了一组条件，根据不同的兼容性设置不同的属性要求。
+- `additionalProperties:` 表示不允许有额外未定义的属性。
+- `examples:` 给出了一个具体的例子，展示如何在设备树中定义DP桥接器。
+
+这个配置用于详细描述DP桥接器的连接方式和必要的配置参数。

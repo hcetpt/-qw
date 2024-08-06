@@ -1,0 +1,124 @@
+下面是给定 YAML 文档的中文翻译：
+
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/power/supply/qcom,pm8916-lbc.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: 高通线性电池充电器
+
+maintainers:
+  - Nikita Travkin <nikita@trvn.ru>
+
+description:
+  线性电池充电器硬件模块，在一些高通电源管理集成电路（PMIC）中发现，如pm8916。实现了一个简单的、自主的恒流/恒压(CC/CV)充电器。
+allOf:
+  - $ref: power-supply.yaml#
+
+properties:
+  compatible:
+    const: qcom,pm8916-lbc
+
+  reg:
+    items:
+      - description: 充电器
+      - description: 电池接口
+      - description: USB
+      - description: 杂项
+
+  reg-names:
+    items:
+      - const: chgr
+      - const: bat_if
+      - const: usb
+      - const: misc
+
+  interrupts:
+    items:
+      - description: 电池检测
+      - description: 快速充电
+      - description: 充电失败
+      - description: 充电完成
+      - description: 电池存在
+      - description: 温度正常
+      - description: USB粗检测
+      - description: USB输入有效
+      - description: 充电器断开
+      - description: 过温
+
+  interrupt-names:
+    items:
+      - const: vbat_det
+      - const: fast_chg
+      - const: chg_fail
+      - const: chg_done
+      - const: bat_pres
+      - const: temp_ok
+      - const: coarse_det
+      - const: usb_vbus
+      - const: chg_gone
+      - const: overtemp
+
+  qcom,fast-charge-safe-voltage:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    minimum: 4000000
+    maximum: 4775000
+    description:
+      最大安全电池电压（微伏）；可能由引导加载程序预设，在这种情况下，设置此值将无害地失败。
+  qcom,fast-charge-safe-current:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    minimum: 90000
+    maximum: 1440000
+    description:
+      最大安全电池充电电流（微安）；可能由引导加载程序预设，在这种情况下设置此值将无害地失败。
+monitored-battery: true
+
+required:
+  - compatible
+  - reg
+  - interrupts
+  - interrupt-names
+  - qcom,fast-charge-safe-voltage
+  - qcom,fast-charge-safe-current
+
+additionalProperties: false
+
+examples:
+  - |
+    #include <dt-bindings/interrupt-controller/irq.h>
+    pmic {
+      #address-cells = <1>;
+      #size-cells = <0>;
+
+      charger@1000 {
+        compatible = "qcom,pm8916-lbc";
+        reg = <0x1000>, <0x1200>, <0x1300>, <0x1600>;
+        reg-names = "chgr", "bat_if", "usb", "misc";
+
+        interrupts = <0x0 0x10 0 IRQ_TYPE_EDGE_BOTH>,
+                     <0x0 0x10 5 IRQ_TYPE_EDGE_BOTH>,
+                     <0x0 0x10 6 IRQ_TYPE_EDGE_BOTH>,
+                     <0x0 0x10 7 IRQ_TYPE_EDGE_BOTH>,
+                     <0x0 0x12 0 IRQ_TYPE_EDGE_BOTH>,
+                     <0x0 0x12 1 IRQ_TYPE_EDGE_BOTH>,
+                     <0x0 0x13 0 IRQ_TYPE_EDGE_BOTH>,
+                     <0x0 0x13 1 IRQ_TYPE_EDGE_BOTH>,
+                     <0x0 0x13 2 IRQ_TYPE_EDGE_BOTH>,
+                     <0x0 0x13 4 IRQ_TYPE_EDGE_BOTH>;
+        interrupt-names = "vbat_det",
+                          "fast_chg",
+                          "chg_fail",
+                          "chg_done",
+                          "bat_pres",
+                          "temp_ok",
+                          "coarse_det",
+                          "usb_vbus",
+                          "chg_gone",
+                          "overtemp";
+        monitored-battery = <&battery>;
+
+        qcom,fast-charge-safe-current = <900000>;
+        qcom,fast-charge-safe-voltage = <4300000>;
+      };
+    };

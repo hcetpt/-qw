@@ -1,0 +1,95 @@
+# SPDX-许可证标识符: GPL-2.0-only OR BSD-2-Clause
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/display/msm/dsi-phy-10nm.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: Qualcomm 显示 DSI 10nm PHY
+
+维护者:
+  - Krishna Manikandan <quic_mkrishn@quicinc.com>
+
+allOf:
+  - $ref: dsi-phy-common.yaml#
+
+属性:
+  compatible:
+    枚举:
+      - qcom,dsi-phy-10nm
+      - qcom,dsi-phy-10nm-8998
+
+  reg:
+    项目:
+      - 描述: DSI PHY 寄存器集
+      - 描述: DSI PHY 车道寄存器集
+      - 描述: DSI PLL 寄存器集
+
+  reg-names:
+    项目:
+      - 常量: dsi_phy
+      - 常量: dsi_phy_lane
+      - 常量: dsi_pll
+
+  vdds-supply:
+    描述: |
+      对于 sc7180 目标，连接到 DSI0_MIPI_DSI_PLL_VDDA0P9 引脚；对于 sdm845 目标，连接到 VDDA_MIPI_DSI_0_PLL_0P9 引脚。
+
+  qcom,phy-rescode-offset-top:
+    $ref: /schemas/types.yaml#/definitions/int8-array
+    最大项数: 5
+    描述:
+      所有五个车道的上拉腿 rescode 的整数数组偏移量
+为了以递增的方式调整驱动强度远离校准值，-32 表示最弱，+31 表示最强。
+项:
+      最小值: -32
+      最大值: 31
+
+  qcom,phy-rescode-offset-bot:
+    $ref: /schemas/types.yaml#/definitions/int8-array
+    最大项数: 5
+    描述:
+      所有五个车道的下拉腿 rescode 的整数数组偏移量
+为了以递减的方式调整驱动强度远离校准值，-32 表示最弱，+31 表示最强。
+项:
+      最小值: -32
+      最大值: 31
+
+  qcom,phy-drive-ldo-level:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    描述:
+      PHY LDO 具有幅度调节功能，可以调整 LDO 输出以适应 HSTX 驱动。使用支持的电平（mV）来调整驱动电平从默认值
+枚举: [375, 400, 425, 450, 475, 500]
+
+必需:
+  - compatible
+  - reg
+  - reg-names
+
+未评估属性: false
+
+示例:
+  - |
+     #include <dt-bindings/clock/qcom,dispcc-sdm845.h>
+     #include <dt-bindings/clock/qcom,rpmh.h>
+
+     dsi-phy@ae94400 {
+         compatible = "qcom,dsi-phy-10nm";
+         reg = <0x0ae94400 0x200>,
+               <0x0ae94600 0x280>,
+               <0x0ae94a00 0x1e0>;
+         reg-names = "dsi_phy",
+                     "dsi_phy_lane",
+                     "dsi_pll";
+
+         #clock-cells = <1>;
+         #phy-cells = <0>;
+
+         vdds-supply = <&vdda_mipi_dsi0_pll>;
+         clocks = <&dispcc DISP_CC_MDSS_AHB_CLK>,
+                  <&rpmhcc RPMH_CXO_CLK>;
+         clock-names = "iface", "ref";
+
+         qcom,phy-rescode-offset-top = /bits/ 8 <0 0 0 0 0>;
+         qcom,phy-rescode-offset-bot = /bits/ 8 <0 0 0 0 0>;
+         qcom,phy-drive-ldo-level = <400>;
+     };

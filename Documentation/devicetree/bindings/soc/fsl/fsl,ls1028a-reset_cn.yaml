@@ -1,0 +1,57 @@
+```yaml
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: 'http://devicetree.org/schemas//soc/fsl/fsl,ls1028a-reset.yaml#'
+$schema: 'http://devicetree.org/meta-schemas/core.yaml#'
+
+title: Freescale Layerscape 重置寄存器模块
+
+maintainers:
+  - Frank Li
+
+description:
+  重置模块包括芯片重置、服务处理器控制和重置控制字 (RCW) 状态
+properties:
+  $nodename:
+    pattern: '^syscon@[0-9a-f]+$'
+
+  compatible:
+    items:
+      - enum:
+          - fsl,ls1028a-reset
+      - const: syscon
+      - const: simple-mfd
+
+  reg:
+    maxItems: 1
+
+  little-endian: true
+
+  reboot:
+    $ref: '/schemas/power/reset/syscon-reboot.yaml#'
+    unevaluatedProperties: false
+
+required:
+  - compatible
+  - reg
+  - reboot
+
+additionalProperties: false
+
+examples:
+  - |
+    syscon@1e60000 {
+        compatible = "fsl,ls1028a-reset", "syscon", "simple-mfd";
+        reg = <0x1e60000 0x10000>;
+        little-endian;
+
+        reboot {
+            compatible = "syscon-reboot";
+            offset = <0>;
+            mask = <0x02>;
+        };
+    };
+```
+
+此文档定义了一个用于Freescale Layerscape系列处理器中重置寄存器模块的Device Tree片段。它描述了如何配置该模块，包括必要的兼容性声明、寄存器地址范围以及如何实现重置功能。

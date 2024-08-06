@@ -1,0 +1,167 @@
+* Marvell EBU PCIe 接口
+
+必需属性：
+
+- compatible: 必须是以下值之一：
+    marvell,armada-370-pcie
+    marvell,armada-xp-pcie
+    marvell,dove-pcie
+    marvell,kirkwood-pcie
+- #address-cells, 设置为 <3>
+- #size-cells, 设置为 <2>
+- #interrupt-cells, 设置为 <1>
+- bus-range: 覆盖的 PCI 总线编号
+- device_type, 设置为 "pci"
+- ranges: 描述用于控制 PCIe 接口的 MMIO 寄存器以及描述每个 PCIe 接口访问内存和 I/O 区域所需的 MBus 窗口的范围
+- msi-parent: 指向服务于该 PCI 控制器的消息信号中断控制器的硬件实体
+描述 MMIO 寄存器的范围具有以下布局：
+
+    0x82000000 0 r MBUS_ID(0xf0, 0x01) r 0 s
+
+其中：
+
+  * r 是一个 32 位值，表示此 PCIe 接口的 MMIO 寄存器相对于内部寄存器基址的偏移量
+  * s 是一个 32 位值，表示此 MMIO 寄存器区域的大小。此范围条目将 '0x82000000 0 r' PCI 地址转换为 'MBUS_ID(0xf0, 0x01) r' CPU 地址，该地址属于内部寄存器窗口（由 MBUS_ID(0xf0, 0x01) 标识）
+描述 MBus 窗口的范围具有以下布局：
+
+    0x8t000000 s 0     MBUS_ID(w, a) 0 1 0
+
+其中：
+
+   * t 是 MBus 窗口的类型（根据标准 PCI 设备树绑定定义），1 表示 I/O，2 表示内存
+   * s 是与此 PCIe 接口对应的 PCI 插槽
+   * w 是 MBus 窗口的 '目标 ID' 值
+   * a 是 MBus 窗口的 '属性' 值
+由于不同的 MBus 窗口在硬件中的位置和大小不是固定的，并且仅在运行时确定，因此这些范围覆盖了物理地址空间的前 4GB，并且不会转换为有效的 CPU 地址。
+此外，设备树节点必须有描述每个 PCIe 接口的子节点，具有以下必需属性：
+
+- reg: 仅用于中断映射，因此仅使用前四个字节来引用正确的总线编号和设备编号
+- assigned-addresses: 对用于控制此 PCIe 接口的 MMIO 寄存器的引用
+- clocks: 与此 PCIe 接口相关的时钟
+- marvell,pcie-port: 物理 PCIe 端口号
+- status: "disabled" 或 "okay"
+- device_type, 设置为 "pci"
+- #address-cells, 设置为 <3>
+- #size-cells, 设置为 <2>
+- #interrupt-cells, 设置为 <1>
+- ranges, 将父节点的 MBus 窗口范围转换为标准 PCI 地址
+下面是给定的文本翻译成中文：
+
+- `interrupt-map-mask` 和 `interrupt-map`：标准PCI属性，用于定义PCIe接口到中断号的映射；
+- 以下为可选属性：
+  - `marvell,pcie-lane`：物理PCIe通道编号，针对具有多个通道的端口。如果未找到此属性，则假设其值为0。
+  - `num-lanes`：该链路的SerDes PCIe通道数（1或4）。
+  - `reset-gpios`：可选的GPIO至PERST#。
+  - `reset-delay-us`：复位撤销后等待的时间（单位：微秒）。若未指定，则默认为100毫秒，符合PCIe规范的要求。
+  - `interrupt-names`：中断名称列表，支持如下：
+    - `"intx"`：由传统中断触发的中断线。
+  - `interrupts` 或 `interrupts-extended`：与`interrupt-names`对应的中断源列表。如果非空，则还需要定义额外的`interrupt-controller`子节点。
+
+示例：
+
+```text
+pcie-controller {
+	compatible = "marvell,armada-xp-pcie";
+	device_type = "pci";
+
+	#address-cells = <3>;
+	#size-cells = <2>;
+
+	bus-range = <0x00 0xff>;
+	msi-parent = <&mpic>;
+
+	ranges =
+	       <0x82000000 0 0x40000 MBUS_ID(0xf0, 0x01) 0x40000 0 0x00002000	/* 端口 0.0 寄存器 */
+		0x82000000 0 0x42000 MBUS_ID(0xf0, 0x01) 0x42000 0 0x00002000	/* 端口 2.0 寄存器 */
+		0x82000000 0 0x44000 MBUS_ID(0xf0, 0x01) 0x44000 0 0x00002000	/* 端口 0.1 寄存器 */
+		0x82000000 0 0x48000 MBUS_ID(0xf0, 0x01) 0x48000 0 0x00002000	/* 端口 0.2 寄存器 */
+		0x82000000 0 0x4c000 MBUS_ID(0xf0, 0x01) 0x4c000 0 0x00002000	/* 端口 0.3 寄存器 */
+		0x82000000 0 0x80000 MBUS_ID(0xf0, 0x01) 0x80000 0 0x00002000	/* 端口 1.0 寄存器 */
+		0x82000000 0 0x82000 MBUS_ID(0xf0, 0x01) 0x82000 0 0x00002000	/* 端口 3.0 寄存器 */
+		0x82000000 0 0x84000 MBUS_ID(0xf0, 0x01) 0x84000 0 0x00002000	/* 端口 1.1 寄存器 */
+		0x82000000 0 0x88000 MBUS_ID(0xf0, 0x01) 0x88000 0 0x00002000	/* 端口 1.2 寄存器 */
+		0x82000000 0 0x8c000 MBUS_ID(0xf0, 0x01) 0x8c000 0 0x00002000	/* 端口 1.3 寄存器 */
+		0x82000000 0x1 0     MBUS_ID(0x04, 0xe8) 0 1 0 /* 端口 0.0 内存 */
+		0x81000000 0x1 0     MBUS_ID(0x04, 0xe0) 0 1 0 /* 端口 0.0 I/O  */
+		0x82000000 0x2 0     MBUS_ID(0x04, 0xd8) 0 1 0 /* 端口 0.1 内存 */
+		0x81000000 0x2 0     MBUS_ID(0x04, 0xd0) 0 1 0 /* 端口 0.1 I/O  */
+		0x82000000 0x3 0     MBUS_ID(0x04, 0xb8) 0 1 0 /* 端口 0.2 内存 */
+		0x81000000 0x3 0     MBUS_ID(0x04, 0xb0) 0 1 0 /* 端口 0.2 I/O  */
+		0x82000000 0x4 0     MBUS_ID(0x04, 0x78) 0 1 0 /* 端口 0.3 内存 */
+		0x81000000 0x4 0     MBUS_ID(0x04, 0x70) 0 1 0 /* 端口 0.3 I/O  */
+
+		0x82000000 0x5 0     MBUS_ID(0x08, 0xe8) 0 1 0 /* 端口 1.0 内存 */
+		0x81000000 0x5 0     MBUS_ID(0x08, 0xe0) 0 1 0 /* 端口 1.0 I/O  */
+		0x82000000 0x6 0     MBUS_ID(0x08, 0xd8) 0 1 0 /* 端口 1.1 内存 */
+		0x81000000 0x6 0     MBUS_ID(0x08, 0xd0) 0 1 0 /* 端口 1.1 I/O  */
+		0x82000000 0x7 0     MBUS_ID(0x08, 0xb8) 0 1 0 /* 端口 1.2 内存 */
+		0x81000000 0x7 0     MBUS_ID(0x08, 0xb0) 0 1 0 /* 端口 1.2 I/O  */
+		0x82000000 0x8 0     MBUS_ID(0x08, 0x78) 0 1 0 /* 端口 1.3 内存 */
+		0x81000000 0x8 0     MBUS_ID(0x08, 0x70) 0 1 0 /* 端口 1.3 I/O  */
+
+		0x82000000 0x9 0     MBUS_ID(0x04, 0xf8) 0 1 0 /* 端口 2.0 内存 */
+		0x81000000 0x9 0     MBUS_ID(0x04, 0xf0) 0 1 0 /* 端口 2.0 I/O  */
+
+		0x82000000 0xa 0     MBUS_ID(0x08, 0xf8) 0 1 0 /* 端口 3.0 内存 */
+		0x81000000 0xa 0     MBUS_ID(0x08, 0xf0) 0 1 0 /* 端口 3.0 I/O  */>;
+
+	pcie@1,0 {
+		device_type = "pci";
+		assigned-addresses = <0x82000800 0 0x40000 0 0x2000>;
+		reg = <0x0800 0 0 0 0>;
+		#address-cells = <3>;
+		#size-cells = <2>;
+		#interrupt-cells = <1>;
+		ranges = <0x82000000 0 0 0x82000000 0x1 0 1 0
+			  0x81000000 0 0 0x81000000 0x1 0 1 0>;
+		interrupt-map-mask = <0 0 0 0>;
+		interrupt-map = <0 0 0 0 &mpic 58>;
+		marvell,pcie-port = <0>;
+		marvell,pcie-lane = <0>;
+		num-lanes = <1>;
+		/* GPIO 25 上的低电平有效的 PERST# 复位 */
+		reset-gpios = <&gpio0 25 1>;
+		/* 复位撤销后等待设备稳定20毫秒 */
+		reset-delay-us = <20000>;
+		clocks = <&gateclk 5>;
+	};
+
+	pcie@2,0 {
+		device_type = "pci";
+		assigned-addresses = <0x82001000 0 0x44000 0 0x2000>;
+		reg = <0x1000 0 0 0 0>;
+		#address-cells = <3>;
+		#size-cells = <2>;
+		#interrupt-cells = <1>;
+		ranges = <0x82000000 0 0 0x82000000 0x2 0 1 0
+			  0x81000000 0 0 0x81000000 0x2 0 1 0>;
+		interrupt-map-mask = <0 0 0 0>;
+		interrupt-map = <0 0 0 0 &mpic 59>;
+		marvell,pcie-port = <0>;
+		marvell,pcie-lane = <1>;
+		num-lanes = <1>;
+		clocks = <&gateclk 6>;
+	};
+
+	...
+
+	pcie@a,0 {
+		device_type = "pci";
+		assigned-addresses = <0x82005000 0 0x82000 0 0x2000>;
+		reg = <0x5000 0 0 0 0>;
+		#address-cells = <3>;
+		#size-cells = <2>;
+		#interrupt-cells = <1>;
+		ranges = <0x82000000 0 0 0x82000000 0xa 0 1 0
+			  0x81000000 0 0 0x81000000 0xa 0 1 0>;
+		interrupt-map-mask = <0 0 0 0>;
+		interrupt-map = <0 0 0 0 &mpic 103>;
+		marvell,pcie-port = <3>;
+		marvell,pcie-lane = <0>;
+		num-lanes = <1>;
+		clocks = <&gateclk 27>;
+	};
+};
+```
+
+请注意，上述示例中省略了中间部分，以保持示例的简洁性。

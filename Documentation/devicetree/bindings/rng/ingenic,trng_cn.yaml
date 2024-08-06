@@ -1,0 +1,42 @@
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/rng/ingenic,trng.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: Ingenic SoCs 中的 DTRNG
+
+维护者:
+  - 周琰杰 (Zhou Yanjie) <zhouyanjie@wanyeetech.com>
+
+描述:
+  Ingenic SoCs 中的真随机数生成器
+
+属性:
+  compatible:
+    枚举:
+      - ingenic,x1830-dtrng
+
+  reg:
+    最大项目数: 1
+
+  clocks:
+    最大项目数: 1
+
+必需项:
+  - compatible
+  - reg
+  - clocks
+
+额外属性: false
+
+示例:
+  - |
+    #include <dt-bindings/clock/ingenic,x1830-cgu.h>
+
+    dtrng: trng@10072000 {
+        compatible = "ingenic,x1830-dtrng";
+        reg = <0x10072000 0xc>;
+
+        clocks = <&cgu X1830_CLK_DTRNG>;
+    };

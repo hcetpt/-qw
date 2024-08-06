@@ -1,0 +1,12 @@
+海思随机数生成器
+
+所需属性：
+- compatible（兼容性）: 应该是 "hisilicon,hip04-rng" 或者 "hisilicon,hip05-rng"
+- reg（寄存器区域）: 此块的寄存器集的偏移量和长度
+
+示例：
+
+rng@d1010000 {
+	compatible = "hisilicon,hip05-rng";  // 兼容 "hisilicon,hip05-rng"
+	reg = <0xd1010000 0x100>;  // 寄存器区域偏移量为 0xd1010000，长度为 0x100
+};

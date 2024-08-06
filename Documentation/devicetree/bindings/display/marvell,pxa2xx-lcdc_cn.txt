@@ -1,0 +1,39 @@
+PXA LCD 控制器
+--------------
+
+必需属性：
+- `compatible`：必须是以下之一
+  - `"marvell,pxa2xx-lcdc"`
+  - `"marvell,pxa270-lcdc"`
+  - `"marvell,pxa300-lcdc"`
+- `reg`：应包含一个寄存器范围（地址和长度）
+- `interrupts`：帧缓冲控制器中断
+- `clocks`：输入时钟的物理句柄
+
+可选属性：
+- `lcd-supply`：一个指向控制LCD电压的电源调节器的物理句柄
+
+必需节点：
+- `port`：连接到LCD面板（参见video-interfaces.txt）
+  此节点必须设置其属性`bus-width`和`remote-endpoint`
+
+如果面板不是TFT彩色面板，则应在面板中使用`lcd-type`属性指定面板类型。
+此面板节点应位于板级DTS文件中。
+
+示例：
+```dts
+lcd-controller@40500000 {
+    compatible = "marvell,pxa2xx-lcdc";
+    reg = <0x44000000 0x10000>;
+    interrupts = <17>;
+    clocks = <&clks CLK_LCD>;
+
+    port {
+        lcdb_out: endpoint {
+            remote-endpoint = <&panel_in>;
+            bus-width = <16>;
+        };
+    };
+};
+```
+请注意，示例中的`lcdb_out`标签应与实际配置保持一致。如果原始文档中使用的是`lcdb_out`，那么在示例中也应使用`lcdb_out`；如果原始文档中使用的是`lccd_out`或其它标签，则应相应地进行更改。

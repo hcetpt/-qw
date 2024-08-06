@@ -1,0 +1,26 @@
+# SPDX-许可证标识符: (GPL-2.0 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/interconnect/qcom,rpm-common.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: Qualcomm RPMh 网络-on-芯片互连
+
+维护者:
+  - Konrad Dybcio <konradybcio@kernel.org>
+
+描述:
+  RPM 互连提供者支持通过基于预定义值或由总线监控硬件指示的手动请求来管理系统带宽需求。
+  每个提供者节点代表一个 NoC 总线主控器，由专用时钟源驱动。
+
+属性:
+  '#interconnect-cells':
+    oneOf:
+      - 常量: 2
+      - 常量: 1
+        过时: true
+
+必需:
+  - '#interconnect-cells'
+
+额外属性: true

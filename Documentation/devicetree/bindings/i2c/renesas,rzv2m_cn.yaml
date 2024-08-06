@@ -1,0 +1,83 @@
+```yaml
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/i2c/renesas,rzv2m.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: Renesas RZ/V2M I2C 总线接口
+
+maintainers:
+  - Fabrizio Castro <fabrizio.castro.jz@renesas.com>
+
+allOf:
+  - $ref: /schemas/i2c/i2c-controller.yaml#
+
+properties:
+  compatible:
+    items:
+      - enum:
+          - renesas,r9a09g011-i2c  # RZ/V2M
+      - const: renesas,rzv2m-i2c
+
+  reg:
+    maxItems: 1
+
+  interrupts:
+    items:
+      - description: 数据传输/接收中断
+      - description: 状态中断
+
+  interrupt-names:
+    items:
+      - const: tia
+      - const: tis
+
+  clock-frequency:
+    default: 100000
+    enum: [ 100000, 400000 ]
+    description:
+      期望的 I2C 总线时钟频率 (Hz)
+
+clocks:
+    maxItems: 1
+
+  power-domains:
+    maxItems: 1
+
+  resets:
+    maxItems: 1
+
+required:
+  - compatible
+  - reg
+  - interrupts
+  - interrupt-names
+  - clocks
+  - power-domains
+  - resets
+  - '#address-cells'
+  - '#size-cells'
+
+unevaluatedProperties: false
+
+examples:
+  - |
+    #include <dt-bindings/clock/r9a09g011-cpg.h>
+    #include <dt-bindings/interrupt-controller/arm-gic.h>
+
+    i2c0: i2c@a4030000 {
+        compatible = "renesas,r9a09g011-i2c", "renesas,rzv2m-i2c";
+        reg = <0xa4030000 0x80>;
+        interrupts = <GIC_SPI 232 IRQ_TYPE_EDGE_RISING>,
+                     <GIC_SPI 236 IRQ_TYPE_EDGE_RISING>;
+        interrupt-names = "tia", "tis";
+        clocks = <&cpg CPG_MOD R9A09G011_IIC_PCLK0>;
+        resets = <&cpg R9A09G011_IIC_GPA_PRESETN>;
+        power-domains = <&cpg>;
+        clock-frequency = <100000>;
+        #address-cells = <1>;
+        #size-cells = <0>;
+    };
+```
+请注意，`clocks` 和 `interrupts` 的描述位置在翻译过程中进行了调整以符合中文阅读习惯。此外，“clocks”字段的中文翻译通常为“时钟”，但在这里为了保持与原文一致，依然使用了“clocks”。如果需要更准确的中文表达，可以将 “clocks” 替换为 “时钟”。

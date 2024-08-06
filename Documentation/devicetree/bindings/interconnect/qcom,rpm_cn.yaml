@@ -1,0 +1,50 @@
+```yaml
+# SPDX-许可证标识符: (GPL-2.0 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/interconnect/qcom,rpm.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: 高通RPM网络芯片间互连
+
+maintainers:
+  - Georgi Djakov <djakov@kernel.org>
+
+description: |
+  RPM互连提供者通过RPM处理器支持系统带宽需求。该提供者能够通过RPM共享内存设备与RPM进行通信。
+allOf:
+  - $ref: qcom,rpm-common.yaml#
+
+properties:
+  reg:
+    maxItems: 1
+
+  compatible:
+    enum:
+      - qcom,msm8909-bimc
+      - qcom,msm8909-pcnoc
+      - qcom,msm8909-snoc
+      - qcom,msm8916-bimc
+      - qcom,msm8916-pcnoc
+      - qcom,msm8916-snoc
+      - qcom,qcs404-bimc
+      - qcom,qcs404-pcnoc
+      - qcom,qcs404-snoc
+
+required:
+  - compatible
+  - reg
+
+unevaluatedProperties: false
+
+examples:
+  - |
+      #include <dt-bindings/clock/qcom,rpmcc.h>
+
+      bimc: interconnect@400000 {
+          compatible = "qcom,msm8916-bimc";
+          reg = <0x00400000 0x62000>;
+          #interconnect-cells = <1>;
+      };
+```
+请注意，上述翻译将英文原文尽可能地转换为中文，但为了保持语义的准确性和技术文档的规范性，一些专业术语和格式被保留了下来。

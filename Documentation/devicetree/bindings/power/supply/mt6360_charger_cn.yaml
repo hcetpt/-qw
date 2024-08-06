@@ -1,0 +1,49 @@
+```yaml
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/power/supply/mt6360_charger.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: 来自MediaTek Integrated的MT6360 PMIC电池充电器驱动程序
+maintainers:
+  - Gene Chen <gene_chen@richtek.com>
+
+description: |
+  本模块是MT6360 MFD设备的一部分
+提供电池充电器、OTG设备的升压以及BC1.2检测功能
+properties:
+  compatible:
+    const: mediatek,mt6360-chg
+
+  richtek,vinovp-microvolt:
+    description: 最大CHGIN调节电压（以微伏为单位）
+enum: [ 5500000, 6500000, 11000000, 14500000 ]
+
+
+  usb-otg-vbus-regulator:
+    type: object
+    description: OTG升压稳压器
+$ref: /schemas/regulator/regulator.yaml#
+    unevaluatedProperties: false
+
+required:
+  - compatible
+
+additionalProperties: false
+
+examples:
+  - |
+    mt6360_charger: charger {
+      compatible = "mediatek,mt6360-chg";
+      richtek,vinovp-microvolt = <14500000>;
+
+      otg_vbus_regulator: usb-otg-vbus-regulator {
+        regulator-name = "usb-otg-vbus";
+        regulator-min-microvolt = <4425000>;
+        regulator-max-microvolt = <5825000>;
+      };
+    };
+```
+
+请注意，此翻译将原始英文文档中的术语和概念转换成了中文。其中一些术语可能有多种中文译法，这里选择了一种常见的翻译方式。

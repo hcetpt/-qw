@@ -1,0 +1,68 @@
+```yaml
+# SPDX-许可证标识符: (GPL-2.0)
+# 版权所有 2020 Linaro 有限公司
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/thermal/thermal-sensor.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: 温度传感器
+
+维护者:
+  - Amit Kucheria <amitk@kernel.org>
+
+描述: |
+  设备树中的热管理是通过描述传感器硬件和所需软件抽象的热区来实现的，以采取适当措施缓解过热问题。
+以下节点类型用于在设备树中完全描述一个热管理系统：
+   - 温度传感器: 测量温度的设备，具有特定于SoC的绑定
+   - 冷却设备: 用于被动或主动散热的设备
+   - 热区: 包含以下节点类型的容器，用于描述平台的所有热数据
+
+  本绑定描述了温度传感器
+温度传感器设备在热区提供温度感应功能。典型的设备是I2C ADC转换器和带隙。温度传感器设备可以控制一个或多个内部传感器
+属性:
+  "#thermal-sensor-cells":
+    描述:
+      用于唯一识别IC内的温度传感器实例。在仅有一个传感器的节点上将是0，在包含多个内部传感器的节点上至少为1
+枚举: [0, 1]
+
+必需:
+  - "#thermal-sensor-cells"
+
+其他属性: true
+
+示例:
+  - |
+    #include <dt-bindings/interrupt-controller/arm-gic.h>
+
+    // 示例 1: SDM845 TSENS
+    soc: soc {
+            #address-cells = <2>;
+            #size-cells = <2>;
+
+            /* ... */
+
+            tsens0: thermal-sensor@c263000 {
+                    compatible = "qcom,sdm845-tsens", "qcom,tsens-v2";
+                    reg = <0 0x0c263000 0 0x1ff>, /* TM */
+                          <0 0x0c222000 0 0x1ff>; /* SROT */
+                    #qcom,sensors = <13>;
+                    interrupts = <GIC_SPI 506 IRQ_TYPE_LEVEL_HIGH>,
+                                 <GIC_SPI 508 IRQ_TYPE_LEVEL_HIGH>;
+                    interrupt-names = "uplow", "critical";
+                    #thermal-sensor-cells = <1>;
+            };
+
+            tsens1: thermal-sensor@c265000 {
+                    compatible = "qcom,sdm845-tsens", "qcom,tsens-v2";
+                    reg = <0 0x0c265000 0 0x1ff>, /* TM */
+                          <0 0x0c223000 0 0x1ff>; /* SROT */
+                    #qcom,sensors = <8>;
+                    interrupts = <GIC_SPI 507 IRQ_TYPE_LEVEL_HIGH>,
+                                 <GIC_SPI 509 IRQ_TYPE_LEVEL_HIGH>;
+                    interrupt-names = "uplow", "critical";
+                    #thermal-sensor-cells = <1>;
+            };
+    };
+..
+```

@@ -1,0 +1,19 @@
+MOXA ART 实时钟
+
+所需属性:
+
+- compatible（兼容性）: 应该是 "moxa,moxart-rtc"
+- rtc-sclk-gpios（实时钟 SCLK GPIO）: 实时钟的 SCLK GPIO，带有零标志
+- rtc-data-gpios（实时钟数据 GPIO）: 实时钟的数据 GPIO，带有零标志
+- rtc-reset-gpios（实时钟复位 GPIO）: 实时钟的复位 GPIO，带有零标志
+
+示例:
+
+    rtc: rtc { 
+        compatible = "moxa,moxart-rtc"; 
+        rtc-sclk-gpios = <&gpio 5 0>; 
+        rtc-data-gpios = <&gpio 6 0>; 
+        rtc-reset-gpios = <&gpio 7 0>; 
+    }; 
+
+这段代码描述了一个与 MOXA ART 实时钟相关的设备树片段。它定义了与实时钟交互所需的 GPIO 引脚。每个 GPIO 引脚都与实时钟的一个功能相关联：SCLK（串行时钟）、DATA（数据）和 RESET（复位）。

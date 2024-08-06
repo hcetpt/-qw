@@ -1,0 +1,56 @@
+```yaml
+# SPDX-文件许可人: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/display/tegra/nvidia,tegra210-csi.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: NVIDIA Tegra CSI 控制器
+
+maintainers:
+  - Thierry Reding <thierry.reding@gmail.com>
+  - Jon Hunter <jonathanh@nvidia.com>
+
+properties:
+  $nodename:
+    pattern: "^csi@[0-9a-f]+$"
+
+  compatible:
+    enum:
+      - nvidia,tegra210-csi
+
+  reg:
+    maxItems: 1
+
+  clocks:
+    items:
+      - description: 模块时钟
+      - description: A/B 车道时钟
+      - description: C/D 车道时钟
+      - description: E 车道时钟
+      - description: 测试模式生成器时钟
+
+  clock-names:
+    items:
+      - const: csi
+      - const: cilab
+      - const: cilcd
+      - const: cile
+      - const: csi_tpg
+
+  power-domains:
+    maxItems: 1
+
+additionalProperties: false
+
+required:
+  - compatible
+  - reg
+  - clocks
+  - clock-names
+  - power-domains
+
+# 参见 nvidia,tegra20-vi.yaml 以获取示例
+```
+
+请注意，此翻译尽量保持了原文的结构和内容。某些术语和技术细节（如 "clocks", "clock-names", "power-domains" 等）保持了英文形式，因为这些术语在中文环境中通常也使用英文表述。

@@ -1,0 +1,59 @@
+```yaml
+# SPDX-许可证标识符: (GPL-2.0 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/rng/mtk-rng.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: MediaTek 随机数生成器
+
+maintainers:
+  - Sean Wang <sean.wang@mediatek.com>
+
+properties:
+  $nodename:
+    pattern: "^rng@[0-9a-f]+$"
+
+  compatible:
+    oneOf:
+      - enum:
+          - mediatek,mt7623-rng
+      - items:
+          - enum:
+              - mediatek,mt7622-rng
+              - mediatek,mt7629-rng
+              - mediatek,mt7986-rng
+              - mediatek,mt8365-rng
+              - mediatek,mt8516-rng
+          - const: mediatek,mt7623-rng
+
+  reg:
+    maxItems: 1
+
+  clocks:
+    maxItems: 1
+
+  clock-names:
+    items:
+      - const: rng
+
+required:
+  - compatible
+  - reg
+  - clocks
+  - clock-names
+
+additionalProperties: false
+
+examples:
+  - |
+    #include <dt-bindings/clock/mt2701-clk.h>
+    rng: rng@1020f000 {
+            compatible = "mediatek,mt7623-rng";
+            reg = <0x1020f000 0x1000>;
+            clocks = <&infracfg CLK_INFRA_TRNG>;
+            clock-names = "rng";
+    };
+```
+
+这段 YAML 文件描述了 Device Tree 中关于 MediaTek 随机数生成器的配置信息。它定义了如何在设备树中表示 MediaTek 的随机数生成器，包括必要的属性、兼容性声明和示例。

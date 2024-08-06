@@ -1,0 +1,157 @@
+# SPDX-许可证标识符: GPL-2.0-only 或 BSD-2-Clause
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/mfd/rockchip,rk806.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: RK806 电源管理集成电路
+
+维护者:
+  - Sebastian Reichel <sebastian.reichel@collabora.com>
+
+描述:
+  Rockchip RK806 系列 PMIC。此设备由一个通过 spi 或
+  i2c 控制的多功能设备 (MFD) 组成，其中包括多个可切换的稳压器。
+
+属性:
+  compatible:
+    枚举:
+      - rockchip,rk806
+
+  reg:
+    最大项数: 1
+
+  interrupts:
+    最大项数: 1
+
+  gpio-controller: true
+
+  '#gpio-cells':
+    常量: 2
+
+  system-power-controller: true
+
+  vcc1-supply:
+    描述:
+      dcdc-reg1 的输入供电
+
+  vcc2-supply:
+    描述:
+      dcdc-reg2 的输入供电
+
+  vcc3-supply:
+    描述:
+      dcdc-reg3 的输入供电
+
+  vcc4-supply:
+    描述:
+      dcdc-reg4 的输入供电
+
+  vcc5-supply:
+    描述:
+      dcdc-reg5 的输入供电
+
+  vcc6-supply:
+    描述:
+      dcdc-reg6 的输入供电
+
+  vcc7-supply:
+    描述:
+      dcdc-reg7 的输入供电
+
+  vcc8-supply:
+    描述:
+      dcdc-reg8 的输入供电
+
+  vcc9-supply:
+    描述:
+      dcdc-reg9 的输入供电
+下面是给定内容的中文翻译：
+
+### 电源供应定义：
+- **vcc10-supply:**
+    - **描述：** DC-DC转换器10的输入电源。
+- **vcc11-supply:**
+    - **描述：** 用于PLDO调节器1、2和3的输入电源。
+- **vcc12-supply:**
+    - **描述：** 用于PLDO调节器4和5的输入电源。
+- **vcc13-supply:**
+    - **描述：** 用于NLDO调节器1、2和3的输入电源。
+- **vcc14-supply:**
+    - **描述：** 用于NLDO调节器4和5的输入电源。
+- **vcca-supply:**
+    - **描述：** 用于PLDO调节器6的输入电源。
+
+### 调节器：
+- **类型：** 对象
+- **附加属性：** 不允许
+- **模式属性：**
+    - 匹配规则：
+      - `^(dcdc-reg([1-9]|10)|pldo-reg[1-6]|nldo-reg[1-5])$`
+- **子对象：**
+    - 类型：对象
+    - 引用：`/schemas/regulator/regulator.yaml#`
+    - 不允许未评估的属性
+
+### 模式属性：
+- `-pins$`:
+    - **类型：** 对象
+    - **附加属性：** 不允许
+    - **引用：** `/schemas/pinctrl/pinmux-node.yaml`
+
+    - **属性：**
+        - **功能：**
+            - 枚举：`[pin_fun0, pin_fun1, pin_fun2, pin_fun3, pin_fun4, pin_fun5]`
+        - **引脚：**
+            - 枚举：`[gpio_pwrctrl1, gpio_pwrctrl2, gpio_pwrctrl3]`
+            - 引用：`/schemas/types.yaml#/definitions/string`
+
+### 全部属性：
+- **-** 引用：`/schemas/spi/spi-peripheral-props.yaml`
+
+### 必需属性：
+- **兼容性**
+- **寄存器地址**
+- **中断**
+
+### 不允许未评估的属性
+
+### 示例：
+```yaml
+#include <dt-bindings/pinctrl/rockchip.h>
+#include <dt-bindings/interrupt-controller/irq.h>
+#include <dt-bindings/gpio/gpio.h>
+spi {
+    #address-cells = <1>;
+    #size-cells = <0>;
+
+    pmic@0 {
+        compatible = "rockchip,rk806";
+        reg = <0x0>;
+
+        interrupts = <7 IRQ_TYPE_LEVEL_LOW>;
+
+        vcc1-supply = <&vcc5v0_sys>;
+        vcc2-supply = <&vcc5v0_sys>;
+        vcc3-supply = <&vcc5v0_sys>;
+        vcc4-supply = <&vcc5v0_sys>;
+        vcc5-supply = <&vcc5v0_sys>;
+        vcc6-supply = <&vcc5v0_sys>;
+        vcc7-supply = <&vcc5v0_sys>;
+        vcc8-supply = <&vcc5v0_sys>;
+        vcc9-supply = <&vcc5v0_sys>;
+        vcc10-supply = <&vcc5v0_sys>;
+        vcc11-supply = <&vcc_2v0_pldo_s3>;
+        vcc12-supply = <&vcc5v0_sys>;
+        vcc13-supply = <&vcc5v0_sys>;
+        vcc14-supply = <&vcc_1v1_nldo_s3>;
+        vcca-supply = <&vcc5v0_sys>;
+
+        regulators {
+            // ... 调节器配置 ...
+        };
+    };
+};
+```
+
+以上示例展示了如何为特定硬件配置电源管理集成电路(PMIC)。每个调节器都有详细的配置，包括最小和最大输出电压、启动和关闭行为等。这些配置对于确保系统正确供电至关重要。

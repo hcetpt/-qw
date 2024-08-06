@@ -1,0 +1,41 @@
+# SPDX-文件许可人: GPL-2.0
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/w1/w1-gpio.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: 位操作的GPIO 1-Wire总线
+
+维护者:
+  - Daniel Mack <zonque@gmail.com>
+
+属性:
+  compatible:
+    常量: w1-gpio
+
+  gpios:
+    最少项目数: 1
+    项目:
+      - 描述: 数据I/O引脚
+      - 描述: 用于外部上拉电阻的使能引脚
+
+  linux,open-drain:
+    类型: 布尔值
+    描述: >
+      如果指定，则认为数据引脚处于开漏模式
+
+必需:
+  - compatible
+  - gpios
+
+附加属性:
+  类型: 对象
+
+示例:
+  - |
+    #include <dt-bindings/gpio/gpio.h>
+
+    onewire {
+        compatible = "w1-gpio";
+        gpios = <&gpio 0 GPIO_ACTIVE_HIGH>;
+    };

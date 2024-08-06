@@ -1,0 +1,109 @@
+```yaml
+# SPDX-许可证标识符: (GPL-2.0 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/interconnect/qcom,sdm660.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: 高通 SDM660 网络-on-芯片互连
+
+maintainers:
+  - Konrad Dybcio <konradybcio@kernel.org>
+
+description: |
+  高通 SDM660 互连提供者支持调整各种 NoC 织物之间的带宽需求。
+
+properties:
+  compatible:
+    enum:
+      - qcom,sdm660-a2noc
+      - qcom,sdm660-bimc
+      - qcom,sdm660-cnoc
+      - qcom,sdm660-gnoc
+      - qcom,sdm660-mnoc
+      - qcom,sdm660-snoc
+
+  reg:
+    maxItems: 1
+
+  clock-names:
+    minItems: 1
+    maxItems: 5
+
+  clocks:
+    minItems: 1
+    maxItems: 5
+
+required:
+  - compatible
+  - reg
+
+unevaluatedProperties: false
+
+allOf:
+  - $ref: qcom,rpm-common.yaml#
+  - if:
+      properties:
+        compatible:
+          const: qcom,sdm660-mnoc
+
+    then:
+      properties:
+        clocks:
+          items:
+            - description: CPU-NoC 高性能总线时钟
+clock-names:
+          const: iface
+
+  - if:
+      properties:
+        compatible:
+          const: qcom,sdm660-a2noc
+
+    then:
+      properties:
+        clocks:
+          items:
+            - description: IPA 时钟
+- description: UFS AXI 时钟
+- description: Aggregate2 UFS AXI 时钟
+- description: Aggregate2 USB3 AXI 时钟
+- description: 配置 NoC USB2 AXI 时钟
+clock-names:
+          items:
+            - const: ipa
+            - const: ufs_axi
+            - const: aggre2_ufs_axi
+            - const: aggre2_usb3_axi
+            - const: cfg_noc_usb2_axi
+
+examples:
+  - |
+    #include <dt-bindings/clock/qcom,gcc-sdm660.h>
+    #include <dt-bindings/clock/qcom,mmcc-sdm660.h>
+    #include <dt-bindings/clock/qcom,rpmcc.h>
+
+    bimc: interconnect@1008000 {
+        compatible = "qcom,sdm660-bimc";
+        reg = <0x01008000 0x78000>;
+        #interconnect-cells = <1>;
+    };
+
+    a2noc: interconnect@1704000 {
+        compatible = "qcom,sdm660-a2noc";
+        reg = <0x01704000 0xc100>;
+        #interconnect-cells = <1>;
+        clocks = <&rpmcc RPM_SMD_IPA_CLK>,
+                 <&gcc GCC_UFS_AXI_CLK>,
+                 <&gcc GCC_AGGRE2_UFS_AXI_CLK>,
+                 <&gcc GCC_AGGRE2_USB3_AXI_CLK>,
+                 <&gcc GCC_CFG_NOC_USB2_AXI_CLK>;
+        clock-names = "ipa",
+                      "ufs_axi",
+                      "aggre2_ufs_axi",
+                      "aggre2_usb3_axi",
+                      "cfg_noc_usb2_axi";
+    };
+```
+
+请注意，代码示例部分的注释和内容未被翻译，因为它们包含特定于系统的指令和设备树绑定。

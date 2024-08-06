@@ -1,0 +1,40 @@
+```yaml
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/bus/aspeed,ast2600-ahbc.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: ASPEED 高级高性能总线控制器 (AHBC)
+
+maintainers:
+  - Neal Liu <neal_liu@aspeedtech.com>
+  - Chia-Wei Wang <chiawei_wang@aspeedtech.com>
+
+description: |
+  高级高性能总线控制器 (AHBC) 支持多种机制，包括优先级仲裁器、地址解码器和数据多路复用器，
+  用于控制高级高性能总线 (AHB) 的整体操作。
+
+properties:
+  compatible:
+    enum:
+      - aspeed,ast2600-ahbc
+
+  reg:
+    maxItems: 1
+
+required:
+  - compatible
+  - reg
+
+additionalProperties: false
+
+examples:
+  - |
+    ahbc@1e600000 {
+        compatible = "aspeed,ast2600-ahbc";
+        reg = <0x1e600000 0x100>;
+    };
+```
+
+这段 YAML 文件描述了 ASPEED 公司的高级高性能总线控制器 (AHBC) 在 Device Tree 中的定义。该文件包含了必要的属性和示例，以帮助设备树作者正确地配置和使用 AHBC 控制器。

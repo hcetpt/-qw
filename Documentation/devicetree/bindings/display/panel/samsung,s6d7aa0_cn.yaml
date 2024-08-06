@@ -1,0 +1,68 @@
+# SPDX-文件许可人: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/display/panel/samsung,s6d7aa0.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: 三星 S6D7AA0 MIPI-DSI LCD 面板控制器
+
+maintainers:
+  - Artur Weber <aweber.kernel@gmail.com>
+
+allOf:
+  - $ref: panel-common.yaml#
+
+properties:
+  compatible:
+    items:
+      - enum:
+          # 1280x800 LSL080AL02 面板
+          - samsung,lsl080al02
+          # 1024x768 LSL080AL03 面板
+          - samsung,lsl080al03
+          # 1024x768 LTL101AT01 面板
+          - samsung,ltl101at01
+      - const: samsung,s6d7aa0
+
+  reg:
+    maxItems: 1
+
+  backlight:
+    description:
+      用于面板的背光。如果此属性设置在具有基于 DSI 的背光控制的面板上（LSL080AL03 和 LTL101AT01），
+      它将覆盖基于 DSI 的背光。
+
+  reset-gpios:
+    description: 重置 GPIO 引脚，通常为 GPIO_ACTIVE_LOW
+  power-supply:
+    description:
+      面板的主要电源供应；不同面板的具体电压各不相同，
+      并且通常大约在 3.3-5V 左右。
+  vmipi-supply:
+    description: VMIPI 供电，通常为 1.8V
+
+required:
+  - compatible
+  - reg
+  - reset-gpios
+
+additionalProperties: false
+
+examples:
+  - |
+    #include <dt-bindings/gpio/gpio.h>
+
+    dsi {
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        panel@0 {
+            compatible = "samsung,lsl080al02", "samsung,s6d7aa0";
+            reg = <0>;
+            power-supply = <&display_3v3_supply>;
+            reset-gpios = <&gpf0 4 GPIO_ACTIVE_LOW>;
+            backlight = <&backlight>;
+        };
+    };
+
+..

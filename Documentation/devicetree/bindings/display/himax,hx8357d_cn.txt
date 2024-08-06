@@ -1,0 +1,24 @@
+Himax HX8357D 显示屏
+
+此绑定适用于使用 Himax HX8357D 控制器并通过 SPI 模式工作的显示屏，例如适用于 Raspberry Pi 的 Adafruit 3.5" TFT。
+必需的属性：
+- compatible: "adafruit,yx350hv15", "himax,hx8357d"
+- dc-gpios: D/C 引脚
+- reg: SPI 总线上该面板的地址
+
+此驱动程序的节点必须是 SPI 控制器的子节点，因此在 ../spi/spi-bus.txt 中描述的所有强制性属性都必须指定。
+可选属性：
+- rotation: 面板逆时针旋转的角度（0、90、180、270）
+- backlight: 面板所连接背光设备的 phandle
+
+示例：
+```
+display@0{
+	compatible = "adafruit,yx350hv15", "himax,hx8357d";
+	reg = <0>;
+	spi-max-frequency = <32000000>;
+	dc-gpios = <&gpio0 25 GPIO_ACTIVE_HIGH>;
+	rotation = <90>;
+	backlight = <&backlight>;
+};
+```

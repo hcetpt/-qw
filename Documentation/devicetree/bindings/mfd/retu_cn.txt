@@ -1,0 +1,22 @@
+针对诺基亚 Retu 和 Tahvo 多功能设备的设备树绑定
+
+Retu 和 Tahvo 是在诺基亚互联网平板（770、N800 和 N810）上发现的多功能设备。Retu 芯片提供看门狗定时器和电源按钮控制功能，而 Tahvo 芯片提供 USB 收发器功能。
+必需属性：
+- compatible: "nokia,retu" 或 "nokia,tahvo"
+- reg: 指定 ASIC 芯片的 CBUS 从地址
+- interrupts: 设备连接到的中断线
+
+示例：
+
+```
+cbus0 {
+	compatible = "i2c-cbus-gpio";
+	..
+	retu: retu@1 {
+		compatible = "nokia,retu";
+		interrupt-parent = <&gpio4>;
+		interrupts = <12 IRQ_TYPE_EDGE_RISING>;
+		reg = <0x1>;
+	};
+};
+```

@@ -1,0 +1,70 @@
+Analog devices AS3645A 设备树绑定
+
+AS3645A 闪光 LED 控制器可以驱动两个 LED，一个大电流的闪光 LED 和一个指示 LED。大电流的闪光 LED 也可以用作手电筒模式。
+下面标记为 [a, b] 的范围是指从 a 到 b 的闭区间，即包括 a 和 b 在内。
+
+请同时参阅同一目录下的 common.txt 文件。
+
+必需属性
+==========
+
+compatible : 必须是 "ams,as3645a"
+reg       : 设备的 I2C 地址。通常为 0x30
+#address-cells : 1
+#size-cells    : 0
+
+闪光子节点（0）的必需属性
+=================================
+
+reg: 0
+flash-timeout-us: 闪光超时时间，单位为微秒。该值必须在 [100000, 850000] 范围内，并且可被 50000 整除
+flash-max-microamp: 最大闪光电流，单位为微安。必须在 [200000, 500000] 范围内，并且可被 20000 整除
+led-max-microamp: 最大手电筒（辅助）电流，单位为微安。该值必须在 [20000, 160000] 范围内，并且可被 20000 整除
+ams,input-max-microamp: 最大闪光控制器输入电流。该值必须在 [1250000, 2000000] 范围内，并且可被 50000 整除
+
+闪光子节点的可选属性
+======================
+
+function : 请参阅 Documentation/devicetree/bindings/leds/common.txt
+下面是给定内容的中文翻译：
+
+颜色 : 参见文档/设备树/绑定/LEDs/common.txt
+标签 : 参见文档/设备树/绑定/LEDs/common.txt（已废弃）
+指示器子节点所需的属性（1）
+===================================================
+reg: 1
+led-max-microamp: 最大指示电流。允许的值为
+		  2500、5000、7500 和 10000
+指示器子节点的可选属性
+===============================================
+功能 : 参见文档/设备树/绑定/LEDs/common.txt
+颜色 : 参见文档/设备树/绑定/LEDs/common.txt
+标签 : 参见文档/设备树/绑定/LEDs/common.txt（已废弃）
+示例
+=====
+
+``` 
+#include <dt-bindings/leds/common.h>
+
+as3645a@30 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+	reg = <0x30>;
+	compatible = "ams,as3645a";
+	led@0 {
+		reg = <0x0>;
+		flash-timeout-us = <150000>;
+		flash-max-microamp = <320000>;
+		led-max-microamp = <60000>;
+		ams,input-max-microamp = <1750000>;
+		function = LED_FUNCTION_FLASH;
+	};
+	led@1 {
+		reg = <0x1>;
+		led-max-microamp = <10000>;
+		function = LED_FUNCTION_INDICATOR;
+	};
+};
+```
+
+这里主要描述了在设备树中定义LED控制器（例如 as3645a）时，对于指示器子节点所要求和可选的属性。其中“reg”表示该指示器的寄存器地址，“led-max-microamp”定义了最大允许通过的电流（以微安为单位），而“function”则指定了LED的功能类型。此外，还提到了“color”和“label”的属性，但它们已被标记为废弃。

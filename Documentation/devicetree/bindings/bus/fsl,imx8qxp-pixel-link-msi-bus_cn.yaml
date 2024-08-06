@@ -1,0 +1,212 @@
+# SPDX-文件许可人: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/bus/fsl,imx8qxp-pixel-link-msi-bus.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: Freescale i.MX8qxp 像素链接中速互联（MSI）总线
+
+维护者:
+  - Liu Ying <victor.liu@nxp.com>
+
+描述: |
+  i.MX8qxp 像素链接 MSI 总线用于控制与 PHYs 同处的 PHYs 和 I/O 的设置。它不同于来自 i.MX8 系统控制器单元 (SCU) 的 MSI 总线，后者用于通过 i.MX8 分布式从系统控制器 (DSC) 控制电源、时钟和复位。
+  i.MX8qxp 像素链接 MSI 总线是一个简单的内存映射总线。需要使能两个输入时钟，即 MSI 时钟和 AHB 时钟，以便能够访问连接到总线上的外设。此外，该总线属于一个电源域。在可以访问外设之前，需要使能电源域。
+  i.MX8qm/qxp 成像、LVDS、MIPI DSI 和 HDMI TX 子系统中的外设，如 I2C 控制器、PWM 控制器、MIPI DSI 控制器和控制与状态寄存器 (CSR) 模块，都是通过该总线进行访问的。
+  i.MX 系统控制器固件 (SCFW) 拥有并使用 i.MX8qm/qxp 像素链接 MSI 总线控制器，并不允许 SCFW 用户对其进行控制。因此，控制器的寄存器无法被 SCFW 用户访问。因此，从 SCFW 用户的角度来看，由控制器产生的中断没有任何意义。
+allOf:
+  - $ref: simple-pm-bus.yaml#
+
+# 我们需要在这里选择，以免匹配所有带有 'simple-pm-bus' 的节点
+选择:
+  属性:
+    兼容性:
+      包含:
+        枚举:
+          - fsl,imx8qxp-display-pixel-link-msi-bus
+          - fsl,imx8qm-display-pixel-link-msi-bus
+  必需:
+    - 兼容性
+
+属性:
+  兼容性:
+    项:
+      - 枚举:
+          - fsl,imx8qxp-display-pixel-link-msi-bus
+          - fsl,imx8qm-display-pixel-link-msi-bus
+      - 常量: simple-pm-bus
+
+  地址:
+    最大项数: 1
+
+  中断:
+    最大项数: 1
+
+  时钟:
+    项:
+      - 描述: 来自系统的主门控时钟
+      - 描述: AHB 时钟
+
+  时钟名称:
+    项:
+      - 常量: msi
+      - 常量: ahb
+
+模式属性:
+  "^.*@[0-9a-f]+$":
+    描述: 连接到总线的设备
+    类型: 对象
+
+    必需:
+      - 地址
+
+必需:
+  - 兼容性
+  - 地址
+  - 时钟
+  - 时钟名称
+  - 电源域
+
+未评估属性: false
+
+示例:
+  - |
+    #include <dt-bindings/clock/imx8-lpcg.h>
+    #include <dt-bindings/firmware/imx/rsrc.h>
+    bus@56200000 {
+        兼容性 = "fsl,imx8qxp-display-pixel-link-msi-bus", "simple-pm-bus";
+        地址 = <0x56200000 0x20000>;
+        #地址单元 = <1>;
+        #大小单元 = <1>;
+        中断父级 = <&dc0_irqsteer>;
+        中断 = <320>;
+        范围;
+        时钟 = <&dc0_disp_ctrl_link_mst0_lpcg IMX_LPCG_CLK_4>,
+               <&dc0_disp_ctrl_link_mst0_lpcg IMX_LPCG_CLK_4>;
+        时钟名称 = "msi", "ahb";
+        电源域 = <&pd IMX_SC_R_DC_0>;
+
+        syscon@56221000 {
+            兼容性 = "fsl,imx8qxp-mipi-lvds-csr", "syscon", "simple-mfd";
+            地址 = <0x56221000 0x1000>;
+            时钟 = <&mipi_lvds_0_di_mipi_lvds_regs_lpcg IMX_LPCG_CLK_4>;
+            时钟名称 = "ipg";
+
+            pxl2dpi {
+                兼容性 = "fsl,imx8qxp-pxl2dpi";
+                fsl,sc-资源 = <IMX_SC_R_MIPI_0>;
+                电源域 = <&pd IMX_SC_R_MIPI_0>;
+
+                端口 {
+                    #地址单元 = <1>;
+                    #大小单元 = <0>;
+
+                    端口@0 {
+                        #地址单元 = <1>;
+                        #大小单元 = <0>;
+                        地址 = <0>;
+
+                        mipi_lvds_0_pxl2dpi_dc0_pixel_link0: 终端@0 {
+                            地址 = <0>;
+                            远程终端 = <&dc0_pixel_link0_mipi_lvds_0_pxl2dpi>;
+                        };
+
+                        mipi_lvds_0_pxl2dpi_dc0_pixel_link1: 终端@1 {
+                            地址 = <1>;
+                            远程终端 = <&dc0_pixel_link1_mipi_lvds_0_pxl2dpi>;
+                        };
+                    };
+
+                    端口@1 {
+                        #地址单元 = <1>;
+                        #大小单元 = <0>;
+                        地址 = <1>;
+
+                        mipi_lvds_0_pxl2dpi_mipi_lvds_0_ldb_ch0: 终端@0 {
+                            地址 = <0>;
+                            远程终端 = <&mipi_lvds_0_ldb_ch0_mipi_lvds_0_pxl2dpi>;
+                        };
+
+                        mipi_lvds_0_pxl2dpi_mipi_lvds_0_ldb_ch1: 终端@1 {
+                            地址 = <1>;
+                            远程终端 = <&mipi_lvds_0_ldb_ch1_mipi_lvds_0_pxl2dpi>;
+                        };
+                    };
+                };
+            };
+
+            ldb {
+                #地址单元 = <1>;
+                #大小单元 = <0>;
+                兼容性 = "fsl,imx8qxp-ldb";
+                时钟 = <&clk IMX_SC_R_LVDS_0 IMX_SC_PM_CLK_MISC2>,
+                       <&clk IMX_SC_R_LVDS_0 IMX_SC_PM_CLK_BYPASS>;
+                时钟名称 = "pixel", "bypass";
+                电源域 = <&pd IMX_SC_R_LVDS_0>;
+
+                通道@0 {
+                    #地址单元 = <1>;
+                    #大小单元 = <0>;
+                    地址 = <0>;
+                    物理层 = <&mipi_lvds_0_phy>;
+                    物理层名称 = "lvds_phy";
+
+                    端口@0 {
+                        地址 = <0>;
+
+                        mipi_lvds_0_ldb_ch0_mipi_lvds_0_pxl2dpi: 终端 {
+                            远程终端 = <&mipi_lvds_0_pxl2dpi_mipi_lvds_0_ldb_ch0>;
+                        };
+                    };
+
+                    端口@1 {
+                        地址 = <1>;
+
+                        /* ... */
+                    };
+                };
+
+                通道@1 {
+                    #地址单元 = <1>;
+                    #大小单元 = <0>;
+                    地址 = <1>;
+                    物理层 = <&mipi_lvds_0_phy>;
+                    物理层名称 = "lvds_phy";
+
+                    端口@0 {
+                        地址 = <0>;
+
+                        mipi_lvds_0_ldb_ch1_mipi_lvds_0_pxl2dpi: 终端 {
+                            远程终端 = <&mipi_lvds_0_pxl2dpi_mipi_lvds_0_ldb_ch1>;
+                        };
+                    };
+
+                    端口@1 {
+                        地址 = <1>;
+
+                        /* ... */
+                    };
+                };
+            };
+        };
+
+        时钟控制器@56223004 {
+            兼容性 = "fsl,imx8qxp-lpcg";
+            地址 = <0x56223004 0x4>;
+            #时钟单元 = <1>;
+            时钟 = <&mipi_lvds_0_ipg_clk>;
+            时钟索引 = <IMX_LPCG_CLK_4>;
+            时钟输出名称 = "mipi_lvds_0_di_mipi_lvds_regs_lpcg_ipg_clk";
+            电源域 = <&pd IMX_SC_R_MIPI_0>;
+        };
+
+        物理层@56228300 {
+            兼容性 = "fsl,imx8qxp-mipi-dphy";
+            地址 = <0x56228300 0x100>;
+            时钟 = <&clk IMX_SC_R_LVDS_0 IMX_SC_PM_CLK_PHY>;
+            时钟名称 = "phy_ref";
+            #物理层单元 = <0>;
+            fsl,syscon = <&mipi_lvds_0_csr>;
+            电源域 = <&pd IMX_SC_R_MIPI_0>;
+        };
+    };

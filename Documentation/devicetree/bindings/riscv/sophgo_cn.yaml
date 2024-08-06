@@ -1,0 +1,36 @@
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/riscv/sophgo.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: 基于 Sophgo SoC 的板卡
+
+维护者:
+  - 魏超 <chao.wei@sophgo.com>
+  - 王晨 <unicorn_wang@outlook.com>
+
+描述:
+  基于 Sophgo SoC 的板卡
+
+属性:
+  $nodename:
+    恒定值: '/'
+  compatible:
+    oneOf:
+      - items:
+          - 枚举:
+              - milkv,duo
+          - 恒定值: sophgo,cv1800b
+      - items:
+          - 枚举:
+              - sophgo,huashan-pi
+          - 恒定值: sophgo,cv1812h
+      - items:
+          - 枚举:
+              - milkv,pioneer
+          - 恒定值: sophgo,sg2042
+
+其他属性: true
+
+..

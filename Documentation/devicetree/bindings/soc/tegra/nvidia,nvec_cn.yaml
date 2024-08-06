@@ -1,0 +1,84 @@
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/soc/tegra/nvidia,nvec.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: 符合NVIDIA规范的嵌入式控制器
+
+maintainers:
+  - Thierry Reding <thierry.reding@gmail.com>
+  - Jon Hunter <jonathanh@nvidia.com>
+
+properties:
+  compatible:
+    const: nvidia,nvec
+
+  reg:
+    maxItems: 1
+
+  interrupts:
+    maxItems: 1
+
+  clocks:
+    minItems: 1
+    items:
+      - description: 分频时钟
+      - description: 快速时钟
+
+  clock-names:
+    minItems: 1
+    items:
+      - const: div-clk
+      - const: fast-clk
+
+  resets:
+    items:
+      - description: 模块复位
+
+  reset-names:
+    items:
+      - const: i2c
+
+  clock-frequency: true
+
+  request-gpios:
+    description: 用于EC请求的GPIO的phandle
+
+  slave-addr:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    description: 从控制器的I2C地址
+
+additionalProperties: false
+
+required:
+  - compatible
+  - reg
+  - interrupts
+  - clocks
+  - clock-names
+  - resets
+  - reset-names
+  - clock-frequency
+  - request-gpios
+  - slave-addr
+
+examples:
+  - |
+    #include <dt-bindings/clock/tegra20-car.h>
+    #include <dt-bindings/gpio/tegra-gpio.h>
+    #include <dt-bindings/interrupt-controller/arm-gic.h>
+
+    i2c@7000c500 {
+        compatible = "nvidia,nvec";
+        reg = <0x7000c500 0x100>;
+        interrupts = <GIC_SPI 92 IRQ_TYPE_LEVEL_HIGH>;
+        clock-frequency = <80000>;
+        request-gpios = <&gpio TEGRA_GPIO(V, 2) GPIO_ACTIVE_HIGH>;
+        slave-addr = <138>;
+        clocks = <&tegra_car TEGRA20_CLK_I2C3>,
+                 <&tegra_car TEGRA20_CLK_PLL_P_OUT3>;
+        clock-names = "div-clk", "fast-clk";
+        resets = <&tegra_car 67>;
+        reset-names = "i2c";
+    };

@@ -1,0 +1,28 @@
+# SPDX-许可证标识符: GPL-2.0
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/display/lvds.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: LVDS 显示器通用属性
+
+allOf:
+  - $ref: lvds-data-mapping.yaml#
+
+维护者:
+  - Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
+  - Thierry Reding <thierry.reding@gmail.com>
+
+描述:
+  此绑定扩展了在 lvds-data-mapping.yaml 中定义的数据映射。
+它支持反转在那里定义的格式上的位顺序，以适应更专业化的数据格式，
+因为有多种数据格式和布局用于驱动 LVDS 显示器。
+属性:
+  data-mirror:
+    类型: 布尔值
+    描述:
+      如果设置，则反转所有数据通道中数据映射中描述的位顺序，
+      传输槽 6 到 0 的比特位，而不是 0 到 6
+其他属性: true
+
+..

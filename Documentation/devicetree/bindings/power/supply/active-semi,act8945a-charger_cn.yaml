@@ -1,0 +1,79 @@
+```yaml
+# SPDX-文件许可标识: GPL-2.0
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/power/supply/active-semi,act8945a-charger.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: Active-semi ACT8945A 充电器功能
+
+maintainers:
+  - Sebastian Reichel <sre@kernel.org>
+
+allOf:
+  - $ref: power-supply.yaml#
+
+properties:
+  compatible:
+    const: active-semi,act8945a-charger
+
+  interrupts:
+    maxItems: 1
+
+  active-semi,chglev-gpios:
+    maxItems: 1
+    description: 充电电流等级 GPIO
+
+  active-semi,lbo-gpios:
+    maxItems: 1
+    description: 低电池电压检测 GPIO
+
+  active-semi,input-voltage-threshold-microvolt:
+    description: |
+      指定充电器的输入过压阈值，尽管名称中使用微伏（μV），实际指定的单位是毫伏（mV）
+      默认为 6.6 V
+    enum: [ 6600, 7000, 7500, 8000 ]
+
+  active-semi,precondition-timeout:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    description: |
+      指定充电器的预处理安全定时器设置值（分钟）
+      如果为 0，则表示禁用此定时器
+      默认为 40 分钟
+    enum: [ 0, 40, 60, 80 ]
+
+  active-semi,total-timeout:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    description: |
+      指定充电器的总安全定时器设置值（小时）；
+      如果为 0，则表示禁用此定时器；
+      默认为 3 小时
+    enum: [ 0, 3, 4, 5 ]
+
+required:
+  - compatible
+  - interrupts
+  - active-semi,chglev-gpios
+  - active-semi,lbo-gpios
+
+additionalProperties: false
+
+examples:
+  - |
+    #include <dt-bindings/gpio/gpio.h>
+    #include <dt-bindings/interrupt-controller/irq.h>
+    pmic {
+      charger {
+        compatible = "active-semi,act8945a-charger";
+        interrupt-parent = <&pioA>;
+        interrupts = <45 IRQ_TYPE_LEVEL_LOW>;
+        active-semi,chglev-gpios = <&pioA 12 GPIO_ACTIVE_HIGH>;
+        active-semi,lbo-gpios = <&pioA 72 GPIO_ACTIVE_LOW>;
+        active-semi,input-voltage-threshold-microvolt = <6600>;
+        active-semi,precondition-timeout = <40>;
+        active-semi,total-timeout = <3>;
+      };
+    };
+```
+
+这段 YAML 描述了 Active-semi ACT8945A 充电器在设备树中的配置。它定义了与充电器相关的属性和要求，并提供了一个示例来展示如何在设备树源代码中使用这些属性。

@@ -1,0 +1,75 @@
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/fpga/xlnx,fpga-slave-serial.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: Xilinx 从属串行 SPI FPGA
+
+maintainers:
+  - Nava Kishore Manne <nava.kishore.manne@amd.com>
+
+description: |
+  Xilinx Spartan-6 和 7 系列 FPGA 支持一种通过所谓的从属串行接口加载位流的方法。从属串行链路在技术上并不是 SPI，并且可能需要额外的电路才能与其他在同一总线上的 SPI 从属设备兼容。
+数据手册:
+    https://www.xilinx.com/support/documentation/user_guides/ug380.pdf
+    https://www.xilinx.com/support/documentation/user_guides/ug470_7Series_Config.pdf
+    https://www.xilinx.com/support/documentation/application_notes/xapp583-fpga-configuration.pdf
+
+allOf:
+  - $ref: /schemas/spi/spi-peripheral-props.yaml#
+
+properties:
+  compatible:
+    enum:
+      - xlnx,fpga-slave-serial
+
+  spi-cpha: true
+
+  spi-max-frequency:
+    maximum: 60000000
+
+  reg:
+    maxItems: 1
+
+  prog_b-gpios:
+    description:
+      配置引脚（在手册中称为 PROGRAM_B）
+    maxItems: 1
+
+  done-gpios:
+    description:
+      配置状态引脚（在手册中称为 DONE）
+    maxItems: 1
+
+  init-b-gpios:
+    description:
+      初始化状态和配置错误引脚（在手册中称为 INIT_B）
+    maxItems: 1
+
+required:
+  - compatible
+  - reg
+  - prog_b-gpios
+  - done-gpios
+  - init-b-gpios
+
+additionalProperties: false
+
+examples:
+  - |
+    #include <dt-bindings/gpio/gpio.h>
+    spi {
+      #address-cells = <1>;
+      #size-cells = <0>;
+      fpga_mgr_spi: fpga-mgr@0 {
+        compatible = "xlnx,fpga-slave-serial";
+        spi-max-frequency = <60000000>;
+        spi-cpha;
+        reg = <0>;
+        prog_b-gpios = <&gpio0 29 GPIO_ACTIVE_LOW>;
+        init-b-gpios = <&gpio0 28 GPIO_ACTIVE_LOW>;
+        done-gpios = <&gpio0 9 GPIO_ACTIVE_HIGH>;
+      };
+    };
+..

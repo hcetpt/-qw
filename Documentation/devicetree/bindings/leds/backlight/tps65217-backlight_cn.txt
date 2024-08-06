@@ -1,0 +1,27 @@
+TPS65217 系列稳压器
+
+TPS65217 芯片包含一个升压转换器和电流阱，可用于驱动 LED 作为背光使用。
+所需属性：
+- compatible: "ti,tps65217"
+- reg: I2C 从设备地址
+- backlight: 用于指定 TPS65217 中 WLED1 和 WLED2 线的节点
+- isel: 选择位，有效值：1 表示 ISEL1（低电平）和 2 表示 ISEL2（高电平）
+- fdim: PWM 调光频率，有效值：100、200、500、1000
+- default-brightness: 有效值：0-100
+
+每个稳压器都使用标准的稳压器绑定定义。
+示例：
+
+```plaintext
+tps: tps@24 {
+    reg = <0x24>;
+    compatible = "ti,tps65217";
+    backlight {
+        isel = <1>;  /* 1 - ISET1, 2 - ISET2 */
+        fdim = <100>; /* TPS65217_BL_FDIM_100HZ */
+        default-brightness = <50>;
+    };
+};
+```
+
+这段代码描述了如何在设备树中配置一个 TPS65217 芯片，以便能够正确地控制其背光功能。

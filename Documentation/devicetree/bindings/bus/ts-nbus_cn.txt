@@ -1,0 +1,49 @@
+### 技术系统公司 NBUS
+
+NBUS 是一种总线，用于与技术系统公司 FPGA 上的外围设备进行接口，在 TS-4600 系统级模块 (SoM) 中使用。
+必需属性：
+- `compatible`：必须为 `"technologic,ts-nbus"`
+- `#address-cells`：必须为 1
+- `#size-cells`：必须为 0
+- `pwms`：绑定到 FPGA 的 PWM
+- `ts,data-gpios`：连接到 FPGA 数据线上的 8 个 GPIO 引脚
+- `ts,csn-gpios`：连接到 FPGA CSN 线路上的 GPIO 引脚
+- `ts,txrx-gpios`：连接到 FPGA TXRX 线路上的 GPIO 引脚
+- `ts,strobe-gpios`：连接到 FPGA STROBE 线路上的 GPIO 引脚
+- `ts,ale-gpios`：连接到 FPGA ALE 线路上的 GPIO 引脚
+- `ts,rdy-gpios`：连接到 FPGA RDY 线路上的 GPIO 引脚
+
+#### 子节点
+
+NBUS 节点可以包含零个或多个表示总线上外围设备的子节点。
+示例：
+
+```yaml
+nbus {
+    compatible = "technologic,ts-nbus";
+    pinctrl-0 = <&nbus_pins>;
+    #address-cells = <1>;
+    #size-cells = <0>;
+    pwms = <&pwm 2 83>;
+    ts,data-gpios = <&gpio0 0 GPIO_ACTIVE_HIGH
+                     &gpio0 1 GPIO_ACTIVE_HIGH
+                     &gpio0 2 GPIO_ACTIVE_HIGH
+                     &gpio0 3 GPIO_ACTIVE_HIGH
+                     &gpio0 4 GPIO_ACTIVE_HIGH
+                     &gpio0 5 GPIO_ACTIVE_HIGH
+                     &gpio0 6 GPIO_ACTIVE_HIGH
+                     &gpio0 7 GPIO_ACTIVE_HIGH>;
+    ts,csn-gpios = <&gpio0 16 GPIO_ACTIVE_HIGH>;
+    ts,txrx-gpios = <&gpio0 24 GPIO_ACTIVE_HIGH>;
+    ts,strobe-gpios = <&gpio0 25 GPIO_ACTIVE_HIGH>;
+    ts,ale-gpios = <&gpio0 26 GPIO_ACTIVE_HIGH>;
+    ts,rdy-gpios = <&gpio0 21 GPIO_ACTIVE_HIGH>;
+
+    watchdog@2a {
+        compatible = "...";
+
+        /* ... */
+    };
+};
+```
+以上示例展示了如何配置一个 NBUS 总线及其相关的 GPIO 和 PWM 控制器，并且包含了一个名为 `watchdog@2a` 的示例子节点。

@@ -1,0 +1,54 @@
+*TPS65912电源管理集成电路绑定
+
+必需的属性：
+- compatible（兼容性）：应为"ti,tps65912"
+- reg（寄存器）：从机地址或芯片选择号（I2C / SPI）
+- interrupts（中断）：设备连接到的中断线
+- interrupt-controller（中断控制器）：标记该设备节点为一个中断控制器
+- #interrupt-cells（中断单元数量）：描述一个IRQ所需的单元格数量，应为2
+第一个单元格是IRQ编号
+第二个单元格是标志，编码为来自../interrupt-controller/interrupts.txt中的触发掩码
+- gpio-controller（GPIO控制器）：标记该设备节点为一个GPIO控制器
+- #gpio-cells（GPIO单元数量）：应为两个。第一个单元格是引脚编号，
+第二个单元格用于指定标志
+更多信息请参阅../gpio/gpio.txt
+这段英文描述了一个设备树（Device Tree）中的配置示例，主要涉及电源管理集成电路（PMIC）及其相关的电压调节器（regulators）。下面是该段落的中文翻译：
+
+---
+
+**调节器：** 子节点列表，用于指定调节器的初始化数据。子节点必须以其硬件对应部分命名：`dcdc[1-4]` 和 `ldo[1-10]`。每个子节点使用标准的调节器绑定定义。
+
+**示例：**
+
+```plaintext
+pmic: tps65912@2d { // PMIC 节点名称为 tps65912@2d
+    compatible = "ti,tps65912"; // 兼容性声明
+    reg = <0x2d>; // 寄存器地址
+    interrupt-parent = <&gpio1>; // 中断父节点
+    interrupts = <28 IRQ_TYPE_LEVEL_LOW>; // 中断设置
+    interrupt-controller; // 中断控制器声明
+    #interrupt-cells = <2>; // 中断单元数量
+    gpio-controller; // GPIO 控制器声明
+    #gpio-cells = <2>; // GPIO 单元数量
+
+    regulators { // 调节器节点
+        dcdc1 { // DCDC1 调节器
+            regulator-name = "vdd_core"; // 调节器名称
+            regulator-min-microvolt = <912000>; // 最小输出电压 (微伏)
+            regulator-max-microvolt = <1144000>; // 最大输出电压 (微伏)
+            regulator-boot-on; // 开机时启用
+            regulator-always-on; // 始终启用
+        };
+
+        ldo1 { // LDO1 调节器
+            regulator-name = "ldo1"; // 调节器名称
+            regulator-min-microvolt = <1900000>; // 最小输出电压 (微伏)
+            regulator-max-microvolt = <1900000>; // 最大输出电压 (微伏)
+        };
+    };
+};
+```
+
+---
+
+此示例详细地展示了如何在设备树中配置一个特定型号的电源管理芯片（TPS65912），以及其内部的电压调节器。

@@ -1,0 +1,30 @@
+ZHAW InES PTP 时间戳 IP 核心模块
+
+该 IP 核心模块需要两种不同类型的节点。控制节点位于内存映射的某个位置，并指定了控制寄存器的地址。最多可以在 PHY 节点中作为属性放置三个端口句柄。这些句柄将特定的 MII 总线与 IP 核心模块中的端口索引相关联。
+控制节点所需属性：
+
+- compatible:		"ines,ptp-ctrl"
+- reg:			寄存器组的物理地址和大小
+
+PHY 节点内端口句柄所需格式：
+
+- timestamper:		提供对控制节点的引用以及
+			IP 核心模块内的端口通道
+
+示例：
+
+	tstamper: timestamper@60000000 {
+		compatible = "ines,ptp-ctrl";
+		reg = <0x60000000 0x80>;
+	};
+
+	ethernet@80000000 {
+		..
+mdio {
+			..
+ethernet-phy@3 {
+				..
+timestamper = <&tstamper 0>;
+			};
+		};
+	};

@@ -1,0 +1,65 @@
+```yaml
+# SPDX-许可证标识符: GPL-2.0
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/display/bridge/analogix,dp.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: Analogix 显示端口桥接器
+
+maintainers:
+  - Rob Herring <robh@kernel.org>
+
+properties:
+  reg:
+    maxItems: 1
+
+  interrupts:
+    maxItems: 1
+
+  clocks: true
+
+  clock-names: true
+
+  phys: true
+
+  phy-names:
+    const: dp
+
+  force-hpd:
+    type: 布尔
+    description:
+      指示驱动程序需要在热插拔检测失败时强制执行热插拔检测，这
+      是用于某些没有热插拔信号的eDP屏幕
+hpd-gpios:
+    description:
+      热插拔检测GPIO
+指示哪个GPIO应该用于热插拔检测
+
+  ports:
+    $ref: /schemas/graph.yaml#/properties/ports
+
+    properties:
+      port@0:
+        $ref: /schemas/graph.yaml#/properties/port
+        description:
+          输入节点以接收像素数据
+port@1:
+        $ref: /schemas/graph.yaml#/properties/port
+        description:
+          端口节点，其一个端点连接到dp-connector节点
+required:
+      - port@0
+      - port@1
+
+required:
+  - reg
+  - interrupts
+  - clock-names
+  - clocks
+  - ports
+
+additionalProperties: true
+```
+
+请注意，部分翻译可能不太准确，如 `hpd-gpios:` 下面的描述，因为原文件中的这部分描述并未完成。另外，`force-hpd:` 中的 "hpd" 应该是 "hot plug detect"（热插拔检测）的缩写，但为了保持原文意思未作修改。

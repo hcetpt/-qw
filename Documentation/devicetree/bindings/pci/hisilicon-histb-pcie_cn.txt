@@ -1,0 +1,73 @@
+海思STB PCIe主机桥接器设备树描述
+
+海思STB PCIe主机控制器基于DesignWare PCIe内核，
+它与DesignWare PCIe内核驱动程序共享通用功能，并继承了
+在 `Documentation/devicetree/bindings/pci/snps,dw-pcie.yaml` 中定义的
+通用属性。额外的属性在这里描述：
+
+必需的属性
+- compatible: 应该是以下字符串之一：
+    - "hisilicon,hi3798cv200-pcie"
+- reg: 应包含sysctl、rc_dbi、config寄存器的位置和长度
+- reg-names: 必须包括以下条目：
+  - "control": PCIe控制器的控制寄存器；
+  - "rc-dbi": PCIe控制器的配置空间；
+  - "config": PCIe控制器的配置事务空间
+- bus-range: 覆盖的PCI总线编号
+- interrupts: MSI中断
+- interrupt-names: 必须包括 "msi" 条目
+- clocks: 根据clock-names属性列出的phandle和时钟标识符对列表
+- clock-names: 必须包括以下条目：
+  - "aux": 辅助门控时钟；
+  - "pipe": 管道门控时钟；
+  - "sys": 系统门控时钟；
+  - "bus": 总线门控时钟
+- resets: 根据reset-names属性列出的phandle和复位标识符对列表
+此段文本描述了一个 PCI Express (PCIe) 设备在设备树中的配置。下面是这段配置的中文翻译：
+
+必须包含的重置名称条目：
+- `soft`: 软重置；
+- `sys`: 系统重置；
+- `bus`: 总线重置
+
+可选属性：
+- `reset-gpios`: 生成 PCIe PERST# 断言和非断言信号的 GPIO
+- `vpcie-supply`: 负责 PCIe 端口供电的稳压器
+- `phys`: 物理层（PHY）句柄列表及 PHY 模式指定符，应为 0
+- `phy-names`: 必须是 "phy"
+
+示例：
+```plaintext
+pcie@f9860000 {
+    compatible = "hisilicon,hi3798cv200-pcie";  // 兼容性标识
+    reg = <0xf9860000 0x1000>,                  // 寄存器地址范围
+          <0xf0000000 0x2000>,
+          <0xf2000000 0x01000000>;
+    reg-names = "control", "rc-dbi", "config";  // 寄存器名称
+    #address-cells = <3>;                       // 地址单元数量
+    #size-cells = <2>;                          // 大小单元数量
+    device_type = "pci";                        // 设备类型
+    bus-range = <0 15>;                         // 总线范围
+    num-lanes = <1>;                            // 车道数
+    ranges=<0x81000000 0 0 0xf4000000 0 0x00010000
+        0x82000000 0 0xf3000000 0xf3000000 0 0x01000000>;  // 地址映射
+    interrupts = <GIC_SPI 128 IRQ_TYPE_LEVEL_HIGH>;  // 中断信息
+    interrupt-names = "msi";                    // 中断名称
+    #interrupt-cells = <1>;                     // 中断单元数量
+    interrupt-map-mask = <0 0 0 0>;             // 中断映射掩码
+    interrupt-map = <0 0 0 0 &gic GIC_SPI 131 IRQ_TYPE_LEVEL_HIGH>;  // 中断映射
+    clocks = <&crg PCIE_AUX_CLK>,               // 时钟源
+             <&crg PCIE_PIPE_CLK>,
+             <&crg PCIE_SYS_CLK>,
+             <&crg PCIE_BUS_CLK>;
+    clock-names = "aux", "pipe", "sys", "bus";  // 时钟名称
+    resets = <&crg 0x18c 6>,                    // 重置源
+             <&crg 0x18c 5>,
+             <&crg 0x18c 4>;
+    reset-names = "soft", "sys", "bus";         // 重置名称
+    phys = <&combphy1 PHY_TYPE_PCIE>;           // 物理层配置
+    phy-names = "phy";                          // 物理层名称
+};
+```
+
+这个配置定义了 PCIe 控制器的详细信息，包括它的寄存器、中断、时钟、重置等设置。

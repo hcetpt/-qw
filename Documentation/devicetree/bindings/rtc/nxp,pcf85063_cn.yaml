@@ -1,0 +1,92 @@
+下面是给定内容的中文翻译：
+
+# SPDX-文件许可标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/rtc/nxp,pcf85063.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: NXP PCF85063 实时时钟
+
+maintainers:
+  - Alexander Stein <alexander.stein@ew.tq-group.com>
+
+properties:
+  compatible:
+    enum:
+      - microcrystal,rv8263
+      - nxp,pcf85063
+      - nxp,pcf85063a
+      - nxp,pcf85063tp
+      - nxp,pca85073a
+
+  reg:
+    maxItems: 1
+
+  "#clock-cells":
+    const: 0
+
+  clock-output-names:
+    maxItems: 1
+
+  interrupts:
+    maxItems: 1
+
+  quartz-load-femtofarads:
+    description:
+      晶体(x-tal)的电容负载
+    enum: [7000, 12500]
+    default: 7000
+
+  clock:
+    $ref: /schemas/clock/fixed-clock.yaml
+    description:
+      如果方形波引脚用作启动启用的固定时钟，则提供此配置
+    wakeup-source: true
+
+allOf:
+  - $ref: rtc.yaml#
+  - if:
+      properties:
+        compatible:
+          contains:
+            enum:
+              - microcrystal,rv8263
+    then:
+      properties:
+        quartz-load-femtofarads: false
+  - if:
+      properties:
+        compatible:
+          contains:
+            enum:
+              - nxp,pcf85063
+    then:
+      properties:
+        quartz-load-femtofarads:
+          const: 7000
+
+required:
+  - compatible
+  - reg
+
+additionalProperties: false
+
+examples:
+  - |
+    i2c {
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        rtc@51 {
+          compatible = "nxp,pcf85063a";
+          reg = <0x51>;
+          quartz-load-femtofarads = <12500>;
+
+          clock {
+            compatible = "fixed-clock";
+            #clock-cells = <0>;
+            clock-frequency = <32768>;
+          };
+        };
+      };

@@ -1,0 +1,67 @@
+* 德州仪器 (Texas Instruments) - LM3697 高效白光 LED 驱动器
+
+LM3697 11 位 LED 驱动器为单串、双串或三串 LED 提供高性能的背光调光功能，同时可实现高达 90% 的效率。该器件适用于显示屏和键盘照明。
+
+必需属性：
+    - compatible: 
+        "ti,lm3697"
+    - reg : I2C 从设备地址
+    - #address-cells : 1
+    - #size-cells : 0
+
+可选属性：
+    - enable-gpios : 用于启用/禁用设备的 GPIO 引脚
+    - vled-supply : LED 供电
+
+必需子节点属性：
+    - reg : 
+        0 - LED 由 A 银行控制
+        1 - LED 由 B 银行控制
+    - led-sources : 指示哪个高压 LED 串与哪个控制银行相关联。这是基于零的属性，即
+            HVLED1 = 0, HVLED2 = 1, HVLED3 = 2
+有关更多信息，请参阅文档/devicetree/bindings/leds/common.txt
+
+可选子节点属性：
+    - ti,brightness-resolution - 请参阅文档/devicetree/bindings/mfd/ti-lmu.txt
+    - ramp-up-us: 请参阅文档/devicetree/bindings/mfd/ti-lmu.txt
+    - ramp-down-us: 请参阅文档/devicetree/bindings/mfd/ti-lmu.txt
+    - label : 请参阅文档/devicetree/bindings/leds/common.txt
+    - linux,default-trigger : 请参阅文档/devicetree/bindings/leds/common.txt
+
+示例：
+
+高压 LED 串 1 和 3 由控制银行 A 控制，而高压 LED 串 2 由控制银行 B 控制。
+```
+led-controller@36 {
+    compatible = "ti,lm3697";
+    #address-cells = <1>;
+    #size-cells = <0>;
+    reg = <0x36>;
+
+    enable-gpios = <&gpio1 28 GPIO_ACTIVE_HIGH>;
+    vled-supply = <&vbatt>;
+
+    led@0 {
+        reg = <0>;
+        led-sources = <0 2>;
+        ti,brightness-resolution = <2047>;
+        ramp-up-us = <5000>;
+        ramp-down-us = <1000>;
+        label = "white:first_backlight_cluster";
+        linux,default-trigger = "backlight";
+    };
+
+    led@1 {
+        reg = <1>;
+        led-sources = <1>;
+        ti,brightness-resolution = <255>;
+        ramp-up-us = <500>;
+        ramp-down-us = <1000>;
+        label = "white:second_backlight_cluster";
+        linux,default-trigger = "backlight";
+    };
+}
+```
+
+欲了解更多信息，请访问以下链接：
+https://www.ti.com/lit/ds/symlink/lm3697.pdf

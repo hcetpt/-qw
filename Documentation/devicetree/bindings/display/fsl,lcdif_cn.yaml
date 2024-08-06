@@ -1,0 +1,180 @@
+下面是给定内容的中文翻译：
+
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/display/fsl,lcdif.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: Freescale/NXP i.MX 液晶显示接口 (LCDIF)
+
+维护者:
+  - Marek Vasut <marex@denx.de>
+  - Stefan Agner <stefan@agner.ch>
+
+描述: |
+  在Freescale/NXP i.MX 系统级芯片中发现的 (e)LCDIF 显示控制器
+属性:
+  compatible:
+    oneOf:
+      - 枚举:
+          - fsl,imx23-lcdif
+          - fsl,imx28-lcdif
+          - fsl,imx6sx-lcdif
+          - fsl,imx8mp-lcdif
+          - fsl,imx93-lcdif
+      - items:
+          - 枚举:
+              - fsl,imx6sl-lcdif
+              - fsl,imx6sll-lcdif
+              - fsl,imx6ul-lcdif
+              - fsl,imx7d-lcdif
+              - fsl,imx8mm-lcdif
+              - fsl,imx8mn-lcdif
+              - fsl,imx8mq-lcdif
+          - 常量: fsl,imx6sx-lcdif
+
+  reg:
+    maxItems: 1
+
+  clocks:
+    items:
+      - 描述: 像素时钟
+      - 描述: 总线时钟
+      - 描述: 显示AXI时钟
+    minItems: 1
+
+  clock-names:
+    items:
+      - 常量: pix
+      - 常量: axi
+      - 常量: disp_axi
+    minItems: 1
+
+  interrupts:
+    items:
+      - 描述: LCDIF DMA中断
+      - 描述: LCDIF 错误中断
+    minItems: 1
+
+  power-domains:
+    maxItems: 1
+
+  port:
+    $ref: /schemas/graph.yaml#/properties/port
+    描述: LCDIF 输出端口
+
+必需:
+  - compatible
+  - reg
+  - clocks
+  - interrupts
+  - port
+
+额外属性: false
+
+allOf:
+  - 如果:
+      属性:
+        compatible:
+          包含:
+            常量: fsl,imx6sx-lcdif
+    那么:
+      属性:
+        clocks:
+          minItems: 2
+          maxItems: 3
+        clock-names:
+          minItems: 2
+          maxItems: 3
+      必需:
+        - clock-names
+  - 如果:
+      属性:
+        compatible:
+          包含:
+            枚举:
+              - fsl,imx8mp-lcdif
+              - fsl,imx93-lcdif
+    那么:
+      属性:
+        clocks:
+          minItems: 3
+          maxItems: 3
+        clock-names:
+          minItems: 3
+          maxItems: 3
+      必需:
+        - clock-names
+  - 如果:
+      not:
+        属性:
+          compatible:
+            包含:
+              枚举:
+                - fsl,imx6sx-lcdif
+                - fsl,imx8mp-lcdif
+                - fsl,imx93-lcdif
+    那么:
+      属性:
+        clocks:
+          maxItems: 1
+        clock-names:
+          maxItems: 1
+  - 如果:
+      属性:
+        compatible:
+          常量: fsl,imx6sx-lcdif
+    那么:
+      必需:
+        - power-domains
+  - 如果:
+      属性:
+        compatible:
+          包含:
+            枚举:
+              - fsl,imx6sl-lcdif
+              - fsl,imx8mm-lcdif
+              - fsl,imx8mn-lcdif
+              - fsl,imx8mp-lcdif
+              - fsl,imx93-lcdif
+    那么:
+      必需:
+        - power-domains
+  - 如果:
+      属性:
+        compatible:
+          包含:
+            枚举:
+              - fsl,imx23-lcdif
+    那么:
+      属性:
+        interrupts:
+          minItems: 2
+          maxItems: 2
+    否则:
+      属性:
+        interrupts:
+          maxItems: 1
+
+示例:
+  - |
+    #include <dt-bindings/clock/imx6sx-clock.h>
+    #include <dt-bindings/interrupt-controller/arm-gic.h>
+
+    display-controller@2220000 {
+        compatible = "fsl,imx6sx-lcdif";
+        reg = <0x02220000 0x4000>;
+        interrupts = <GIC_SPI 5 IRQ_TYPE_LEVEL_HIGH>;
+        clocks = <&clks IMX6SX_CLK_LCDIF1_PIX>,
+                 <&clks IMX6SX_CLK_LCDIF_APB>,
+                 <&clks IMX6SX_CLK_DISPLAY_AXI>;
+        clock-names = "pix", "axi", "disp_axi";
+        power-domains = <&pd_disp>;
+
+        port {
+            endpoint {
+                remote-endpoint = <&panel_in>;
+            };
+        };
+    };

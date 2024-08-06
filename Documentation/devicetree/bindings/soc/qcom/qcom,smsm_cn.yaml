@@ -1,0 +1,127 @@
+# SPDX-License-Identifier: GPL-2.0-only OR BSD-2-Clause
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/soc/qcom/qcom,smsm.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: 高通共享内存状态机
+
+maintainers:
+  - Andy Gross <agross@kernel.org>
+  - Bjorn Andersson <bjorn.andersson@linaro.org>
+  - Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+
+description:
+  共享内存状态机促进了高通SoC中处理器间单比特状态信息的广播。每个处理器被分配了32位的状态信息，这些信息可以被修改。一个处理器可以通过位图矩阵信号来订阅特定远程处理器所拥有的某个比特的变化通知。
+
+properties:
+  compatible:
+    const: qcom,smsm
+
+  '#address-cells':
+    const: 1
+
+  qcom,local-host:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    default: 0
+    description:
+      本地处理器在主机列表中的标识符，或者说代表本地处理器的订阅矩阵中的列索引。
+mboxes:
+    minItems: 1
+    maxItems: 5
+    description:
+      指向表示此客户端APCS中出站门铃的邮箱的引用。每个条目通过索引（从0开始）代表第N个远程处理器。
+'#size-cells':
+    const: 0
+
+patternProperties:
+  "^qcom,ipc-[1-4]$":
+    $ref: /schemas/types.yaml#/definitions/phandle-array
+    items:
+      - items:
+          - description: 指向表示APCS寄存器的syscon节点的phandle
+          - description: 表示syscon内寄存器偏移量的u32
+          - description: 寄存器内的ipc比特
+    description:
+      三个条目指定了用于标记第N个远程处理器的出站ipc比特。
+deprecated: true
+
+  "@[0-9a-f]$":
+    type: object
+    description:
+      每个处理器的状态比特由SMSM设备节点的子节点描述。节点可以标记为中断控制器以表示远程处理器的状态比特或本地处理器的状态比特。节点名称不重要。
+properties:
+      reg:
+        maxItems: 1
+
+      interrupt-controller:
+        description:
+          标记该条目为中断控制器，并且状态比特属于远程处理器。
+'#interrupt-cells':
+        const: 2
+
+      interrupts:
+        maxItems: 1
+        description:
+          一个条目指定远程处理器用于标记其状态比特变化的远程IRQ。
+'#qcom,smem-state-cells':
+        $ref: /schemas/types.yaml#/definitions/uint32
+        const: 1
+        description:
+          对于本地条目是必需的。表示比特号。
+required:
+      - reg
+
+    oneOf:
+      - required:
+          - '#qcom,smem-state-cells'
+      - required:
+          - interrupt-controller
+          - '#interrupt-cells'
+          - interrupts
+
+    additionalProperties: false
+
+required:
+  - compatible
+  - '#address-cells'
+  - '#size-cells'
+
+oneOf:
+  - required:
+      - mboxes
+  - anyOf:
+      - required:
+          - qcom,ipc-1
+      - required:
+          - qcom,ipc-2
+      - required:
+          - qcom,ipc-3
+      - required:
+          - qcom,ipc-4
+
+additionalProperties: false
+
+examples:
+  # 下面的例子展示了从8974应用程序处理器的角度控制无线处理器特性的SMEM设置。它包括一个出站条目和无线处理器的出站中断。
+- |
+    #include <dt-bindings/interrupt-controller/arm-gic.h>
+
+    shared-memory {
+        compatible = "qcom,smsm";
+        #address-cells = <1>;
+        #size-cells = <0>;
+        mboxes = <0>, <0>, <0>, <&apcs 19>;
+
+        apps_smsm: apps@0 {
+            reg = <0>;
+            #qcom,smem-state-cells = <1>;
+        };
+
+        wcnss_smsm: wcnss@7 {
+            reg = <7>;
+            interrupts = <GIC_SPI 144 IRQ_TYPE_EDGE_RISING>;
+            interrupt-controller;
+            #interrupt-cells = <2>;
+        };
+    };

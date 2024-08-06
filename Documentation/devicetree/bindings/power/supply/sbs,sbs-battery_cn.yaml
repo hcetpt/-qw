@@ -1,0 +1,78 @@
+# SPDX-许可证标识符: GPL-2.0
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/power/supply/sbs,sbs-battery.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: 符合SBS规范的电池
+
+maintainers:
+  - Sebastian Reichel <sre@kernel.org>
+
+description: |
+  与智能电池系统规范兼容的电池
+
+allOf:
+  - $ref: power-supply.yaml#
+
+properties:
+  compatible:
+    oneOf:
+      - items:
+          - enum:
+              - ti,bq20z45
+              - ti,bq20z65
+              - ti,bq20z75
+          - enum:
+              - sbs,sbs-battery
+      - items:
+          - const: sbs,sbs-battery
+
+  reg:
+    maxItems: 1
+
+  sbs,i2c-retry-count:
+    description:
+      在I2C IO失败时重试I2C事务的次数
+    default: 0
+    $ref: /schemas/types.yaml#/definitions/uint32
+
+  sbs,poll-retry-count:
+    description:
+      在外部更改通知后尝试查找新状态的次数
+    default: 0
+    $ref: /schemas/types.yaml#/definitions/uint32
+
+  sbs,battery-detect-gpios:
+    description:
+      用于指示电池检测的GPIO。如果没有提供这个属性，需要通过轮询总线来检测电池
+    maxItems: 1
+
+  sbs,disable-charger-broadcasts:
+    description:
+      SBS电池默认向符合SBS规范的充电器发送广播消息以配置最大充电电流/电压。如果你的硬件没有SBS兼容的充电器，则应通过此属性禁用它以避免阻塞总线。此外，已知某些SBS电池燃料表具有错误的多主控实现。
+    type: boolean
+
+required:
+  - compatible
+  - reg
+
+unevaluatedProperties: false
+
+examples:
+  - |
+    #include <dt-bindings/gpio/gpio.h>
+
+    i2c {
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        battery@b {
+            compatible = "ti,bq20z75", "sbs,sbs-battery";
+            reg = <0xb>;
+            sbs,i2c-retry-count = <2>;
+            sbs,poll-retry-count = <10>;
+            sbs,battery-detect-gpios = <&gpio 122 GPIO_ACTIVE_HIGH>;
+            sbs,disable-charger-broadcasts;
+       };
+    };

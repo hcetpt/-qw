@@ -1,0 +1,48 @@
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/soc/socionext/socionext,uniphier-adamv.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: Socionext UniPhier ADAMV 模块
+
+maintainers:
+  - Kunihiko Hayashi <hayashi.kunihiko@socionext.com>
+
+description: |+
+  Socionext UniPhier 系统芯片上实现的 ADAMV 模块是一个模拟信号放大器，它是外部视频和音频 I/O 系统的一部分。
+  此模块仅定义用于控制音频 I/O 复位。
+
+properties:
+  compatible:
+    items:
+      - enum:
+          - socionext,uniphier-ld11-adamv
+          - socionext,uniphier-ld20-adamv
+      - const: simple-mfd
+      - const: syscon
+
+  reg:
+    maxItems: 1
+
+  reset-controller:
+    $ref: /schemas/reset/socionext,uniphier-reset.yaml#
+
+required:
+  - compatible
+  - reg
+
+additionalProperties: false
+
+examples:
+  - |
+    syscon@57920000 {
+        compatible = "socionext,uniphier-ld20-adamv",
+                     "simple-mfd", "syscon";
+        reg = <0x57920000 0x1000>;
+
+        reset-controller {
+            compatible = "socionext,uniphier-ld20-adamv-reset";
+            #reset-cells = <1>;
+        };
+    };

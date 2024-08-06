@@ -1,0 +1,196 @@
+### NVIDIA Tegra PCIe 控制器
+
+**必需属性：**
+- **compatible：** 必须为以下之一：
+  - `"nvidia,tegra20-pcie"`：针对 Tegra20
+  - `"nvidia,tegra30-pcie"`：针对 Tegra30
+  - `"nvidia,tegra124-pcie"`：针对 Tegra124 和 Tegra132
+  - `"nvidia,tegra210-pcie"`：针对 Tegra210
+  - `"nvidia,tegra186-pcie"`：针对 Tegra186
+- **power-domains：** 用于通过 BPMP 功率门驱动程序解锁功率分区。必须包含 BPMP 的 phandle 和 PCIe 功率分区 ID。此属性仅适用于 Tegra186。
+- **device_type：** 必须为 "pci"。
+- **reg：** 每组控制器寄存器的物理基地址和长度列表。必须为 reg-names 属性中的每一项包含一个条目。
+- **reg-names：** 必须包括以下条目：
+  - `"pads"`：PADS 寄存器
+  - `"afi"`：AFI 寄存器
+  - `"cs"`：配置空间区域
+- **interrupts：** 控制器中断输出的列表。必须为 interrupt-names 属性中的每一项包含一个条目。
+- **interrupt-names：** 必须包括以下条目：
+  - `"intr"`：Tegra 中断，用于控制器中断
+  - `"msi"`：Tegra 中断，在接收到 MSI 时被激活
+- **bus-range：** 与此控制器关联的总线编号范围。
+- **#address-cells：** 根端口的地址表示（必须是 3）
+  - 单元 0 指定根端口的总线和设备编号：
+    - [23:16]：总线编号
+    - [15:11]：设备编号
+  - 单元 1 表示上层 32 位地址，并应为 0
+  - 单元 2 包含下层 32 位地址，并用于转换到 CPU 地址空间
+- **#size-cells：** 根端口的大小表示（必须是 2）。
+- **ranges：** 描述根端口和标准 PCI 区域的地址转换。每条记录必须由 6 个单元组成，其中前三个单元对应于上面为 #address-cells 属性描述的地址，第四个单元是将要转换的物理 CPU 地址，第五个和第六个单元对应于上面为 #size-cells 属性描述的内容。
+  - 前两个条目预期会转换根端口寄存器的地址，这些地址由根端口节点的 assigned-addresses 属性引用（参见下文）。
+  - 剩余的条目设置标准 I/O、内存和可预取 PCI 区域的映射。第一个单元确定设置的区域类型：
+    - `0x81000000`：I/O 内存区域
+    - `0x82000000`：非可预取内存区域
+    - `0xc2000000`：可预取内存区域
+  - 请参阅标准 PCI 总线绑定文档以获取更详细的解释。
+- **#interrupt-cells：** 中断的大小表示（必须是 1）。
+- **interrupt-map-mask** 和 **interrupt-map**：标准 PCI IRQ 映射属性。请参阅标准 PCI 总线绑定文档以获取更详细的解释。
+- **clocks：** 必须为 clock-names 中的每一项包含一个条目。详细信息请参阅 `../clocks/clock-bindings.txt`。
+- **clock-names：** 必须包括以下条目：
+  - `pex`
+  - `afi`
+  - `pll_e`
+  - `cml`（Tegra20 不需要）
+- **resets：** 必须为 reset-names 中的每一项包含一个条目。
+请参阅 ../reset/reset.txt 获取详细信息。
+- reset-names: 必须包含以下条目：
+  - pex
+  - afi
+  - pcie_x
+
+可选属性：
+- pinctrl-names: 一组针脚控制状态名称。必须包含以下条目：
+  - "default": 激活状态，将PCIe I/O从深度断电状态中移出
+  - "idle": 将PCIe I/O置于深度断电状态
+- pinctrl-0: 针脚配置默认/激活状态的句柄
+- pinctrl-1: 针脚配置空闲状态的句柄
+对于Tegra124及以后版本所需的属性（已弃用）：
+- phys: 对于phy-names中的每个条目都必须有一个相应的条目
+- phy-names: 必须包含以下条目：
+  - pcie
+
+这些属性已被弃用，取而代之的是在每个根端口中定义的每通道PHY（见下文）
+Tegra20的电源供应：
+- avdd-pex-supply: 为模拟PCIe逻辑供电。必须提供1.05V电压
+- vdd-pex-supply: 为数字PCIe I/O供电。必须提供1.05V电压
+- avdd-pex-pll-supply: 为专用（内部）PCIe PLL供电。必须提供1.05V电压
+- avdd-plle-supply: 为PLLE供电，该电源与SATA共享。必须提供1.05V电压
+- vddio-pex-clk-supply: 为PCIe时钟供电。必须提供3.3V电压
+Tegra30 的电源供应：
+- 必需的：
+  - avdd-pex-pll-supply：为专用（内部）PCIe PLL 提供电源。必须提供 1.05V。
+  - avdd-plle-supply：为 PLLE 提供电源，该电源与 SATA 共享。必须提供 1.05V。
+  - vddio-pex-ctl-supply：为 PCIe 控制 I/O 分区提供电源。必须提供 1.8V。
+  - hvdd-pex-supply：为 PCIe I/O 和 PCIe 输出时钟提供高压电源。必须提供 3.3V。
+- 可选的：
+  - 如果使用第 0 至第 3 车道：
+    - avdd-pexa-supply：为模拟 PCIe 逻辑提供电源。必须提供 1.05V。
+  - vdd-pexa-supply：为数字 PCIe I/O 提供电源。必须提供 1.05V。
+  - 如果使用第 4 或第 5 车道：
+    - avdd-pexb-supply：为模拟 PCIe 逻辑提供电源。必须提供 1.05V。
+  - vdd-pexb-supply：为数字 PCIe I/O 提供电源。必须提供 1.05V。
+
+Tegra124 的电源供应：
+- 必需的：
+  - avddio-pex-supply：为模拟 PCIe 逻辑提供电源。必须提供 1.05V。
+下面是给定内容的中文翻译：
+
+- `dvddio-pex-supply`: 为数字 PCIe I/O 提供电源。必须提供 1.05V 的电压。
+- `hvdd-pex-supply`: 为 PCIe I/O 和 PCIe 输出时钟提供高压电源。必须提供 3.3V 的电压。
+- `vddio-pex-ctl-supply`: 为 PCIe 控制 I/O 分区提供电源。必须提供 2.8 至 3.3V 的电压。
+
+Tegra210 的电源供应：
+- 必需项：
+  - `hvddio-pex-supply`: 为 PCIe I/O 和 PCIe 输出时钟提供高压电源。必须提供 1.8V 的电压。
+- `dvddio-pex-supply`: 为数字 PCIe I/O 提供电源。必须提供 1.05V 的电压。
+- `vddio-pex-ctl-supply`: 为 PCIe 控制 I/O 分区提供电源。必须提供 1.8V 的电压。
+
+Tegra186 的电源供应：
+- 必需项：
+  - `dvdd-pex-supply`: 为数字 PCIe I/O 提供电源。必须提供 1.05V 的电压。
+- `hvdd-pex-pll-supply`: 为 PLLE（与 USB3 共享）提供高压电源。必须提供 1.8V 的电压。
+- `hvdd-pex-supply`: 为 PCIe I/O 和 PCIe 输出时钟提供高压电源。
+The provided text outlines the Device Tree Source (DTS) files for configuring PCIe controllers and their root ports on various NVIDIA Tegra SoCs. Below is the translation into simplified Chinese:
+
+**必须提供 1.8V**
+- `vddio-pexctl-aud-supply`: 为PCIe侧带信号提供的电源。**必须提供 1.8V**
+根端口定义为PCIe控制器节点的子节点。
+**必需属性:**
+- `device_type`: 必须是"pci"
+- `assigned-addresses`: 端口配置寄存器的地址和大小
+- `reg`: 根端口的PCI总线地址
+- `#address-cells`: 必须是3
+- `#size-cells`: 必须是2
+- `ranges`: 从PCIe控制器节点分配的子范围。一个空属性就足够了
+- `nvidia,num-lanes`: 此端口要使用的通道数量。有效的组合是:
+  - 根端口0使用4个通道，根端口1未使用
+- 所有根端口都使用2个通道
+对于Tegra124及以后版本的**必需属性:**
+- `phys`: 必须包含PHY列表中每个条目的phandle
+- `phy-names`: 必须包括每个活动通道的条目。注意条目的数量不一定（虽然通常会）等于`nvidia,num-lanes`属性中指定的通道数。条目的形式为"pcie-N"，其中N的范围是从0到`nvidia,num-lanes`属性中指定的值
+
+**示例:**
+
+**Tegra20:**
+
+**SoC DTSI:**
+
+```dts
+...
+```
+
+**板级DTS:**
+
+```dts
+...
+```
+
+**注释:** PCI总线上的设备通过PCI总线枚举动态发现，因此不需要在设备树中对应设备节点。但是，如果PCI总线上的设备提供了不可探测的总线（如I2C或SPI），则需要添加设备节点以允许操作系统设备树中的适当位置实例化这些总线的子设备。
+
+**Tegra30:**
+
+**SoC DTSI:**
+
+```dts
+...
+```
+
+**板级DTS:**
+
+```dts
+...
+```
+
+**Tegra124:**
+
+**SoC DTSI:**
+
+```dts
+...
+```
+
+**板级DTS:**
+
+```dts
+...
+```
+
+**Tegra210:**
+
+**SoC DTSI:**
+
+```dts
+...
+```
+
+**板级DTS:**
+
+```dts
+...
+```
+
+**Tegra186:**
+
+**SoC DTSI:**
+
+```dts
+...
+```
+
+**板级DTS:**
+
+```dts
+...
+```
+
+请注意，以上示例展示了如何在不同的Tegra SoC上配置PCIe控制器及其根端口。每个SoC都有其特定的兼容字符串、地址空间、中断和其他配置细节。此外，板级DTS文件指定了额外的电源管理信息和其他特定于板卡的配置。

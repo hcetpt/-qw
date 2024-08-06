@@ -1,0 +1,204 @@
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/display/panel/panel-timing.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: 面板定时
+
+维护者:
+  - Thierry Reding <thierry.reding@gmail.com>
+  - Sam Ravnborg <sam@ravnborg.org>
+
+描述: |
+  描述面板定时数据的方法有多种。设备树中的表示方式与通常在面板数据表中找到的表示方式相对应。
+  参数定义如以下示意图所示：
++-------+----------+-------------------------------------+----------+
+  |       |          |        ^                            |          |
+  |       |          |        |vsync_len                   |          |
+  |       |          |        v                            |          |
+  +-------+----------+-------------------------------------+----------+
+  |       |          |        ^                            |          |
+  |       |          |        |vback_porch                 |          |
+  |       |          |        v                            |          |
+  +-------+----------#######################################----------+
+  |       |          #        ^                            #          |
+  |       |          #        |                            #          |
+  | hsync |  hback   #        |                            #  hfront  |
+  |  len  |   porch  #        |       hactive              #  porch   |
+  |<----->|<-------->#<-------+--------------------------->#<-------->|
+  |       |          #        |                            #          |
+  |       |          #        |vactive                     #          |
+  |       |          #        |                            #          |
+  |       |          #        v                            #          |
+  +-------+----------#######################################----------+
+  |       |          |        ^                            |          |
+  |       |          |        |vfront_porch                |          |
+  |       |          |        v                            |          |
+  +-------+----------+-------------------------------------+----------+
+
+  下面是沿X轴的时间方向展示的面板定时。
+  这与数据表中常见的定时图相匹配。
+活动                  前端           同步           后端
+              区域                 空闲                          空闲
+  <-----------------------><----------------><-------------><-------------->
+    //////////////////////|
+   ////////////////////// |
+  //////////////////////  |..................               ...............
+_______________
+
+  定时可以指定为典型值或最小、典型、最大值的元组。
+属性:
+
+  clock-frequency:
+    描述: 面板时钟频率（赫兹Hz）
+
+  hactive:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    描述: 水平分辨率（像素数）
+
+  vactive:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    描述: 垂直分辨率（像素数）
+
+  hfront-porch:
+    描述: 水平前端空闲时间
+    $ref: /schemas/types.yaml#/definitions/uint32-array
+    oneOf:
+      - maxItems: 1
+        items:
+          描述: 典型像素数
+      - minItems: 3
+        maxItems: 3
+        items:
+          描述: 最小、典型、最大像素数
+
+  hback-porch:
+    描述: 水平后端空闲时间
+    $ref: /schemas/types.yaml#/definitions/uint32-array
+    oneOf:
+      - maxItems: 1
+        items:
+          描述: 典型像素数
+      - minItems: 3
+        maxItems: 3
+        items:
+          描述: 最小、典型、最大像素数
+
+  hsync-len:
+    描述: 水平同步长度
+    $ref: /schemas/types.yaml#/definitions/uint32-array
+    oneOf:
+      - maxItems: 1
+        items:
+          描述: 典型像素数
+      - minItems: 3
+        maxItems: 3
+        items:
+          描述: 最小、典型、最大像素数
+
+  vfront-porch:
+    描述: 垂直前端空闲时间
+    $ref: /schemas/types.yaml#/definitions/uint32-array
+    oneOf:
+      - maxItems: 1
+        items:
+          描述: 典型行数
+      - minItems: 3
+        maxItems: 3
+        items:
+          描述: 最小、典型、最大行数
+
+  vback-porch:
+    描述: 垂直后端空闲时间
+    $ref: /schemas/types.yaml#/definitions/uint32-array
+    oneOf:
+      - maxItems: 1
+        items:
+          描述: 典型行数
+      - minItems: 3
+        maxItems: 3
+        items:
+          描述: 最小、典型、最大行数
+
+  vsync-len:
+    描述: 垂直同步长度
+    $ref: /schemas/types.yaml#/definitions/uint32-array
+    oneOf:
+      - maxItems: 1
+        items:
+          描述: 典型行数
+      - minItems: 3
+        maxItems: 3
+        items:
+          描述: 最小、典型、最大行数
+
+  hsync-active:
+    描述: |
+      水平同步脉冲
+0 表示低电平有效，1 表示高电平有效
+如果省略，则硬件不使用它
+    $ref: /schemas/types.yaml#/definitions/uint32
+    enum: [0, 1]
+
+  vsync-active:
+    描述: |
+      垂直同步脉冲
+0 表示低电平有效，1 表示高电平有效
+Here's the translation into Chinese:
+
+如果省略，则硬件不会使用它。
+$ref: /schemas/types.yaml#/definitions/uint32
+enum: [0, 1]
+
+de-active:
+描述: |
+  数据使能
+0 表示低电平有效，1 表示高电平有效
+如果省略，则硬件不会使用它
+$ref: /schemas/types.yaml#/definitions/uint32
+enum: [0, 1]
+
+pixelclk-active:
+描述: |
+  在上升沿或下降沿驱动数据
+使用 0 在下降沿驱动像素数据，在上升沿采样数据
+使用 1 在上升沿驱动像素数据，在下降沿采样数据
+$ref: /schemas/types.yaml#/definitions/uint32
+enum: [0, 1]
+
+syncclk-active:
+描述: |
+  在上升沿驱动同步信号或在下降沿采样同步信号
+如果不指定，则配置遵循 pixelclk-active 的设置
+使用 0 在下降沿驱动同步信号，在像素时钟的上升沿采样同步信号
+使用 1 在上升沿驱动同步信号，在像素时钟的下降沿采样同步信号
+$ref: /schemas/types.yaml#/definitions/uint32
+enum: [0, 1]
+
+interlaced:
+类型: 布尔值
+描述: 启用隔行模式
+
+doublescan:
+类型: 布尔值
+描述: 启用双扫描模式
+
+doubleclk:
+类型: 布尔值
+描述: 启用双倍时钟模式
+
+必需:
+  - 时钟频率
+  - 水平有效区域
+  - 垂直有效区域
+  - 水平前廊
+  - 水平后廊
+  - 水平同步长度
+  - 垂直前廊
+  - 垂直后廊
+  - 垂直同步长度
+
+不允许额外属性:
+
+..

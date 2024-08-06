@@ -1,0 +1,64 @@
+### 指定设备的唤醒能力
+
+#### 任何设备节点
+
+描述具有唤醒能力的设备的节点可以包含一个布尔属性 `wakeup-source`。
+如果设备被标记为唤醒源，中断唤醒能力依赖于特定设备的 `interrupt-names` 属性。如果没有中断被标记为能够唤醒，则由设备自身确定哪些中断可以唤醒系统。
+然而，如果设备有一个专用中断作为唤醒源，则需要使用特定设备的中断名称来指定/识别它。在这种情况下，只有该中断可以用作唤醒中断。
+虽然存在各种遗留的中断名称，但新设备应使用 “wakeup” 作为规范的中断名称。
+
+#### 遗留属性列表及对应的绑定文档
+
+1. "gpio-key,wakeup" —— [Documentation/devicetree/bindings/input/gpio-keys{,-polled}.txt](Documentation/devicetree/bindings/input/gpio-keys{,-polled}.txt)
+2. "has-tpo" —— [Documentation/devicetree/bindings/rtc/rtc-opal.txt](Documentation/devicetree/bindings/rtc/rtc-opal.txt)
+3. "linux,wakeup" —— [Documentation/devicetree/bindings/input/gpio-matrix-keypad.txt](Documentation/devicetree/bindings/input/gpio-matrix-keypad.txt)、[Documentation/devicetree/bindings/mfd/tc3589x.txt](Documentation/devicetree/bindings/mfd/tc3589x.txt)、[Documentation/devicetree/bindings/input/touchscreen/ads7846.txt](Documentation/devicetree/bindings/input/touchscreen/ads7846.txt)
+4. "linux,keypad-wakeup" —— [Documentation/devicetree/bindings/input/qcom,pm8xxx-keypad.txt](Documentation/devicetree/bindings/input/qcom,pm8xxx-keypad.txt)
+5. "linux,input-wakeup" —— [Documentation/devicetree/bindings/input/samsung,s3c6410-keypad.yaml](Documentation/devicetree/bindings/input/samsung,s3c6410-keypad.yaml)
+6. "nvidia,wakeup-source" —— [Documentation/devicetree/bindings/input/nvidia,tegra20-kbc.txt](Documentation/devicetree/bindings/input/nvidia,tegra20-kbc.txt)
+
+#### 示例
+
+1. 使用 "wakeup" 中断名称
+
+```yaml
+device@10000 {
+    compatible = "vendor,device-id";
+    reg = <0x10000 0x1000>;
+    interrupts = <0 19 4>, <0 21 4>, <0 22 4>;
+    interrupt-names = "ack", "err", "wakeup";
+    wakeup-source;
+};
+```
+
+2. 不使用 "wakeup" 中断名称
+
+```yaml
+embedded-controller {
+    compatible = "google,cros-ec-i2c";
+    reg = <0x1e>;
+    interrupts = <6 0>;
+    interrupt-parent = <&gpx1>;
+    pinctrl-names = "default";
+    pinctrl-0 = <&ec_irq>;
+    wakeup-source;
+};
+```
+
+3. 没有中断
+
+```yaml
+gpio_keys {
+    compatible = "gpio-keys";
+    #address-cells = <1>;
+    #size-cells = <0>;
+
+    button@1 {
+        debounce-interval = <50>;
+        wakeup-source;
+        linux,code = <116>;
+        label = "POWER";
+        gpios = <&iofpga_gpio0 0 0x4>;
+    };
+    [....]
+};
+```

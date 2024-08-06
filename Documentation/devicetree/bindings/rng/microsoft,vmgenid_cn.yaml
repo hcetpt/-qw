@@ -1,0 +1,42 @@
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/rng/microsoft,vmgenid.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: 虚拟机生成ID
+
+维护者:
+  - Jason A. Donenfeld <Jason@zx2c4.com>
+
+描述:
+  固件或虚拟机监视程序可以使用此设备树来描述一个中断和一个共享资源，以注入虚拟机生成ID。虚拟机生成ID是一个全局唯一标识符（GUID），设备树绑定遵循在http://go.microsoft.com/fwlink/?LinkId=260709中定义的VMGenID规范。
+属性:
+  compatible:
+    常量: microsoft,vmgenid
+
+  reg:
+    描述:
+      指定一个16字节的VMGenID，采用与字节顺序无关的十六进制格式。
+最大项数: 1
+
+  interrupts:
+    描述:
+      用于通知新VMGenID可用的中断
+最大项数: 1
+
+必需:
+  - compatible
+  - reg
+  - interrupts
+
+额外属性: false
+
+示例:
+  - |
+    #include <dt-bindings/interrupt-controller/arm-gic.h>
+    rng@80000000 {
+      compatible = "microsoft,vmgenid";
+      reg = <0x80000000 0x1000>;
+      interrupts = <GIC_SPI 35 IRQ_TYPE_EDGE_RISING>;
+    };

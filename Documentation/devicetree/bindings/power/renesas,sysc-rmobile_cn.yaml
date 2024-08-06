@@ -1,0 +1,114 @@
+下面是给定内容的中文翻译：
+
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/power/renesas,sysc-rmobile.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: Renesas R-Mobile 系统控制器
+
+维护者:
+  - Geert Uytterhoeven <geert+renesas@glider.be>
+  - Magnus Damm <magnus.damm@gmail.com>
+
+描述: |
+  R-Mobile 系统控制器提供了以下功能：
+    - 启动模式管理，
+    - 重置生成，
+    - 电源管理
+属性:
+  compatible:
+    items:
+      - 枚举:
+          - renesas,sysc-r8a73a4    # R-Mobile APE6
+          - renesas,sysc-r8a7740    # R-Mobile A1
+          - renesas,sysc-sh73a0     # SH-Mobile AG5
+      - 常量: renesas,sysc-rmobile # 通用 SH/R-Mobile
+
+  reg:
+    items:
+      - 描述: 正常可访问寄存器块
+      - 描述: 受 HPB 半导体保护的寄存器块
+
+  pm-domains:
+    类型: 对象
+    描述: |
+      此节点包含 PM 域节点的层次结构，应与设备数据手册中“电源域规范”部分中的电源区域层次结构相匹配。
+属性:
+      '#address-cells':
+        常量: 1
+
+      '#size-cells':
+        常量: 0
+
+    additionalProperties:
+      $ref: "#/$defs/pd-node"
+
+必需:
+  - compatible
+  - reg
+  - pm-domains
+
+additionalProperties: false
+
+$defs:
+  pd-node:
+    类型: 对象
+    描述:
+      PM 域节点表示一个 PM 域。此节点应以其实际的电源区域名称命名，因此其名称应是唯一的。
+属性:
+      reg:
+        maxItems: 1
+        描述:
+          如果 PM 域不是始终开启，则此属性必须包含对应电源区域在各种电源控制和状态寄存器中的位索引号。
+          如果 PM 域始终开启，则必须省略此属性。
+'#address-cells':
+        常量: 1
+
+      '#size-cells':
+        常量: 0
+
+      '#power-domain-cells':
+        常量: 0
+
+    必需:
+      - '#power-domain-cells'
+
+    additionalProperties:
+      $ref: "#/$defs/pd-node"
+
+示例:
+  - |
+    // 这里展示的是 r8a7740 PM 域层次结构的一个子集，包括
+    // C5 “始终开启” 域、它的两个子域（A4S 和 A4SU），以及 A3SP 域，
+    // A3SP 是 A4S 的子域
+sysc: system-controller@e6180000 {
+            compatible = "renesas,sysc-r8a7740", "renesas,sysc-rmobile";
+            reg = <0xe6180000 0x8000>, <0xe6188000 0x8000>;
+
+            pm-domains {
+                    pd_c5: c5 {
+                            #address-cells = <1>;
+                            #size-cells = <0>;
+                            #power-domain-cells = <0>;
+
+                            pd_a4s: a4s@10 {
+                                    reg = <10>;
+                                    #address-cells = <1>;
+                                    #size-cells = <0>;
+                                    #power-domain-cells = <0>;
+
+                                    pd_a3sp: a3sp@11 {
+                                            reg = <11>;
+                                            #power-domain-cells = <0>;
+                                    };
+                            };
+
+                            pd_a4su: a4su@20 {
+                                    reg = <20>;
+                                    #power-domain-cells = <0>;
+                            };
+                    };
+            };
+    };

@@ -1,0 +1,59 @@
+MT6323 LED 控制器是 MT6323 PMIC 提供的子功能，因此 LED 控制器被定义为由 MT6323 PMIC 控制器提供的功能节点的子节点。MT6323 PMIC 控制器作为一种使用共享总线（称为 PMIC 包装器）的多功能设备 (MFD)，允许每个子功能访问远程 MT6323 PMIC 硬件。
+
+对于 MT6323 MFD 绑定，请参阅：
+`Documentation/devicetree/bindings/mfd/mt6397.txt`
+
+对于 MediaTek PMIC 包装器绑定，请参阅：
+`Documentation/devicetree/bindings/soc/mediatek/mediatek,pwrap.yaml`
+
+必需属性：
+- `compatible`：必须为以下之一
+  - `"mediatek,mt6323-led"`
+  - `"mediatek,mt6331-led"`
+  - `"mediatek,mt6332-led"`
+- `address-cells`：必须为 1
+- `size-cells`：必须为 0
+
+每个 LED 以子节点的形式表示，该子节点描述了每个 LED 的初始行为，并且当前仅支持四个 LED 子节点。
+对于 LED 子节点的必需属性：
+- `reg`：LED 通道编号（0..3）
+
+对于 LED 子节点的可选属性：
+- `label`：请参阅 `Documentation/devicetree/bindings/leds/common.txt`
+- `linux,default-trigger`：请参阅 `Documentation/devicetree/bindings/leds/common.txt`
+- `default-state`：请参阅 `Documentation/devicetree/bindings/leds/common.txt`
+
+示例：
+
+```text
+mt6323: pmic {
+	compatible = "mediatek,mt6323";
+
+	..
+
+mt6323led: leds {
+		compatible = "mediatek,mt6323-led";
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		led@0 {
+			reg = <0>;
+			label = "LED0";
+			linux,default-trigger = "timer";
+			default-state = "on";
+		};
+		led@1 {
+			reg = <1>;
+			label = "LED1";
+			default-state = "off";
+		};
+		led@2 {
+			reg = <2>;
+			label = "LED2";
+			default-state = "on";
+		};
+	};
+};
+```
+
+这个示例展示了如何在 Device Tree 中配置 MT6323 PMIC 的 LED 控制器及其 LED 子节点。每个 LED 都有其特定的配置，用于初始化 LED 的行为。

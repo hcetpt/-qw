@@ -1,0 +1,300 @@
+```yaml
+# SPDX-License-Identifier: (GPL-2.0 OR BSD-2-Clause)
+# Copyright 2019 Bootlin
+%YAML 1.2
+---
+$id: 'http://devicetree.org/schemas/display/xylon,logicvc-display.yaml#'
+$schema: 'http://devicetree.org/meta-schemas/core.yaml#'
+
+title: Xylon LogiCVC 显示控制器
+
+maintainers:
+  - Paul Kocialkowski <paul.kocialkowski@bootlin.com>
+
+description: |
+  Xylon LogiCVC 是一个支持多个图层的显示控制器。
+  它通常作为可编程逻辑实现，并针对Xilinx Zynq-7000 SoC和Xilinx FPGA进行了优化。
+  由于该控制器旨在用于FPGA中，因此大多数控制器配置发生在逻辑配置位流合成阶段。
+  因此，许多设备树绑定是为了反映合成配置，并且不应进行不同的配置。
+  在适用时提供了匹配的合成参数。
+  图层在"layers"子节点中声明，并具有专用配置。
+  在第3版控制器中，每个图层从视频内存基地址开始有固定的内存偏移和地址以供其帧缓冲区使用。而在第4版中，
+  帧缓冲区通过直接内存地址进行配置。
+
+properties:
+  compatible:
+    enum:
+      - xylon,logicvc-3.02.a-display
+      - xylon,logicvc-4.01.a-display
+
+  reg:
+    maxItems: 1
+
+  clocks:
+    minItems: 1
+    maxItems: 4
+
+  clock-names:
+    minItems: 1
+    items:
+      # vclk是必需的，并且必须作为第一项提供
+      - const: vclk
+      # 其他时钟是可选的，可以按任意顺序提供
+      - enum:
+          - vclk2
+          - lvdsclk
+          - lvdsclkn
+      - enum:
+          - vclk2
+          - lvdsclk
+          - lvdsclkn
+      - enum:
+          - vclk2
+          - lvdsclk
+          - lvdsclkn
+
+  interrupts:
+    maxItems: 1
+
+  memory-region:
+    maxItems: 1
+
+  xylon,display-interface:
+    enum:
+      # 平行RGB接口（C_DISPLAY_INTERFACE == 0）
+      - parallel-rgb
+      # ITU-T BR656接口（C_DISPLAY_INTERFACE == 1）
+      - bt656
+      # 4位LVDS接口（C_DISPLAY_INTERFACE == 2）
+      - lvds-4bits
+      # 3位LVDS接口（C_DISPLAY_INTERFACE == 4）
+      - lvds-3bits
+      # DVI接口（C_DISPLAY_INTERFACE == 5）
+      - dvi
+    description: 显示输出接口（C_DISPLAY_INTERFACE）
+
+  xylon,display-colorspace:
+    enum:
+      # RGB颜色空间（C_DISPLAY_COLOR_SPACE == 0）
+      - rgb
+      # YUV 4:2:2颜色空间（C_DISPLAY_COLOR_SPACE == 1）
+      - yuv422
+      # YUV 4:4:4颜色空间（C_DISPLAY_COLOR_SPACE == 2）
+      - yuv444
+    description: 显示输出颜色空间（C_DISPLAY_COLOR_SPACE）
+```
+下面是给定内容的中文翻译：
+
+xylon,display-depth:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    description: 显示输出深度 (C_PIXEL_DATA_WIDTH)
+xylon,row-stride:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    description: 帧缓冲区中每行固定像素数 (C_ROW_STRIDE)
+xylon,dithering:
+    $ref: /schemas/types.yaml#/definitions/flag
+    description: 混色模块已启用 (C_XCOLOR)
+
+  xylon,background-layer:
+    $ref: /schemas/types.yaml#/definitions/flag
+    description: |
+      最后一层用于显示黑色背景 (C_USE_BACKGROUND)
+      必须注册该层
+xylon,layers-configurable:
+    $ref: /schemas/types.yaml#/definitions/flag
+    description: |
+      启用各层大小、位置和偏移量的配置 (C_USE_SIZE_POSITION)
+layers:
+    type: object
+
+    properties:
+      "#address-cells":
+        const: 1
+
+      "#size-cells":
+        const: 0
+
+    patternProperties:
+      "^layer@[0-9]+$":
+        type: object
+
+        properties:
+          reg:
+            maxItems: 1
+
+          xylon,layer-depth:
+            $ref: /schemas/types.yaml#/definitions/uint32
+            description: 层深度 (C_LAYER_X_DATA_WIDTH)
+xylon,layer-colorspace:
+            enum:
+              # RGB颜色空间 (C_LAYER_X_TYPE == 0)
+              - rgb
+              # YUV打包颜色空间 (C_LAYER_X_TYPE == 0)
+              - yuv
+            description: 层颜色空间 (C_LAYER_X_TYPE)
+xylon,layer-alpha-mode:
+            enum:
+              # 层级范围内的Alpha配置 (C_LAYER_X_ALPHA_MODE == 0)
+              - layer
+              # 每个像素的Alpha配置 (C_LAYER_X_ALPHA_MODE == 1)
+              - pixel
+            description: 层的Alpha模式 (C_LAYER_X_ALPHA_MODE)
+xylon,layer-base-offset:
+            $ref: /schemas/types.yaml#/definitions/uint32
+            description: |
+              从视频RAM基址 (C_VMEM_BASEADDR) 开始计算的线数偏移量 (C_LAYER_X_OFFSET)，仅适用于版本3
+xylon,layer-buffer-offset:
+            $ref: /schemas/types.yaml#/definitions/uint32
+            description: |
+              双缓冲中第二个缓冲区相对于层基址偏移量 (C_BUFFER_*_OFFSET) 的线数偏移量
+下面是给定 YAML 示例的中文翻译：
+
+```yaml
+#ylon,layer-primary:
+$ref: /schemas/types.yaml#/definitions/flag
+description: |
+  层应当作为主平面进行注册（需要且仅需一个）
+additionalProperties: false
+
+required:
+  - reg
+  - xylon,layer-depth
+  - xylon,layer-colorspace
+  - xylon,layer-alpha-mode
+
+# 描述显示控制器层，包含描述已注册层的子节点
+required:
+  - "#address-cells"
+  - "#size-cells"
+  - layer@0
+
+additionalProperties: false
+
+description: |
+  显示控制器层的描述，包含描述各注册层的子节点
+
+# 端口配置
+port:
+$ref: /schemas/graph.yaml#/properties/port
+description: |
+  视频输出端口，通常连接到面板或桥接器
+additionalProperties: false
+
+# 必须字段
+required:
+  - compatible
+  - reg
+  - clocks
+  - clock-names
+  - interrupts
+  - xylon,display-interface
+  - xylon,display-colorspace
+  - xylon,display-depth
+  - xylon,row-stride
+  - layers
+  - port
+
+# 示例
+examples:
+  - |
+    #include <dt-bindings/interrupt-controller/irq.h>
+
+    logicvc: logicvc@43c00000 {
+      compatible = "xylon,logicvc-3.02.a", "syscon", "simple-mfd";
+      reg = <0x43c00000 0x6000>;
+
+      #address-cells = <1>;
+      #size-cells = <1>;
+
+      # 显示控制器节点
+      logicvc_display: display@0 {
+        compatible = "xylon,logicvc-3.02.a-display";
+        reg = <0x0 0x6000>;
+
+        memory-region = <&logicvc_cma>;
+
+        clocks = <&logicvc_vclk 0>, <&logicvc_lvdsclk 0>;
+        clock-names = "vclk", "lvdsclk";
+
+        interrupt-parent = <&intc>;
+        interrupts = <0 34 IRQ_TYPE_LEVEL_HIGH>;
+
+        xylon,display-interface = "lvds-4bits";
+        xylon,display-colorspace = "rgb";
+        xylon,display-depth = <16>;
+        xylon,row-stride = <1024>;
+
+        xylon,layers-configurable;
+
+        # 层配置
+        layers {
+          #address-cells = <1>;
+          #size-cells = <0>;
+
+          # 主层
+          layer@0 {
+            reg = <0>;
+            xylon,layer-depth = <16>;
+            xylon,layer-colorspace = "rgb";
+            xylon,layer-alpha-mode = "layer";
+            xylon,layer-base-offset = <0>;
+            xylon,layer-buffer-offset = <480>;
+            xylon,layer-primary;
+          };
+
+          # 子层1
+          layer@1 {
+            reg = <1>;
+            xylon,layer-depth = <16>;
+            xylon,layer-colorspace = "rgb";
+            xylon,layer-alpha-mode = "layer";
+            xylon,layer-base-offset = <2400>;
+            xylon,layer-buffer-offset = <480>;
+          };
+
+          # 子层2
+          layer@2 {
+            reg = <2>;
+            xylon,layer-depth = <16>;
+            xylon,layer-colorspace = "rgb";
+            xylon,layer-alpha-mode = "layer";
+            xylon,layer-base-offset = <960>;
+            xylon,layer-buffer-offset = <480>;
+          };
+
+          # 子层3
+          layer@3 {
+            reg = <3>;
+            xylon,layer-depth = <16>;
+            xylon,layer-colorspace = "rgb";
+            xylon,layer-alpha-mode = "layer";
+            xylon,layer-base-offset = <480>;
+            xylon,layer-buffer-offset = <480>;
+          };
+
+          # 子层4
+          layer@4 {
+            reg = <4>;
+            xylon,layer-depth = <16>;
+            xylon,layer-colorspace = "rgb";
+            xylon,layer-alpha-mode = "layer";
+            xylon,layer-base-offset = <8192>;
+            xylon,layer-buffer-offset = <480>;
+          };
+        };
+
+        # 输出端口配置
+        port {
+          #address-cells = <1>;
+          #size-cells = <0>;
+
+          logicvc_output: endpoint@0 {
+            reg = <0>;
+            remote-endpoint = <&panel_input>;
+          };
+        };
+      };
+    };
+```
+
+请注意，上述翻译尽可能保持了原始 YAML 结构和内容的一致性，并对关键部分进行了中文注释。

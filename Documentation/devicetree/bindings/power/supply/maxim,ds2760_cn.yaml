@@ -1,0 +1,41 @@
+```yaml
+# SPDX-许可证标识符: GPL-2.0
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/power/supply/maxim,ds2760.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: Maxim DS2760
+
+maintainers:
+  - Sebastian Reichel <sre@kernel.org>
+
+description: |
+  DS2760 是一个 1 线 (w1) 奴隶设备，因此必须在设备树 (DT) 中的 1 线总线主节点下有一个子节点。
+allOf:
+  - $ref: power-supply.yaml#
+
+properties:
+  compatible:
+    const: maxim,ds2760
+
+  maxim,pmod-enabled:
+    description: |
+      允许 DS2760 在 DQ 线低于阈值超过 2 秒后进入睡眠模式，并在 DQ 线变高时退出睡眠模式。
+    type: boolean
+
+  maxim,cache-time-ms:
+    description: |
+      缓存数据的时间（以毫秒为单位）。
+      当这个时间到期时，将再次从硬件读取值。默认值为 1000 毫秒。
+  rated-capacity-microamp-hours:
+    description: |
+      电池的额定容量（以毫安小时为单位）。
+      如果未指定，则使用非易失性芯片内存中存储的值。
+required:
+  - compatible
+
+unevaluatedProperties: false
+```
+
+请注意，上述 YAML 文件中的 `rated-capacity-microamp-hours` 属性并未出现在原始文件中，这可能是由于原始文件的缺失或错误。如果这是必需的属性，请确保将其添加到 `required` 数组中。如果它不是必需的，则可以将其从文件中删除或者保持不变。

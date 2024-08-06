@@ -1,0 +1,90 @@
+下面是给定内容的中文翻译：
+
+```yaml
+# SPDX-文件许可标识: (GPL-2.0 或 BSD-2-Clause)
+# 版权 (C) 2020 德州仪器公司
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/power/supply/bq2515x.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: 德州仪器 bq2515x 500mA 线性充电器系列
+
+维护者:
+  - 安德鲁·戴维斯 <afd@ti.com>
+
+描述: |
+  BQ2515x 系列是一款高度集成的电池充电管理 IC，集成了可穿戴设备中最常用的功能，包括充电器、输出电压轨、用于电池和系统监控的 ADC（模数转换器）以及推按钮控制器。
+  关于充电器的详细规格可以参考：
+    http://www.ti.com/lit/ds/symlink/bq25150.pdf
+    http://www.ti.com/lit/ds/symlink/bq25155.pdf
+
+属性:
+  compatible:
+    枚举:
+      - ti,bq25150
+      - ti,bq25155
+
+  reg:
+    最大项数: 1
+    描述: 充电器的 I2C 地址
+ac-detect-gpios:
+    描述: |
+       用于连接 bq2515x 设备 PG (AC 检测) 引脚的 GPIO
+最大项数: 1
+
+  reset-gpios:
+    描述: 用于硬件复位的 GPIO
+最大项数: 1
+
+  powerdown-gpios:
+    描述: 用于 IC 低功耗模式的 GPIO
+最大项数: 1
+
+  charge-enable-gpios:
+    描述: 用于开启和关闭充电的 GPIO
+最大项数: 1
+
+  input-current-limit-microamp:
+    描述: 最大输入电流（微安）
+最小值: 50000
+    最大值: 500000
+
+  monitored-battery:
+    $ref: /schemas/types.yaml#/definitions/phandle
+    描述: 被监控的电池节点的 phandle
+
+必需:
+  - compatible
+  - reg
+  - monitored-battery
+
+额外属性: false
+
+示例:
+  - |
+    bat: 电池 {
+      compatible = "simple-battery";
+      constant-charge-current-max-microamp = <50000>;
+      precharge-current-microamp = <2500>;
+      constant-charge-voltage-max-microvolt = <4000000>;
+    };
+    #include <dt-bindings/gpio/gpio.h>
+    i2c {
+      #address-cells = <1>;
+      #size-cells = <0>;
+
+      bq25150: charger@6b {
+        compatible = "ti,bq25150";
+        reg = <0x6b>;
+        monitored-battery = <&bat>;
+        input-current-limit-microamp = <100000>;
+
+        ac-detect-gpios = <&gpio1 28 GPIO_ACTIVE_HIGH>;
+        reset-gpios = <&gpio0 14 GPIO_ACTIVE_HIGH>;
+        powerdown-gpios = <&gpio0 15 GPIO_ACTIVE_HIGH>;
+        charge-enable-gpios = <&gpio0 13 GPIO_ACTIVE_LOW>;
+      };
+    };
+```
+```

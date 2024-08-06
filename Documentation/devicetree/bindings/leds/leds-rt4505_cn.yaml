@@ -1,0 +1,61 @@
+```yaml
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/leds/leds-rt4505.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: Richtek RT4505 单通道 LED 驱动器
+
+maintainers:
+  - ChiYuan Huang <cy_huang@richtek.com>
+
+description: |
+  RT4505 是一款闪光 LED 驱动器，可以支持高达 375mA 和 1.5A 的电流，
+  分别用于手电筒模式和闪光模式。
+  数据手册可以在以下链接找到：
+    https://www.richtek.com/assets/product_file/RT4505/DS4505-02.pdf
+
+properties:
+  compatible:
+    const: richtek,rt4505
+
+  reg:
+    description: 控制器的 I2C 从设备地址
+  maxItems: 1
+
+  led:
+    type: object
+    $ref: common.yaml#
+    unevaluatedProperties: false
+
+required:
+  - compatible
+  - reg
+
+additionalProperties: false
+
+examples:
+  - |
+    #include <dt-bindings/leds/common.h>
+
+    i2c {
+      #address-cells = <1>;
+      #size-cells = <0>;
+
+      led-controller@63 {
+        compatible = "richtek,rt4505";
+        reg = <0x63>;
+
+        rt4505_flash: led {
+          function = LED_FUNCTION_FLASH;
+          color = <LED_COLOR_ID_WHITE>;
+          led-max-microamp = <375000>;
+          flash-max-microamp = <1500000>;
+          flash-max-timeout-us = <800000>;
+        };
+      };
+    };
+```
+
+此文档描述了Richtek RT4505单通道LED驱动器的Device Tree规范，并给出了一个示例。

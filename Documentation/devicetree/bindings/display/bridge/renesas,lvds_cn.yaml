@@ -1,0 +1,235 @@
+以下是提供的 YAML 文件翻译成中文：
+
+```yaml
+# SPDX 许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/display/bridge/renesas,lvds.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: Renesas R-Car LVDS 编码器
+
+maintainers:
+  - Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
+
+description: |
+  这些设备树绑定描述了嵌入在 Renesas R-Car Gen2、R-Car Gen3、RZ/G1 和 RZ/G2 系统级芯片 (SoC) 中的 LVDS 编码器。
+
+properties:
+  compatible:
+    enum:
+      - renesas,r8a7742-lvds # 对于 RZ/G1H 兼容的 LVDS 编码器
+      - renesas,r8a7743-lvds # 对于 RZ/G1M 兼容的 LVDS 编码器
+      - renesas,r8a7744-lvds # 对于 RZ/G1N 兼容的 LVDS 编码器
+      - renesas,r8a774a1-lvds # 对于 RZ/G2M 兼容的 LVDS 编码器
+      - renesas,r8a774b1-lvds # 对于 RZ/G2N 兼容的 LVDS 编码器
+      - renesas,r8a774c0-lvds # 对于 RZ/G2E 兼容的 LVDS 编码器
+      - renesas,r8a774e1-lvds # 对于 RZ/G2H 兼容的 LVDS 编码器
+      - renesas,r8a7790-lvds # 对于 R-Car H2 兼容的 LVDS 编码器
+      - renesas,r8a7791-lvds # 对于 R-Car M2-W 兼容的 LVDS 编码器
+      - renesas,r8a7793-lvds # 对于 R-Car M2-N 兼容的 LVDS 编码器
+      - renesas,r8a7795-lvds # 对于 R-Car H3 兼容的 LVDS 编码器
+      - renesas,r8a7796-lvds # 对于 R-Car M3-W 兼容的 LVDS 编码器
+      - renesas,r8a77961-lvds # 对于 R-Car M3-W+ 兼容的 LVDS 编码器
+      - renesas,r8a77965-lvds # 对于 R-Car M3-N 兼容的 LVDS 编码器
+      - renesas,r8a77970-lvds # 对于 R-Car V3M 兼容的 LVDS 编码器
+      - renesas,r8a77980-lvds # 对于 R-Car V3H 兼容的 LVDS 编码器
+      - renesas,r8a77990-lvds # 对于 R-Car E3 兼容的 LVDS 编码器
+      - renesas,r8a77995-lvds # 对于 R-Car D3 兼容的 LVDS 编码器
+
+  reg:
+    maxItems: 1
+
+  clocks:
+    minItems: 1
+    maxItems: 4
+
+  clock-names:
+    minItems: 1
+    maxItems: 4
+
+  resets:
+    maxItems: 1
+
+  ports:
+    $ref: /schemas/graph.yaml#/properties/ports
+
+    properties:
+      port@0:
+        $ref: /schemas/graph.yaml#/properties/port
+        description: 并行 RGB 输入端口
+
+      port@1:
+        $ref: /schemas/graph.yaml#/properties/port
+        description: LVDS 输出端口
+
+    required:
+      - port@0
+      - port@1
+
+  power-domains:
+    maxItems: 1
+
+  renesas,companion:
+    $ref: /schemas/types.yaml#/definitions/phandle
+    description: 
+      指向配套 LVDS 编码器的 phandle。此属性对于 R-Car D3 和 E3，以及 RZ/G2E SoC 上的第一个 LVDS 编码器是必需的，并且应指向要作为双链路模式下的伴侣使用的第二个编码器。
+      对于其他任何 LVDS 编码器，不应设置此属性。
+
+required:
+  - compatible
+  - reg
+  - clocks
+  - power-domains
+  - resets
+  - ports
+
+if:
+  properties:
+    compatible:
+      enum:
+        - renesas,r8a774c0-lvds
+        - renesas,r8a77990-lvds
+        - renesas,r8a77995-lvds
+then:
+  properties:
+    clocks:
+      minItems: 1
+      items:
+        - description: 功能时钟
+        - description: EXTAL 输入时钟
+        - description: DU_DOTCLKIN0 输入时钟
+        - description: DU_DOTCLKIN1 输入时钟
+
+    clock-names:
+      minItems: 1
+      items:
+        - const: fck
+        # LVDS 编码器可以使用 EXTAL 或 DU_DOTCLKINx 时钟
+        # 这些时钟是可选的
+        - enum:
+            - extal
+            - dclkin.0
+            - dclkin.1
+        - enum:
+            - extal
+            - dclkin.0
+            - dclkin.1
+        - enum:
+            - extal
+            - dclkin.0
+            - dclkin.1
+
+  required:
+    - clock-names
+
+else:
+  properties:
+    clocks:
+      items:
+        - description: 功能时钟
+
+    clock-names:
+      items:
+        - const: fck
+
+    renesas,companion: false
+
+additionalProperties: false
+
+examples:
+  - |
+    #include <dt-bindings/clock/renesas-cpg-mssr.h>
+    #include <dt-bindings/power/r8a7795-sysc.h>
+
+    lvds@feb90000 {
+        compatible = "renesas,r8a7795-lvds";
+        reg = <0xfeb90000 0x14>;
+        clocks = <&cpg CPG_MOD 727>;
+        power-domains = <&sysc R8A7795_PD_ALWAYS_ON>;
+        resets = <&cpg 727>;
+
+        ports {
+            #address-cells = <1>;
+            #size-cells = <0>;
+
+            port@0 {
+                reg = <0>;
+                lvds_in: endpoint {
+                    remote-endpoint = <&du_out_lvds0>;
+                };
+            };
+            port@1 {
+                reg = <1>;
+                lvds_out: endpoint {
+                    remote-endpoint = <&panel_in>;
+                };
+            };
+        };
+    };
+
+  - |
+    #include <dt-bindings/clock/renesas-cpg-mssr.h>
+    #include <dt-bindings/power/r8a77990-sysc.h>
+
+    lvds0: lvds@feb90000 {
+        compatible = "renesas,r8a77990-lvds";
+        reg = <0xfeb90000 0x20>;
+        clocks = <&cpg CPG_MOD 727>,
+                 <&x13_clk>,
+                 <&extal_clk>;
+        clock-names = "fck", "dclkin.0", "extal";
+        power-domains = <&sysc R8A77990_PD_ALWAYS_ON>;
+        resets = <&cpg 727>;
+
+        renesas,companion = <&lvds1>;
+
+        ports {
+            #address-cells = <1>;
+            #size-cells = <0>;
+
+            port@0 {
+                reg = <0>;
+                lvds0_in: endpoint {
+                    remote-endpoint = <&du_out_lvds0>;
+                };
+            };
+            port@1 {
+                reg = <1>;
+                lvds0_out: endpoint {
+                    remote-endpoint = <&panel_in1>;
+                };
+            };
+        };
+    };
+
+    lvds1: lvds@feb90100 {
+        compatible = "renesas,r8a77990-lvds";
+        reg = <0xfeb90100 0x20>;
+        clocks = <&cpg CPG_MOD 727>,
+                 <&x13_clk>,
+                 <&extal_clk>;
+        clock-names = "fck", "dclkin.0", "extal";
+        power-domains = <&sysc R8A77990_PD_ALWAYS_ON>;
+        resets = <&cpg 726>;
+
+        ports {
+            #address-cells = <1>;
+            #size-cells = <0>;
+
+            port@0 {
+                reg = <0>;
+                lvds1_in: endpoint {
+                    remote-endpoint = <&du_out_lvds1>;
+                };
+            };
+            port@1 {
+                reg = <1>;
+                lvds1_out: endpoint {
+                    remote-endpoint = <&panel_in2>;
+                };
+            };
+        };
+    };
+```
+请注意，上述 YAML 文件的翻译保持了原有的格式和语法结构，以便能被相应的解析器正确解析。

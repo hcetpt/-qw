@@ -1,0 +1,64 @@
+* 对话 DA9052/53 电源管理集成电路 (PMIC)
+
+必需属性：
+- compatible ：应设置为 "dlg,da9052"、"dlg,da9053-aa"、
+               "dlg,da9053-ab" 或 "dlg,da9053-bb"
+
+可选属性：
+- dlg,tsi-as-adc ：布尔值，如果设置，则X+、X-、Y+、Y- 触摸屏
+                   输入线将用作通用模拟输入
+- tsiref-supply: 指向调节器的句柄，该调节器提供TSIREF引脚所需的参考
+                 电压。当触摸屏引脚用于ADC目的时必须提供
+
+子节点：
+- regulators : 包含调节器节点。DA9052/53 的调节器使用以下列出的名字进行绑定：
+
+    buck1     : 调节器 BUCK CORE
+    buck2     : 调节器 BUCK PRO
+    buck3     : 调节器 BUCK MEM
+    buck4     : 调节器 BUCK PERI
+    ldo1      : 调节器 LDO1
+    ldo2      : 调节器 LDO2
+    ldo3      : 调节器 LDO3
+    ldo4      : 调节器 LDO4
+    ldo5      : 调节器 LDO5
+    ldo6      : 调节器 LDO6
+    ldo7      : 调节器 LDO7
+    ldo8      : 调节器 LDO8
+    ldo9      : 调节器 LDO9
+    ldo10     : 调节器 LDO10
+
+  各个调节器设备的具体绑定细节可以在以下文档中找到：
+  文档/devicetree/bindings/regulator/regulator.txt
+
+示例：
+
+i2c@63fc8000 { /* I2C1 */
+
+	pmic: dialog@48 {
+		compatible = "dlg,da9053-aa";
+		reg = <0x48>;
+
+		regulators {
+			buck1 {
+				regulator-min-microvolt = <500000>;
+				regulator-max-microvolt = <2075000>;
+			};
+
+			buck2 {
+				regulator-min-microvolt = <500000>;
+				regulator-max-microvolt = <2075000>;
+			};
+
+			buck3 {
+				regulator-min-microvolt = <925000>;
+				regulator-max-microvolt = <2500000>;
+			};
+
+			buck4 {
+				regulator-min-microvolt = <925000>;
+				regulator-max-microvolt = <2500000>;
+			};
+		};
+	};
+};

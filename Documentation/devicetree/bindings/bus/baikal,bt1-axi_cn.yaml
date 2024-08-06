@@ -1,0 +1,102 @@
+以下是给定内容的中文翻译：
+
+```yaml
+# SPDX-文件许可标识符: (GPL-2.0-only 或 BSD-2-Clause)
+# 版权 (C) 2020 百科电子, 股份有限公司
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/bus/baikal,bt1-axi.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: 百科-T1 AXI 总线
+
+维护者:
+  - Serge Semin <fancer.lancer@gmail.com>
+
+描述: |
+  AXI3 总线是百科-T1 系统芯片的主要通信总线，用于连接所有高速外围 IP 核心与 RAM 控制器以及 MIPS P5600 核心。流量仲裁通过 DesignWare AXI 互连（即所谓的 AXI 主互连）实现，该互连将 I/O 请求从一个块路由到另一个：从 CPU 到系统芯片外围设备，以及在某些系统芯片外围设备之间（主要是在外围设备和 RAM 之间，但也在 DMA 和一些外围设备之间）。在出现任何协议错误或设备未响应的情况下，会触发一个中断，并向位于 DesignWare AXI 互连之上的 AXI 错误处理模块 (EHB) 报告故障情况，该模块可通过百科-T1 系统控制器访问。
+allOf:
+  - $ref: /schemas/simple-bus.yaml#
+
+属性:
+  compatible:
+    包含:
+      常量: baikal,bt1-axi
+
+  reg:
+    最少项目数: 1
+    项目:
+      - 描述: Synopsys DesignWare AXI 互连 QoS 寄存器
+      - 描述: AXI EHB MMIO 系统控制器寄存器
+
+  reg-names:
+    最少项目数: 1
+    项目:
+      - 常量: qos
+      - 常量: ehb
+
+  '#interconnect-cells':
+    常量: 1
+
+  syscon:
+    $ref: /schemas/types.yaml#/definitions/phandle
+    描述: 百科-T1 系统控制器 DT 节点的 phandle
+
+  interrupts:
+    最大项目数: 1
+
+  clocks:
+    项目:
+      - 描述: 主互连上行参考时钟
+
+  clock-names:
+    项目:
+      - 常量: aclk
+
+  resets:
+    项目:
+      - 描述: 主互连复位线
+
+  reset-names:
+    项目:
+      - 常量: arst
+
+unevaluatedProperties: false
+
+必需:
+  - compatible
+  - reg
+  - reg-names
+  - syscon
+  - interrupts
+  - clocks
+  - clock-names
+
+示例:
+  - |
+    #include <dt-bindings/interrupt-controller/mips-gic.h>
+
+    bus@1f05a000 {
+      compatible = "baikal,bt1-axi", "simple-bus";
+      reg = <0x1f05a000 0x1000>,
+            <0x1f04d110 0x8>;
+      reg-names = "qos", "ehb";
+      #address-cells = <1>;
+      #size-cells = <1>;
+      #interconnect-cells = <1>;
+
+      syscon = <&syscon>;
+
+      ranges;
+
+      interrupts = <GIC_SHARED 127 IRQ_TYPE_LEVEL_HIGH>;
+
+      clocks = <&ccu_axi 0>;
+      clock-names = "aclk";
+
+      resets = <&ccu_axi 0>;
+      reset-names = "arst";
+    };
+..
+```
+```

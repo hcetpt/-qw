@@ -1,0 +1,46 @@
+*ST-Ericsson DB8500 热管理节点
+
+**热管理节点属性：
+
+- 兼容性: "stericsson,db8500-thermal";
+- reg : 热传感器寄存器的地址范围；
+- interrupts : 由PRCMU产生的中断；
+- interrupt-names : "IRQ_HOTMON_LOW" 和 "IRQ_HOTMON_HIGH";
+- num-trips : 总的温度阈值点数量，这是必需的，如果没有则设置为0，
+  如果大于0，则必须定义以下属性；
+- tripN-temp : 阈值点N的温度，应按升序排列；
+- tripN-type : 阈值点N的类型，应为"active" "passive" "hot"
+  "critical"之一；
+- tripN-cdev-num : 可以绑定到阈值点N的冷却设备数量，如果定义了阈值点N，则这是必需的，如果没有则设置为0，
+  否则必须定义以下冷却设备名称；
+- tripN-cdev-nameM : 阈值点N的第M个冷却设备的名称；
+
+通常，num-trips和tripN-***在与板级相关的DTS文件中是分开的。
+示例：
+```
+thermal@801573c0 {
+	compatible = "stericsson,db8500-thermal";
+	reg = <0x801573c0 0x40>;
+	interrupts = <21 0x4>, <22 0x4>;
+	interrupt-names = "IRQ_HOTMON_LOW", "IRQ_HOTMON_HIGH";
+
+	num-trips = <3>;
+
+	trip0-temp = <75000>;
+	trip0-type = "active";
+	trip0-cdev-num = <1>;
+	trip0-cdev-name0 = "thermal-cpufreq-0";
+
+	trip1-temp = <80000>;
+	trip1-type = "active";
+	trip1-cdev-num = <2>;
+	trip1-cdev-name0 = "thermal-cpufreq-0";
+	trip1-cdev-name1 = "thermal-fan";
+
+	trip2-temp = <85000>;
+	trip2-type = "critical";
+	trip2-cdev-num = <0>;
+}
+```
+
+这个配置描述了一个ST-Ericsson DB8500平台上的热管理节点。它定义了三个温度阈值点（trip points），每个阈值点都有特定的温度、类型以及可绑定的冷却设备数量和名称。这些信息用于控制处理器频率或风扇速度等，以防止过热。

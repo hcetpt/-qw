@@ -1,0 +1,49 @@
+# SPDX-许可证标识符: GPL-2.0
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/power/supply/nokia,n900-battery.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: 诺基亚 N900 电池
+
+maintainers:
+  - Pali Rohár <pali@kernel.org>
+  - Sebastian Reichel <sre@kernel.org>
+
+allOf:
+  - $ref: power-supply.yaml#
+
+properties:
+  compatible:
+    const: nokia,n900-battery
+
+  io-channels:
+    items:
+      - description: 用于温度读数的ADC通道
+      - description: 用于识别电池容量的ADC通道
+      - description: 用于测量电池电压的ADC通道
+
+  io-channel-names:
+    items:
+      - const: temp
+      - const: bsi
+      - const: vbat
+
+required:
+  - compatible
+  - io-channels
+  - io-channel-names
+
+additionalProperties: false
+
+examples:
+  - |
+    battery {
+      compatible = "nokia,n900-battery";
+      io-channels = <&twl4030_madc 0>,
+                    <&twl4030_madc 4>,
+                    <&twl4030_madc 12>;
+      io-channel-names = "temp",
+                         "bsi",
+                         "vbat";
+    };

@@ -1,0 +1,64 @@
+```yaml
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/rtc/ti,k3-rtc.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: 德州仪器 K3 实时时钟
+
+maintainers:
+  - Nishanth Menon <nm@ti.com>
+
+description: |
+  此实时时钟出现在 AM62x 系列的片上系统(SoC)中
+allOf:
+  - $ref: rtc.yaml#
+
+properties:
+  compatible:
+    enum:
+      - ti,am62-rtc
+
+  reg:
+    maxItems: 1
+
+  interrupts:
+    maxItems: 1
+
+  clocks:
+    items:
+      - description: VBUS 接口时钟
+      - description: 32k 时钟源（外部或内部）
+clock-names:
+    items:
+      - const: vbus
+      - const: osc32k
+
+  power-domains:
+    maxItems: 1
+
+required:
+  - compatible
+  - reg
+  - interrupts
+  - clocks
+  - clock-names
+
+unevaluatedProperties: false
+
+examples:
+  - |
+    #include <dt-bindings/interrupt-controller/arm-gic.h>
+    rtc@2b1f0000 {
+        compatible = "ti,am62-rtc";
+        reg = <0x2b1f0000 0x100>;
+        interrupts = <GIC_SPI 100 IRQ_TYPE_LEVEL_HIGH>;
+        power-domains = <&bar 0>;
+        clocks = <&foo 0>, <&foo 1>;
+        clock-names = "vbus", "osc32k";
+        wakeup-source;
+    };
+```
+
+此段代码定义了一个设备树片段，用于描述德州仪器 AM62x 系列片上系统中的实时时钟（RTC）组件。它详细说明了该 RTC 的兼容性、寄存器地址、中断配置、时钟源以及电源域等信息，并提供了一个具体的实例。

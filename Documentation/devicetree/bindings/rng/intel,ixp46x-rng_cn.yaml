@@ -1,0 +1,36 @@
+```yaml
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/rng/intel,ixp46x-rng.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: Intel IXP46x 随机数生成器
+
+description: |
+  Intel IXP46x 在内存中的固定物理位置有一个随机数生成器。
+  每次读取都保证提供一个唯一的 32 位随机数。
+maintainers:
+  - Linus Walleij <linus.walleij@linaro.org>
+
+properties:
+  compatible:
+    const: intel,ixp46x-rng
+
+  reg:
+    maxItems: 1
+
+required:
+  - compatible
+  - reg
+
+additionalProperties: false
+
+examples:
+  - |
+    rng@70002100 {
+      compatible = "intel,ixp46x-rng";
+      reg = <0x70002100 4>;
+    };
+```
+此段代码描述了Intel IXP46x随机数生成器在设备树中的表示方式，并提供了示例。

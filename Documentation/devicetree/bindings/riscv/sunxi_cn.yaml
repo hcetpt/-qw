@@ -1,0 +1,74 @@
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/riscv/sunxi.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: 基于Allwinner RISC-V 系统芯片的开发板
+
+维护者:
+  - 陈宇 蔡 <wens@csie.org>
+  - Jernej Skrabec <jernej.skrabec@gmail.com>
+  - Samuel Holland <samuel@sholland.org>
+
+描述:
+  基于Allwinner RISC-V 系统芯片的开发板
+
+属性:
+  $nodename:
+    常量: '/'
+  compatible:
+    oneOf:
+      - 描述: Dongshan Nezha STU 模块系统
+        items:
+          - 常量: 100ask,dongshan-nezha-stu
+          - 常量: allwinner,sun20i-d1
+
+      - 描述: D1 Nezha 开发板
+        items:
+          - 常量: allwinner,d1-nezha
+          - 常量: allwinner,sun20i-d1
+
+      - 描述: ClockworkPi R-01 模块系统 和 v3.14 开发板
+        items:
+          - 常量: clockwork,r-01-clockworkpi-v3.14
+          - 常量: allwinner,sun20i-d1
+
+      - 描述: ClockworkPi R-01 模块系统, v3.14 开发板, 和 DevTerm 扩展
+        items:
+          - 常量: clockwork,r-01-devterm-v3.14
+          - 常量: clockwork,r-01-clockworkpi-v3.14
+          - 常量: allwinner,sun20i-d1
+
+      - 描述: Lichee RV 模块系统
+        items:
+          - 常量: sipeed,lichee-rv
+          - 常量: allwinner,sun20i-d1
+
+      - 描述: 用于 Lichee RV 模块系统的载体开发板
+        items:
+          - 枚举:
+              - sipeed,lichee-rv-86-panel-480p
+              - sipeed,lichee-rv-86-panel-720p
+              - sipeed,lichee-rv-dock
+          - 常量: sipeed,lichee-rv
+          - 常量: allwinner,sun20i-d1
+
+      - 描述: MangoPi MQ 开发板
+        items:
+          - 常量: widora,mangopi-mq
+          - 常量: allwinner,sun20i-d1s
+
+      - 描述: MangoPi MQ Pro 开发板
+        items:
+          - 常量: widora,mangopi-mq-pro
+          - 常量: allwinner,sun20i-d1
+
+      - 描述: MangoPi MQ-R 开发板
+        items:
+          - 常量: widora,mangopi-mq-r-f133
+          - 常量: allwinner,sun20i-d1s
+
+其他属性: true
+
+..

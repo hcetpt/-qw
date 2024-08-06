@@ -1,0 +1,105 @@
+以下是提供的 YAML 文件的中文翻译：
+
+```
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+# 版权所有 (C) 2020 德州仪器公司 - http://www.ti.com/
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/soc/ti/ti,j721e-system-controller.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: TI J721e 系统控制器寄存器读写
+
+description: |
+  此文件表示了 SoC 上系统控制器节点中的控制模块寄存器（CTRL_MMR0）。
+  系统控制器节点代表一组包含各种寄存器的区域。这些寄存器不够连贯，无法作为特定类型的设备来表示。典型的用例是其他节点的驱动程序或平台特定代码获取系统控制器节点的引用（例如通过 phandle、节点路径或使用特定兼容值搜索），查询节点（或相关操作系统驱动程序）以确定寄存器的位置，并直接访问这些寄存器。
+maintainers:
+  - Kishon Vijay Abraham I <kishon@kernel.org>
+  - Roger Quadros <rogerq@kernel.org>
+
+properties:
+  compatible:
+    items:
+      - enum:
+          - ti,j7200-system-controller
+          - ti,j721e-system-controller
+          - ti,j721s2-system-controller
+      - const: syscon
+      - const: simple-mfd
+
+  reg:
+    maxItems: 1
+
+  "#address-cells":
+    const: 1
+
+  "#size-cells":
+    const: 1
+
+  ranges: true
+
+patternProperties:
+  # 可选子节点
+  "^mux-controller@[0-9a-f]+$":
+    type: object
+    description:
+      这是 SERDES 车道控制多路复用器
+"^clock-controller@[0-9a-f]+$":
+    type: object
+    $ref: /schemas/clock/ti,am654-ehrpwm-tbclk.yaml#
+    description:
+      为 TI EHRPWM 节点提供时钟
+"phy@[0-9a-f]+$":
+    type: object
+    $ref: /schemas/phy/ti,phy-gmii-sel.yaml#
+    description:
+      对应于以太网 MAC 的 PHY 节点
+"^chipid@[0-9a-f]+$":
+    type: object
+    $ref: /schemas/hwinfo/ti,k3-socinfo.yaml#
+    description:
+      对应 SoC 芯片识别的节点
+required:
+  - compatible
+  - reg
+  - "#address-cells"
+  - "#size-cells"
+  - ranges
+
+additionalProperties: false
+
+examples:
+  - |
+    scm_conf: scm-conf@100000 {
+        compatible = "ti,j721e-system-controller", "syscon", "simple-mfd";
+        reg = <0x00100000 0x1c000>;
+        #address-cells = <1>;
+        #size-cells = <1>;
+        ranges;
+
+        serdes_ln_ctrl: mux-controller@4080 {
+            compatible = "mmio-mux";
+            reg = <0x00004080 0x50>;
+
+            #mux-control-cells = <1>;
+            mux-reg-masks =
+                <0x4080 0x3>, <0x4084 0x3>, /* SERDES0 车道0/1选择 */
+                <0x4090 0x3>, <0x4094 0x3>, /* SERDES1 车道0/1选择 */
+                <0x40a0 0x3>, <0x40a4 0x3>, /* SERDES2 车道0/1选择 */
+                <0x40b0 0x3>, <0x40b4 0x3>, /* SERDES3 车道0/1选择 */
+                <0x40c0 0x3>, <0x40c4 0x3>, <0x40c8 0x3>, <0x40cc 0x3>;
+                /* SERDES4 车道0/1/2/3选择 */
+        };
+
+        clock-controller@4140 {
+            compatible = "ti,am654-ehrpwm-tbclk";
+            reg = <0x4140 0x18>;
+            #clock-cells = <1>;
+        };
+
+        chipid@14 {
+            compatible = "ti,am654-chipid";
+            reg = <0x14 0x4>;
+        };
+    };
+```

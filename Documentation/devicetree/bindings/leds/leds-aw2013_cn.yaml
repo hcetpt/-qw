@@ -1,0 +1,100 @@
+下面是给定内容的中文翻译：
+
+# SPDX-文件许可标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/leds/leds-aw2013.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: AWINIC AW2013 三通道 LED 驱动器
+
+维护者:
+  - 尼基塔·特拉夫金 <nikitos.tr@gmail.com>
+
+描述: |
+  AW2013 是一款具有 I2C 接口的三通道 LED 驱动器。它能够通过 PWM 输出控制 LED 的亮度。
+属性:
+  compatible:
+    常量: awinic,aw2013
+
+  reg:
+    最大项目数: 1
+
+  interrupts:
+    最大项目数: 1
+    描述: 开漏、低电平有效的中断引脚 "INTN"
+用于报告操作完成（上电，LED 呼吸效果）
+vcc-supply:
+    描述: 向 "VCC" 引脚供电的稳压器
+vio-supply:
+    描述: 为 I/O 线路的上拉提供电源的稳压器
+"VIO1" 在数据手册典型应用电路示例中
+需要注意的是，该稳压器并非直接连接至 AW2013，但对于中断和 I2C 线路的正常工作是必需的
+"#address-cells":
+    常量: 1
+
+  "#size-cells":
+    常量: 0
+
+模式匹配属性:
+  "^led@[0-2]$":
+    类型: 对象
+    $ref: common.yaml#
+    不评估的属性: false
+
+    属性:
+      reg:
+        描述: LED 的索引
+最小值: 0
+        最大值: 2
+
+必需:
+  - compatible
+  - reg
+  - "#address-cells"
+  - "#size-cells"
+
+附加属性: false
+
+示例:
+  - |
+    #include <dt-bindings/gpio/gpio.h>
+    #include <dt-bindings/interrupt-controller/irq.h>
+    #include <dt-bindings/leds/common.h>
+
+    i2c {
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        led-controller@45 {
+            compatible = "awinic,aw2013";
+            reg = <0x45>;
+            interrupts = <42 IRQ_TYPE_LEVEL_LOW>;
+            #address-cells = <1>;
+            #size-cells = <0>;
+
+            vcc-supply = <&pm8916_l17>;
+
+            led@0 {
+                reg = <0>;
+                led-max-microamp = <5000>;
+                function = LED_FUNCTION_INDICATOR;
+                color = <LED_COLOR_ID_RED>;
+            };
+
+            led@1 {
+                reg = <1>;
+                led-max-microamp = <5000>;
+                function = LED_FUNCTION_INDICATOR;
+                color = <LED_COLOR_ID_GREEN>;
+            };
+
+            led@2 {
+                reg = <2>;
+                led-max-microamp = <5000>;
+                function = LED_FUNCTION_INDICATOR;
+                color = <LED_COLOR_ID_BLUE>;
+            };
+        };
+    };
+..

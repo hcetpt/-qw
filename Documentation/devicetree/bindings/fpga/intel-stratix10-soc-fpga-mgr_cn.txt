@@ -1,0 +1,18 @@
+Intel Stratix 10 SoC FPGA 管理器
+
+所需属性：
+fpga_mgr 节点具有以下必需属性，必须位于 firmware/svc 节点下
+- compatible（兼容性）: 应包含 "intel,stratix10-soc-fpga-mgr" 或
+	       "intel,agilex-soc-fpga-mgr"
+
+示例：
+
+```
+firmware {  // 固件
+	svc {  // 服务
+		fpga_mgr: fpga-mgr {  // FPGA 管理器
+			compatible = "intel,stratix10-soc-fpga-mgr";  // 兼容性
+		};
+	};
+};
+```

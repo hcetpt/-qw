@@ -1,0 +1,135 @@
+这段 YAML 描述了针对 Xilinx Versal 系统级芯片 (SoC) 的 CPM (Configurable Platform Management) 主控制器的设备树规范。
+
+# SPDX 许可标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/pci/xilinx-versal-cpm.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: 对于 Xilinx Versal SoC 的 CPM 主控制器设备树规范
+
+maintainers:
+  - Bharat Kumar Gogada <bharat.kumar.gogada@amd.com>
+
+allOf:
+  - $ref: /schemas/pci/pci-host-bridge.yaml#
+
+properties:
+  compatible:
+    enum:
+      - xlnx,versal-cpm-host-1.00
+      - xlnx,versal-cpm5-host
+
+  reg:
+    items:
+      - description: CPM 系统级控制和状态寄存器
+      - description: 配置空间区域和桥接寄存器
+      - description: CPM5 控制和状态寄存器
+    minItems: 2
+
+  reg-names:
+    items:
+      - const: cpm_slcr
+      - const: cfg
+      - const: cpm_csr
+    minItems: 2
+
+  interrupts:
+    maxItems: 1
+
+  msi-map:
+    description: 映射请求者ID到MSI控制器及其相关的MSI侧带数据
+    maxItems: 2
+
+  "#interrupt-cells":
+    const: 1
+
+  interrupt-controller:
+    description: 用于处理传统PCI中断的中断控制器节点
+    type: object
+    additionalProperties: false
+    properties:
+      "#address-cells":
+        const: 0
+
+      "#interrupt-cells":
+        const: 1
+
+      interrupt-controller: true
+
+required:
+  - reg
+  - reg-names
+  - "#interrupt-cells"
+  - interrupts
+  - interrupt-map
+  - interrupt-map-mask
+  - bus-range
+  - msi-map
+  - interrupt-controller
+
+unevaluatedProperties: false
+
+examples:
+  - |
+
+    versal {
+               #address-cells = <2>;
+               #size-cells = <2>;
+               cpm_pcie: pcie@fca10000 {
+                       compatible = "xlnx,versal-cpm-host-1.00";
+                       device_type = "pci";
+                       #address-cells = <3>;
+                       #interrupt-cells = <1>;
+                       #size-cells = <2>;
+                       interrupts = <0 72 4>;
+                       interrupt-parent = <&gic>;
+                       interrupt-map-mask = <0 0 0 7>;
+                       interrupt-map = <0 0 0 1 &pcie_intc_0 0>,
+                                       <0 0 0 2 &pcie_intc_0 1>,
+                                       <0 0 0 3 &pcie_intc_0 2>,
+                                       <0 0 0 4 &pcie_intc_0 3>;
+                       bus-range = <0x00 0xff>;
+                       ranges = <0x02000000 0x0 0xe0000000 0x0 0xe0000000 0x0 0x10000000>,
+                                <0x43000000 0x80 0x00000000 0x80 0x00000000 0x0 0x80000000>;
+                       msi-map = <0x0 &its_gic 0x0 0x10000>;
+                       reg = <0x0 0xfca10000 0x0 0x1000>,
+                             <0x6 0x00000000 0x0 0x10000000>;
+                       reg-names = "cpm_slcr", "cfg";
+                       pcie_intc_0: interrupt-controller {
+                               #address-cells = <0>;
+                               #interrupt-cells = <1>;
+                               interrupt-controller;
+                       };
+               };
+
+               cpm5_pcie: pcie@fcdd0000 {
+                       compatible = "xlnx,versal-cpm5-host";
+                       device_type = "pci";
+                       #address-cells = <3>;
+                       #interrupt-cells = <1>;
+                       #size-cells = <2>;
+                       interrupts = <0 72 4>;
+                       interrupt-parent = <&gic>;
+                       interrupt-map-mask = <0 0 0 7>;
+                       interrupt-map = <0 0 0 1 &pcie_intc_1 0>,
+                                       <0 0 0 2 &pcie_intc_1 1>,
+                                       <0 0 0 3 &pcie_intc_1 2>,
+                                       <0 0 0 4 &pcie_intc_1 3>;
+                       bus-range = <0x00 0xff>;
+                       ranges = <0x02000000 0x0 0xe0000000 0x0 0xe0000000 0x0 0x10000000>,
+                                <0x43000000 0x80 0x00000000 0x80 0x00000000 0x0 0x80000000>;
+                       msi-map = <0x0 &its_gic 0x0 0x10000>;
+                       reg = <0x00 0xfcdd0000 0x00 0x1000>,
+                             <0x06 0x00000000 0x00 0x1000000>,
+                             <0x00 0xfce20000 0x00 0x1000000>;
+                       reg-names = "cpm_slcr", "cfg", "cpm_csr";
+
+                       pcie_intc_1: interrupt-controller {
+                               #address-cells = <0>;
+                               #interrupt-cells = <1>;
+                               interrupt-controller;
+                       };
+               };
+
+    };

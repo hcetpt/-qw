@@ -1,0 +1,30 @@
+Armada DRM CRTC 驱动的设备树绑定
+
+必需属性：
+- `compatible`：值应为 "marvell,dove-lcd"
+- `reg`：LCD 控制器的基本地址和大小
+- `interrupts`：LCD 控制器的单个中断编号
+- `port`：带有端点的视频输出端口，如 graph.txt 中所述
+
+可选属性：
+
+- `clocks`：如 clock-bindings.txt 中所述
+- `clock-names`：如 clock-bindings.txt 中所述
+   - `"axiclk"`：用于像素时钟的 AXI 总线时钟
+   - `"plldivider"`：用于像素时钟的 PLL 分频时钟
+   - `"ext_ref_clk0"`：用于像素时钟的外部时钟 0
+   - `"ext_ref_clk1"`：用于像素时钟的外部时钟 1
+
+注意：所有时钟都是可选的，但至少需要指定一个。未来可能会根据不同 SoC 的需求添加更多的时钟。
+示例：
+
+``` 
+lcd0: lcd-controller@820000 {
+	compatible = "marvell,dove-lcd";
+	reg = <0x820000 0x1000>;
+	interrupts = <47>;
+	clocks = <&si5351 0>;
+	clock-names = "ext_ref_clk_1";
+};
+```
+在上述示例中，`lcd-controller@820000` 表示 LCD 控制器的基地址为 0x820000，其大小为 0x1000 字节。它使用了外部时钟 1 (`ext_ref_clk1`) 作为其像素时钟源，并且该控制器的中断号为 47。

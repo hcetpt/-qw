@@ -1,0 +1,26 @@
+# SPDX-许可证标识符: GPL-2.0-only 或 BSD-2-Clause
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/power/reset/restart-handler.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: 重启和关机处理器通用属性
+
+maintainers:
+  - Sebastian Reichel <sre@kernel.org>
+
+description:
+  重启和关机处理器设备负责关闭系统，例如切断电源。系统可能有多个重启处理器，这些通常按照从最精确到最后手段的顺序尝试。
+
+属性:
+  priority:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    description: |
+      优先级范围从0到255，根据以下准则：
+        0::   最后的重启处理器，重启能力有限
+        128:: 典型的、默认的重启处理器；如果预期没有其他重启处理器可用，或者重启功能足以重启整个系统时使用
+        255:: 最高优先级的重启处理器，将抢占所有其他重启处理器
+    minimum: 0
+    maximum: 255
+
+additionalProperties: true

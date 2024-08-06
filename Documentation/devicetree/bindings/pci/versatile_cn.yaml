@@ -1,0 +1,90 @@
+# SPDX-文件许可人: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/pci/versatile.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: ARM Versatile 平台基板的 PCI 接口
+
+维护者:
+  - Rob Herring <robh@kernel.org>
+
+描述: |+
+  在 ARM Versatile PB 板上的 FPGA 中找到的 PCI 主控制器
+allOf:
+  - $ref: /schemas/pci/pci-host-bridge.yaml#
+
+属性:
+  compatible:
+    常量: arm,versatile-pci
+
+  reg:
+    项目:
+      - 描述: 特定于 Versatile 的寄存器
+      - 描述: 自配置空间
+      - 描述: 配置空间
+
+  ranges:
+    最大项数: 3
+
+  "#interrupt-cells": true
+
+  interrupt-map:
+    最大项数: 16
+
+  interrupt-map-mask:
+    项目:
+      - 常量: 0x1800
+      - 常量: 0
+      - 常量: 0
+      - 常量: 7
+
+必需:
+  - compatible
+  - reg
+  - ranges
+  - "#interrupt-cells"
+  - interrupt-map
+  - interrupt-map-mask
+
+未评估的属性: false
+
+示例:
+  - |
+    pci@10001000 {
+      compatible = "arm,versatile-pci";
+      device_type = "pci";
+      reg = <0x10001000 0x1000>,
+            <0x41000000 0x10000>,
+            <0x42000000 0x100000>;
+      bus-range = <0 0xff>;
+      #address-cells = <3>;
+      #size-cells = <2>;
+      #interrupt-cells = <1>;
+
+      ranges =
+          <0x01000000 0 0x00000000 0x43000000 0 0x00010000>,  /* 下游 I/O */
+          <0x02000000 0 0x50000000 0x50000000 0 0x10000000>,  /* 不可预取内存 */
+          <0x42000000 0 0x60000000 0x60000000 0 0x10000000>;  /* 可预取内存 */
+
+      interrupt-map-mask = <0x1800 0 0 7>;
+      interrupt-map = <0x1800 0 0 1 &sic 28>,
+          <0x1800 0 0 2 &sic 29>,
+          <0x1800 0 0 3 &sic 30>,
+          <0x1800 0 0 4 &sic 27>,
+
+          <0x1000 0 0 1 &sic 27>,
+          <0x1000 0 0 2 &sic 28>,
+          <0x1000 0 0 3 &sic 29>,
+          <0x1000 0 0 4 &sic 30>,
+
+          <0x0800 0 0 1 &sic 30>,
+          <0x0800 0 0 2 &sic 27>,
+          <0x0800 0 0 3 &sic 28>,
+          <0x0800 0 0 4 &sic 29>,
+
+          <0x0000 0 0 1 &sic 29>,
+          <0x0000 0 0 2 &sic 30>,
+          <0x0000 0 0 3 &sic 27>,
+          <0x0000 0 0 4 &sic 28>;
+    };

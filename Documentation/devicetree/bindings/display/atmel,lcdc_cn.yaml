@@ -1,0 +1,65 @@
+# SPDX-文件许可人: (GPL-2.0 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/display/atmel,lcdc.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: Microchip 的 LCDC 帧缓冲区
+
+维护者:
+  - Nicolas Ferre <nicolas.ferre@microchip.com>
+  - Dharma Balasubiramani <dharma.b@microchip.com>
+
+描述:
+  LCDC 与帧缓冲区一起工作，帧缓冲区是包含表示显示像素值的完整帧数据的内存部分。LCDC 从帧缓冲区读取像素数据，并将其发送到 LCD 面板以渲染图像。
+属性:
+  compatible:
+    枚举:
+      - atmel,at91sam9261-lcdc
+      - atmel,at91sam9263-lcdc
+      - atmel,at91sam9g10-lcdc
+      - atmel,at91sam9g45-lcdc
+      - atmel,at91sam9g45es-lcdc
+      - atmel,at91sam9rl-lcdc
+
+  reg:
+    最大项数: 1
+
+  interrupts:
+    最大项数: 1
+
+  clocks:
+    最大项数: 2
+
+  clock-names:
+    项:
+      - 常量: hclk
+      - 常量: lcdc_clk
+
+  display:
+    $ref: /schemas/types.yaml#/definitions/phandle
+    描述: 指向 display 节点的 phandle
+必需:
+  - compatible
+  - reg
+  - interrupts
+  - clocks
+  - clock-names
+  - display
+
+附加属性: false
+
+示例:
+  - |
+    #include <dt-bindings/clock/at91.h>
+    #include <dt-bindings/interrupt-controller/irq.h>
+    fb@500000 {
+      compatible = "atmel,at91sam9g45-lcdc";
+      reg = <0x00500000 0x1000>;
+      interrupts = <23 IRQ_TYPE_LEVEL_HIGH 0>;
+      pinctrl-names = "default";
+      pinctrl-0 = <&pinctrl_fb>;
+      clocks = <&pmc PMC_TYPE_PERIPHERAL 23>, <&pmc PMC_TYPE_PERIPHERAL 23>;
+      clock-names = "hclk", "lcdc_clk";
+      display = <&display>;
+    };

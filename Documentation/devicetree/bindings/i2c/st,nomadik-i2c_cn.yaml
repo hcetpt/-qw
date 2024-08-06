@@ -1,0 +1,147 @@
+下面是给定内容的中文翻译：
+
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/i2c/st,nomadik-i2c.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: 意法半导体 Nomadik I2C
+
+描述: Nomadik I2C 主控制器最初出现在意法半导体的 STn8800 系统芯片中，随后被继承到 STn8810 和 STn8815。它是原型 STn8500 的一部分，在这两家公司的无线部门合并后成为了 ST-Ericsson DB8500。
+维护者:
+  - Linus Walleij <linus.walleij@linaro.org>
+
+# 需要自定义选择器或 'arm,primecell' 将匹配许多节点
+选择:
+  属性:
+    兼容性:
+      包含:
+        枚举:
+          - st,nomadik-i2c
+          - mobileye,eyeq5-i2c
+  必需:
+    - 兼容性
+
+属性:
+  兼容性:
+    一种:
+      - 项:
+          - 常量: st,nomadik-i2c
+          - 常量: arm,primecell
+      - 项:
+          - 常量: stericsson,db8500-i2c
+          - 常量: st,nomadik-i2c
+          - 常量: arm,primecell
+      - 项:
+          - 常量: mobileye,eyeq5-i2c
+          - 常量: arm,primecell
+
+  寄存器:
+    最大项数: 1
+
+  中断:
+    最大项数: 1
+
+  时钟:
+    最大项数: 2
+
+  时钟名称:
+    一种:
+      # STn8815 中的时钟名称
+      - 项:
+          - 常量: mclk
+          - 常量: apb_pclk
+      # DB8500 或 EyeQ5 中的时钟名称
+      - 项:
+          - 常量: i2cclk
+          - 常量: apb_pclk
+
+  功率域:
+    最大项数: 1
+
+  重置:
+    最大项数: 1
+
+  时钟频率:
+    最小值: 1
+    最大值: 400000
+
+  mobileye,olb:
+    $ref: /schemas/types.yaml#/definitions/phandle-array
+    项:
+      - 项:
+          - 描述: 指向 OLB 系统控制器节点的 phandle
+- 描述: 平台范围内的控制器 ID（从零开始的整数）
+描述:
+      指向 OLB 系统控制器节点的 phandle，带有 I2C
+      控制器索引
+必需:
+  - 兼容性
+  - 寄存器
+  - 中断
+  - 时钟
+  - 时钟名称
+
+未评估的属性: false
+
+所有:
+  - $ref: /schemas/i2c/i2c-controller.yaml#
+  - 如果:
+      属性:
+        兼容性:
+          包含:
+            常量: mobileye,eyeq5-i2c
+    则:
+      必需:
+        - mobileye,olb
+    否则:
+      属性:
+        mobileye,olb: false
+
+示例:
+  - |
+    #include <dt-bindings/interrupt-controller/irq.h>
+    #include <dt-bindings/interrupt-controller/arm-gic.h>
+    #include <dt-bindings/reset/stericsson,db8500-prcc-reset.h>
+    #include <dt-bindings/arm/ux500_pm_domains.h>
+    i2c@80004000 {
+      兼容性 = "stericsson,db8500-i2c", "st,nomadik-i2c", "arm,primecell";
+      寄存器 = <0x80004000 0x1000>;
+      中断 = <GIC_SPI 21 IRQ_TYPE_LEVEL_HIGH>;
+
+      #address-cells = <1>;
+      #size-cells = <0>;
+
+      时钟频率 = <400000>;
+      时钟 = <&prcc_kclk 3 3>, <&prcc_pclk 3 3>;
+      时钟名称 = "i2cclk", "apb_pclk";
+      功率域 = <&pm_domains DOMAIN_VAPE>;
+      重置 = <&prcc_reset DB8500_PRCC_3 DB8500_PRCC_3_RESET_I2C0>;
+    };
+
+    i2c@101f8000 {
+      兼容性 = "st,nomadik-i2c", "arm,primecell";
+      寄存器 = <0x101f8000 0x1000>;
+      中断父设备 = <&vica>;
+      中断 = <20>;
+      时钟频率 = <100000>;
+      #address-cells = <1>;
+      #size-cells = <0>;
+      时钟 = <&i2c0clk>, <&pclki2c0>;
+      时钟名称 = "mclk", "apb_pclk";
+    };
+  - |
+    #include <dt-bindings/interrupt-controller/mips-gic.h>
+    i2c@300000 {
+      兼容性 = "mobileye,eyeq5-i2c", "arm,primecell";
+      寄存器 = <0x300000 0x1000>;
+      中断父设备 = <&gic>;
+      中断 = <GIC_SHARED 1 IRQ_TYPE_LEVEL_HIGH>;
+      时钟频率 = <400000>;
+      #address-cells = <1>;
+      #size-cells = <0>;
+      时钟 = <&i2c_ser_clk>, <&i2c_clk>;
+      时钟名称 = "i2cclk", "apb_pclk";
+      mobileye,olb = <&olb 0>;
+    };

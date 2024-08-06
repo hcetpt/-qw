@@ -1,0 +1,34 @@
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/power/reset/regulator-poweroff.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: 强制禁用电源调节器以关闭电源
+maintainers:
+  - Michael Klein <michael@fossekall.de>
+
+description: |
+  当调用电源关闭处理器时，通过调用 regulator_force_disable() 来禁用一个电源调节器。
+  如果在 3000 毫秒的延迟后电源仍然开启且 CPU 仍在运行，则会发出警告。
+
+properties:
+  compatible:
+    const: regulator-poweroff
+
+  cpu-supply:
+    description:
+      在电源下降时要禁用的调节器
+
+required:
+  - compatible
+  - cpu-supply
+
+additionalProperties: false
+
+examples:
+  - |
+    regulator-poweroff {
+        compatible = "regulator-poweroff";
+        cpu-supply = <&reg_vcc1v2>;
+    };

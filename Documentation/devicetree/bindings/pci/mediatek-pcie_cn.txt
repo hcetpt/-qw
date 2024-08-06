@@ -1,0 +1,121 @@
+### MediaTek Gen2 PCIe 控制器
+
+**必需属性：**
+- **compatible：** 应包含以下字符串之一：
+    - "mediatek,mt2701-pcie"
+    - "mediatek,mt2712-pcie"
+    - "mediatek,mt7622-pcie"
+    - "mediatek,mt7623-pcie"
+    - "mediatek,mt7629-pcie"
+    - "airoha,en7523-pcie"
+- **device_type：** 必须为 "pci"
+- **reg：** 根端口的基本地址和长度
+- **reg-names：** 上述区域的名称，用于资源查找时使用
+- **#address-cells：** 根端口的地址表示（必须为 3）
+- **#size-cells：** 根端口的大小表示（必须为 2）
+- **clocks：** 必须包含与 clock-names 中的条目相匹配的条目。详情见 ../clocks/clock-bindings.txt
+- **clock-names：**
+    - **必填条目：**
+        - sys_ckN : 交易层和数据链路层时钟
+    - **MT2701/MT7623 必需条目：**
+        - free_ck : PCIe 子系统的参考时钟
+    - **MT2712/MT7622 必需条目：**
+        - ahb_ckN : 用于 CSR 访问和 RC 发起的 MMIO 访问的 AHB 从接口操作时钟
+    - **MT7622 必需条目：**
+        - axi_ckN : 应用层 MMIO 通道的操作时钟
+        - aux_ckN : 当 pcie_mac_ck/pcie_pipe_ck 关闭时，pe2_mac_bridge 和 pe2_mac_core 的操作时钟
+        - obff_ckN : OBFF 功能块的操作时钟
+        - pipe_ckN : LTSSM 和 PHY/MAC 层的操作时钟
+    - 其中 N 从 0 开始，直到根端口数量减一
+- **phys：** PHY 规格列表（由通用 PHY 框架使用）
+- **phy-names：** 必须是 "pcie-phy0", "pcie-phy1", "pcie-phyN" 等，基于 *phys* 属性中指定的 PHY 数量
+- **power-domains：** 一个指向负责外围设备电源折叠和恢复的电源域的句柄及其电源域规格对
+- **bus-range：** 与此控制器关联的总线编号范围
+- **ranges：** PCI 内存和 I/O 区域的范围
+### 对于MT7623/MT2701所需属性：
+- `#interrupt-cells`: 中断表示的大小（必须为1）
+- `interrupt-map-mask` 和 `interrupt-map`: 标准PCI中断映射属性。请参阅标准PCI总线绑定文档以获取更详细的解释。
+- `resets`: 必须包含与`reset-names`条目数量相同的条目。
+  - 详情见`../reset/reset.txt`
+- `reset-names`: 必须是`pcie-rst0`, `pcie-rst1`, `pcie-rstN`...基于根端口的数量。
+
+### 对于MT2712/MT7622/MT7629所需属性：
+- `interrupts`: 控制器的中断输出列表，必须为每个PCIe端口有一个条目。
+- `interrupt-names`: 必须包括以下条目：
+  - `"pcie_irq"`: 当接收到MSI/INTX时被触发的中断。
+- `linux,pci-domain`: PCI域ID。对于每个主机控制器应该是唯一的。
+
+### 此外，设备树节点必须有描述每个PCIe端口接口的子节点，并具有以下强制性属性：
+
+#### 强制性属性：
+- `device_type`: 必须是"pci"
+- `reg`: 只使用前四个字节来引用正确的总线号和设备号
+- `#address-cells`: 必须为3
+- `#size-cells`: 必须为2
+- `#interrupt-cells`: 必须为1
+- `interrupt-map-mask` 和 `interrupt-map`: 标准PCI中断映射属性。请参阅标准PCI总线绑定文档以获取更详细的解释。
+- `ranges`: 从PCIe控制器节点分配的子范围。空属性就足够了。
+
+### MT7623示例：
+
+```plaintext
+hifsys: syscon@1a000000 {
+    compatible = "mediatek,mt7623-hifsys", "mediatek,mt2701-hifsys", "syscon";
+    reg = <0 0x1a000000 0 0x1000>;
+    #clock-cells = <1>;
+    #reset-cells = <1>;
+};
+
+pcie: pcie@1a140000 {
+    compatible = "mediatek,mt7623-pcie";
+    device_type = "pci";
+    reg = <0 0x1a140000 0 0x1000>, /* PCIe共享寄存器 */
+          <0 0x1a142000 0 0x1000>, /* Port0寄存器 */
+          <0 0x1a143000 0 0x1000>, /* Port1寄存器 */
+          <0 0x1a144000 0 0x1000>; /* Port2寄存器 */
+    reg-names = "subsys", "port0", "port1", "port2";
+    #address-cells = <3>;
+    #size-cells = <2>;
+    #interrupt-cells = <1>;
+    interrupt-map-mask = <0xf800 0 0 0>;
+    interrupt-map = <0x0000 0 0 0 &sysirq GIC_SPI 193 IRQ_TYPE_LEVEL_LOW>,
+                    <0x0800 0 0 0 &sysirq GIC_SPI 194 IRQ_TYPE_LEVEL_LOW>,
+                    <0x1000 0 0 0 &sysirq GIC_SPI 195 IRQ_TYPE_LEVEL_LOW>;
+    clocks = <&topckgen CLK_TOP_ETHIF_SEL>,
+             <&hifsys CLK_HIFSYS_PCIE0>,
+             <&hifsys CLK_HIFSYS_PCIE1>,
+             <&hifsys CLK_HIFSYS_PCIE2>;
+    clock-names = "free_ck", "sys_ck0", "sys_ck1", "sys_ck2";
+    resets = <&hifsys MT2701_HIFSYS_PCIE0_RST>,
+             <&hifsys MT2701_HIFSYS_PCIE1_RST>,
+             <&hifsys MT2701_HIFSYS_PCIE2_RST>;
+    reset-names = "pcie-rst0", "pcie-rst1", "pcie-rst2";
+    phys = <&pcie0_phy PHY_TYPE_PCIE>, <&pcie1_phy PHY_TYPE_PCIE>,
+           <&pcie2_phy PHY_TYPE_PCIE>;
+    phy-names = "pcie-phy0", "pcie-phy1", "pcie-phy2";
+    power-domains = <&scpsys MT2701_POWER_DOMAIN_HIF>;
+    bus-range = <0x00 0xff>;
+    ranges = <0x81000000 0 0x1a160000 0 0x1a160000 0 0x00010000> /* I/O空间 */
+              <0x83000000 0 0x60000000 0 0x60000000 0 0x10000000>; /* 内存空间 */
+
+    pcie@0,0 { ... };
+    pcie@1,0 { ... };
+    pcie@2,0 { ... };
+};
+```
+
+### MT2712示例：
+
+```plaintext
+pcie1: pcie@112ff000 { ... };
+pcie0: pcie@11700000 { ... };
+```
+
+### MT7622示例：
+
+```plaintext
+pcie0: pcie@1a143000 { ... };
+pcie1: pcie@1a145000 { ... };
+```
+
+以上示例展示了如何在设备树中配置MT7623、MT2712以及MT7622的PCIe控制器及其端口。这些配置确保了硬件可以正确地初始化并运行。

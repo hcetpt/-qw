@@ -1,0 +1,160 @@
+# SPDX-文件许可人: GPL-2.0-only 或 BSD-2-Clause
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/mfd/maxim,max8998.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: Maxim MAX8998, National/TI LP3974 电源管理 IC
+
+maintainers:
+  - Krzysztof Kozlowski <krzk@kernel.org>
+
+description:
+  Maxim MAX8998 是一款电源管理 IC，其中包括电压/电流稳压器、实时时钟、电池充电控制器以及多个其他子模块。它通过 I2C 接口进行通信。每个子模块由主机系统使用不同的 I2C 从设备地址来寻址。
+properties:
+  compatible:
+    enum:
+      - maxim,max8998
+      - national,lp3974
+      - ti,lp3974
+
+  reg:
+    maxItems: 1
+
+  interrupts:
+    minItems: 1
+    items:
+      - description: 主中断
+      - description: 上电/断电中断
+
+  max8998,pmic-buck1-dvs-gpios:
+    maxItems: 2
+    description:
+      用于 buck1 动态电压调节 (DVS) 的两个主机 GPIO。
+max8998,pmic-buck2-dvs-gpio:
+    maxItems: 1
+    description:
+      用于 buck2 动态电压调节 (DVS) 的主机 GPIO。
+max8998,pmic-buck1-default-dvs-idx:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    enum: [0, 1, 2, 3]
+    default: 0
+    description:
+      从可通过 DVS GPIO 选择的四个选项中选择的默认电压设置。
+max8998,pmic-buck2-default-dvs-idx:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    enum: [0, 1]
+    default: 0
+    description:
+      从可通过 DVS GPIO 选择的两个选项中选择的默认电压设置。
+max8998,pmic-buck-voltage-lock:
+    type: boolean
+    description:
+      如果存在，则不允许更改预编程的 buck DVS 电压。
+max8998,pmic-buck1-dvs-voltage:
+    $ref: /schemas/types.yaml#/definitions/uint32-array
+    maxItems: 4
+    description:
+      可以通过 DVS GPIO 为 buck1 稳压器选择的四个电压值（微伏）。
+max8998,pmic-buck2-dvs-voltage:
+    $ref: /schemas/types.yaml#/definitions/uint32-array
+    maxItems: 2
+    description:
+      可以通过 DVS GPIO 为 buck2 稳压器选择的两个电压值（微伏）。
+regulators:
+    type: object
+    additionalProperties: false
+
+    properties:
+      CHARGER:
+        type: object
+        $ref: /schemas/regulator/regulator.yaml#
+        unevaluatedProperties: false
+        description:
+          CHARGER 是主电池充电器的电流控制，被错误地表示为稳压器。
+properties:
+          regulator-min-microamp:
+            minimum: 90000
+            maximum: 800000
+
+          regulator-max-microamp:
+            minimum: 90000
+            maximum: 800000
+
+          regulator-min-microvolt: false
+          regulator-max-microvolt: false
+
+        required:
+          - regulator-name
+
+    patternProperties:
+      "^(LDO([2-9]|1[0-7])|BUCK[1-4])$":
+        type: object
+        $ref: /schemas/regulator/regulator.yaml#
+        unevaluatedProperties: false
+
+        required:
+          - regulator-name
+
+      "^(EN32KHz-AP|EN32KHz-CP|ENVICHG|ESAFEOUT[12])$":
+        type: object
+        $ref: /schemas/regulator/regulator.yaml#
+        unevaluatedProperties: false
+        description: |
+          EN32KHz-AP 和 EN32KHz-CP 是 32768 Hz 时钟，被错误地表示为稳压器。
+The provided text describes the configuration of a power management system using Device Tree (DT) syntax for specifying hardware properties in embedded systems. Below is a translation and explanation of the key components:
+
+### Overview
+`ENVICHG` is an output monitor for battery charging current.
+
+### Properties
+- **regulator-min-microvolt**: Not used (false).
+- **regulator-max-microvolt**: Not used (false).
+
+### Required Properties
+- **regulator-name**: The name of the regulator.
+
+### Dependencies
+- **max8998,pmic-buck1-dvs-gpios**: Linked to `max8998,pmic-buck1-dvs-voltage`.
+- **max8998,pmic-buck2-dvs-gpio**: Linked to `max8998,pmic-buck2-dvs-voltage`.
+
+### Other Requirements
+- **compatible**: Compatibility string.
+- **reg**: Register address.
+- **regulators**: Regulator configuration.
+
+### Additional Properties
+- **additionalProperties**: False, indicating no additional properties are allowed.
+
+### Examples
+Here's a breakdown of the example configuration:
+
+#### I2C Bus Configuration
+- **#address-cells**: Number of cells to represent an address.
+- **#size-cells**: Number of cells to represent a size.
+
+#### Power Management IC (PMIC) Configuration
+- **compatible**: Compatibility string indicating the type of PMIC.
+- **reg**: Register address of the PMIC.
+- **interrupts-extended**: Interrupts configuration.
+- **pinctrl-names**: Pin control names.
+- **pinctrl-0**: Pin control configuration.
+
+#### DVS (Dynamic Voltage Scaling) Configuration
+- **max8998,pmic-buck1-default-dvs-idx**: Default index for Dynamic Voltage Scaling of Buck1.
+- **max8998,pmic-buck1-dvs-gpios**: GPIOs controlling the DVS states of Buck1.
+- **max8998,pmic-buck1-dvs-voltage**: Voltages for different DVS states of Buck1.
+- **max8998,pmic-buck2-default-dvs-idx**: Default index for Dynamic Voltage Scaling of Buck2.
+- **max8998,pmic-buck2-dvs-gpio**: GPIO controlling the DVS states of Buck2.
+- **max8998,pmic-buck2-dvs-voltage**: Voltages for different DVS states of Buck2.
+
+#### Regulator Configuration
+Each regulator has a name, minimum voltage (`regulator-min-microvolt`), maximum voltage (`regulator-max-microvolt`), and flags like `regulator-always-on` or `regulator-boot-on`.
+
+- **LDO2** to **LDO17**: Low Dropout (LDO) regulators with fixed voltages.
+- **BUCK1**, **BUCK2**, **BUCK3**, and **BUCK4**: Switching regulators with adjustable voltage ranges.
+- **EN32KHz-AP** and **EN32KHz-CP**: 32KHz regulators, one always on, the other not.
+- **ENVICHG**: Represents the battery charging current monitor output, named as `VICHG`.
+- **ESAFEOUT1** and **ESAFEOUT2**: Safe output regulators, with the latter enabled at boot.
+
+This example shows a detailed configuration for a PMIC that includes various voltage regulators, including the battery charging current monitor `ENVICHG`.

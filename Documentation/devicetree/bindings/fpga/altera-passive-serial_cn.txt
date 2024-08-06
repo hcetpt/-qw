@@ -1,0 +1,28 @@
+Altera 的被动串行 SPI FPGA 管理器
+
+Altera 的 FPGA 支持一种被称为“被动串行”的方法来加载位流。
+被动串行链接从技术上讲并不是 SPI，并且可能需要额外的电路才能与其他在同一总线上的 SPI 从设备兼容。
+详情请参阅 https://www.altera.com/literature/hb/cyc/cyc_c51013.pdf
+
+必需属性：
+- compatible: 必须是以下之一：
+    - "altr,fpga-passive-serial",
+    - "altr,fpga-arria10-passive-serial"
+- reg: FPGA 的 SPI 芯片选择
+- nconfig-gpios: 配置引脚（在手册中称为 nCONFIG）
+- nstat-gpios: 状态引脚（在手册中称为 nSTATUS）
+
+可选属性：
+- confd-gpios: confd 引脚（在手册中称为 CONF_DONE）
+
+示例：
+```
+fpga: fpga@0 {
+	compatible = "altr,fpga-passive-serial";
+	spi-max-frequency = <20000000>;
+	reg = <0>;
+	nconfig-gpios = <&gpio4 9 GPIO_ACTIVE_LOW>;
+	nstat-gpios = <&gpio4 11 GPIO_ACTIVE_LOW>;
+	confd-gpios = <&gpio4 12 GPIO_ACTIVE_LOW>;
+};
+```

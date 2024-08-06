@@ -1,0 +1,352 @@
+# SPDX-文件许可人: GPL-2.0-only 或 BSD-2-Clause
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/mfd/cirrus,lochnagar.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: Cirrus Logic Lochnagar 音频开发板
+
+维护者:
+  - patches@opensource.cirrus.com
+
+描述: |
+  Lochnagar 是用于评估和开发 Cirrus Logic 智能 CODEC 和放大器设备的平台。它允许通过迷你卡连接大多数 Cirrus Logic 设备，并且还允许连接各种应用处理器系统，以提供一个完整的评估平台。音频系统的拓扑结构、时钟和电源都可以通过 Lochnagar 进行控制，使得被测设备可以在多种可能的应用场景中使用。
+还可以参阅以下文档获取通用绑定信息：
+    [1] GPIO : ../gpio/gpio.txt
+
+  以及这些文档获取相关定义：
+    [2] include/dt-bindings/pinctrl/lochnagar.h
+    [3] include/dt-bindings/clock/lochnagar.h
+
+  并且参阅以下文档获取所需的子节点绑定详情：
+    [4] 时钟: ../clock/cirrus,lochnagar.yaml
+    [5] 引脚控制器: ../pinctrl/cirrus,lochnagar.yaml
+    [6] 声音: ../sound/cirrus,lochnagar.yaml
+    [7] 硬件监控: ../hwmon/cirrus,lochnagar.yaml
+
+allOf:
+  - 如果:
+      属性:
+        compatible:
+          枚举:
+            - cirrus,lochnagar2
+    则:
+      属性:
+        lochnagar-hwmon:
+          类型: 对象
+          $ref: /schemas/hwmon/cirrus,lochnagar.yaml#
+
+        lochnagar-sc:
+          类型: 对象
+          $ref: /schemas/sound/cirrus,lochnagar.yaml#
+
+属性:
+  compatible:
+    枚举:
+      - cirrus,lochnagar1
+      - cirrus,lochnagar2
+
+  reg:
+    常量: 0x22
+
+  reset-gpios:
+    最大项数: 1
+
+  present-gpios:
+    描述: |
+      主机在位信号线，指示主机系统的在位情况，参见 [1]。如果硬件上已经固定在位信号线，则可以省略此配置
+最大项数: 1
+
+  lochnagar-clk:
+    类型: 对象
+    $ref: /schemas/clock/cirrus,lochnagar.yaml#
+
+  lochnagar-pmic32k:
+    类型: 对象
+    $ref: /schemas/clock/fixed-clock.yaml#
+    属性:
+      clock-frequency:
+        常量: 32768
+
+  lochnagar-clk12m:
+    类型: 对象
+    $ref: /schemas/clock/fixed-clock.yaml#
+    属性:
+      clock-frequency:
+        常量: 12288000
+
+  lochnagar-clk11m:
+    类型: 对象
+    $ref: /schemas/clock/fixed-clock.yaml#
+    属性:
+      clock-frequency:
+        常量: 11298600
+
+  lochnagar-clk24m:
+    类型: 对象
+    $ref: /schemas/clock/fixed-clock.yaml#
+    属性:
+      clock-frequency:
+        常量: 24576000
+
+  lochnagar-clk22m:
+    类型: 对象
+    $ref: /schemas/clock/fixed-clock.yaml#
+    属性:
+      clock-frequency:
+        常量: 22579200
+
+  lochnagar-clk8m:
+    类型: 对象
+    $ref: /schemas/clock/fixed-clock.yaml#
+    属性:
+      clock-frequency:
+        常量: 8192000
+
+  lochnagar-usb24m:
+    类型: 对象
+    $ref: /schemas/clock/fixed-clock.yaml#
+    属性:
+      clock-frequency:
+        常量: 24576000
+
+  lochnagar-usb12m:
+    类型: 对象
+    $ref: /schemas/clock/fixed-clock.yaml#
+    属性:
+      clock-frequency:
+        常量: 12288000
+
+  pinctrl:
+    类型: 对象
+    $ref: /schemas/pinctrl/cirrus,lochnagar.yaml#
+
+  lochnagar-hwmon:
+    类型: 对象
+    $ref: /schemas/hwmon/cirrus,lochnagar.yaml#
+
+  lochnagar-sc:
+    类型: 对象
+    $ref: /schemas/sound/cirrus,lochnagar.yaml#
+
+  VDDCORE:
+    描述:
+      VDDCORE 调节器的初始化数据，该调节器为 CODEC 的数字核心供电（如果不由内部调节器供电的话）
+类型: 对象
+    $ref: /schemas/regulator/regulator.yaml#
+    未评估属性: false
+    属性:
+      compatible:
+        枚举:
+          - cirrus,lochnagar2-vddcore
+
+      SYSVDD-supply:
+        描述:
+          Lochnagar 的主电源供应
+必需:
+      - compatible
+
+  MICVDD:
+    描述:
+      MICVDD 调节器的初始化数据，该调节器为 CODEC 的 MICVDD 供电
+类型: 对象
+    $ref: /schemas/regulator/regulator.yaml#
+    未评估属性: false
+    属性:
+      compatible:
+        枚举:
+          - cirrus,lochnagar2-micvdd
+
+      SYSVDD-supply:
+        描述:
+          Lochnagar 的主电源供应
+必需:
+      - compatible
+
+  MIC1VDD:
+    描述:
+      MIC1VDD 供电的初始化数据
+类型: 对象
+    $ref: /schemas/regulator/regulator.yaml#
+    未评估属性: false
+    属性:
+      compatible:
+        枚举:
+          - cirrus,lochnagar2-mic1vdd
+
+      cirrus,micbias-input:
+        描述:
+          选择应使用哪个 CODEC 迷你卡输出的 micbias
+$ref: /schemas/types.yaml#/definitions/uint32
+        最小值: 1
+        最大值: 4
+
+      MICBIAS1-supply:
+        描述:
+          MIC1VDD 输出的调节器供电，为数字麦克风供电，通常由连接的 CODEC 提供
+必需:
+      - compatible
+
+  MIC2VDD:
+    描述:
+      MIC2VDD 供电的初始化数据
+The provided text describes device tree bindings for a hardware configuration using YAML-like syntax. Below is the translation into Chinese:
+
+类型: 对象
+    $ref: /schemas/regulator/regulator.yaml#
+    不评估的属性: false
+    属性:
+      兼容性:
+        枚举:
+          - cirrus,lochnagar2-mic2vdd
+
+      cirrus,micbias-input:
+        描述:
+          一个用于选择CODEC微型卡micbias输出中哪一个应该被使用的属性
+
+$ref: /schemas/types.yaml#/definitions/uint32
+        最小值: 1
+        最大值: 4
+
+      MICBIAS2-supply:
+        描述:
+          为MIC2VDD输出供电的稳压器，为数字麦克风供电，通常由连接的CODEC供电
+必需:
+      - 兼容性
+
+  VDD1V8:
+    描述:
+      推荐的VDD1V8稳压器固定稳压器，它为CODEC的模拟和1.8V数字供电提供电源
+类型: 对象
+    $ref: /schemas/regulator/regulator.yaml#
+    不评估的属性: false
+    属性:
+      兼容性:
+        枚举:
+          - regulator-fixed
+
+      regulator-min-microvolt:
+        常量: 1800000
+
+      regulator-max-microvolt:
+        常量: 1800000
+
+      vin-supply:
+        描述:
+          应该设置为与SYSVDD相同的电源
+必需:
+      - 兼容性
+      - regulator-min-microvolt
+      - regulator-max-microvolt
+      - regulator-boot-on
+      - regulator-always-on
+      - vin-supply
+
+必需:
+  - 兼容性
+  - 寄存器
+  - 重置GPIOs
+  - lochnagar时钟
+  - 引脚控制器
+
+额外属性: false
+
+示例:
+  - |
+    #include <dt-bindings/clock/lochnagar.h>
+    #include <dt-bindings/pinctrl/lochnagar.h>
+    i2c@e0004000 {
+        #地址单元格 = <1>;
+        #大小单元格 = <0>;
+        寄存器 = <0xe0004000 0x1000>;
+
+        lochnagar: lochnagar@22 {
+            兼容性 = "cirrus,lochnagar2";
+            寄存器 = <0x22>;
+
+            重置GPIOs = <&gpio0 55 0>;
+            在位GPIOs = <&gpio0 60 0>;
+
+            lochnagarclk: lochnagar-clk {
+                兼容性 = "cirrus,lochnagar2-clk";
+
+                #时钟单元格 = <1>;
+                时钟 = <&clkaudio>, <&clkpmic>;
+                时钟名称 = "ln-gf-mclk2", "ln-pmic-32k";
+
+                分配时钟 = <&lochnagarclk LOCHNAGAR_CDC_MCLK1>,
+                                  <&lochnagarclk LOCHNAGAR_CDC_MCLK2>;
+                分配时钟父级 = <&clkaudio>, <&clkpmic>;
+            };
+
+            clkpmic: lochnagar-pmic32k {
+                兼容性 = "fixed-clock";
+                #时钟单元格 = <0>;
+                时钟频率 = <32768>;
+            };
+
+            pinctrl {
+                兼容性 = "cirrus,lochnagar-pinctrl";
+
+                GPIO控制器;
+                #GPIO单元格 = <2>;
+                GPIO范围 = <&lochnagar 0 0 LOCHNAGAR2_PIN_NUM_GPIOS>;
+
+                引脚控制器名称 = "默认";
+                引脚控制器-0 = <&pinsettings>;
+
+                pinsettings: 引脚设置 {
+                    ap2aif-pins {
+                        输入使能;
+                        组 = "gf-aif1";
+                        功能 = "codec-aif3";
+                    };
+                    codec2aif-pins {
+                        输出使能;
+                        组 = "codec-aif3";
+                        功能 = "gf-aif1";
+                    };
+                };
+            };
+
+            lochnagar-sc {
+                兼容性 = "cirrus,lochnagar2-soundcard";
+
+                #声音D-AI单元格 = <1>;
+
+                时钟 = <&lochnagarclk LOCHNAGAR_SOUNDCARD_MCLK>;
+                时钟名称 = "mclk";
+            };
+
+            lochnagar-hwmon {
+                兼容性 = "cirrus,lochnagar2-hwmon";
+            };
+
+            MIC1VDD {
+                兼容性 = "cirrus,lochnagar2-mic1vdd";
+
+                cirrus,micbias-input = <3>;
+            };
+
+            MICVDD {
+                兼容性 = "cirrus,lochnagar2-micvdd";
+
+                SYSVDD供电 = <&wallvdd>;
+
+                稳压器最小微伏特 = <3300000>;
+                稳压器最大微伏特 = <3300000>;
+            };
+
+            VDD1V8 {
+                兼容性 = "regulator-fixed";
+
+                稳压器名称 = "VDD1V8";
+                稳压器最小微伏特 = <1800000>;
+                稳压器最大微伏特 = <1800000>;
+                稳压器启动时开启;
+                稳压器始终开启;
+
+                vin供电 = <&wallvdd>;
+            };
+        };
+    };

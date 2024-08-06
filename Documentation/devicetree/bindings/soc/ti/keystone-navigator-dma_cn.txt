@@ -1,0 +1,93 @@
+### Keystone Navigator DMA 控制器
+
+本文件解释了 Keystone 设备上数据包 DMA 的设备树绑定。Keystone Navigator DMA 驱动程序为 QMSS（队列管理子系统）设置 DMA 通道和流，QMSS 触发客户端间实际的数据传输使用目标队列。每个客户端模块，如 NETCP（网络协处理器）、SRIO（串行快速 I/O）、CRYPTO 引擎等，都有自己的 DMA 硬件实例。QMSS 也有一个内部的数据包 DMA 模块，作为零复制基础设施 DMA 使用。
+
+#### Navigator DMA 云布局：
+```
+------------------
+| Navigator DMAs |
+------------------
+    |
+    |-> DMA 实例 #0
+    |
+    |-> DMA 实例 #1
+
+    |
+    |-> DMA 实例 #n
+```
+
+#### Navigator DMA 属性：
+
+**必需属性：**
+- `compatible`：应为 "ti,keystone-navigator-dma"
+- `clocks`：指向 DMA 实例时钟的 phandle。时钟句柄的数量可以与 DMA 实例数量相同。顺序应保持与 DMA 实例一致。
+- `ti,navigator-cloud-address`：应包含多核 Navigator 云的基本地址，地址的数量取决于 SoC 集成配置。Navigator 云全局地址需要被编程到 DMA 中，并且 DMA 将其用作到达队列管理器的物理地址。需要注意的是，尽管这些地址指向队列管理器，但它们仅从 DMA 的角度来看是相关的。QMSS 可能不会选择使用它们，因为它有一个不同的地址空间视图来访问所有组件。
+
+#### DMA 实例属性：
+
+**必需属性：**
+- `reg`：应包含以下 DMA 寄存器区域的位置和长度。寄存器区域应按以下顺序指定：
+  - 全局控制寄存器区域（global）
+  - 发送 DMA 通道配置寄存器区域（txchan）
+  - 接收 DMA 通道配置寄存器区域（rxchan）
+  - 发送 DMA 通道调度器配置寄存器区域（txsched）
+### DMA 流配置寄存器区域 (rxflow)
+可选属性:
+- `reg-names`: 寄存器区域的名称。
+- `ti,enable-all`: 启用所有DMA通道，而不是客户端仅打开它们需要的具体通道。此属性对于用户空间快速路径案例有用，在这种情况下，Linux驱动程序会启用用户空间堆栈使用的通道。
+- `ti,loop-back`: 用于将Tx流接口回环到Rx流接口。用于基础设施传输。
+- `ti,rx-retry-timeout`: 缓冲区饥饿前等待的DMA周期数。
+
+#### 示例：
+
+```plaintext
+knav_dmas: knav_dmas@0 { // DMA 设备节点
+    compatible = "ti,keystone-navigator-dma"; // 兼容性字符串
+    clocks = <&papllclk>, <&clkxge>; // 钟频率引用
+    #address-cells = <1>; // 地址单元的数量
+    #size-cells = <1>; // 大小单元的数量
+    ranges; // 地址映射范围
+    ti,navigator-cloud-address = <0x23a80000 0x23a90000
+                                 0x23aa0000 0x23ab0000>; // 导航器云地址
+
+    dma_gbe: dma_gbe@0 { // GBE DMA 控制器实例
+        reg = <0x2004000 0x100>,
+             <0x2004400 0x120>,
+             <0x2004800 0x300>,
+             <0x2004c00 0x120>,
+             <0x2005000 0x400>; // 寄存器基地址和大小
+        reg-names = "global", "txchan", "rxchan",
+                    "txsched", "rxflow"; // 寄存器区域名称
+    };
+
+    dma_xgbe: dma_xgbe@0 { // XGBE DMA 控制器实例
+        reg = <0x2fa1000 0x100>,
+             <0x2fa1400 0x200>,
+             <0x2fa1800 0x200>,
+             <0x2fa1c00 0x200>,
+             <0x2fa2000 0x400>; // 寄存器基地址和大小
+        reg-names = "global", "txchan", "rxchan",
+                    "txsched", "rxflow"; // 寄存器区域名称
+    };
+};
+```
+
+### Navigator DMA 客户端
+必需属性:
+- `ti,navigator-dmas`: 一个或多个DMA指定符列表，每个指定符包括：
+   - 指向DMA实例节点的phandle
+   - 作为phandle参数的DMA通道编号
+- `ti,navigator-dma-names`: 包含在`ti,navigator-dmas`属性中每个DMA指定符对应的DMA通道名称。
+
+#### 示例：
+
+```plaintext
+netcp: netcp@2090000 { // 网络控制器节点
+    .
+    ti,navigator-dmas = <&dma_gbe 22>,
+                         <&dma_gbe 23>,
+                         <&dma_gbe 8>; // DMA指定符列表
+    ti,navigator-dma-names = "netrx0", "netrx1", "nettx"; // DMA通道名称
+    .
+};
+```

@@ -1,0 +1,217 @@
+下面是给定 YAML 文档的中文翻译：
+
+---
+
+# SPDX 许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/display/tegra/nvidia,tegra20-gr3d.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: NVIDIA 3D 图形引擎
+
+维护者:
+  - Thierry Reding <thierry.reding@gmail.com>
+  - Jon Hunter <jonathanh@nvidia.com>
+
+属性:
+  $nodename:
+    模式: "^gr3d@[0-9a-f]+$"
+
+  compatible:
+    枚举:
+      - nvidia,tegra20-gr3d
+      - nvidia,tegra30-gr3d
+      - nvidia,tegra114-gr3d
+
+  reg:
+    最大项数: 1
+
+  clocks:
+    最小项数: 1
+    最大项数: 2
+
+  clock-names:
+    最小项数: 1
+    最大项数: 2
+
+  resets:
+    最小项数: 2
+    最大项数: 4
+
+  reset-names:
+    最小项数: 2
+    最大项数: 4
+
+  iommus:
+    最小项数: 1
+    最大项数: 2
+
+  interconnects:
+    最小项数: 4
+    最大项数: 10
+
+  interconnect-names:
+    最小项数: 4
+    最大项数: 10
+
+  operating-points-v2: 真
+
+  power-domains:
+    最小项数: 1
+    最大项数: 2
+
+  power-domain-names:
+    最大项数: 2
+
+allOf:
+  - 如果:
+      属性:
+        compatible:
+          包含:
+            常量: nvidia,tegra20-gr2d
+    那么:
+      属性:
+        clocks:
+          项:
+            - 描述: 模块时钟
+
+        clock-names:
+          项:
+            - 常量: 3d
+
+        resets:
+          项:
+            - 描述: 模块复位
+            - 描述: 内存客户端热刷新复位
+
+        reset-names:
+          项:
+            - 常量: 3d
+            - 常量: mc
+
+        iommus:
+          最大项数: 1
+
+        interconnects:
+          最小项数: 4
+          最大项数: 4
+
+        interconnect-names:
+          最小项数: 4
+          最大项数: 4
+
+        power-domains:
+          项:
+            - 描述: 到 TD 功率域的 phandle
+
+  - 如果:
+      属性:
+        compatible:
+          包含:
+            常量: nvidia,tegra30-gr3d
+    那么:
+      属性:
+        clocks:
+          项:
+            - 描述: 主模块时钟
+            - 描述: 辅助模块时钟
+
+        clock-names:
+          项:
+            - 常量: 3d
+            - 常量: 3d2
+
+        resets:
+          项:
+            - 描述: 主模块复位
+            - 描述: 辅助模块复位
+            - 描述: 主内存客户端热刷新复位
+            - 描述: 辅助内存客户端热刷新复位
+
+        reset-names:
+          项:
+            - 常量: 3d
+            - 常量: 3d2
+            - 常量: mc
+            - 常量: mc2
+
+        iommus:
+          最小项数: 2
+          最大项数: 2
+
+        interconnects:
+          最小项数: 8
+          最大项数: 8
+
+        interconnect-names:
+          最小项数: 8
+          最大项数: 8
+
+        power-domains:
+          项:
+            - 描述: 到 TD 功率域的 phandle
+            - 描述: 到 TD2 功率域的 phandle
+
+        power-domain-names:
+          项:
+            - 常量: 3d0
+            - 常量: 3d1
+
+      依赖:
+        power-domains: [ power-domain-names ]
+
+  - 如果:
+      属性:
+        compatible:
+          包含:
+            常量: nvidia,tegra114-gr2d
+    那么:
+      属性:
+        clocks:
+          项:
+            - 描述: 模块时钟
+
+        clock-names:
+          项:
+            - 常量: 3d
+
+        resets:
+          项:
+            - 描述: 模块复位
+            - 描述: 内存客户端热刷新复位
+
+        reset-names:
+          项:
+            - 常量: 3d
+            - 常量: mc
+
+        iommus:
+          最大项数: 1
+
+        interconnects:
+          最小项数: 10
+          最大项数: 10
+
+        interconnect-names:
+          最小项数: 10
+          最大项数: 10
+
+        power-domains:
+          项:
+            - 描述: 到 TD 功率域的 phandle
+
+additionalProperties: 假
+
+示例:
+  - |
+    #include <dt-bindings/clock/tegra20-car.h>
+    #include <dt-bindings/memory/tegra20-mc.h>
+
+    gr3d@54180000 {
+        compatible = "nvidia,tegra20-gr3d";
+        reg = <0x54180000 0x00040000>;
+        clocks = <&tegra_car TEGRA20_CLK_GR3D>;
+        resets = <&tegra_car 24>, <&mc TEGRA20_MC_RESET_3D>;
+        reset-names = "3d", "mc";
+    };

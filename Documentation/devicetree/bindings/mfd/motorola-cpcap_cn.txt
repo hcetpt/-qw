@@ -1,0 +1,71 @@
+Motorola CPCAP PMIC 设备树绑定
+
+**必需属性:**
+- `compatible` : 必须包含 "motorola,cpcap" 或 "ste,6556002" 中的一个或两个
+- `reg` : 指定 SPI 芯片选择
+- `interrupts` : 设备连接的中断线
+- `interrupt-controller` : 标记该设备节点为中断控制器
+- `#interrupt-cells` : 描述 IRQ 所需的单元格数，应为 2
+- `#address-cells` : 子设备偏移单元格数，应为 1
+- `#size-cells` : 子设备大小单元格数，应为 0
+- `spi-max-frequency` : 通常设置为 3000000
+- `spi-cs-high` : SPI 芯片选择方向
+
+**可选子节点:**
+
+CPCAP 的子功能拥有自己的节点和兼容值，这些值在以下文件中描述：
+
+- 文档/devicetree/bindings/power/supply/cpcap-battery.yaml
+- 文档/devicetree/bindings/power/supply/cpcap-charger.yaml
+- 文档/devicetree/bindings/regulator/cpcap-regulator.txt
+- 文档/devicetree/bindings/phy/phy-cpcap-usb.txt
+- 文档/devicetree/bindings/input/cpcap-pwrbutton.txt
+- 文档/devicetree/bindings/rtc/cpcap-rtc.txt
+- 文档/devicetree/bindings/leds/leds-cpcap.txt
+- 文档/devicetree/bindings/iio/adc/motorola,cpcap-adc.yaml
+
+音频编解码器是唯一的例外。其节点名称必须为 "audio-codec"。
+
+**audio-codec 子节点必需的属性:**
+
+- `#sound-dai-cells = <1>;`
+
+音频编解码器提供两个 DAI (数字音频接口)。第一个连接到立体声高保真 DAC，第二个连接到语音 DAC。
+
+**示例:**
+
+```yaml
+&mcspi1 {
+    cpcap: pmic@0 {  // 使用 cs0 作为 SPI 芯片选择
+        compatible = "motorola,cpcap", "ste,6556002";
+        reg = <0>;
+        interrupt-parent = <&gpio1>;
+        interrupts = <7 IRQ_TYPE_EDGE_RISING>;
+        interrupt-controller;
+        #interrupt-cells = <2>;
+        #address-cells = <1>;
+        #size-cells = <0>;
+        spi-max-frequency = <3000000>;
+        spi-cs-high;
+
+        audio-codec {  // 音频编解码器
+            #sound-dai-cells = <1>;
+
+            /* HiFi */
+            port@0 {
+                endpoint {
+                    remote-endpoint = <&cpu_dai1>;
+                };
+            };
+
+            /* Voice */
+            port@1 {
+                endpoint {
+                    remote-endpoint = <&cpu_dai2>;
+                };
+            };
+        };
+    };
+};
+```
+以上示例展示了如何在设备树中配置 Motorola CPCAP PMIC，包括必需属性以及音频编解码器的配置。

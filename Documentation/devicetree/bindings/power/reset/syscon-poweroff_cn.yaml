@@ -1,0 +1,59 @@
+# SPDX-许可证标识符: GPL-2.0
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/power/reset/syscon-poweroff.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: 通用 SYSCON 映射寄存器关机驱动程序
+
+维护者:
+  - Sebastian Reichel <sre@kernel.org>
+
+描述: |+
+  这是一个使用 syscon 映射关机寄存器的通用关机驱动程序。
+  通常通过向由 syscon 引用所指向的寄存器映射加上偏移量定义的关机寄存器写入值来执行关机操作，
+  其中值和掩码由关机节点定义。
+  默认情况下为小端模式，仅支持 32 位访问。
+  SYSCON 寄存器映射通常从父 dt 节点获取。因此，
+  SYSCON 关机节点应该作为 "syscon" 或 "simple-mfd" 节点的子节点表示。
+属性:
+  compatible:
+    常量: syscon-poweroff
+
+  mask:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    描述: 更新由掩码（32 位）定义的寄存器位
+  offset:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    描述: 在寄存器映射中关机寄存器的偏移量（以字节为单位）
+  regmap:
+    $ref: /schemas/types.yaml#/definitions/phandle
+    已弃用: true
+    描述:
+      寄存器映射节点的 phandle。此属性已弃用，取而代之的是使 syscon-poweroff 节点成为系统控制器节点的子节点
+  value:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    描述: 写入到关机寄存器的关机值（32 位访问）
+
+必需:
+  - compatible
+  - offset
+
+其他属性: false
+
+allOf:
+  - 如果:
+      不:
+        必需:
+          - mask
+    然后:
+      必需:
+        - value
+
+示例:
+  - |
+    poweroff {
+        compatible = "syscon-poweroff";
+        offset = <0x0>;
+        mask = <0x7a>;
+    };

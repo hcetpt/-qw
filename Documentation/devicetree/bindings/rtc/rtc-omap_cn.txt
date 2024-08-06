@@ -1,0 +1,51 @@
+实时钟 (RTC) 配置：
+
+必需属性：
+- compatible（兼容性）:
+  - "ti,da830-rtc" - 对于类似 DA8xx 系统芯片 (SoC) 家族中使用的 RTC IP
+  - "ti,am3352-rtc" - 对于类似 AM335x 系统芯片 (SoC) 家族中使用的 RTC IP。此 RTC IP 具有特殊的 WAKE-EN 寄存器来启用事件警报的唤醒生成。它还可以通过 `pmic_power_en` 引脚来控制外部电源管理集成电路 (PMIC)。
+  - "ti,am4372-rtc" - 对于类似 AM437X 系统芯片 (SoC) 家族中使用的 RTC IP
+- reg（寄存器范围）: RTC 寄存器集的地址范围
+- interrupts（中断）: RTC 定时器和警报中断，按顺序排列
+
+可选属性：
+- system-power-controller（系统电源控制器）: RTC 是否通过 `pmic_power_en` 控制系统电源
+- clocks（时钟）: 输入到 RTC 的任何内部或外部时钟
+- clock-names（时钟名称）: 对应时钟的名称
+- pinctrl-0（引脚控制器0）: 指向设备的引脚设置的 phandle
+- pinctrl-names（引脚控制器名称）: 应为 "default"
+
+可选子节点：
+- 通用引脚控制器节点
+
+必需的引脚控制器子节点属性：
+- pins（引脚）: 要配置的 ext_wakeup 引脚名称
+
+可选的引脚控制器子节点属性：
+- input-enable（输入使能）: 启用 ext_wakeup
+- ti,active-high（高电平有效）: 设置输入为高电平有效（默认为低电平有效）
+
+示例：
+
+```text
+rtc@1c23000 { // RTC 设备在地址 0x1c23000 处
+    compatible = "ti,da830-rtc"; // 与 DA830 RTC 兼容
+    reg = <0x23000 0x1000>; // RTC 寄存器集的地址范围
+    interrupts = <19 // RTC 定时器中断
+                  19>; // RTC 警报中断
+    interrupt-parent = <&intc>; // 中断控制器的 phandle
+    system-power-controller; // RTC 控制系统电源
+    clocks = <&clk_32k_rtc>, <&clk_32768_ck>; // RTC 的两个时钟源
+    clock-names = "ext-clk", "int-clk"; // 时钟名称
+
+    pinctrl-0 = <&ext_wakeup>; // 引脚控制器的 phandle
+    pinctrl-names = "default"; // 引脚控制器名称
+
+    ext_wakeup: ext-wakeup { // ext_wakeup 子节点
+        pins = "ext_wakeup0"; // 配置的 ext_wakeup 引脚名称
+        input-enable; // 启用 ext_wakeup
+        ti,active-high; // 设置输入为高电平有效
+    };
+};
+```
+以上是针对特定的 TI 实时钟 (RTC) 配置的描述，包括必需的属性、可选属性以及示例配置。

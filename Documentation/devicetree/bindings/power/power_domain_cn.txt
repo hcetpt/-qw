@@ -1,0 +1,86 @@
+* 通用电源管理 (PM) 域
+
+片上系统设计通常被划分为多个电源管理 (PM) 域，这些域可用于通过降低漏电流来关闭选定的 IP 模块以节省电力。此设备树绑定可以用于将使用 PM 域的设备（消费者）与提供 PM 域的设备（提供者）进行绑定。PM 域提供者可以由设备树中的任意节点表示，并且可以提供一个或多个 PM 域。消费者节点可以通过指针 (phandle) 和一组指针参数（即所谓的 PM 域标识符）来引用提供者，这些参数的长度由 PM 域提供者节点中的 #power-domain-cells 属性指定。
+
+==PM 域提供者==
+
+请参阅 `power-domain.yaml`
+
+==PM 域消费者==
+
+必需属性：
+- `power-domains`：一个 PM 域标识符列表，如电源控制器（即 PM 域提供者）绑定中所定义的。
+可选属性：
+- `power-domain-names`：一个按名称字符串排序的列表，与 `power-domains` 属性中的顺序相同。消费者驱动程序会使用 `power-domain-names` 来匹配电源域与其标识符。
+示例：
+
+```device_tree
+leaky-device@12350000 {
+    compatible = "foo,i-leak-current";
+    reg = <0x12350000 0x1000>;
+    power-domains = <&power 0>;
+    power-domain-names = "io";
+};
+
+leaky-device@12351000 {
+    compatible = "foo,i-leak-current";
+    reg = <0x12351000 0x1000>;
+    power-domains = <&power 0>, <&power 1>;
+    power-domain-names = "io", "clk";
+};
+```
+
+第一个示例定义了一个典型的 PM 域消费者设备，该设备位于由标签为 "power" 的节点代表的电源控制器提供的索引为 0 的 PM 域内。在第二个示例中，消费者设备跨越两个 PM 域，第一个域索引为 0，第二个域索引为 1，这些域由标签为 "power" 的节点代表的电源控制器提供。
+
+可选属性：
+- `required-opps`：这个属性包含指向另一个设备的 OPP 表中的 OPP 节点的指针。它可以包含指向不同设备 OPP 的指针数组，但不应包含指向同一 OPP 表中多个 OPP 节点的多个指针。这指定了当前设备在当前 OPP（该属性存在的位置）下所需的最低 OPP。
+示例：
+- 提供两个域的 PM 域提供者的 OPP 表
+```device_tree
+domain0_opp_table: opp-table0 {
+    compatible = "operating-points-v2";
+    domain0_opp_0: opp-1000000000 {
+        opp-hz = /bits/ 64 <1000000000>;
+        opp-microvolt = <975000 970000 985000>;
+    };
+    domain0_opp_1: opp-1100000000 {
+        opp-hz = /bits/ 64 <1100000000>;
+        opp-microvolt = <1000000 980000 1010000>;
+    };
+};
+
+domain1_opp_table: opp-table1 {
+    compatible = "operating-points-v2";
+    domain1_opp_0: opp-1200000000 {
+        opp-hz = /bits/ 64 <1200000000>;
+        opp-microvolt = <975000 970000 985000>;
+    };
+    domain1_opp_1: opp-1300000000 {
+        opp-hz = /bits/ 64 <1300000000>;
+        opp-microvolt = <1000000 980000 1010000>;
+    };
+};
+
+power: power-controller@12340000 {
+    compatible = "foo,power-controller";
+    reg = <0x12340000 0x1000>;
+    #power-domain-cells = <1>;
+    operating-points-v2 = <&domain0_opp_table>, <&domain1_opp_table>;
+};
+
+leaky-device0@12350000 {
+    compatible = "foo,i-leak-current";
+    reg = <0x12350000 0x1000>;
+    power-domains = <&power 0>;
+    required-opps = <&domain0_opp_0>;
+};
+
+leaky-device1@12350000 {
+    compatible = "foo,i-leak-current";
+    reg = <0x12350000 0x1000>;
+    power-domains = <&power 1>;
+    required-opps = <&domain1_opp_1>;
+};
+```
+
+[1]. 文档/devicetree/bindings/power/domain-idle-state.yaml

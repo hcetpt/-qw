@@ -1,0 +1,66 @@
+```yaml
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/display/panel/newvision,nv3051d.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: 基于 NewVision NV3051D 的 LCD 面板
+
+description: |
+  NewVision NV3051D 是一种用于驱动 DSI 面板的驱动芯片。
+maintainers:
+  - Chris Morgan <macromorgan@hotmail.com>
+
+allOf:
+  - $ref: panel-common.yaml#
+
+properties:
+  compatible:
+    items:
+      - enum:
+          - anbernic,rg351v-panel
+          - anbernic,rg353p-panel
+          - powkiddy,rk2023-panel
+      - const: newvision,nv3051d
+
+  reg:
+    maxItems: 1
+
+  backlight: true
+  port: true
+  reset-gpios:
+    description: 低电平有效的复位 GPIO
+  vdd-supply: true
+
+required:
+  - compatible
+  - reg
+  - backlight
+
+additionalProperties: false
+
+examples:
+  - |
+    #include <dt-bindings/gpio/gpio.h>
+    dsi {
+        #address-cells = <1>;
+        #size-cells = <0>;
+        panel@0 {
+            compatible = "anbernic,rg353p-panel", "newvision,nv3051d";
+            reg = <0>;
+            backlight = <&backlight>;
+            reset-gpios = <&gpio4 0 GPIO_ACTIVE_LOW>;
+            vdd-supply = <&vcc3v3_lcd>;
+
+            port {
+                mipi_in_panel: endpoint {
+                    remote-endpoint = <&mipi_out_panel>;
+                };
+            };
+        };
+    };
+..
+```
+
+这段 YAML 文件定义了基于 NewVision NV3051D 的 LCD 面板的设备树配置。它描述了如何配置与这种面板相关的属性和必要的绑定信息。

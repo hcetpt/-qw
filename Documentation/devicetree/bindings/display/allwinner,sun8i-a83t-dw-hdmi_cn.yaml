@@ -1,0 +1,249 @@
+以下是提供的 YAML 文件的中文翻译：
+
+```yaml
+# SPDX 许可证标识符: GPL-2.0
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/display/allwinner,sun8i-a83t-dw-hdmi.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: Allwinner A83t DWC HDMI 发送器编码器
+
+description: |
+  HDMI 发送器是一个 Synopsys DesignWare HDMI 1.4 TX 控制器
+  IP，结合了 Allwinner 自有的 PHY IP。它支持音频和视频输出
+  以及 CEC 功能。
+这些设备树绑定遵循在 bridge/synopsys,dw-hdmi.yaml 中定义的
+  Synopsys DWC HDMI TX 绑定，并包含以下特定于设备的属性。
+maintainers:
+  - 陈宇 蔡 <wens@csie.org>
+  - 马克西姆·里帕德 <mripard@kernel.org>
+
+properties:
+  "#phy-cells":
+    const: 0
+
+  compatible:
+    oneOf:
+      - const: allwinner,sun8i-a83t-dw-hdmi
+      - const: allwinner,sun50i-h6-dw-hdmi
+
+      - items:
+          - enum:
+              - allwinner,sun8i-h3-dw-hdmi
+              - allwinner,sun8i-r40-dw-hdmi
+              - allwinner,sun50i-a64-dw-hdmi
+          - const: allwinner,sun8i-a83t-dw-hdmi
+
+  reg:
+    maxItems: 1
+
+  reg-io-width:
+    const: 1
+
+  interrupts:
+    maxItems: 1
+
+  clocks:
+    minItems: 3
+    items:
+      - description: 总线时钟
+      - description: 寄存器时钟
+      - description: TMDS 时钟
+      - description: HDMI CEC 时钟
+      - description: HDCP 时钟
+      - description: HDCP 总线时钟
+
+  clock-names:
+    minItems: 3
+    items:
+      - const: iahb
+      - const: isfr
+      - const: tmds
+      - const: cec
+      - const: hdcp
+      - const: hdcp-bus
+
+  resets:
+    minItems: 1
+    items:
+      - description: HDMI 控制器复位
+      - description: HDCP 复位
+
+  reset-names:
+    minItems: 1
+    items:
+      - const: ctrl
+      - const: hdcp
+
+  phys:
+    maxItems: 1
+    description:
+      DWC HDMI PHY 的物理句柄
+phy-names:
+    const: phy
+
+  hvcc-supply:
+    description:
+      控制器的 VCC 电源供应
+
+  ports:
+    $ref: /schemas/graph.yaml#/properties/ports
+
+    properties:
+      port@0:
+        $ref: /schemas/graph.yaml#/properties/port
+        description: |
+          控制器的输入端点。通常与
+          相关联的 TCON
+port@1:
+        $ref: /schemas/graph.yaml#/properties/port
+        description: |
+          控制器的输出端点。通常是一个 HDMI
+          连接器
+required:
+      - port@0
+      - port@1
+
+required:
+  - compatible
+  - reg
+  - reg-io-width
+  - interrupts
+  - clocks
+  - clock-names
+  - resets
+  - reset-names
+  - phys
+  - phy-names
+  - ports
+
+if:
+  properties:
+    compatible:
+      contains:
+        enum:
+          - allwinner,sun50i-h6-dw-hdmi
+
+then:
+  properties:
+    clocks:
+      minItems: 6
+
+    clock-names:
+      minItems: 6
+
+    resets:
+      minItems: 2
+
+    reset-names:
+      minItems: 2
+
+
+additionalProperties: false
+
+examples:
+  - |
+    #include <dt-bindings/interrupt-controller/arm-gic.h>
+
+    /*
+     * 这些来自 clock/sun8i-a83t-ccu.h 和
+     * reset/sun8i-a83t-ccu.h 头文件，但是我们不能直接包含它们，因为
+     * 它们会触发大量警告，因为与其它示例中的符号重复定义问题
+*/
+    #define CLK_BUS_HDMI	39
+    #define CLK_HDMI		93
+    #define CLK_HDMI_SLOW	94
+    #define RST_BUS_HDMI1	26
+
+    hdmi@1ee0000 {
+        compatible = "allwinner,sun8i-a83t-dw-hdmi";
+        reg = <0x01ee0000 0x10000>;
+        reg-io-width = <1>;
+        interrupts = <GIC_SPI 88 IRQ_TYPE_LEVEL_HIGH>;
+        clocks = <&ccu CLK_BUS_HDMI>, <&ccu CLK_HDMI_SLOW>,
+                 <&ccu CLK_HDMI>;
+        clock-names = "iahb", "isfr", "tmds";
+        resets = <&ccu RST_BUS_HDMI1>;
+        reset-names = "ctrl";
+        phys = <&hdmi_phy>;
+        phy-names = "phy";
+        pinctrl-names = "default";
+        pinctrl-0 = <&hdmi_pins>;
+
+        ports {
+            #address-cells = <1>;
+            #size-cells = <0>;
+
+            port@0 {
+                reg = <0>;
+
+                endpoint {
+                    remote-endpoint = <&tcon1_out_hdmi>;
+                };
+            };
+
+            port@1 {
+                reg = <1>;
+            };
+        };
+    };
+
+    /* 清理 */
+    #undef CLK_BUS_HDMI
+    #undef CLK_HDMI
+    #undef CLK_HDMI_SLOW
+
+  - |
+    #include <dt-bindings/interrupt-controller/arm-gic.h>
+
+    /*
+     * 这些来自 clock/sun50i-h6-ccu.h 和
+     * reset/sun50i-h6-ccu.h 头文件，但是我们不能直接包含它们，因为
+     * 它们会触发大量警告，因为与其它示例中的符号重复定义问题
+*/
+    #define CLK_BUS_HDMI	126
+    #define CLK_BUS_HDCP	137
+    #define CLK_HDMI		123
+    #define CLK_HDMI_SLOW	124
+    #define CLK_HDMI_CEC	125
+    #define CLK_HDCP		136
+    #define RST_BUS_HDMI_SUB	57
+    #define RST_BUS_HDCP	62
+
+    hdmi@6000000 {
+        compatible = "allwinner,sun50i-h6-dw-hdmi";
+        reg = <0x06000000 0x10000>;
+        reg-io-width = <1>;
+        interrupts = <GIC_SPI 64 IRQ_TYPE_LEVEL_HIGH>;
+        clocks = <&ccu CLK_BUS_HDMI>, <&ccu CLK_HDMI_SLOW>,
+                 <&ccu CLK_HDMI>, <&ccu CLK_HDMI_CEC>,
+                 <&ccu CLK_HDCP>, <&ccu CLK_BUS_HDCP>;
+        clock-names = "iahb", "isfr", "tmds", "cec", "hdcp",
+                      "hdcp-bus";
+        resets = <&ccu RST_BUS_HDMI_SUB>, <&ccu RST_BUS_HDCP>;
+        reset-names = "ctrl", "hdcp";
+        phys = <&hdmi_phy>;
+        phy-names = "phy";
+        pinctrl-names = "default";
+        pinctrl-0 = <&hdmi_pins>;
+
+        ports {
+            #address-cells = <1>;
+            #size-cells = <0>;
+
+            port@0 {
+                reg = <0>;
+
+                endpoint {
+                    remote-endpoint = <&tcon_top_hdmi_out_hdmi>;
+                };
+            };
+
+            port@1 {
+                reg = <1>;
+            };
+        };
+    };
+```
+请注意，某些注释和代码块的细节可能需要根据实际上下文进行调整以确保准确性。

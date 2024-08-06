@@ -1,0 +1,132 @@
+# SPDX-许可证标识符: GPL-2.0-only
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/soc/qcom/qcom,rpmh-rsc.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: Qualcomm RPMH RSC
+
+维护者:
+  - Bjorn Andersson <bjorn.andersson@linaro.org>
+
+描述: |
+  资源电源管理硬化 (RPMH) 是与 Qualcomm 系统芯片上的硬化资源加速器通信的机制。对资源的请求可以写入触发命令集 (TCS) 寄存器，并通过 (地址, 值) 对来触发。TCS 中的消息随后按顺序通过内部总线发送。
+硬件模块 (直接资源投票器或 DRV) 是实体 (资源状态协调器，即 RSC) 的一部分，能够处理多个休眠和活动/唤醒资源请求。一个系统级芯片中可能存在多个这样的 DRV，并且可以从 Linux 写入。每个 DRV 的结构遵循相同的模板，有一些变化由这里的属性捕捉。
+TCS 可能从 Linux 触发，或者在所有 CPU 关闭以实现空闲功耗节省后由固件触发。TCS 可以分类为：
+    活动  - 由 Linux 触发
+    休眠  - 由固件触发
+    唤醒  - 由固件触发
+    控制  - 由固件触发
+参见:: <dt-bindings/soc/qcom,rpmh-rsc.h>
+
+在设备树中描述它们的顺序应该与硬件配置相匹配。
+当子系统处于活动状态或空闲状态时，可以提出对资源状态的请求。当所有子系统（如调制解调器、GPU 和 CPU）都处于空闲状态时，资源状态将是这些子系统各自的休眠投票的汇总。客户端除了活动模式请求之外，还可以为其共享资源请求休眠值。
+想要使用 RSC 与 RPMH 进行通信的驱动程序必须将它们的绑定指定为与其希望通信的 RSC 控制器的子节点。
+属性:
+  compatible:
+    常量: qcom,rpmh-rsc
+
+  interrupts:
+    minItems: 1
+    maxItems: 4
+    描述:
+      当从该 DRV 收到消息完成/响应时触发的中断
+中断的数量必须与 DRV 块的数量相匹配
+标签:
+    描述:
+      RSC 的名称。此名称将在跟踪日志中使用
+qcom,drv-id:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    描述:
+      将被此控制器使用的 RSC 块中的 DRV 的 ID
+qcom,tcs-config:
+    $ref: /schemas/types.yaml#/definitions/uint32-matrix
+    minItems: 4
+    maxItems: 4
+    items:
+      items:
+        - 描述: |
+            TCS 类型::
+             - ACTIVE_TCS
+             - SLEEP_TCS
+             - WAKE_TCS
+             - CONTROL_TCS
+          枚举: [ 0, 1, 2, 3 ]
+        - 描述: TCS 的数量
+    描述: |
+      定义 TCS 配置的元组。必须包含两个单元格来描述每种 TCS 类型。TCS 的顺序必须与硬件配置相匹配
+The provided text describes a Device Tree (DT) schema for configuring a Resource Sharing Controller (RSC) from Qualcomm (QCOM), along with examples of how to use it in Device Tree files. Here's a translation of the key components:
+
+### `qcom,tcs-offset`:
+- **Type**: Unsigned 32-bit integer (`uint32`)
+- **Description**: The offset of the TCS (Trust Control System) blocks.
+
+### `reg`:
+- **Minimum Items**: 1
+- **Maximum Items**: 4
+- This property defines the register ranges used by the RSC.
+
+### `reg-names`:
+- **Minimum Items**: 1
+- **Items**:
+  - Constant: `drv-0`
+  - Constant: `drv-1`
+  - Constant: `drv-2`
+  - Constant: `drv-3`
+- These are names for the register regions defined by `reg`.
+
+### `power-domains`:
+- **Maximum Items**: 1
+- This property links the RSC to its power domain.
+
+### `bcm-voter`, `clock-controller`, `power-controller`:
+- Each of these properties references another YAML file that defines their respective schemas.
+  - `bcm-voter`: Refers to a voter component that decides which power level to apply.
+  - `clock-controller`: Refers to a clock controller component.
+  - `power-controller`: Refers to a power controller component.
+
+### `patternProperties`:
+- Defines a pattern for properties that match the regular expression `'^regulators(-[0-9])?$'`.
+  - References a regulator schema.
+
+### `required`:
+- Lists properties that must be present in the configuration:
+  - `compatible`
+  - `interrupts`
+  - `qcom,drv-id`
+  - `qcom,tcs-config`
+  - `qcom,tcs-offset`
+  - `reg`
+  - `reg-names`
+  - `power-domains`
+
+### `additionalProperties`:
+- Set to `false`, indicating no additional properties beyond those specified are allowed.
+
+### Examples:
+#### Example 1:
+- **RSC Base Address**: 0x179C0000
+- **DRV ID**: 2
+- **Register Offsets for DRV2**: Start at 0xD00
+- **Interrupts**: GIC_SPI 3, GIC_SPI 4, GIC_SPI 5 (all level-triggered high)
+- **TCS Configuration**:
+  - Active TCS: 2
+  - Sleep TCS: 3
+  - Wake TCS: 3
+  - Control TCS: 1
+- **Power Domain**: Linked to `CLUSTER_PD`
+
+#### Example 2:
+- **RSC Base Address**: 0xAF20000
+- **DRV ID**: 0
+- **Register Offsets for DRV0**: Start at 0x1C00
+- **Interrupt**: GIC_SPI 129 (level-triggered high)
+- **TCS Configuration**:
+  - Active TCS: 0
+  - Sleep TCS: 1
+  - Wake TCS: 1
+  - Control TCS: 0
+- **Power Domain**: Linked to `CLUSTER_PD`
+
+#### Example 3:
+- Similar to Example 1 but includes configurations for a clock controller and a power controller, as well as a voter component.

@@ -1,0 +1,54 @@
+下面是给定内容的中文翻译：
+
+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/display/bridge/snps,dw-mipi-dsi.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: Synopsys DesignWare MIPI DSI 主控制器
+
+maintainers:
+  - Philippe CORNU <philippe.cornu@foss.st.com>
+
+description: |
+  本文件定义了适用于Synopsys DesignWare MIPI DSI主控制器的设备树属性。它本身并不构成一个设备树绑定规范，而是旨在被特定平台的设备树绑定引用。
+  当从平台设备树绑定中引用时，本文件中定义的属性如下。平台设备树绑定负责定义每个属性是必需还是可选。
+allOf:
+  - $ref: ../dsi-controller.yaml#
+
+properties:
+  reg:
+    maxItems: 1
+
+  clocks: true
+
+  clock-names: true
+
+  resets:
+    maxItems: 1
+
+  reset-names:
+    const: apb
+
+  ports:
+    $ref: /schemas/graph.yaml#/properties/ports
+
+    properties:
+      port@0:
+        $ref: /schemas/graph.yaml#/properties/port
+        description: 接收像素数据的输入节点
+      port@1:
+        $ref: /schemas/graph.yaml#/properties/port
+        description: DSI输出节点至面板
+required:
+  - port@0
+  - port@1
+
+required:
+  - clock-names
+  - clocks
+  - ports
+  - reg
+
+additionalProperties: true

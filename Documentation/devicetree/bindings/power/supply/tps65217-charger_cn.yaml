@@ -1,0 +1,47 @@
+```yaml
+# SPDX-许可证标识符: GPL-2.0
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/power/supply/tps65217-charger.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: TPS65217 充电器
+
+maintainers:
+  - Sebastian Reichel <sre@kernel.org>
+
+allOf:
+  - $ref: power-supply.yaml#
+
+properties:
+  compatible:
+    const: ti,tps65217-charger
+
+  interrupts:
+    minItems: 2
+    maxItems: 2
+
+  interrupt-names:
+    items:
+      - const: USB
+      - const: AC
+
+required:
+  - compatible
+  - interrupts
+  - interrupt-names
+
+additionalProperties: false
+
+examples:
+  - |
+    pmic {
+      charger {
+        compatible = "ti,tps65217-charger";
+        interrupts = <0>, <1>;
+        interrupt-names = "USB", "AC";
+      };
+    };
+```
+
+请注意，代码中的注释和内容保持不变，只是将英文关键词进行了翻译。对于实际使用来说，通常我们会保留原文的关键词和语法结构，因为 YAML 和其它编程语言的标准通常是英文的。如果你需要在实际环境中使用这段 YAML，请确保遵循 YAML 的标准和规范。

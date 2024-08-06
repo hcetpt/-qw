@@ -1,0 +1,204 @@
+# SPDX-文件许可人: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/mfd/ams,as3711.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: 奥地利微系统 AS3711 四路降压高电流电源管理芯片带充电器
+
+maintainers:
+  - Guennadi Liakhovetski <guennadi.liakhovetski@linux.intel.com>
+
+description:
+  AS3711 是奥地利微系统公司的一款通过 I2C 控制的电源管理芯片（PMIC），包含多个 DC/DC 和 LDO 电源供应、电池充电器和实时时钟（RTC）。目前仅定义了两个升压 DC/DC 转换器的绑定。
+properties:
+  compatible:
+    const: ams,as3711
+
+  reg:
+    maxItems: 1
+
+  backlight:
+    description:
+      升压转换器配置，用于作为背光源
+    type: object
+    additionalProperties: false
+    properties:
+      compatible:
+        const: ams,as3711-bl
+
+      su1-dev:
+        description: 第一个升压转换器的帧缓冲区 phandle
+        $ref: /schemas/types.yaml#/definitions/phandle
+
+      su1-max-uA:
+        description: 第一个升压转换器的最大电流
+        $ref: /schemas/types.yaml#/definitions/uint32
+
+      su2-dev:
+        description: 第二个升压转换器的帧缓冲区 phandle
+        $ref: /schemas/types.yaml#/definitions/phandle
+
+      su2-max-uA:
+        description: 第二个升压转换器的最大电流
+        $ref: /schemas/types.yaml#/definitions/uint32
+
+      su2-feedback-voltage:
+        description: 第二个升压转换器使用电压反馈
+        type: boolean
+
+      su2-feedback-curr1:
+        description: 第二个升压转换器使用 CURR1 输入进行电流反馈
+        type: boolean
+
+      su2-feedback-curr2:
+        description: 第二个升压转换器使用 CURR2 输入进行电流反馈
+        type: boolean
+
+      su2-feedback-curr3:
+        description: 第二个升压转换器使用 CURR3 输入进行电流反馈
+        type: boolean
+
+      su2-feedback-curr-auto:
+        description: 第二个升压转换器使用自动电流反馈选择
+        type: boolean
+
+      su2-fbprot-lx-sd4:
+        description: 第二个升压转换器使用 LX_SD4 进行过电压保护
+        type: boolean
+
+      su2-fbprot-gpio2:
+        description: 第二个升压转换器使用 GPIO2 进行过电压保护
+        type: boolean
+
+      su2-fbprot-gpio3:
+        description: 第二个升压转换器使用 GPIO3 进行过电压保护
+        type: boolean
+
+      su2-fbprot-gpio4:
+        description: 第二个升压转换器使用 GPIO4 进行过电压保护
+        type: boolean
+
+      su2-auto-curr1:
+        description: 第二个升压转换器使用 CURR1 输入进行自动电流反馈
+        type: boolean
+
+      su2-auto-curr2:
+        description: 第二个升压转换器使用 CURR2 输入进行自动电流反馈
+        type: boolean
+
+      su2-auto-curr3:
+        description: 第二个升压转换器使用 CURR3 输入进行自动电流反馈
+        type: boolean
+
+    required:
+      - compatible
+
+    dependentRequired:
+      # 要将 SU1 转换器用作背光源，必须提供以下两个属性：
+      su1-dev: [ su1-max-uA ]
+      su1-max-uA: [ su1-dev ]
+
+      # 要将 SU2 转换器用作背光源，必须提供以下两个属性：
+      su2-dev: [ su2-max-uA ]
+      su2-max-uA: [ su2-dev ]
+
+      su2-feedback-voltage: [ su2-dev ]
+      su2-feedback-curr1: [ su2-dev ]
+      su2-feedback-curr2: [ su2-dev ]
+      su2-feedback-curr3: [ su2-dev ]
+      su2-feedback-curr-auto: [ su2-dev ]
+      su2-fbprot-lx-sd4: [ su2-dev ]
+      su2-fbprot-gpio2: [ su2-dev ]
+      su2-fbprot-gpio3: [ su2-dev ]
+      su2-fbprot-gpio4: [ su2-dev ]
+      su2-auto-curr1: [ su2-feedback-curr-auto ]
+      su2-auto-curr2: [ su2-feedback-curr-auto ]
+      su2-auto-curr3: [ su2-feedback-curr-auto ]
+
+    dependentSchemas:
+      su2-dev:
+        allOf:
+          - oneOf:
+              - required:
+                  - su2-feedback-voltage
+              - required:
+                  - su2-feedback-curr1
+              - required:
+                  - su2-feedback-curr2
+              - required:
+                  - su2-feedback-curr3
+              - required:
+                  - su2-feedback-curr-auto
+          - oneOf:
+              - required:
+                  - su2-fbprot-lx-sd4
+              - required:
+                  - su2-fbprot-gpio2
+              - required:
+                  - su2-fbprot-gpio3
+              - required:
+                  - su2-fbprot-gpio4
+
+      su2-feedback-curr-auto:
+        anyOf:
+          - required:
+              - su2-auto-curr1
+          - required:
+              - su2-auto-curr2
+          - required:
+              - su2-auto-curr3
+
+  regulators:
+    description: 其他 DC/DC 和 LDO 电源
+    type: object
+    unevaluatedProperties: false
+    patternProperties:
+      "^(sd[1-4]|ldo[1-8])$":
+        type: object
+        $ref: /schemas/regulator/regulator.yaml#
+        unevaluatedProperties: false
+
+required:
+  - compatible
+  - reg
+
+additionalProperties: false
+
+examples:
+  - |
+    i2c {
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        pmic@40 {
+            compatible = "ams,as3711";
+            reg = <0x40>;
+
+            regulators {
+                sd4 {
+                    regulator-name = "1.215V";
+                    regulator-min-microvolt = <1215000>;
+                    regulator-max-microvolt = <1235000>;
+                };
+                ldo2 {
+                    regulator-name = "2.8V CPU";
+                    regulator-min-microvolt = <2800000>;
+                    regulator-max-microvolt = <2800000>;
+                    regulator-always-on;
+                    regulator-boot-on;
+                };
+            };
+
+            backlight {
+                compatible = "ams,as3711-bl";
+                su2-dev = <&lcdc>;
+                su2-max-uA = <36000>;
+                su2-feedback-curr-auto;
+                su2-fbprot-gpio4;
+                su2-auto-curr1;
+                su2-auto-curr2;
+                su2-auto-curr3;
+            };
+        };
+    };

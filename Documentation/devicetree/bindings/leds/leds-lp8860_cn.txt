@@ -1,0 +1,48 @@
+* 德州仪器 - LP8860 四通道 LED 驱动器
+
+LP8860-Q1 是一款高效率的 LED 驱动器，带有升压控制器。它具有 4 个高精度电流阱，这些电流阱可以通过脉冲宽度调制（PWM）输入信号、SPI/I²C 主控器或两者共同控制。
+
+必需属性：
+    - compatible: 
+        "ti,lp8860"
+    - reg: I²C 从设备地址
+    - #address-cells: 1
+    - #size-cells: 0
+
+可选属性：
+    - enable-gpios: 用于启用（高电平有效）/禁用设备的 GPIO 引脚
+    - vled-supply: LED 供电
+
+必需的子节点属性：
+    - reg: 0
+
+可选的子节点属性：
+    - function: 参见文档/devicetree/bindings/leds/common.txt
+    - color: 参见文档/devicetree/bindings/leds/common.txt
+    - label: 参见文档/devicetree/bindings/leds/common.txt （已废弃）
+    - linux,default-trigger: 参见文档/devicetree/bindings/leds/common.txt
+
+示例：
+
+```dtb
+#include <dt-bindings/leds/common.h>
+
+led-controller@2d {
+	compatible = "ti,lp8860";
+	#address-cells = <1>;
+	#size-cells = <0>;
+	reg = <0x2d>;
+	enable-gpios = <&gpio1 28 GPIO_ACTIVE_HIGH>;
+	vled-supply = <&vbatt>;
+
+	led@0 {
+		reg = <0>;
+		function = LED_FUNCTION_BACKLIGHT;
+		color = <LED_COLOR_ID_WHITE>;
+		linux,default-trigger = "backlight";
+	};
+};
+```
+
+欲了解更多产品信息，请参阅以下链接：
+https://www.ti.com/product/lp8860-q1

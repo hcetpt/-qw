@@ -1,0 +1,190 @@
+### 德州仪器 OMAP 显示子系统
+========================================
+
+### 通用描述
+-------------------
+
+本文件是对 OMAP 显示子系统的通用绑定描述。每个 OMAP 系统级芯片（SoC）版本的具体绑定细节在各自的绑定文档中描述。
+OMAP 显示子系统（DSS）硬件包括 DSS 核心、DISPC 模块以及一系列编码器模块。所有 DSS 版本都包含 DSS 核心和 DISPC，但编码器模块则有所不同。
+DSS 核心是其他 DSS 模块的父级，并管理时钟路由、与 SoC 的集成等。
+DISPC 是显示控制器，它从内存读取像素并输出 RGB 像素流到编码器。
+编码器模块将接收到的 RGB 像素流编码为视频输出，如 HDMI、MIPI DPI 等。
+
+### 视频端口
+--------------
+
+DSS 核心和编码器具有视频端口输出。视频端口的结构在 `Documentation/devicetree/bindings/graph.txt` 中描述，而每个编码器的端口和端点属性在 SoC 的 DSS 绑定文档中有描述。
+视频端口用于描述与外部硬件（如面板或外部编码器）的连接。
+
+### 别名
+-------
+
+板载 DTS 文件可以定义显示别名以分配类似“displayX”风格的名称给每个显示设备。如果没有定义别名，则会使用一个半随机数字作为显示设备的标识。
+
+### 示例
+-------
+
+以下是 OMAP4 的 DSS 描述的一个简化的例子，删除了不相关的部分，该描述定义于 `omap4.dtsi` 文件中：
+
+```dts
+dss: dss@58000000 {
+    compatible = "ti,omap4-dss";
+    reg = <0x58000000 0x80>;
+    status = "disabled";
+    ti,hwmods = "dss_core";
+    clocks = <&dss_dss_clk>;
+    clock-names = "fck";
+    #address-cells = <1>;
+    #size-cells = <1>;
+    ranges;
+
+    dispc@58001000 {
+        compatible = "ti,omap4-dispc";
+        reg = <0x58001000 0x1000>;
+        interrupts = <GIC_SPI 25 IRQ_TYPE_LEVEL_HIGH>;
+        ti,hwmods = "dss_dispc";
+        clocks = <&dss_dss_clk>;
+        clock-names = "fck";
+    };
+
+    hdmi: encoder@58006000 {
+        compatible = "ti,omap4-hdmi";
+        reg = <0x58006000 0x200>,
+              <0x58006200 0x100>,
+              <0x58006300 0x100>,
+              <0x58006400 0x1000>;
+        reg-names = "wp", "pll", "phy", "core";
+        interrupts = <GIC_SPI 101 IRQ_TYPE_LEVEL_HIGH>;
+        status = "disabled";
+        ti,hwmods = "dss_hdmi";
+        clocks = <&dss_48mhz_clk>, <&dss_sys_clk>;
+        clock-names = "fck", "sys_clk";
+    };
+};
+```
+
+这是 OMAP4 Panda 板的简化描述示例，在 `omap4-panda.dts` 文件中定义。
+熊猫板具有一个DVI和一个HDMI连接器，并且该板包含一个TFP410芯片（MIPI DPI到DVI编码器）和一个TPD12S015芯片（HDMI ESD保护及电平转换器）。针对这些连接器的视频管线形成如下：
+
+DSS核心 --(MIPI DPI)--> TFP410 --(DVI)--> DVI连接器
+OMAP HDMI --(HDMI)--> TPD12S015 --(HDMI)--> HDMI连接器
+
+/ {
+	aliases {
+		display0 = &dvi0;	// 显示器0对应DVI
+		display1 = &hdmi0;	// 显示器1对应HDMI
+	};
+
+	tfp410: encoder@0 {	// TFP410编码器配置
+		compatible = "ti,tfp410";	// 兼容性声明
+		gpios = <&gpio1 0 GPIO_ACTIVE_LOW>;	// GPIO配置，用于电源下降
+
+		pinctrl-names = "default";	// 引脚控制名
+		pinctrl-0 = <&tfp410_pins>;	// 默认引脚控制配置
+
+		ports {	// 端口配置
+			#address-cells = <1>;	// 地址单元数
+			#size-cells = <0>;	// 大小单元数
+
+			port@0 {	// 端口0
+				reg = <0>;	// 端口注册地址
+
+				tfp410_in: endpoint@0 {	// 输入端点
+					remote-endpoint = <&dpi_out>;	// 远程端点为DPI输出
+				};
+			};
+
+			port@1 {	// 端口1
+				reg = <1>;	// 端口注册地址
+
+				tfp410_out: endpoint@0 {	// 输出端点
+					remote-endpoint = <&dvi_connector_in>;	// 远程端点为DVI连接器输入
+				};
+			};
+		};
+	};
+
+	dvi0: connector@0 {	// DVI连接器配置
+		compatible = "dvi-connector";	// 兼容性声明
+		label = "dvi";	// 标签
+
+		i2c-bus = <&i2c3>;	// I2C总线配置
+
+		port {	// 端口配置
+			dvi_connector_in: endpoint {	// 输入端点
+				remote-endpoint = <&tfp410_out>;	// 远程端点为TFP410输出
+			};
+		};
+	};
+
+	tpd12s015: encoder@1 {	// TPD12S015编码器配置
+		compatible = "ti,tpd12s015";	// 兼容性声明
+
+		pinctrl-names = "default";	// 引脚控制名
+		pinctrl-0 = <&tpd12s015_pins>;	// 默认引脚控制配置
+
+		gpios = <&gpio2 28 GPIO_ACTIVE_HIGH>,	// GPIO配置，用于CT CP HPD
+			<&gpio2 9 GPIO_ACTIVE_HIGH>,	// GPIO配置，用于LS OE
+			<&gpio2 31 GPIO_ACTIVE_HIGH>;	// GPIO配置，用于HPD
+
+		ports {	// 端口配置
+			#address-cells = <1>;	// 地址单元数
+			#size-cells = <0>;	// 大小单元数
+
+			port@0 {	// 端口0
+				reg = <0>;	// 端口注册地址
+
+				tpd12s015_in: endpoint@0 {	// 输入端点
+					remote-endpoint = <&hdmi_out>;	// 远程端点为HDMI输出
+				};
+			};
+
+			port@1 {	// 端口1
+				reg = <1>;	// 端口注册地址
+
+				tpd12s015_out: endpoint@0 {	// 输出端点
+					remote-endpoint = <&hdmi_connector_in>;	// 远程端点为HDMI连接器输入
+				};
+			};
+		};
+	};
+
+	hdmi0: connector@1 {	// HDMI连接器配置
+		compatible = "hdmi-connector";	// 兼容性声明
+		label = "hdmi";	// 标签
+
+		port {	// 端口配置
+			hdmi_connector_in: endpoint {	// 输入端点
+				remote-endpoint = <&tpd12s015_out>;	// 远程端点为TPD12S015输出
+			};
+		};
+	};
+};
+
+&dss {	// DSS核心配置
+	status = "ok";	// 状态
+
+	pinctrl-names = "default";	// 引脚控制名
+	pinctrl-0 = <&dss_dpi_pins>;	// 默认引脚控制配置
+
+	port {	// 端口配置
+		dpi_out: endpoint {	// 输出端点
+			remote-endpoint = <&tfp410_in>;	// 远程端点为TFP410输入
+			data-lines = <24>;	// 数据线数量
+		};
+	};
+};
+
+&hdmi {	// HDMI核心配置
+	status = "ok";	// 状态
+	vdda-supply = <&vdac>;	// VDDA供电配置
+
+	pinctrl-names = "default";	// 引脚控制名
+	pinctrl-0 = <&dss_hdmi_pins>;	// 默认引脚控制配置
+
+	port {	// 端口配置
+		hdmi_out: endpoint {	// 输出端点
+			remote-endpoint = <&tpd12s015_in>;	// 远程端点为TPD12S015输入
+		};
+	};
+};

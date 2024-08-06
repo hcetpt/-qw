@@ -1,0 +1,14 @@
+*SPEAr 热传感器*
+
+所需属性:
+- compatible（兼容性）: "st,thermal-spear1340"
+- reg（寄存器范围）: 热传感器寄存器的地址范围
+- st,thermal-flags（热标志）: 用于启用热传感器的标志
+
+示例：
+
+	thermal@fc000000 {    # 表明该设备的基地址为 0xfc000000
+		compatible = "st,thermal-spear1340";    # 指定与 "st,thermal-spear1340" 兼容
+		reg = <0xfc000000 0x1000>;             # 定义热传感器寄存器的地址范围从 0xfc000000 开始，长度为 0x1000
+		st,thermal-flags = <0x7000>;           # 设置用于启用热传感器的标志为 0x7000
+	};

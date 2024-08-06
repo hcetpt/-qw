@@ -1,0 +1,79 @@
+# SPDX-文件许可人: GPL-2.0
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/display/panel/raydium,rm67191.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: 使用MIPI-DSI协议的Raydium RM67171 OLED LCD面板
+
+维护者:
+  - Robert Chiras <robert.chiras@nxp.com>
+
+allOf:
+  - $ref: panel-common.yaml#
+
+属性:
+  compatible:
+    常量: raydium,rm67191
+
+  reg:
+    maxItems: 1
+
+  port: true
+  reset-gpios: true
+  width-mm: true
+  height-mm: true
+
+  dsi-lanes:
+    描述: 要使用的DSI通道数量必须是<3>或<4>
+    $ref: /schemas/types.yaml#/definitions/uint32
+    枚举: [3, 4]
+
+  v3p3-supply:
+    描述: 对3.3V调节器的phandle，该调节器为VDD_3V3引脚供电
+
+  v1p8-supply:
+    描述: 对1.8V调节器的phandle，该调节器为VDD_1V8引脚供电
+
+  video-mode:
+    描述: |
+      0 - 爆发模式
+      1 - 非爆发模式，带同步事件
+      2 - 非爆发模式，带同步脉冲
+    $ref: /schemas/types.yaml#/definitions/uint32
+    枚举: [0, 1, 2]
+
+必需:
+  - compatible
+  - reg
+  - dsi-lanes
+  - port
+
+additionalProperties: false
+
+示例:
+  - |
+    #include <dt-bindings/gpio/gpio.h>
+
+    dsi {
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        panel@0 {
+            compatible = "raydium,rm67191";
+            reg = <0>;
+            reset-gpios = <&gpio1 7 GPIO_ACTIVE_LOW>;
+            dsi-lanes = <4>;
+            width-mm = <68>;
+            height-mm = <121>;
+            video-mode = <1>;
+
+            port {
+                panel_in: endpoint {
+                    remote-endpoint = <&mipi_out>;
+                };
+            };
+        };
+    };
+
+..

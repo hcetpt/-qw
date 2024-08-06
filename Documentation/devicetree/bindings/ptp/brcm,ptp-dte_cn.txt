@@ -1,0 +1,18 @@
+基于博通数字定时引擎 (DTE) 的 PTP 时钟
+
+所需属性：
+- compatible（兼容性）：应包含核心兼容字符串和 SoC 兼容字符串。SoC 兼容字符串用于处理特定于 SoC 的硬件差异。
+  核心兼容字符串：
+                  "brcm,ptp-dte"
+  SoC 兼容字符串：
+                  "brcm,iproc-ptp-dte" - 适用于基于 iproc 的 SoC
+- reg（寄存器）：DTE 块的 NCO 寄存器的地址和长度
+
+示例：
+
+```
+ptp: ptp-dte@180af650 { 
+	compatible = "brcm,iproc-ptp-dte", "brcm,ptp-dte"; 
+	reg = <0x180af650 0x10>; 
+};
+```

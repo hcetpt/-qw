@@ -1,0 +1,39 @@
+```yaml
+# SPDX-文件许可标识符: GPL-2.0-only 或 BSD-2-Clause
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/leds/irled/gpio-ir-tx.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: 通过 GPIO 引脚连接的红外线 LED
+
+maintainers:
+  - Sean Young <sean@mess.org>
+
+description:
+  通过 GPIO 引脚连接的红外线 LED，用于作为遥控器发射器
+
+properties:
+  compatible:
+    const: gpio-ir-tx
+
+  gpios:
+    maxItems: 1
+
+required:
+  - compatible
+  - gpios
+
+additionalProperties: false
+
+examples:
+  - |
+    #include <dt-bindings/gpio/gpio.h>
+
+    irled {
+        compatible = "gpio-ir-tx";
+        gpios = <&gpio1 2 GPIO_ACTIVE_HIGH>;
+    };
+```
+
+此段代码定义了一个设备树 (Device Tree) 的 YAML 格式配置文件，用于描述通过 GPIO 引脚连接的红外线 LED。它被用作遥控器发射器，并且指定了必须的兼容性和 GPIO 配置。

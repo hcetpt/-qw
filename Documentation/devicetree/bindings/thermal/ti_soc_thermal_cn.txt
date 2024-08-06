@@ -1,0 +1,89 @@
+在系统控制模块中，OMAP 提供了一个电压参考和温度传感器功能，这些功能被集成在带隙电压和温度传感器（VBGAPTS）模块中。带隙为内部电路和其他模拟 IP 块提供电流和电压参考。模数转换器（ADC）产生一个与硅温度成比例的输出值。
+
+必需属性：
+- `compatible`：应为：
+  - `"ti,omap34xx-bandgap"`：对于 OMAP34xx 的带隙
+  - `"ti,omap36xx-bandgap"`：对于 OMAP36xx 的带隙
+  - `"ti,omap4430-bandgap"`：对于 OMAP4430 的带隙
+  - `"ti,omap4460-bandgap"`：对于 OMAP4460 的带隙
+  - `"ti,omap4470-bandgap"`：对于 OMAP4470 的带隙
+  - `"ti,omap5430-bandgap"`：对于 OMAP5430 的带隙
+- `interrupts`：此条目应指示 talert 信号路由到哪个中断线；
+特定属性：
+- `gpios`：此条目应用于告知 tshut 信号路由到了哪个 GPIO 线。所告知的 GPIO 将被视为 IRQ；
+- `regs`：此条目也必须指定，并且它对每个带隙版本都是特定的，因为映射可能从一个 SoC 到另一个 SoC 发生变化，除了依赖于可用的功能之外。
+
+示例：
+OMAP34xx:
+```
+bandgap {
+    reg = <0x48002524 0x4>;
+    compatible = "ti,omap34xx-bandgap";
+};
+```
+
+OMAP36xx:
+```
+bandgap {
+    reg = <0x48002524 0x4>;
+    compatible = "ti,omap36xx-bandgap";
+};
+```
+
+OMAP4430:
+```
+bandgap {
+    reg = <0x4a002260 0x4 0x4a00232C 0x4>;
+    compatible = "ti,omap4430-bandgap";
+};
+```
+
+OMAP4460:
+```
+bandgap {
+    reg = <0x4a002260 0x4
+           0x4a00232C 0x4
+           0x4a002378 0x18>;
+    compatible = "ti,omap4460-bandgap";
+    interrupts = <0 126 4>; /* talert */
+    gpios = <&gpio3 22 0>; /* tshut */
+};
+```
+
+OMAP4470:
+```
+bandgap {
+    reg = <0x4a002260 0x4
+           0x4a00232C 0x4
+           0x4a002378 0x18>;
+    compatible = "ti,omap4470-bandgap";
+    interrupts = <0 126 4>; /* talert */
+    gpios = <&gpio3 22 0>; /* tshut */
+};
+```
+
+OMAP5430:
+```
+bandgap {
+    reg = <0x4a0021e0 0xc
+           0x4a00232c 0xc
+           0x4a002380 0x2c
+           0x4a0023C0 0x3c>;
+    compatible = "ti,omap5430-bandgap";
+    interrupts = <0 126 4>; /* talert */
+};
+```
+
+DRA752:
+```
+bandgap {
+    reg = <0x4a0021e0 0xc
+           0x4a00232c 0xc
+           0x4a002380 0x2c
+           0x4a0023C0 0x3c
+           0x4a002564 0x8
+           0x4a002574 0x50>;
+    compatible = "ti,dra752-bandgap";
+    interrupts = <0 126 4>; /* talert */
+};
+```

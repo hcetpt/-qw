@@ -1,0 +1,63 @@
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/bus/brcm,gisb-arb.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: Broadcom GISB 总线仲裁控制器
+
+maintainers:
+  - Florian Fainelli <f.fainelli@gmail.com>
+
+properties:
+  compatible:
+    oneOf:
+      - items:
+          - enum:
+              - brcm,bcm7445-gisb-arb  # 对于其他 28nm 芯片
+          - const: brcm,gisb-arb
+      - items:
+          - enum:
+              - brcm,bcm74165-gisb-arb  # 对于 V7 新型 16nm 芯片
+              - brcm,bcm7278-gisb-arb  # 对于 V7 28nm 芯片
+              - brcm,bcm7435-gisb-arb  # 对于较新的 40nm 芯片
+              - brcm,bcm7400-gisb-arb  # 对于旧的 40nm 芯片和所有 65nm 芯片
+              - brcm,bcm7038-gisb-arb  # 对于 130nm 芯片
+              - brcm,gisb-arb          # 兼容性回退
+
+  reg:
+    maxItems: 1
+
+  interrupts:
+    minItems: 2
+    items:
+      - description: 超时中断线路
+      - description: 目标中止中断线路
+      - description: 断点中断线路
+
+  brcm,gisb-arb-master-mask:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    description: >
+      32 位宽的位掩码，用于指定在系统级别哪些 GISB 主设备是有效的
+
+  brcm,gisb-arb-master-names:
+    $ref: /schemas/types.yaml#/definitions/string-array
+    description: >
+      GISB 主设备的字面名称的字符串列表。应与 brcm,gisb-arb-master-mask 中设置的位数匹配，并且从最高有效位到最低有效位的顺序出现
+required:
+  - compatible
+  - reg
+  - interrupts
+
+additionalProperties: false
+
+examples:
+  - |
+    gisb-arb@f0400000 {
+      compatible = "brcm,gisb-arb";
+      reg = <0xf0400000 0x800>;
+      interrupts = <0>, <2>;
+      interrupt-parent = <&sun_l2_intc>;
+      brcm,gisb-arb-master-mask = <0x7>;
+      brcm,gisb-arb-master-names = "bsp_0", "scpu_0", "cpu_0";
+    };

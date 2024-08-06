@@ -1,0 +1,170 @@
+以下是提供的 YAML 文档的中文翻译：
+
+# SPDX 许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/pci/brcm,iproc-pcie.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: Broadcom iProc PCIe 控制器，带有平台总线接口
+
+维护者:
+  - Ray Jui <ray.jui@broadcom.com>
+  - Scott Branden <scott.branden@broadcom.com>
+
+allOf:
+  - $ref: /schemas/pci/pci-host-bridge.yaml#
+
+属性:
+  compatible:
+    items:
+      - 枚举:
+          # 第一代基于 PAXB 的控制器，用于包括 NSP、Cygnus、NS2 和 Pegasus 在内的 SoC
+          - brcm,iproc-pcie
+          # 第二代基于 PAXB 的控制器，用于 Stingray
+          - brcm,iproc-pcie-paxb-v2
+          # 第一代基于 PAXC 的控制器，用于 NS2
+          - brcm,iproc-pcie-paxc
+          # 第二代基于 PAXC 的控制器，用于 Stingray
+          - brcm,iproc-pcie-paxc-v2
+
+  reg:
+    maxItems: 1
+    描述: >
+       PCIe 控制器 I/O 寄存器空间的基地址和长度
+
+  ranges:
+    minItems: 1
+    maxItems: 2
+    描述: >
+      PCI 内存和 I/O 区域的范围
+
+  phys:
+    maxItems: 1
+
+  phy-names:
+    items:
+      - 常量: pcie-phy
+
+  dma-coherent: true
+
+  brcm,pcie-ob:
+    类型: 布尔
+    描述: >
+      某些 iProc SoC 在复位后没有由 ASIC 完成出站地址映射。在这种情况下，软件需要配置它
+
+  brcm,pcie-ob-axi-offset:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    描述: >
+       从 AXI 地址到 iProc PCIe 核心（而非 PCIe 地址）使用的内部地址的偏移量
+
+  msi:
+    类型: 对象
+    $ref: /schemas/interrupt-controller/msi-controller.yaml#
+    unevaluatedProperties: false
+
+    属性:
+      compatible:
+        items:
+          - 常量: brcm,iproc-msi
+
+      interrupts:
+        maxItems: 4
+
+      brcm,pcie-msi-inten:
+        类型: 布尔
+        描述:
+          需要在一些较旧的 iProc 平台上存在，这些平台需要显式设置中断使能寄存器来启用 MSI
+
+  msi-parent: true
+
+依赖关系:
+  brcm,pcie-ob-axi-offset: ["brcm,pcie-ob"]
+  brcm,pcie-msi-inten: [msi-controller]
+
+必需项:
+  - compatible
+  - reg
+  - ranges
+
+如果:
+  属性:
+    compatible:
+      包含:
+        枚举:
+          - brcm,iproc-pcie
+那么:
+  必需项:
+    - interrupt-map
+    - interrupt-map-mask
+
+unevaluatedProperties: false
+
+示例:
+  - |
+    #include <dt-bindings/interrupt-controller/arm-gic.h>
+
+    gic: interrupt-controller {
+        interrupt-controller;
+        #interrupt-cells = <3>;
+    };
+
+    pcie@18012000 {
+        compatible = "brcm,iproc-pcie";
+        reg = <0x18012000 0x1000>;
+
+        #interrupt-cells = <1>;
+        interrupt-map-mask = <0 0 0 0>;
+        interrupt-map = <0 0 0 0 &gic GIC_SPI 100 IRQ_TYPE_NONE>;
+
+        linux,pci-domain = <0>;
+
+        bus-range = <0x00 0xff>;
+
+        #address-cells = <3>;
+        #size-cells = <2>;
+        device_type = "pci";
+        ranges = <0x81000000 0          0 0x28000000 0 0x00010000>,
+                 <0x82000000 0 0x20000000 0x20000000 0 0x04000000>;
+
+        phys = <&phy 0 5>;
+        phy-names = "pcie-phy";
+
+        brcm,pcie-ob;
+        brcm,pcie-ob-axi-offset = <0x00000000>;
+
+        msi-parent = <&msi0>;
+
+        /* iProc 事件队列基础的 MSI */
+        msi0: msi {
+            compatible = "brcm,iproc-msi";
+            msi-controller;
+            interrupt-parent = <&gic>;
+            interrupts = <GIC_SPI 96 IRQ_TYPE_NONE>,
+                    <GIC_SPI 97 IRQ_TYPE_NONE>,
+                    <GIC_SPI 98 IRQ_TYPE_NONE>,
+                    <GIC_SPI 99 IRQ_TYPE_NONE>;
+        };
+    };
+  - |
+    pcie@18013000 {
+        compatible = "brcm,iproc-pcie";
+        reg = <0x18013000 0x1000>;
+
+        #interrupt-cells = <1>;
+        interrupt-map-mask = <0 0 0 0>;
+        interrupt-map = <0 0 0 0 &gic GIC_SPI 106 IRQ_TYPE_NONE>;
+
+        linux,pci-domain = <1>;
+
+        bus-range = <0x00 0xff>;
+
+        #address-cells = <3>;
+        #size-cells = <2>;
+        device_type = "pci";
+        ranges = <0x81000000 0          0 0x48000000 0 0x00010000>,
+                 <0x82000000 0 0x40000000 0x40000000 0 0x04000000>;
+
+        phys = <&phy 1 6>;
+        phy-names = "pcie-phy";
+    };

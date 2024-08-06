@@ -1,0 +1,122 @@
+下面是给定 YAML 文档的中文翻译：
+
+```yaml
+# SPDX-许可证标识符: GPL-2.0
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/mfd/x-powers,ac100.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: X-Powers AC100
+
+维护者:
+  - 陈宇蔡 <wens@csie.org>
+
+属性:
+  compatible:
+    常量: x-powers,ac100
+
+  reg:
+    最大项数: 1
+
+  codec:
+    类型: 对象
+
+    属性:
+      "#clock-cells":
+        常量: 0
+
+      compatible:
+        常量: x-powers,ac100-codec
+
+      interrupts:
+        最大项数: 1
+
+      clock-output-names:
+        最大项数: 1
+        描述: >
+          由 codec 暴露的 4M_adda 时钟名称
+
+    必需:
+      - "#clock-cells"
+      - compatible
+      - interrupts
+      - clock-output-names
+
+    额外属性: false
+
+  rtc:
+    类型: 对象
+
+    属性:
+      "#clock-cells":
+        常量: 1
+
+      compatible:
+        常量: x-powers,ac100-rtc
+
+      interrupts:
+        最大项数: 1
+
+      clocks:
+        最大项数: 1
+        描述: >
+           指向 codec 的 "4M_adda" 时钟的 phandle
+
+      clock-output-names:
+        最大项数: 3
+        描述: >
+          由 codec 暴露的 cko1, cko2 和 cko3 时钟名称
+
+    必需:
+      - "#clock-cells"
+      - compatible
+      - interrupts
+      - clocks
+      - clock-output-names
+
+    额外属性: false
+
+必需:
+  - compatible
+  - reg
+  - codec
+  - rtc
+
+额外属性: false
+
+示例:
+  - |
+    #include <dt-bindings/interrupt-controller/irq.h>
+
+    rsb {
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        codec@e89 {
+            compatible = "x-powers,ac100";
+            reg = <0xe89>;
+
+            ac100_codec: codec {
+                compatible = "x-powers,ac100-codec";
+                interrupt-parent = <&r_pio>;
+                interrupts = <0 9 IRQ_TYPE_LEVEL_LOW>; /* PL9 */
+                #clock-cells = <0>;
+                clock-output-names = "4M_adda";
+            };
+
+            ac100_rtc: rtc {
+                compatible = "x-powers,ac100-rtc";
+                interrupt-parent = <&nmi_intc>;
+                interrupts = <0 IRQ_TYPE_LEVEL_LOW>;
+                clocks = <&ac100_codec>;
+                #clock-cells = <1>;
+                clock-output-names = "cko1_rtc", "cko2_rtc", "cko3_rtc";
+            };
+        };
+    };
+
+..
+```
+
+请注意，由于 YAML 是一种数据格式，并非所有的内容都可以直接翻译为中文，比如注释、变量名等通常保持原样。上述翻译尽可能地将描述性文本转换成了中文。

@@ -1,0 +1,47 @@
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/soc/ti/sci-pm-domain.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: TI-SCI 通用电源域
+
+维护者:
+  - Nishanth Menon <nm@ti.com>
+
+allOf:
+  - $ref: /schemas/power/power-domain.yaml#
+
+描述: |
+  某些 TI 系统芯片 (SoC) 包含一个系统控制器（例如，在 Keystone 66AK2G SoC 上的电源管理微控制器 (PMMC)），这些控制器负责控制 SoC 上存在的各种硬件模块的状态。主机处理器运行操作系统与系统控制器之间的通信通过称为 TI 系统控制接口 (TI-SCI 协议) 的协议进行。
+此电源域节点代表由 TI-SCI 控制器管理的全局电源域。由于它依赖于 TI SCI 协议与 TI-SCI 控制器通信，因此必须是 TI-SCI 控制器节点的子节点。
+
+属性:
+  compatible:
+    常量: ti,sci-pm-domain
+
+  "#power-domain-cells":
+    枚举: [1, 2]
+    描述:
+      这两个单元表示 TI-SCI 控制器定义的值。
+第一个单元应包含设备 ID。
+如果单元值为 2，则第二个单元应该是以下之一：
+      TI_SCI_PD_EXCLUSIVE - 允许设备被独家控制
+      或
+      TI_SCI_PD_SHARED - 允许设备被多个主机共享
+请参考 dt-bindings/soc/ti,sci_pm_domain.h 获取定义。
+请参阅 https://software-dl.ti.com/tisci/esd/latest/index.html 获取不同设备使用的协议文档中的值。
+additionalProperties: false
+
+示例:
+  - |
+    k2g_pds: power-controller {
+        compatible = "ti,sci-pm-domain";
+        #power-domain-cells = <1>;
+    };
+
+  - |
+    k3_pds: power-controller {
+        compatible = "ti,sci-pm-domain";
+        #power-domain-cells = <2>;
+    };

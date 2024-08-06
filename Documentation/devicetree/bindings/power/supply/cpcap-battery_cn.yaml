@@ -1,0 +1,90 @@
+```yaml
+# SPDX-许可证标识符: GPL-2.0
+# 版权 (C) 2021 Sebastian Reichel
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/power/supply/cpcap-battery.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: Motorola CPCAP PMIC 电池
+
+维护者:
+  - Tony Lindgren <tony@atomide.com>
+  - Sebastian Reichel <sre@kernel.org>
+
+描述: |
+  Motorola CPCAP 是一些移动电话中发现的电源管理 IC (PMIC)，例如
+Droid 4。此绑定描述了其电池燃料计
+子功能
+全部包含:
+  - $ref: power-supply.yaml#
+
+属性:
+  兼容性:
+    常量: motorola,cpcap-battery
+
+  中断:
+    项目:
+      - 描述: EOL 中断
+      - 描述: 低电量百分比中断
+      - 描述: 临界电量百分比中断
+      - 描述: 充电器检测中断
+      - 描述: 电池检测中断
+      - 描述: 库仑计校准中断
+
+  中断名称:
+    项目:
+      - 常量: eol
+      - 常量: lowbph
+      - 常量: lowbpl
+      - 常量: chrgcurr1
+      - 常量: battdetb
+      - 常量: cccal
+
+  IO通道:
+    项目:
+      - 描述: 电池温度
+      - 描述: 电池电压
+      - 描述: 电池充电电流
+      - 描述: 电池电流
+
+  IO通道名称:
+    项目:
+      - 常量: battdetb
+      - 常量: battp
+      - 常量: chg_isense
+      - 常量: batti
+
+  电源供应: 真
+
+必需:
+  - 兼容性
+  - 中断
+  - 中断名称
+  - IO通道
+  - IO通道名称
+  - 电源供应
+
+额外属性: 错误
+
+示例:
+  - |
+    cpcap {
+      battery {
+        兼容性 = "motorola,cpcap-battery";
+        扩展中断 =
+                <&cpcap 6 0>, <&cpcap 5 0>, <&cpcap 3 0>,
+                <&cpcap 20 0>, <&cpcap 54 0>, <&cpcap 57 0>;
+        中断名称 =
+                "eol", "lowbph", "lowbpl",
+                "chrgcurr1", "battdetb", "cccal";
+        IO通道 = <&cpcap_adc 0>, <&cpcap_adc 1>,
+                      <&cpcap_adc 5>, <&cpcap_adc 6>;
+        IO通道名称 = "battdetb", "battp",
+                           "chg_isense", "batti";
+        电源供应 = <&cpcap_charger>;
+      };
+    };
+```
+
+请注意，上述翻译中的某些词汇（如“常量”、“项目”等）是为了符合 YAML 的语法结构而使用的，并不一定与实际的 Device Tree 文档中的用词完全一致。在 Device Tree 规范中，这些词汇可能有更具体的术语。

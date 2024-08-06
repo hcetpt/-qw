@@ -1,0 +1,62 @@
+```yaml
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/rtc/arm,pl031.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: Arm Primecell PL031 实时时钟
+
+select:
+  properties:
+    compatible:
+      contains:
+        const: arm,pl031
+  required:
+    - compatible
+
+allOf:
+  - $ref: rtc.yaml#
+
+maintainers:
+  - Rob Herring <robh@kernel.org>
+
+properties:
+  compatible:
+    items:
+      - const: arm,pl031
+      - const: arm,primecell
+
+  reg:
+    maxItems: 1
+
+  interrupts:
+    maxItems: 1
+
+  clocks:
+    maxItems: 1
+
+  clock-names:
+    maxItems: 1
+
+  start-year: true
+
+required:
+  - compatible
+  - reg
+  - clocks
+  - clock-names
+
+additionalProperties: false
+
+examples:
+  - |
+    rtc@10017000 {
+        compatible = "arm,pl031", "arm,primecell";
+        reg = <0x10017000 0x1000>;
+        clocks = <&pclk>;
+        clock-names = "apb_pclk";
+    };
+```
+
+请注意，`start-year` 属性在上述 YAML 文件中未被详细定义，如果需要使用它，需要根据实际的设备树规范来添加其描述。此外，“maxItems: 1”意味着这些属性（如 `reg`, `interrupts`, `clocks`, `clock-names`）最多只能出现一次。

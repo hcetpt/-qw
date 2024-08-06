@@ -1,0 +1,113 @@
+下面是给定内容的中文翻译：
+
+```yaml
+# SPDX-文件许可标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/display/bridge/fsl,imx93-mipi-dsi.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: Freescale i.MX93 对 Synopsys Designware MIPI DSI 的特定扩展
+
+维护者:
+  - 刘颖 <victor.liu@nxp.com>
+
+描述: |
+  在 Freescale i.MX93 SoC 中嵌入了一个 Synopsys Designware MIPI DSI 主控制器和一个 Synopsys Designware MIPI DPHY。一些配置和扩展由 i.MX93 多媒体块控制器控制。
+allOf:
+  - $ref: snps,dw-mipi-dsi.yaml#
+
+属性:
+  compatible:
+    常量: fsl,imx93-mipi-dsi
+
+  clocks:
+    items:
+      - 描述: APB 时钟
+      - 描述: 像素时钟
+      - 描述: PHY 配置时钟
+      - 描述: PHY 参考时钟
+
+  clock-names:
+    items:
+      - 常量: pclk
+      - 常量: pix
+      - 常量: phy_cfg
+      - 常量: phy_ref
+
+  interrupts:
+    最大项数: 1
+
+  fsl,media-blk-ctrl:
+    $ref: /schemas/types.yaml#/definitions/phandle
+    描述:
+      i.MX93 多媒体块控制器作为系统控制器，通过 PLL SoC 接口控制从 LCDIF 显示控制器到 MIPI DSI 主控制器的像素组件位图配置以及与 MIPI DPHY PLL 相关的配置
+电源域:
+    最大项数: 1
+
+必需:
+  - compatible
+  - interrupts
+  - fsl,media-blk-ctrl
+  - 电源域
+
+未评估属性: false
+
+示例:
+  - |
+    #include <dt-bindings/clock/imx93-clock.h>
+    #include <dt-bindings/gpio/gpio.h>
+    #include <dt-bindings/interrupt-controller/arm-gic.h>
+    #include <dt-bindings/power/fsl,imx93-power.h>
+
+    dsi@4ae10000 {
+        compatible = "fsl,imx93-mipi-dsi";
+        reg = <0x4ae10000 0x10000>;
+        interrupts = <GIC_SPI 177 IRQ_TYPE_LEVEL_HIGH>;
+        clocks = <&clk IMX93_CLK_MIPI_DSI_GATE>,
+                 <&clk IMX93_CLK_MEDIA_DISP_PIX>,
+                 <&clk IMX93_CLK_MIPI_PHY_CFG>,
+                 <&clk IMX93_CLK_24M>;
+        clock-names = "pclk", "pix", "phy_cfg", "phy_ref";
+        fsl,media-blk-ctrl = <&media_blk_ctrl>;
+        power-domains = <&media_blk_ctrl IMX93_MEDIABLK_PD_MIPI_DSI>;
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        panel@0 {
+            compatible = "raydium,rm67191";
+            reg = <0>;
+            reset-gpios = <&adp5585gpio 6 GPIO_ACTIVE_LOW>;
+            dsi-lanes = <4>;
+            video-mode = <2>;
+
+            port {
+                panel_in: endpoint {
+                    remote-endpoint = <&dsi_out>;
+                };
+            };
+        };
+
+        ports {
+            #address-cells = <1>;
+            #size-cells = <0>;
+
+            port@0 {
+                reg = <0>;
+
+                dsi_to_lcdif: endpoint {
+                    remote-endpoint = <&lcdif_to_dsi>;
+                };
+            };
+
+            port@1 {
+                reg = <1>;
+
+                dsi_out: endpoint {
+                    remote-endpoint = <&panel_in>;
+                };
+            };
+        };
+    };
+```
+```

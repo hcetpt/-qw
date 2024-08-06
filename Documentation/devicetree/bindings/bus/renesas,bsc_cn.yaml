@@ -1,0 +1,62 @@
+此文档定义了Renesas Bus State Controller (BSC)在Device Tree中的表示方式。
+
+```yaml
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/bus/renesas,bsc.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: Renesas Bus State Controller (BSC)
+
+maintainers:
+  - Geert Uytterhoeven <geert+renesas@glider.be>
+
+description: |
+  Renesas Bus State Controller (BSC，有时被称为“Bus Bridge内的LBSC”或“外部总线接口”) 可以在多个Renesas ARM片上系统(SoC)中找到。它提供了一个外部总线，用于将多个外部设备连接到SoC，并驱动若干个芯片选择线，例如用于NOR FLASH、以太网和USB等。
+尽管BSC是一个相对简单的内存映射总线，但它可能属于一个电源管理(PM)域，并且可能有一个可控制的功能时钟。在可以访问连接到BSC的设备之前，必须为包含BSC的PM域供电，并启用驱动BSC的功能时钟。
+BSC的绑定扩展了"simple-pm-bus"的绑定。
+
+allOf:
+  - $ref: simple-pm-bus.yaml#
+
+properties:
+  compatible:
+    items:
+      - enum:
+          - renesas,bsc-r8a73a4  # R-Mobile APE6 (r8a73a4)
+          - renesas,bsc-sh73a0   # SH-Mobile AG5 (sh73a0)
+      - const: renesas,bsc
+      - {} # simple-pm-bus，但为了避免错误选择此处未列出
+
+  reg:
+    maxItems: 1
+
+  interrupts:
+    maxItems: 1
+
+required:
+  - reg
+
+unevaluatedProperties: false
+
+examples:
+  - |
+    #include <dt-bindings/interrupt-controller/irq.h>
+
+    bsc: bus@fec10000 {
+        compatible = "renesas,bsc-sh73a0", "renesas,bsc", "simple-pm-bus";
+        #address-cells = <1>;
+        #size-cells = <1>;
+        ranges = <0 0 0x20000000>;
+        reg = <0xfec10000 0x400>;
+        interrupts = <0 39 IRQ_TYPE_LEVEL_HIGH>;
+        clocks = <&zb_clk>;
+        power-domains = <&pd_a4s>;
+    };
+```
+
+这段配置描述了一个Renesas BSC设备的Device Tree节点示例。其中：
+- `compatible` 属性指定了与该节点兼容的设备类型，包括特定的型号如 R-Mobile APE6 (r8a73a4) 和 SH-Mobile AG5 (sh73a0)，以及通用的 "renesas,bsc" 标识符。
+- `reg` 属性指定了BSC的基地址和长度。
+- `interrupts` 属性定义了中断控制器的中断配置。
+- `clocks` 和 `power-domains` 属性分别指定了BSC所使用的时钟源和电源域。

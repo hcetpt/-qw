@@ -1,0 +1,38 @@
+Epson RX6110 实时时钟
+============================
+
+Epson RX6110 可以使用 SPI 或 I2C 总线。所使用的总线类型取决于 SPISEL 引脚，并且不能通过软件进行配置。
+
+I2C 模式
+--------
+
+必需属性：
+  - compatible: 应为 "epson,rx6110"
+  - reg : 设备的 I2C 地址
+
+示例：
+
+    rtc: rtc@32 {
+        compatible = "epson,rx6110";
+        reg = <0x32>;
+    };
+
+SPI 模式
+--------
+
+必需属性：
+  - compatible: 应为 "epson,rx6110"
+  - reg: 芯片选择编号
+  - spi-cs-high: RX6110 需要高电平的芯片选择信号
+  - spi-cpha: RX6110 使用 SPI 时钟相位偏移
+  - spi-cpol: RX6110 使用 SPI 逆向时钟极性
+
+示例：
+
+    rtc: rtc@3 {
+        compatible = "epson,rx6110";
+        reg = <3>;
+        spi-cs-high;
+        spi-cpha;
+        spi-cpol;
+    };

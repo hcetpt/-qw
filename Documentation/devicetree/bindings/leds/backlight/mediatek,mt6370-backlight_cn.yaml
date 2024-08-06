@@ -1,0 +1,110 @@
+# SPDX-文件许可人: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/leds/backlight/mediatek,mt6370-backlight.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: MediaTek MT6370 背光
+
+maintainers:
+  - ChiaEn Wu <chiaen_wu@richtek.com>
+
+description: |
+  本模块是 MT6370 多功能设备的一部分。
+MT6370 背光 WLED 驱动支持高达 29V 的输出电压，用于 4 通道串联的 8 个 WLED。每个通道支持最高 30mA 的电流能力，并具有 2048 个电流步进（11 位，仅适用于 MT6370/MT6371）或 16384 个电流步进（14 位，仅适用于 MT6372），可在指数或线性映射曲线中使用。
+allOf:
+  - $ref: common.yaml#
+
+properties:
+  compatible:
+    enum:
+      - mediatek,mt6370-backlight
+      - mediatek,mt6372-backlight
+
+  default-brightness:
+    minimum: 0
+
+  max-brightness:
+    minimum: 0
+
+  enable-gpios:
+    description: 外部背光“启用”引脚
+    maxItems: 1
+
+  mediatek,bled-pwm-enable:
+    description: |
+      启用外部 PWM 输入以调节背光亮度
+    type: boolean
+
+  mediatek,bled-pwm-hys-enable:
+    description: |
+      启用背光输入迟滞以用于 PWM 模式
+    type: boolean
+
+  mediatek,bled-pwm-hys-input-th-steps:
+    $ref: /schemas/types.yaml#/definitions/uint8
+    enum: [1, 4, 16, 64]
+    description: |
+      选择背光 PWM 分辨率的上、下限阈值。如果我们选择 64，则 PWM 分辨率的变化需要超过 64 步。
+mediatek,bled-ovp-shutdown:
+    description: |
+      当达到过压保护 (OVP) 级别时启用背光关闭
+    type: boolean
+
+  mediatek,bled-ovp-microvolt:
+    enum: [17000000, 21000000, 25000000, 29000000]
+    description: |
+      背光过压保护 (OVP) 级别选择
+mediatek,bled-ocp-shutdown:
+    description: |
+      当达到过流保护 (OCP) 级别时启用背光关闭
+    type: boolean
+
+  mediatek,bled-ocp-microamp:
+    enum: [900000, 1200000, 1500000, 1800000]
+    description: |
+      背光过流保护 (OCP) 级别选择
+mediatek,bled-exponential-mode-enable:
+    description: |
+      启用背光亮度的指数模式。如果未启用此属性，默认情况下将使用线性模式。
+    type: boolean
+
+  mediatek,bled-channel-use:
+    $ref: /schemas/types.yaml#/definitions/uint8
+    description: |
+      使用的背光 LED 通道
+每位映射到：
+        - 0: CH4
+        - 1: CH3
+        - 2: CH2
+        - 3: CH1
+    minimum: 1
+    maximum: 15
+
+if:
+  properties:
+    compatible:
+      contains:
+        const: mediatek,mt6372-backlight
+
+then:
+  properties:
+    default-brightness:
+      maximum: 16384
+
+    max-brightness:
+      maximum: 16384
+
+else:
+  properties:
+    default-brightness:
+      maximum: 2048
+
+    max-brightness:
+      maximum: 2048
+
+required:
+  - compatible
+  - mediatek,bled-channel-use
+
+additionalProperties: false

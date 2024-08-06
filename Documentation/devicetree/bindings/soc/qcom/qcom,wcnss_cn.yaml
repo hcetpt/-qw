@@ -1,0 +1,127 @@
+# SPDX-文件许可人: GPL-2.0-only 或 BSD-2-Clause
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/soc/qcom/qcom,wcnss.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: 高通 WCNSS
+
+maintainers:
+  - Andy Gross <agross@kernel.org>
+  - Bjorn Andersson <bjorn.andersson@linaro.org>
+
+description:
+  高通 WCNSS 硬件由控制块和一个包含蓝牙（BT）、Wi-Fi 和调频（FM）无线电模块组成，所有这些都使用 SMD 作为命令通道。
+properties:
+  compatible:
+    const: qcom,wcnss
+
+  firmware-name:
+    $ref: /schemas/types.yaml#/definitions/string
+    default: wlan/prima/WCNSS_qcom_wlan_nv.bin
+    description:
+      Wi-Fi NV blob 固件图像的相对路径
+qcom,mmio:
+    $ref: /schemas/types.yaml#/definitions/phandle
+    description: |
+      指向指定 wcnss "ccu" 和 "dxe" 寄存器块的节点的引用
+节点必须与以下之一兼容：
+           - qcom,riva"
+           - qcom,pronto"
+
+  qcom,smd-channels:
+    $ref: /schemas/types.yaml#/definitions/string
+    const: WCNSS_CTRL
+    description:
+      标准 SMD 属性，用于指定与 Wi-Fi 固件通信所使用的 SMD 通道
+bluetooth:
+    type: object
+    additionalProperties: false
+    allOf:
+      - $ref: /schemas/net/bluetooth/bluetooth-controller.yaml#
+    properties:
+      compatible:
+        const: qcom,wcnss-bt
+
+      local-bd-address: true
+
+    required:
+      - compatible
+
+  wifi:
+    additionalProperties: false
+    type: object
+    properties:
+      compatible:
+        const: qcom,wcnss-wlan
+
+      interrupts:
+        maxItems: 2
+
+      interrupt-names:
+        items:
+          - const: tx
+          - const: rx
+
+      qcom,smem-states:
+        $ref: /schemas/types.yaml#/definitions/phandle-array
+        maxItems: 2
+        description:
+          应该引用 tx-enable 和 tx-rings-empty 的 SMEM 状态
+qcom,smem-state-names:
+        items:
+          - const: tx-enable
+          - const: tx-rings-empty
+        description:
+          SMEM 状态的名称
+required:
+      - compatible
+      - interrupts
+      - interrupt-names
+      - qcom,smem-states
+      - qcom,smem-state-names
+
+required:
+  - compatible
+  - qcom,mmio
+  - qcom,smd-channels
+
+additionalProperties: false
+
+examples:
+  - |
+    #include <dt-bindings/interrupt-controller/arm-gic.h>
+
+    smd-edge {
+        interrupts = <GIC_SPI 142 IRQ_TYPE_EDGE_RISING>;
+
+        qcom,ipc = <&apcs 8 17>;
+        qcom,smd-edge = <6>;
+        qcom,remote-pid = <4>;
+
+        label = "pronto";
+
+        wcnss {
+            compatible = "qcom,wcnss";
+            qcom,smd-channels = "WCNSS_CTRL";
+
+            qcom,mmio = <&pronto>;
+
+            bluetooth {
+                compatible = "qcom,wcnss-bt";
+                /* 由启动固件更新（小端序） */
+                local-bd-address = [ 00 00 00 00 00 00 ];
+            };
+
+            wifi {
+                compatible = "qcom,wcnss-wlan";
+
+                interrupts = <GIC_SPI 145 IRQ_TYPE_LEVEL_HIGH>,
+                             <GIC_SPI 146 IRQ_TYPE_LEVEL_HIGH>;
+                interrupt-names = "tx", "rx";
+
+                qcom,smem-states = <&apps_smsm 10>, <&apps_smsm 9>;
+                qcom,smem-state-names = "tx-enable", "tx-rings-empty";
+            };
+        };
+    };

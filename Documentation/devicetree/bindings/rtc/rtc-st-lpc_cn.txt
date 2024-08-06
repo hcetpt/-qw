@@ -1,0 +1,27 @@
+STMicroelectronics 低功耗控制器 (LPC) - 实时时钟 (RTC)
+===================================================
+
+LPC 目前支持看门狗 或 实时时钟 或 时钟源
+功能
+[参见：../watchdog/st_lpc_wdt.txt 获取看门狗选项]
+[参见：../timer/st,stih407-lpc 获取时钟源选项]
+
+必需的属性
+
+- compatible 	: 必须为："st,stih407-lpc"
+- reg		: LPC 寄存器基地址 + 大小
+- interrupts    : LPC 中断线路编号及其相关标志
+- clocks	: LPC 设备使用的时钟（参见：../clock/clock-bindings.txt）
+- st,lpc-mode	: LPC 可以运行三种模式之一：
+                  ST_LPC_MODE_RTC    [0] 
+                  ST_LPC_MODE_WDT    [1] 
+                  ST_LPC_MODE_CLKSRC [2] 
+		  必须选择一种（且仅限一种）模式
+
+示例：
+	lpc@fde05000 {
+		compatible	= "st,stih407-lpc";
+		reg		= <0xfde05000 0x1000>;
+		clocks 		= <&clk_s_d3_flexgen CLK_LPC_0>;
+		st,lpc-mode	= <ST_LPC_MODE_RTC>;
+	};

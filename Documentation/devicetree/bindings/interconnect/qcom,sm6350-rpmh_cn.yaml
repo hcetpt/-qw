@@ -1,0 +1,84 @@
+```yaml
+# SPDX-License-Identifier: (GPL-2.0 OR BSD-2-Clause)
+%YAML 1.2
+---
+$id: 'http://devicetree.org/schemas/interconnect/qcom,sm6350-rpmh.yaml#'
+$schema: 'http://devicetree.org/meta-schemas/core.yaml#'
+
+title: 高通 SM6350 RPMh 网络芯片间互连
+
+maintainers:
+  - Luca Weiss <luca.weiss@fairphone.com>
+
+description:
+  高通 SM6350 上基于RPMh的互连提供者
+allOf:
+  - $ref: 'qcom,rpmh-common.yaml#'
+
+properties:
+  compatible:
+    enum:
+      - qcom,sm6350-aggre1-noc
+      - qcom,sm6350-aggre2-noc
+      - qcom,sm6350-config-noc
+      - qcom,sm6350-dc-noc
+      - qcom,sm6350-gem-noc
+      - qcom,sm6350-mmss-noc
+      - qcom,sm6350-npu-noc
+      - qcom,sm6350-system-noc
+
+  reg:
+    maxItems: 1
+
+  '#interconnect-cells': true
+
+patternProperties:
+  '^interconnect-[a-z0-9\-]+$':
+    type: object
+    description:
+      互连提供者没有独立的质量保证寄存器空间，而是共享父级的空间
+$ref: 'qcom,rpmh-common.yaml#'
+
+    properties:
+      compatible:
+        enum:
+          - qcom,sm6350-clk-virt
+          - qcom,sm6350-compute-noc
+
+      '#interconnect-cells': true
+
+    required:
+      - compatible
+
+    unevaluatedProperties: false
+
+required:
+  - compatible
+  - reg
+
+unevaluatedProperties: false
+
+examples:
+  - |
+    config_noc: interconnect@1500000 {
+        compatible = "qcom,sm6350-config-noc";
+        reg = <0x01500000 0x28000>;
+        #interconnect-cells = <2>;
+        qcom,bcm-voters = <&apps_bcm_voter>;
+    };
+
+    system_noc: interconnect@1620000 {
+        compatible = "qcom,sm6350-system-noc";
+        reg = <0x01620000 0x17080>;
+        #interconnect-cells = <2>;
+        qcom,bcm-voters = <&apps_bcm_voter>;
+
+        clk_virt: interconnect-clk-virt {
+            compatible = "qcom,sm6350-clk-virt";
+            #interconnect-cells = <2>;
+            qcom,bcm-voters = <&apps_bcm_voter>;
+        };
+    };
+```
+
+请注意，这个 YAML 文件是设备树规范的一部分，用于定义高通 SM6350 芯片中的网络芯片间互连配置。其中的英文描述和属性名称未被翻译，因为它们通常保持原样以保持一致性。

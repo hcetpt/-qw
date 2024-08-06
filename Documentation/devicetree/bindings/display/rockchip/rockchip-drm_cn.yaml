@@ -1,0 +1,38 @@
+# SPDX-许可证标识符: (GPL-2.0-only)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/display/rockchip/rockchip-drm.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: Rockchip DRM 主设备
+
+维护者:
+  - Sandy Huang <hjc@rock-chips.com>
+  - Heiko Stuebner <heiko@sntech.de>
+
+描述: |
+  Rockchip DRM 主设备是一个虚拟设备，用于列出构成图形子系统的所有 VOP 设备或其他显示接口节点。
+属性:
+  compatible:
+    常量: rockchip,display-subsystem
+
+  ports:
+    $ref: /schemas/types.yaml#/definitions/phandle-array
+    items:
+      最大项数: 1
+    描述: |
+      应包含指向 VOP 设备的显示接口端口的 phandle 列表。VOP 定义如在
+      文档/devicetree/bindings/display/rockchip/rockchip-vop.yaml 中定义。
+
+必需:
+  - compatible
+  - ports
+
+附加属性: false
+
+示例:
+  - |
+    display-subsystem {
+        compatible = "rockchip,display-subsystem";
+        ports = <&vopl_out>, <&vopb_out>;
+    };

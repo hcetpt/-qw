@@ -1,0 +1,117 @@
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/mfd/samsung,exynos5433-lpass.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: Samsung Exynos 系统级芯片低功耗音频子系统 (LPASS)
+
+维护者:
+  - Krzysztof Kozlowski <krzk@kernel.org>
+  - Sylwester Nawrocki <s.nawrocki@samsung.com>
+
+属性:
+  compatible:
+    常量: samsung,exynos5433-lpass
+
+  '#address-cells':
+    常量: 1
+
+  clocks:
+    最大项数: 1
+
+  clock-names:
+    项:
+      - 常量: sfr0_ctrl
+
+  power-domains:
+    最大项数: 1
+
+  ranges: 真
+
+  reg:
+    最少项数: 2
+    最大项数: 2
+
+  '#size-cells':
+    常量: 1
+
+模式属性:
+  "^dma-controller@[0-9a-f]+$":
+    $ref: /schemas/dma/arm,pl330.yaml
+
+  "^i2s@[0-9a-f]+$":
+    $ref: /schemas/sound/samsung-i2s.yaml
+
+  "^serial@[0-9a-f]+$":
+    $ref: /schemas/serial/samsung_uart.yaml
+
+必需:
+  - compatible
+  - '#address-cells'
+  - clocks
+  - clock-names
+  - ranges
+  - reg
+  - '#size-cells'
+
+额外属性: 错误
+
+示例:
+  - |
+    #include <dt-bindings/clock/exynos5433.h>
+    #include <dt-bindings/interrupt-controller/arm-gic.h>
+
+    audio-subsystem@11400000 {
+        compatible = "samsung,exynos5433-lpass";
+        reg = <0x11400000 0x100>, <0x11500000 0x08>;
+        clocks = <&cmu_aud CLK_PCLK_SFR0_CTRL>;
+        clock-names = "sfr0_ctrl";
+        power-domains = <&pd_aud>;
+        #address-cells = <1>;
+        #size-cells = <1>;
+        ranges;
+
+        dma-controller@11420000 {
+            compatible = "arm,pl330", "arm,primecell";
+            reg = <0x11420000 0x1000>;
+            interrupts = <GIC_SPI 73 IRQ_TYPE_LEVEL_HIGH>;
+            clocks = <&cmu_aud CLK_ACLK_DMAC>;
+            clock-names = "apb_pclk";
+            #dma-cells = <1>;
+            dma-channels = <8>;
+            dma-requests = <32>;
+            power-domains = <&pd_aud>;
+        };
+
+        i2s@11440000 {
+            compatible = "samsung,exynos5433-i2s", "samsung,exynos7-i2s";
+            reg = <0x11440000 0x100>;
+            dmas = <&adma 0>, <&adma 2>;
+            dma-names = "tx", "rx";
+            interrupts = <GIC_SPI 70 IRQ_TYPE_LEVEL_HIGH>;
+            #address-cells = <1>;
+            #size-cells = <0>;
+            clocks = <&cmu_aud CLK_PCLK_AUD_I2S>,
+                     <&cmu_aud CLK_SCLK_AUD_I2S>,
+                     <&cmu_aud CLK_SCLK_I2S_BCLK>;
+            clock-names = "iis", "i2s_opclk0", "i2s_opclk1";
+            #clock-cells = <1>;
+            pinctrl-names = "default";
+            pinctrl-0 = <&i2s0_bus>;
+            power-domains = <&pd_aud>;
+            #sound-dai-cells = <1>;
+        };
+
+        serial@11460000 {
+            compatible = "samsung,exynos5433-uart";
+            reg = <0x11460000 0x100>;
+            interrupts = <GIC_SPI 67 IRQ_TYPE_LEVEL_HIGH>;
+            clocks = <&cmu_aud CLK_PCLK_AUD_UART>,
+                     <&cmu_aud CLK_SCLK_AUD_UART>;
+            clock-names = "uart", "clk_uart_baud0";
+            pinctrl-names = "default";
+            pinctrl-0 = <&uart_aud_bus>;
+            power-domains = <&pd_aud>;
+        };
+    };

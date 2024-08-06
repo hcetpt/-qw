@@ -1,0 +1,56 @@
+Amlogic Meson 电源控制器（已废弃）
+===========================================
+
+Amlogic Meson 系统级芯片 (SoC) 内嵌了一个内部电源域控制器。
+
+VPU 电源域
+----------------
+
+视频处理单元 (VPU) 电源域由这个电源控制器控制，但该域需要一些外部资源以满足正确的电源序列要求。绑定必须遵循 `power-domain.yaml` 文件中描述的电源域绑定规范。
+
+设备树绑定：
+---------------------
+
+必需属性：
+- compatible：应为以下之一：
+    - 对于 Meson GX SoC，“amlogic,meson-gx-pwrc-vpu”
+    - 对于 Meson G12A SoC，“amlogic,meson-g12a-pwrc-vpu”
+- #power-domain-cells：应为 0
+- amlogic,hhi-sysctrl：指向 HHI sysctrl 节点的句柄
+- resets：指向此电源域序列所需复位线的句柄，如在 `../reset/reset.txt` 中所描述
+- clocks：遵循通用时钟绑定规范：指向 VPU 和 VAPB 时钟的句柄
+- clock-names：遵循通用时钟绑定规范：必须包含“vpu”、“vapb”，与 clocks 属性中的条目相对应
+
+父节点应具有以下属性：
+- compatible：“amlogic,meson-gx-ao-sysctrl”、“syscon”、“simple-mfd”
+- reg：AO 系统控制寄存器空间的基地址和大小
+
+示例：
+-------
+```device-tree
+ao_sysctrl: sys-ctrl@0 {
+	compatible = "amlogic,meson-gx-ao-sysctrl", "syscon", "simple-mfd";
+	reg = <0x0 0x0 0x0 0x100>;
+
+	pwrc_vpu: power-controller-vpu {
+		compatible = "amlogic,meson-gx-pwrc-vpu";
+		#power-domain-cells = <0>;
+		amlogic,hhi-sysctrl = <&sysctrl>;
+		resets = <&reset RESET_VIU>,
+			 <&reset RESET_VENC>,
+			 <&reset RESET_VCBUS>,
+			 <&reset RESET_BT656>,
+			 <&reset RESET_DVIN_RESET>,
+			 <&reset RESET_RDMA>,
+			 <&reset RESET_VENCI>,
+			 <&reset RESET_VENCP>,
+			 <&reset RESET_VDAC>,
+			 <&reset RESET_VDI6>,
+			 <&reset RESET_VENCL>,
+			 <&reset RESET_VID_LOCK>;
+		clocks = <&clkc CLKID_VPU>,
+			 <&clkc CLKID_VAPB>;
+		clock-names = "vpu", "vapb";
+	};
+};
+```

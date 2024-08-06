@@ -1,0 +1,36 @@
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/pci/cdns-pcie-host.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: Cadence PCIe 主机
+
+maintainers:
+  - Tom Joseph <tjoseph@cadence.com>
+
+allOf:
+  - $ref: /schemas/pci/pci-host-bridge.yaml#
+  - $ref: cdns-pcie.yaml#
+
+properties:
+  cdns,max-outbound-regions:
+    description: 最大数量的出站区域
+    $ref: /schemas/types.yaml#/definitions/uint32
+    minimum: 1
+    maximum: 32
+    default: 32
+    deprecated: true
+
+  cdns,no-bar-match-nbits:
+    description:
+      设置到无 BAR 匹配寄存器中，以配置在入站 (PCIe -> AXI) 地址转换期间保留的最低有效位的数量
+    $ref: /schemas/types.yaml#/definitions/uint32
+    minimum: 0
+    maximum: 64
+    default: 32
+    deprecated: true
+
+  msi-parent: true
+
+additionalProperties: true

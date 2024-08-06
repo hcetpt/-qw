@@ -1,0 +1,22 @@
+Zodiac Inflight Innovations RAVE 监控处理器 (SP) 背光绑定
+
+RAVE SP 背光设备是一个“MFD cell”类型的设备，对应于 RAVE 监控处理器的背光功能。预期其设备树节点将作为父级 RAVE SP 设备节点（如在 `Documentation/devicetree/bindings/mfd/zii,rave-sp.txt` 中所记录）的子节点指定。
+
+必需属性：
+
+- compatible：应为 "zii,rave-sp-backlight"
+
+示例：
+
+``` 
+rave-sp { 
+	compatible = "zii,rave-sp-rdu1"; 
+	current-speed = <38400>; 
+
+	backlight { 
+		compatible = "zii,rave-sp-backlight"; 
+	}; 
+}
+```
+
+这段示例代码表示了一个名为 `rave-sp` 的设备节点，它包含了一个子节点 `backlight`。父节点具有兼容性 `"zii,rave-sp-rdu1"` 并指定了当前速度为 38400。子节点 `backlight` 具有兼容性 `"zii,rave-sp-backlight"`，表示这是 RAVE 监控处理器的背光控制部分。

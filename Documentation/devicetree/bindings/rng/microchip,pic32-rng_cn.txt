@@ -1,0 +1,14 @@
+* Microchip PIC32 随机数生成器
+
+PIC32 RNG 提供了一个伪随机数生成器，它可以由另一个真正的随机数生成器进行初始化。
+所需属性：
+- compatible（兼容性）: 应该是 "microchip,pic32mzda-rng"
+- reg（寄存器）: 指定寄存器的基本物理地址和大小
+- clocks（时钟）: 时钟的句柄
+示例：
+
+	rng: rng@1f8e6000 { 
+		compatible = "microchip,pic32mzda-rng"; 
+		reg = <0x1f8e6000 0x1000>; 
+		clocks = <&PBCLK5>; 
+	};

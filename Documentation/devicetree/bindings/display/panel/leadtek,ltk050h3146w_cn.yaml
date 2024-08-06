@@ -1,0 +1,55 @@
+# SPDX-文件许可人: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/display/panel/leadtek,ltk050h3146w.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: Leadtek LTK050H3146W 5.0英寸 720x1280 DSI 显示屏
+
+维护者:
+  - Quentin Schulz <quentin.schulz@theobroma-systems.com>
+
+allOf:
+  - $ref: panel-common.yaml#
+
+属性:
+  compatible:
+    枚举:
+      - leadtek,ltk050h3146w
+      - leadtek,ltk050h3146w-a2
+      - leadtek,ltk050h3148w
+
+  reg:
+    最大项目数: 1
+
+  backlight: 真
+  reset-gpios: 真
+  iovcc-supply:
+    描述: 提供电压iovcc的调节器
+  vci-supply:
+    描述: 提供电压vci的调节器
+
+必需:
+  - compatible
+  - reg
+  - backlight
+  - iovcc-supply
+  - vci-supply
+
+额外属性: 假
+
+示例:
+  - |
+    dsi {
+        #address-cells = <1>;
+        #size-cells = <0>;
+        panel@0 {
+            compatible = "leadtek,ltk050h3146w";
+            reg = <0>;
+            backlight = <&backlight>;
+            iovcc-supply = <&vcc_1v8>;
+            vci-supply = <&vcc3v3_lcd>;
+        };
+    }; 
+
+..

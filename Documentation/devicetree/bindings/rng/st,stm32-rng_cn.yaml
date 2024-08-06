@@ -1,0 +1,65 @@
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/rng/st,stm32-rng.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: STMicroelectronics STM32 随机数生成器
+
+description: |
+  STM32 硬件随机数生成器是一个简单的专用 IP，并且完全与其它加密功能分离。
+maintainers:
+  - Lionel Debieve <lionel.debieve@foss.st.com>
+
+properties:
+  compatible:
+    enum:
+      - st,stm32-rng
+      - st,stm32mp13-rng
+
+  reg:
+    maxItems: 1
+
+  clocks:
+    maxItems: 1
+
+  resets:
+    maxItems: 1
+
+  clock-error-detect:
+    type: boolean
+    description: 如果设置，将启用时钟检测管理
+
+  st,rng-lock-conf:
+    type: boolean
+    description: 如果设置，RNG_CR、RNG_HTCR 和 RNG_NSCR 中的 RNG 配置将被锁定
+access-controllers:
+    minItems: 1
+    maxItems: 2
+
+required:
+  - compatible
+  - reg
+  - clocks
+
+allOf:
+  - if:
+      properties:
+        compatible:
+          contains:
+            enum:
+              - st,stm32-rng
+    then:
+      properties:
+        st,rng-lock-conf: false
+
+additionalProperties: false
+
+examples:
+  - |
+    #include <dt-bindings/clock/stm32mp1-clks.h>
+    rng@54003000 {
+      compatible = "st,stm32-rng";
+      reg = <0x54003000 0x400>;
+      clocks = <&rcc RNG1_K>;
+    };

@@ -1,0 +1,159 @@
+以下是提供的 YAML 文件的中文翻译：
+
+---
+
+SPDX 许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/display/tegra/nvidia,tegra20-dsi.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: NVIDIA Tegra 显示串行接口
+
+维护者:
+  - Thierry Reding <thierry.reding@gmail.com>
+  - Jon Hunter <jonathanh@nvidia.com>
+
+属性:
+  compatible:
+    oneOf:
+      - 枚举:
+          - nvidia,tegra20-dsi
+          - nvidia,tegra30-dsi
+          - nvidia,tegra114-dsi
+          - nvidia,tegra124-dsi
+          - nvidia,tegra210-dsi
+          - nvidia,tegra186-dsi
+
+      - items:
+          - 常量: nvidia,tegra132-dsi
+          - 常量: nvidia,tegra124-dsi
+
+  reg:
+    最大项数: 1
+
+  interrupts:
+    最大项数: 1
+
+  clocks:
+    最小项数: 2
+    最大项数: 3
+
+  clock-names:
+    最小项数: 2
+    最大项数: 3
+
+  resets:
+    items:
+      - 描述: 模块重置
+
+  reset-names:
+    items:
+      - 常量: dsi
+
+  operating-points-v2: true
+
+  power-domains:
+    最大项数: 1
+
+  avdd-dsi-csi-supply:
+    描述: 提供给 DSI 控制器供电的电源句柄
+
+  nvidia,mipi-calibrate:
+    描述: 应包含一个句柄和一个指定符，以指明此 DSI 输出所使用的哪些引脚需要进行校准。详情请参考 nvidia,tegra114-mipi.yaml
+$ref: /schemas/types.yaml#/definitions/phandle-array
+
+  nvidia,ddc-i2c-bus:
+    描述: 用于 DDC EDID 探测的 I2C 控制器的句柄
+    $ref: /schemas/types.yaml#/definitions/phandle
+
+  nvidia,hpd-gpio:
+    描述: 规定用于热插拔检测的 GPIO
+    最大项数: 1
+
+  nvidia,edid:
+    描述: 提供二进制 EDID 数据块
+    $ref: /schemas/types.yaml#/definitions/uint8-array
+
+  nvidia,panel:
+    描述: 显示面板的句柄
+    $ref: /schemas/types.yaml#/definitions/phandle
+
+  nvidia,ganged-mode:
+    描述: 包含另一个 DSI 控制器的句柄，以便与之联合使用以支持多达 8 条数据线
+    $ref: /schemas/types.yaml#/definitions/phandle
+
+allOf:
+  - $ref: ../dsi-controller.yaml#
+  - 如果:
+      属性:
+        compatible:
+          包含:
+            枚举:
+              - nvidia,tegra20-dsi
+              - nvidia,tegra30-dsi
+    然后:
+      属性:
+        clocks:
+          items:
+            - 描述: DSI 模块时钟
+            - 描述: 像素时钟输入
+
+        clock-names:
+          items:
+            - 常量: dsi
+            - 常量: parent
+    否则:
+      属性:
+        clocks:
+          items:
+            - 描述: DSI 模块时钟
+            - 描述: 低功耗模块时钟
+            - 描述: 像素时钟输入
+
+        clock-names:
+          items:
+            - 常量: dsi
+            - 常量: lp
+            - 常量: parent
+
+  - 如果:
+      属性:
+        compatible:
+          包含:
+            常量: nvidia,tegra186-dsi
+    那么:
+      必需:
+        - interrupts
+
+未评估属性: false
+
+必需:
+  - compatible
+  - reg
+  - clocks
+  - clock-names
+  - resets
+  - reset-names
+
+示例:
+  - |
+    #include <dt-bindings/clock/tegra186-clock.h>
+    #include <dt-bindings/interrupt-controller/arm-gic.h>
+    #include <dt-bindings/power/tegra186-powergate.h>
+    #include <dt-bindings/reset/tegra186-reset.h>
+
+    dsi@15300000 {
+        compatible = "nvidia,tegra186-dsi";
+        reg = <0x15300000 0x10000>;
+        interrupts = <GIC_SPI 20 IRQ_TYPE_LEVEL_HIGH>;
+        clocks = <&bpmp TEGRA186_CLK_DSI>,
+                 <&bpmp TEGRA186_CLK_DSIA_LP>,
+                 <&bpmp TEGRA186_CLK_PLLD>;
+        clock-names = "dsi", "lp", "parent";
+        resets = <&bpmp TEGRA186_RESET_DSI>;
+        reset-names = "dsi";
+
+        power-domains = <&bpmp TEGRA186_POWER_DOMAIN_DISP>;
+    };

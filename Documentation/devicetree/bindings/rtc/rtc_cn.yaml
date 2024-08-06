@@ -1,0 +1,55 @@
+# SPDX-许可证标识符: GPL-2.0
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/rtc/rtc.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: 实时时钟通用属性
+
+维护者:
+  - Alexandre Belloni <alexandre.belloni@bootlin.com>
+
+描述: |
+  本文件描述了可用于在设备树中描述实时时钟设备的通用绑定。
+属性:
+  $nodename:
+    模式: "^rtc(@.*|-([0-9]|[1-9][0-9]+))?$"
+
+  辅助电压可充电:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    枚举: [0, 1]
+    描述: |
+      表明实时时钟（如果有的话）的电池/超级电容是否可充电：
+      0: 不可充电
+      1: 可充电
+
+  石英负载飞法拉:
+    描述:
+      石英晶体的电容负载，以飞法拉(fF)为单位。应列出默认值（如果可选），同样列出所有有效值
+起始年份:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    描述:
+      如果提供，则实时时钟支持的硬件范围将进行偏移，使得可用的第一年为指定的年份
+涓流二极管禁用:
+    $ref: /schemas/types.yaml#/definitions/flag
+    描述:
+      禁止使用内部涓流充电二极管。如果需要禁用内部涓流充电二极管，则应给出此属性
+过时: true
+
+  涓流电阻欧姆:
+    描述:
+      选择用于涓流充电器的电阻。如果启用涓流充电器，则应给出此属性
+涓流电压毫伏:
+    描述:
+      选择用于涓流充电器的电压。如果启用了涓流充电器且涓流电压与实时时钟主电源不同，则应给出此属性
+唤醒源:
+    $ref: /schemas/types.yaml#/definitions/flag
+    描述:
+      在报警时启用主机系统的唤醒
+复位源:
+    $ref: /schemas/types.yaml#/definitions/flag
+    描述:
+      实时时钟能够复位机器
+附加属性: true
+
+..

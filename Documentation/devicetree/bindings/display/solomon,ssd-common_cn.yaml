@@ -1,0 +1,42 @@
+```yaml
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/display/solomon,ssd-common.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: Solomon OLED 显示控制器的通用属性
+
+maintainers:
+  - Javier Martinez Canillas <javierm@redhat.com>
+
+properties:
+  reg:
+    maxItems: 1
+
+  reset-gpios:
+    maxItems: 1
+
+  # 仅SPI所需
+  dc-gpios:
+    description:
+      连接到控制器的 D/C#（数据/命令）引脚的 GPIO，这是 4 线 SPI 所需的，用于告诉控制器发送的数据是针对命令寄存器还是显示数据 RAM
+    maxItems: 1
+
+  solomon,height:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    description:
+      由控制器驱动的屏幕的高度（以像素为单位）
+默认值取决于控制器
+  solomon,width:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    description:
+      由控制器驱动的屏幕的宽度（以像素为单位）
+默认值取决于控制器
+allOf:
+  - $ref: /schemas/spi/spi-peripheral-props.yaml#
+
+additionalProperties: true
+```
+
+以上是将提供的 YAML 文件内容翻译成了中文。请注意，由于 YAML 是一种结构化数据格式，其中文翻译保持了与原文相同的结构和格式。

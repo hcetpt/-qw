@@ -1,0 +1,58 @@
+# SPDX-文件许可人: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/serio/ps2-gpio.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: 基于GPIO的PS/2接口
+
+maintainers:
+  - Danilo Krummrich <danilokrummrich@dk-develop.de>
+
+properties:
+  compatible:
+    const: ps2-gpio
+
+  data-gpios:
+    description:
+      用于数据信号的GPIO - 这应该标记为使用开漏输出高电平有效 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)
+      来自 <dt-bindings/gpio/gpio.h>，因为该信号本质上是开漏的。
+    maxItems: 1
+
+  clk-gpios:
+    description:
+      用于时钟信号的GPIO - 这应该标记为使用开漏输出高电平有效 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)
+      来自 <dt-bindings/gpio/gpio.h>，因为该信号本质上是开漏的。
+    maxItems: 1
+
+  interrupts:
+    description:
+      给定的中断应在时钟线下降沿触发。
+    maxItems: 1
+
+  write-enable:
+    type: boolean
+    description:
+      表示是否向串行设备提供写入功能。可能提供的写入功能无法正常工作，
+      因为严格的定时要求。
+required:
+  - compatible
+  - data-gpios
+  - clk-gpios
+  - interrupts
+
+additionalProperties: false
+
+examples:
+  - |
+    #include <dt-bindings/gpio/gpio.h>
+    #include <dt-bindings/interrupt-controller/irq.h>
+
+    ps2 {
+        compatible = "ps2-gpio";
+        interrupt-parent = <&gpio>;
+        interrupts = <23 IRQ_TYPE_EDGE_FALLING>;
+        data-gpios = <&gpio 24 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)>;
+        clk-gpios = <&gpio 23 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)>;
+        write-enable;
+    };

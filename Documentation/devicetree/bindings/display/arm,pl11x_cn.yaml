@@ -1,0 +1,156 @@
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/display/arm,pl11x.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: Arm PrimeCell 彩色 LCD 控制器 PL110/PL111
+
+维护者:
+  - Liviu Dudau <Liviu.Dudau@arm.com>
+  - Andre Przywara <andre.przywara@arm.com>
+
+描述:
+  Arm Primecell PL110/PL111 是一个 LCD 控制器 IP，它扫描系统内存中的帧缓冲区区域，并为各种 LCD 面板创建定时信号。
+# 我们需要在这里使用选择条件以避免匹配所有包含 'arm,primecell' 的节点
+选择:
+  属性:
+    兼容性:
+      包含:
+        枚举:
+          - arm,pl110
+          - arm,pl111
+  必需:
+    - 兼容性
+
+属性:
+  兼容性:
+    项:
+      - 枚举:
+          - arm,pl110
+          - arm,pl111
+      - 常量: arm,primecell
+
+  reg:
+    最大项数: 1
+
+  中断名称:
+    任选其一:
+      - 常量: combined
+        描述:
+          IP 提供了四条单独的中断线，同时也有一条组合线。如果集成只连接这条线到中断控制器，则这里只记录这一条中断。
+      - 项:
+          - 常量: mbe        # CLCDMBEINTR
+          - 常量: vcomp      # CLCDVCOMPINTR
+          - 常量: lnbu       # CLCDLNBUINTR
+          - 常量: fuf        # CLCDFUFINTR
+
+  中断:
+    最小项数: 1
+    最大项数: 4
+
+  时钟名称:
+    项:
+      - 常量: clcdclk
+      - 常量: apb_pclk
+
+  时钟:
+    项:
+      - 描述: 控制器的 CLCDCLK 参考时钟
+      - 描述: 寄存器访问的 HCLK AHB 从属时钟
+内存区域:
+    最大项数: 1
+    描述:
+      指向用于帧缓冲区的内存节点的句柄
+如果没有提供，则帧缓冲区可以位于内存中的任何位置
+最大内存带宽:
+    $引用: /schemas/types.yaml#/definitions/uint32
+    描述:
+      细胞内存接口可以处理的最大带宽（每秒字节数）
+如果没有提供，则内存接口足够快，可以处理所有可能的视频模式
+端口:
+    $引用: /schemas/graph.yaml#/$defs/port-base
+    不允许额外属性
+
+    描述:
+      控制器的输出端点，连接 LCD 面板信号
+属性:
+      端点:
+        $引用: /schemas/graph.yaml#/$defs/endpoint-base
+        不允许未评估属性
+
+        属性:
+          arm,pl11x,tft-r0g0b0-pads:
+            $引用: /schemas/types.yaml#/definitions/uint32-array
+            项:
+              - 描述: 用于第一个红色位 (R0) 的 CLD 垫的索引
+              - 描述: 用于第一个绿色位 (G0) 的 CLD 垫的索引
+              - 描述: 用于第一个蓝色位 (B0) 的 CLD 垫的索引
+            过时: true
+            描述: |
+              已过时。一个包含三个 32 位值的数组，定义了 CLD[23:0] 垫的接线方式
+第一个值包含了用于R0（红色分量的第一个比特）的“CLD”外部引脚（焊盘）的索引，第二个值对应绿色，第三个值对应蓝色。
+请参见 PL110/PL111 技术参考手册中的 "LCD 面板信号复用细节" 段落。
+这隐含地定义了可用的颜色模式，例如：
+- PL111 TFT 4:4:4 面板:
+    `arm,pl11x,tft-r0g0b0-pads = <4 15 20>;`
+- PL110 TFT (1:)5:5:5 面板:
+    `arm,pl11x,tft-r0g0b0-pads = <1 7 13>;`
+- PL111 TFT (1:)5:5:5 面板:
+    `arm,pl11x,tft-r0g0b0-pads = <3 11 19>;`
+- PL111 TFT 5:6:5 面板:
+    `arm,pl11x,tft-r0g0b0-pads = <3 10 19>;`
+- PL110 和 PL111 TFT 8:8:8 面板:
+    `arm,pl11x,tft-r0g0b0-pads = <0 8 16>;`
+- PL110 和 PL111 TFT 8:8:8 面板，红蓝分量交换:
+    `arm,pl11x,tft-r0g0b0-pads = <16 8 0>;`
+
+additionalProperties: false
+
+required:
+  - compatible
+  - reg
+  - clock-names
+  - clocks
+  - port
+
+allOf:
+  - if:
+      properties:
+        interrupts:
+          minItems: 2
+      required:
+        - interrupts
+    then:
+      required:
+        - interrupt-names
+
+示例:
+```yaml
+clcd@10020000 {
+    compatible = "arm,pl111", "arm,primecell";
+    reg = <0x10020000 0x1000>;
+    interrupt-names = "combined";
+    interrupts = <44>;
+    clocks = <&oscclk1>, <&oscclk2>;
+    clock-names = "clcdclk", "apb_pclk";
+    max-memory-bandwidth = <94371840>; /* Bps, 1024x768@60 16bpp */
+
+    port {
+        clcd_pads: endpoint {
+            remote-endpoint = <&clcd_panel>;
+        };
+    };
+};
+
+panel {
+    compatible = "arm,rtsm-display";
+
+    port {
+        clcd_panel: endpoint {
+            remote-endpoint = <&clcd_pads>;
+        };
+    };
+};
+```
+...

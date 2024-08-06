@@ -1,0 +1,93 @@
+# SPDX-文件许可人: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/leds/nxp,pca953x.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: NXP PCA9532 LED 调光器
+
+维护者:
+  - Riku Voipio <riku.voipio@iki.fi>
+
+描述: |
+  PCA9532 系列是针对调光 LED 进行优化的 SMBus I/O 扩展器。
+  PWM 支持 256 个步骤。
+  更多产品信息请参见以下链接：
+    https://www.nxp.com/docs/en/data-sheet/PCA9532.pdf
+
+属性:
+  compatible:
+    枚举:
+      - nxp,pca9530
+      - nxp,pca9531
+      - nxp,pca9532
+      - nxp,pca9533
+
+  reg:
+    maxItems: 1
+
+  gpio-controller: true
+
+  gpio-line-names:
+    minItems: 1
+    maxItems: 16
+
+  '#gpio-cells':
+    常量: 2
+
+模式属性:
+  "^led-[0-9a-z]+$":
+    类型: 对象
+    $ref: common.yaml#
+    unevaluatedProperties: false
+
+    属性:
+      type:
+        描述: |
+          输出配置，参见 include/dt-bindings/leds/leds-pca9532.h
+        $ref: /schemas/types.yaml#/definitions/uint32
+        默认值: 0
+        最小值: 0
+        最大值: 4
+
+必需:
+  - compatible
+  - reg
+
+额外属性: false
+
+示例:
+  - |
+    #include <dt-bindings/leds/leds-pca9532.h>
+
+    i2c {
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        led-controller@62 {
+            compatible = "nxp,pca9533";
+            reg = <0x62>;
+
+            led-1 {
+                label = "pca:red:power";
+                type = <PCA9532_TYPE_LED>;
+            };
+
+            led-2 {
+                label = "pca:green:power";
+                type = <PCA9532_TYPE_LED>;
+            };
+
+            led-3 {
+                type = <PCA9532_TYPE_LED>;
+                default-state = "on";
+            };
+
+            led-4 {
+                type = <PCA9532_TYPE_LED>;
+                default-state = "keep";
+            };
+        };
+    };
+
+..

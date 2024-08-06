@@ -1,0 +1,157 @@
+### 许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+
+#### YAML 1.2
+---
+$id$: http://devicetree.org/schemas/pci/qcom,pcie.yaml#
+$schema$: http://devicetree.org/meta-schemas/core.yaml#
+
+**标题**: Qualcomm PCI Express 根复合控制器
+
+**维护者**:
+  - Bjorn Andersson <bjorn.andersson@linaro.org>
+  - Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
+
+**描述**:
+  Qualcomm PCIe 根复合控制器基于 Synopsys DesignWare PCIe IP。
+
+**属性**:
+  compatible:
+    oneOf:
+      - enum:
+          - qcom,pcie-apq8064
+          - qcom,pcie-apq8084
+          - qcom,pcie-ipq4019
+          - qcom,pcie-ipq6018
+          - qcom,pcie-ipq8064
+          - qcom,pcie-ipq8064-v2
+          - qcom,pcie-ipq8074
+          - qcom,pcie-ipq8074-gen3
+          - qcom,pcie-msm8996
+          - qcom,pcie-qcs404
+          - qcom,pcie-sdm845
+          - qcom,pcie-sdx55
+      - items:
+          - const: qcom,pcie-msm8998
+          - const: qcom,pcie-msm8996
+
+  reg:
+    minItems: 4
+    maxItems: 6
+
+  reg-names:
+    minItems: 4
+    maxItems: 6
+
+  interrupts:
+    minItems: 1
+    maxItems: 8
+
+  interrupt-names:
+    minItems: 1
+    maxItems: 8
+
+  iommu-map:
+    minItems: 1
+    maxItems: 16
+
+  clocks:
+    minItems: 3
+    maxItems: 13
+
+  clock-names:
+    minItems: 3
+    maxItems: 13
+
+  dma-coherent: true
+
+  interconnects:
+    maxItems: 2
+
+  interconnect-names:
+    items:
+      - const: pcie-mem
+      - const: cpu-pcie
+
+  resets:
+    minItems: 1
+    maxItems: 12
+
+  reset-names:
+    minItems: 1
+    maxItems: 12
+
+  vdda-supply:
+    description: 电源供应的物理句柄到核心模拟电源
+
+  vdda_phy-supply:
+    description: 电源供应的物理句柄到 PHY 的核心模拟电源
+
+  vdda_refclk-supply:
+    description: 电源供应的物理句柄到生成参考时钟 IC 的核心模拟电源
+
+  phys:
+    maxItems: 1
+
+  phy-names:
+    items:
+      - const: pciephy
+
+  power-domains:
+    maxItems: 1
+
+  perst-gpios:
+    description: GPIO 控制的连接到 PERST# 信号
+    maxItems: 1
+
+  required-opps:
+    maxItems: 1
+
+  wake-gpios:
+    description: GPIO 控制的连接到 WAKE# 信号
+    maxItems: 1
+
+**必需项**:
+  - compatible
+  - reg
+  - reg-names
+  - interrupt-map-mask
+  - interrupt-map
+  - clocks
+  - clock-names
+
+**任选一项**:
+  - required:
+      - interrupts
+      - interrupt-names
+      - "#interrupt-cells"
+  - required:
+      - msi-map
+
+**全部需要**:
+  - $ref: /schemas/pci/pci-host-bridge.yaml#
+  - if:
+      properties:
+        compatible:
+          contains:
+            enum:
+              - qcom,pcie-apq8064
+              - qcom,pcie-ipq4019
+              - qcom,pcie-ipq8064
+              - qcom,pcie-ipq8064v2
+              - qcom,pcie-ipq8074
+              - qcom,pcie-qcs404
+    then:
+      properties:
+        reg:
+          minItems: 4
+          maxItems: 4
+        reg-names:
+          items:
+            - const: dbi # DesignWare PCIe 寄存器
+            - const: elbi # 外部本地总线接口寄存器
+            - const: parf # Qualcomm 特定寄存器
+            - const: config # PCIe 配置空间
+
+**示例**:
+  - 示例配置
+  - 另一个示例配置

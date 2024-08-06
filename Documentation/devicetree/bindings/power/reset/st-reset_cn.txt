@@ -1,0 +1,13 @@
+针对ST（意法半导体）SW复位功能的设备树绑定。
+
+所需属性：
+- compatible（兼容性）：应为 "stih407-restart"
+- st,syscfg：应为 syscfg 节点的句柄
+示例节点：
+``` 
+restart {
+	compatible = "st,stih407-restart";
+	st,syscfg = <&syscfg_sbc_reg>;
+};
+```
+这段描述了在设备树中如何定义与意法半导体（ST）特定硬件相关的软件复位功能。通过这种方式，操作系统或固件可以正确识别并利用这些硬件特性来执行复位操作。

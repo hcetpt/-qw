@@ -1,0 +1,31 @@
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/leds/leds-class-multicolor.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: 多色LED类的通用属性
+maintainers:
+  - Andrew Davis <afd@ti.com>
+
+description: |
+  多色LED的绑定展示了如何描述集成多色LED元件（如RGB、RGBW、RGBWA-UV等）或独立LED的当前输出，以实现逻辑分组的多色LED模块。这是通过在单色LED绑定上添加多LED节点层来实现的。
+  本文件中定义的节点和属性是多色LED类独有的。通用的LED节点和属性从本文档目录中的common.yaml继承而来。
+properties:
+  $nodename:
+    pattern: "^multi-led(@[0-9a-f])?$"
+
+  color:
+    description: |
+      对于多色LED支持，此属性应定义为LED_COLOR_ID_RGB或LED_COLOR_ID_MULTI，这些可以在include/linux/leds/common.h找到。
+enum: [ 8, 9 ]
+
+required:
+  - color
+
+allOf:
+  - $ref: common.yaml#
+
+additionalProperties: true
+
+..

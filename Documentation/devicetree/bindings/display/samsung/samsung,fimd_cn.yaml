@@ -1,0 +1,159 @@
+此文档定义了三星S3C/S5P/Exynos系统级芯片中全互动移动显示(FIMD)的设备树配置。
+
+- **许可证**: GPL-2.0-only
+- **YAML版本**: 1.2
+- **Schema ID**: `http://devicetree.org/schemas/display/samsung/samsung,fimd.yaml#`
+- **Schema**: 基于`http://devicetree.org/meta-schemas/core.yaml#`
+
+### 标题
+三星S3C/S5P/Exynos SoC 全互动移动显示 (FIMD)
+
+### 维护者
+- Inki Dae <inki.dae@samsung.com>
+- Seung-Woo Kim <sw0312.kim@samsung.com>
+- Kyungmin Park <kyungmin.park@samsung.com>
+- Krzysztof Kozlowski <krzk@kernel.org>
+
+### 属性
+- **compatible**:
+  - 枚举值:
+    - `samsung,s3c2443-fimd`
+    - `samsung,s3c6400-fimd`
+    - `samsung,s5pv210-fimd`
+    - `samsung,exynos3250-fimd`
+    - `samsung,exynos4210-fimd`
+    - `samsung,exynos5250-fimd`
+    - `samsung,exynos5420-fimd`
+
+- **`#address-cells`**:
+  - 常量: 1
+
+- **clocks**:
+  - 最大项数: 2
+
+- **clock-names**:
+  - 项:
+    - 常量: `sclk_fimd`
+    - 常量: `fimd`
+
+- **display-timings**:
+  - 引用: `../panel/display-timings.yaml#`
+
+- **i80-if-timings**:
+  - 类型: 对象
+  - 额外属性: 不允许
+  - 描述: 为LCD I80接口支持的定时配置。
+  - 属性:
+    - **cs-setup**:
+      - 类型: uint32
+      - 默认值: 0
+      - 描述: 地址信号启用到片选信号启用之间的时钟周期数。
+    - **wr-active**:
+      - 类型: uint32
+      - 默认值: 1
+      - 描述: 片选信号启用期间的时钟周期数。
+    - **wr-hold**:
+      - 类型: uint32
+      - 默认值: 0
+      - 描述: 写信号失效前片选信号失效后的时钟周期数。
+    - **wr-setup**:
+      - 类型: uint32
+      - 默认值: 0
+      - 描述: 片选信号启用到写信号启用之间的时钟周期数。
+
+- **iommus**:
+  - 最小项数: 1
+  - 最大项数: 2
+
+- **iommu-names**:
+  - 项:
+    - 常量: `m0`
+    - 常量: `m1`
+
+- **interrupts**:
+  - 项:
+    - 描述: FIFO 水平
+    - 描述: VSYNC
+    - 描述: LCD 系统
+
+- **interrupt-names**:
+  - 项:
+    - 常量: `fifo`
+    - 常量: `vsync`
+    - 常量: `lcd_sys`
+
+- **power-domains**:
+  - 最大项数: 1
+
+- **reg**:
+  - 最大项数: 1
+
+- **samsung,invert-vden**:
+  - 类型: 布尔
+  - 描述: 视频使能信号被反转。
+
+- **samsung,invert-vclk**:
+  - 类型: 布尔
+  - 描述: 视频时钟信号被反转。
+
+- **samsung,sysreg**:
+  - 类型: phandle
+  - 描述: 指向系统寄存器(syscon)的句柄。
+
+- **`#size-cells`**:
+  - 常量: 0
+
+- **patternProperties**:
+  - `^port@[0-4]+$`:
+    - 引用: `/schemas/graph.yaml#/properties/port`
+    - 描述: 包含端口，端口索引:
+      - 0 - 用于CAMIF0输入
+      - 1 - 用于CAMIF1输入
+      - 2 - 用于CAMIF2输入
+      - 3 - 用于并行输出
+      - 4 - 用于回写接口
+
+### 必需属性
+- compatible
+- clocks
+- clock-names
+- interrupts
+- interrupt-names
+- reg
+
+### 示例
+```yaml
+#include <dt-bindings/clock/exynos4.h>
+
+fimd@11c00000 {
+    compatible = "samsung,exynos4210-fimd";
+    interrupt-parent = <&combiner>;
+    reg = <0x11c00000 0x20000>;
+    interrupt-names = "fifo", "vsync", "lcd_sys";
+    interrupts = <11 0>, <11 1>, <11 2>;
+    clocks = <&clock CLK_SCLK_FIMD0>, <&clock CLK_FIMD0>;
+    clock-names = "sclk_fimd", "fimd";
+    power-domains = <&pd_lcd0>;
+    iommus = <&sysmmu_fimd0>;
+    samsung,sysreg = <&sys_reg>;
+
+    #address-cells = <1>;
+    #size-cells = <0>;
+
+    samsung,invert-vden;
+    samsung,invert-vclk;
+
+    pinctrl-0 = <&lcd_clk>, <&lcd_data24>;
+    pinctrl-names = "default";
+
+    port@3 {
+        reg = <3>;
+
+        fimd_dpi_ep: endpoint {
+            remote-endpoint = <&lcd_ep>;
+        };
+    };
+};
+```
+
+该示例展示了如何在设备树中配置一个三星 Exynos 4210 FIMD 控制器。

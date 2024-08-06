@@ -1,0 +1,110 @@
+这段 Device Tree 绑定描述了瑞萨 R-Car 第四代系统芯片 (SoC) 中嵌入的 MIPI DSI/CSI-2 编码器。
+
+维护者:
+  - Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
+
+描述: 
+  此绑定描述了瑞萨 R-Car 第四代系统芯片 (SoC) 中嵌入的 MIPI DSI/CSI-2 编码器。该编码器可以在 DSI 或 CSI-2 模式下工作，并且最多可以使用四个数据通道。
+
+属性:
+  compatible:
+    枚举:
+      - renesas,r8a779a0-dsi-csi2-tx    # 对于 V3U
+      - renesas,r8a779g0-dsi-csi2-tx    # 对于 V4H
+
+  reg:
+    最大项数: 1
+
+  clocks:
+    项:
+      - 描述: 功能时钟
+      - 描述: DSI (和 CSI-2) 功能时钟
+      - 描述: PLL 参考时钟
+
+  clock-names:
+    项:
+      - 常量: fck
+      - 常量: dsi
+      - 常量: pll
+
+  power-domains:
+    最大项数: 1
+
+  resets:
+    最大项数: 1
+
+  ports:
+    $ref: /schemas/graph.yaml#/properties/ports
+
+    属性:
+      port@0:
+        $ref: /schemas/graph.yaml#/properties/port
+        描述: 并行输入端口
+
+      port@1:
+        $ref: /schemas/graph.yaml#/$defs/port-base
+        不评估的属性: false
+        描述: DSI/CSI-2 输出端口
+
+        属性:
+          endpoint:
+            $ref: /schemas/media/video-interfaces.yaml#
+            不评估的属性: false
+
+            属性:
+              data-lanes:
+                最少项数: 1
+                最大项数: 4
+
+            必须包含:
+              - data-lanes
+
+    必须包含:
+      - port@0
+      - port@1
+
+必须包含:
+  - compatible
+  - reg
+  - clocks
+  - power-domains
+  - resets
+  - ports
+
+额外属性: false
+
+示例:
+  - |
+    #include <dt-bindings/clock/r8a779a0-cpg-mssr.h>
+    #include <dt-bindings/power/r8a779a0-sysc.h>
+
+    dsi0: dsi-encoder@fed80000 {
+        compatible = "renesas,r8a779a0-dsi-csi2-tx";
+        reg = <0xfed80000 0x10000>;
+        power-domains = <&sysc R8A779A0_PD_ALWAYS_ON>;
+        clocks = <&cpg CPG_MOD 415>,
+                 <&cpg CPG_CORE R8A779A0_CLK_DSI>,
+                 <&cpg CPG_CORE R8A779A0_CLK_CP>;
+        clock-names = "fck", "dsi", "pll";
+        resets = <&cpg 415>;
+
+        ports {
+            #address-cells = <1>;
+            #size-cells = <0>;
+
+            port@0 {
+                reg = <0>;
+                dsi0_in: endpoint {
+                    remote-endpoint = <&du_out_dsi0>;
+                };
+            };
+
+            port@1 {
+                reg = <1>;
+                dsi0_out: endpoint {
+                    data-lanes = <1 2>;
+                    remote-endpoint = <&sn65dsi86_in>;
+                };
+            };
+        };
+    };

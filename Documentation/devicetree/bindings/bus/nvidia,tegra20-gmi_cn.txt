@@ -1,0 +1,102 @@
+NVIDIA Tegra 通用内存接口总线的设备树绑定
+
+通用内存接口（Generic Memory Interface，GMI）总线实现了内部和外部内存之间的数据传输。它可以用于连接各种高速设备，例如同步/异步NOR闪存、FPGA、UART等。
+实际的设备是从GMI节点的子节点实例化的。
+**必需属性：**
+ - compatible ：应包含以下内容之一：
+        对于Tegra20，必须包含"nvidia,tegra20-gmi"
+对于Tegra30，必须包含"nvidia,tegra30-gmi"
+- reg: 应包含GMI控制器寄存器的位置和长度
+- clocks: 必须为clock-names中的每一项包含一个条目
+- clock-names: 必须包括以下条目："gmi"
+ - resets : 必须为reset-names中的每一项包含一个条目
+- reset-names : 必须包括以下条目："gmi"
+ - #address-cells: 用于表示GMI地址空间中物理基址的单元格数量。应为2
+- #size-cells: 用于表示GMI地址空间中地址范围大小的单元格数量。应为1
+- ranges: 必须设置以反映带有三个整数值的内存布局，针对每个使用的片选线（仅支持一个条目，参见下面的注释）：
+   <cs-number> <offset> <映射的物理地址> <大小>
+
+请注意，GMI控制器没有内部的片选地址解码功能，因此片选要么需要通过软件管理，要么使用外部片选解码逻辑来实现。
+如果使用外部芯片选择逻辑来支持多个设备，则假设这些设备具有相同的定时特性，因此可能是同一类型的。这也假设它们可以适应在256MB的地址范围内。在这种情况下，仅支持一个子设备，该子设备代表活动的芯片选择线，更多细节请参见示例。
+
+芯片选择编号是从`ranges`属性的子节点的第二个地址单元解码得出的，如果`ranges`属性不存在或为空，则从`reg`属性的第一个单元解码芯片选择信号。
+
+可选的子节点`cs`属性如下：
+
+- `nvidia,snor-data-width-32bit`: 使用32位数据总线，默认为16位。
+- `nvidia,snor-mux-mode`: 启用地址/数据复用模式。
+- `nvidia,snor-rdy-active-before-data`: 在数据之前一个周期断言RDY信号；如果省略，则与数据一起断言RDY信号。
+- `nvidia,snor-rdy-active-high`: RDY信号为高电平有效。
+- `nvidia,snor-adv-active-high`: ADV信号为高电平有效。
+- `nvidia,snor-oe-active-high`: WE/OE信号为高电平有效。
+- `nvidia,snor-cs-active-high`: CS信号为高电平有效。
+
+需要注意的是，对于定时值有一些特殊的处理方式。根据Tegra TRM：
+编程值为0意味着1个时钟周期：实际周期数=编程周期数+1。
+
+- `nvidia,snor-muxed-width`: 地址/数据复用信号在总线上断言的周期数。有效值范围是0-15，默认值为1。
+- `nvidia,snor-hold-width`: CE信号在WR_N（在SLAVE/MASTER请求的情况下）或OE_N（在MASTER请求的情况下）撤销后保持断言的周期数。有效值范围是0-15，默认值为1。
+- `nvidia,snor-adv-width`: ADV信号保持断言状态的周期数。有效值范围是0-15，默认值为1。
+- `nvidia,snor-ce-width`: CE信号断言前的周期数。
+有效值为0-15，默认值为4
+- nvidia,snor-we-width: WE保持有效的周期数
+有效值为0-15，默认值为1
+- nvidia,snor-oe-width: OE保持有效的周期数
+有效值为0-255，默认值为1
+- nvidia,snor-wait-width: 在READY被置位之前的周期数
+有效值为0-255，默认值为3
+
+两个SJA1000 CAN控制器连接到GMI总线的例子。我们将这些控制器用一个简单的总线节点包装起来，因为它们都连接到了同一个片选信号（CS4）上；在这个例子中，提供了外部地址解码：
+
+gmi@70009000 {
+	compatible = "nvidia,tegra20-gmi";
+	reg = <0x70009000 0x1000>;
+	#address-cells = <2>;
+	#size-cells = <1>;
+	clocks = <&tegra_car TEGRA20_CLK_NOR>;
+	clock-names = "gmi";
+	resets = <&tegra_car 42>;
+	reset-names = "gmi";
+	ranges = <4 0 0xd0000000 0xfffffff>;
+
+	bus@4,0 {
+		compatible = "simple-bus";
+		#address-cells = <1>;
+		#size-cells = <1>;
+		ranges = <0 4 0 0x40100>;
+
+		nvidia,snor-mux-mode;
+		nvidia,snor-adv-active-high;
+
+		can@0 {
+			reg = <0 0x100>;
+			..
+};
+
+		can@40000 {
+			reg = <0x40000 0x100>;
+			..
+};
+	};
+};
+
+一个SJA1000 CAN控制器连接到GMI总线上的CS4的例子：
+
+gmi@70009000 {
+	compatible = "nvidia,tegra20-gmi";
+	reg = <0x70009000 0x1000>;
+	#address-cells = <2>;
+	#size-cells = <1>;
+	clocks = <&tegra_car TEGRA20_CLK_NOR>;
+	clock-names = "gmi";
+	resets = <&tegra_car 42>;
+	reset-names = "gmi";
+	ranges = <4 0 0xd0000000 0xfffffff>;
+
+	can@4,0 {
+		reg = <4 0 0x100>;
+		nvidia,snor-mux-mode;
+		nvidia,snor-adv-active-high;
+		..
+};
+};

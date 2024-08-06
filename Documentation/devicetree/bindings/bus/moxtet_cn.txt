@@ -1,0 +1,45 @@
+Turris Mox 模块状态和配置总线（通过 SPI）
+
+必需属性：
+- compatible：应为 "cznic,moxtet"
+- #address-cells：必须是 1
+- #size-cells：必须是 0
+- spi-cpol：所需反相时钟极性
+- spi-cpha：所需移位时钟相位
+- interrupts：必须包含对共享中断线的引用
+- interrupt-controller：必需
+- #interrupt-cells：必须是 1
+
+对于 SPI 从节点的其他必需和可选属性，请参阅
+../spi/spi-bus.txt
+子节点的必需属性：
+- reg：应为在 Moxtet 总线上所处的位置（从该模块到 CPU 模块之间有多少个 Moxtet 模块，因此
+              可以是 0 或一个正整数）
+
+驱动程序会自行查找连接到总线的设备，但在某些情况下可能需要从设备树的其他部分引用其中一些设备。在这种情况下，可以将这些设备定义为 moxtet 节点的子节点。
+示例：
+
+``` 
+    moxtet@1 {
+        compatible = "cznic,moxtet";
+        #address-cells = <1>;
+        #size-cells = <0>;
+        reg = <1>;
+        spi-max-frequency = <10000000>;
+        spi-cpol;
+        spi-cpha;
+        interrupt-controller;
+        #interrupt-cells = <1>;
+        interrupt-parent = <&gpiosb>;
+        interrupts = <5 IRQ_TYPE_EDGE_FALLING>;
+
+        moxtet_sfp: gpio@0 {
+            compatible = "cznic,moxtet-gpio";
+            gpio-controller;
+            #gpio-cells = <2>;
+            reg = <0>;
+        }
+    };
+```
+
+这段文本描述了如何在设备树中定义一个使用 SPI 的 Turris Mox 模块，并给出了必要的属性以及一个具体的示例。

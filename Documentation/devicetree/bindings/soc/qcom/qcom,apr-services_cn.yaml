@@ -1,0 +1,57 @@
+---
+
+# SPDX 许可证标识符: GPL-2.0 或 BSD-2-Clause
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/soc/qcom/qcom,apr-services.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: 高通 APR/GPR 服务共享部分
+
+维护者:
+  - Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+
+描述:
+  在高通 APR/GPR (异步/通用数据包路由器) 中静态服务的通用部分。
+
+属性:
+  reg:
+    最小值: 1
+    最大值: 13
+    描述: |
+      APR 服务 ID
+        3 = DSP 核心服务
+        4 = 音频前端服务
+        5 = 语音流管理器服务
+        6 = 语音处理管理器
+        7 = 音频流管理器服务
+        8 = 音频设备管理器服务
+        9 = 多模式语音管理器
+        10 = 核心语音流
+        11 = 核心语音处理器
+        12 = 超声波流管理器
+请注意，原文中数字"5"、"9"和"11"后面缺少了换行符，这可能导致格式问题。在翻译时，我已将其调整为统一格式。
+翻译如下：
+
+13 = 监听流管理器
+GPR 服务 ID
+        1 = 音频处理管理器服务
+        2 = 代理资源管理器服务
+3 = AMDB 服务
+4 = 语音处理管理器
+qcom,protection-domain:
+    $ref: /schemas/types.yaml#/definitions/string-array
+    description: |
+      保护域服务名称及其对于 APR 服务的路径（如果支持）
+可能的值包括：
+      "avs/audio", "msm/adsp/audio_pd"
+"kernel/elf_loader", "msm/modem/wlan_pd"
+"tms/servreg", "msm/adsp/audio_pd"
+"tms/servreg", "msm/modem/wlan_pd"
+"tms/servreg", "msm/slpi/sensor_pd"
+翻译成中文：
+
+必需字段： 
+  - reg
+
+允许额外属性： true

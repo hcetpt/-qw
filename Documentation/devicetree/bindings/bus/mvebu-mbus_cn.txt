@@ -1,0 +1,242 @@
+* Marvell MBus
+
+必需属性：
+
+- compatible:   应设置为以下选项之一：
+         marvell,armada370-mbus
+         marvell,armadaxp-mbus
+         marvell,armada375-mbus
+         marvell,armada380-mbus
+         marvell,kirkwood-mbus
+         marvell,dove-mbus
+         marvell,orion5x-88f5281-mbus
+         marvell,orion5x-88f5182-mbus
+         marvell,orion5x-88f5181-mbus
+         marvell,orion5x-88f6183-mbus
+         marvell,mv78xx0-mbus
+- address-cells: 必须是 '2'。第一个单元用于 MBus ID 编码，
+                第二个单元用于窗口内的地址偏移
+- size-cells:    必须是 '1'
+- ranges:        必须设置以提供对每个子节点的正确转换
+请参阅下面的例子
+- controller:    包含指向 MBus 控制器节点的单个 phandle。这允许指定包含控制 MBus 的寄存器的节点，
+                 该节点通常位于内部寄存器窗口内（见下文）
+可选属性：
+
+- pcie-mem-aperture: 此可选属性包含 PCIe 驱动程序内存区域的孔径
+如果定义了此属性，它必须编码分配给 PCIe 内存区域的地址解码窗口的基址和大小
+- pcie-io-aperture: 与上述属性相同，此可选属性包含 PCIe 驱动程序 I/O 区域的孔径
+
+* Marvell MBus 控制器
+
+必需属性：
+
+- compatible:   应设置为 "marvell,mbus-controller"
+- reg:          设备的寄存器空间
+预计会有两到三个条目（参见下面的例子）：
+第一个控制设备的解码窗口，
+第二个控制SDRAM的解码窗口，
+第三个控制MBus桥接器（仅与
+`marvell,armada370-mbus` 和 `marvell,armadaxp-mbus`
+兼容字符串相关）
+
+例子：
+
+```text
+soc {
+	compatible = "marvell,armada370-mbus", "simple-bus";
+	#address-cells = <2>;
+	#size-cells = <1>;
+	controller = <&mbusc>;
+	pcie-mem-aperture = <0xe0000000 0x8000000>;
+	pcie-io-aperture  = <0xe8000000 0x100000>;
+
+	internal-regs {
+		compatible = "simple-bus";
+
+		mbusc: mbus-controller@20000 {
+			compatible = "marvell,mbus-controller";
+			reg = <0x20000 0x100>, <0x20180 0x20>, <0x20250 0x8>;
+		};
+
+		/* 更多子节点... */
+	};
+};
+```
+
+** MBus 地址解码窗口规范
+
+MBus 子节点地址空间由两个单元组成：第一个用于窗口ID，第二个用于窗口内的偏移量。
+为了允许描述有效和无效的窗口条目，使用了以下编码方式：
+
+  0xSIAA0000 0x00oooooo
+
+其中：
+
+  S = 0x0 表示有效的MBus窗口
+  S = 0xf 表示无效的窗口（参见下文）
+
+如果 S = 0x0，则：
+
+   I = 4位窗口目标ID
+  AA = 窗口属性
+
+如果 S = 0xf，则：
+
+   I = 不关心
+   AA = 对于内部寄存器为1
+
+根据上述编码，对于每个有效的MBus窗口（S = 0x0）的范围条目，都会分配一个地址解码窗口。另一方面，不对应有效窗口（S = 0xf）的转换条目会被跳过。
+
+```text
+soc {
+	compatible = "marvell,armada370-mbus", "simple-bus";
+	#address-cells = <2>;
+	#size-cells = <1>;
+	controller = <&mbusc>;
+
+	ranges = <0xf0010000 0 0 0xd0000000 0x100000
+		  0x01e00000 0 0 0xfff00000 0x100000>;
+
+	bootrom {
+		compatible = "marvell,bootrom";
+		reg = <0x01e00000 0 0x100000>;
+	};
+
+	/* 其他子节点 */
+	..
+internal-regs {
+		compatible = "simple-bus";
+		ranges = <0 0xf0010000 0 0x100000>;
+
+		mbusc: mbus-controller@20000 {
+			compatible = "marvell,mbus-controller";
+			reg = <0x20000 0x100>, <0x20180 0x20>, <0x20250 0x8>;
+		};
+
+		/* 更多子节点... */
+	};
+};
+```
+
+在所示的例子中，'ranges' 属性中的转换条目使得MBus驱动程序为相应的子设备创建静态解码窗口。请注意，此绑定不需要存在子节点。当然，需要子节点来探测设备。
+由于每个窗口通过其目标ID和属性ID来标识，因此有一个特殊的宏可以用来简化转换条目：
+
+```text
+#define MBUS_ID(target,attributes) (((target) << 24) | ((attributes) << 16))
+```
+
+使用这个宏，上面的例子可以表示为：
+
+```text
+soc {
+	compatible = "marvell,armada370-mbus", "simple-bus";
+	#address-cells = <2>;
+	#size-cells = <1>;
+	controller = <&mbusc>;
+
+	ranges = < MBUS_ID(0xf0, 0x01) 0 0 0xd0000000 0x100000
+		   MBUS_ID(0x01, 0xe0) 0 0 0xfff00000 0x100000>;
+
+	bootrom {
+		compatible = "marvell,bootrom";
+		reg = <MBUS_ID(0x01, 0xe0) 0 0x100000>;
+	};
+
+	/* 其他子节点 */
+	..
+internal-regs {
+		compatible = "simple-bus";
+		#address-cells = <1>;
+		#size-cells = <1>;
+		ranges = <0 MBUS_ID(0xf0, 0x01) 0 0x100000>;
+
+		mbusc: mbus-controller@20000 {
+			compatible = "marvell,mbus-controller";
+			reg = <0x20000 0x100>, <0x20180 0x20>, <0x20250 0x8>;
+		};
+
+		/* 其他子节点 */
+		..
+};
+};
+```
+
+** 关于窗口基地址
+
+请记住MBus控制器允许选择解码窗口基地址时有极大的灵活性。在规划设备树布局时，可以选择任何地址作为基地址，当然前提是必须有足够的区域可用，并且具有所需的对齐方式。
+换句话说：如果我们希望的区域未被使用，没有什么阻止我们将基地址设置为0xf0000000或0xd0000000，如上所述的NOR设备。
+
+** 窗口分配策略
+
+mbus-node的ranges属性定义了一组由操作系统设置的MBus窗口，这些窗口保证彼此之间或与系统内存范围无重叠。
+属性中的每个条目都指代一个确切的窗口。如果操作系统选择使用不同的MBus窗口集，则必须确保从下游设备执行的任何地址转换相应地进行调整。
+操作系统可能会插入额外的内存总线 (mbus) 窗口，这些窗口不会与在范围内列出的窗口发生冲突，例如用于映射 PCIe 设备。作为一个特殊情况，内部寄存器窗口必须由启动加载器按照 `ranges` 属性中列出的地址进行设置，因为需要访问该区域以设置其他窗口。
+
+** 示例 **
+
+请参阅以下示例，其中展示了一个更为完整的设备树：
+
+```plaintext
+soc {
+    compatible = "marvell,armadaxp-mbus", "simple-bus";
+    controller = <&mbusc>;
+
+    ranges = <MBUS_ID(0xf0, 0x01) 0 0 0xd0000000 0x100000   /* 内部寄存器 */
+              MBUS_ID(0x01, 0x1d) 0 0 0xfff00000 0x100000
+              MBUS_ID(0x01, 0x2f) 0 0 0xf0000000 0x8000000>;
+
+    bootrom {
+        compatible = "marvell,bootrom";
+        reg = <MBUS_ID(0x01, 0x1d) 0 0x100000>;
+    };
+
+    devbus-bootcs {
+        ranges = <0 MBUS_ID(0x01, 0x2f) 0 0x8000000>;
+
+        /* NOR Flash */
+        nor {
+            compatible = "cfi-flash";
+            reg = <0 0x8000000>;
+            bank-width = <2>;
+        };
+    };
+
+    pcie-controller {
+        compatible = "marvell,armada-xp-pcie";
+        device_type = "pci";
+
+        #address-cells = <3>;
+        #size-cells = <2>;
+
+        ranges =
+               <0x82000000 0 0x40000 MBUS_ID(0xf0, 0x01) 0x40000 0 0x00002000   /* 端口 0.0 寄存器 */
+                0x82000000 0 0x42000 MBUS_ID(0xf0, 0x01) 0x42000 0 0x00002000   /* 端口 2.0 寄存器 */
+                0x82000000 0 0x44000 MBUS_ID(0xf0, 0x01) 0x44000 0 0x00002000   /* 端口 0.1 寄存器 */
+                0x82000000 0 0x48000 MBUS_ID(0xf0, 0x01) 0x48000 0 0x00002000   /* 端口 0.2 寄存器 */
+                0x82000000 0 0x4c000 MBUS_ID(0xf0, 0x01) 0x4c000 0 0x00002000   /* 端口 0.3 寄存器 */
+                0x82000800 0 0xe0000000 MBUS_ID(0x04, 0xe8) 0xe0000000 0 0x08000000 /* 端口 0.0 内存 */
+                0x81000800 0 0          MBUS_ID(0x04, 0xe0) 0xe8000000 0 0x00100000 /* 端口 0.0 输入输出 */>;
+
+        pcie@1,0 {
+            /* 端口 0, 车道 0 */
+        };
+    };
+
+    internal-regs {
+        compatible = "simple-bus";
+        #address-cells = <1>;
+        #size-cells = <1>;
+        ranges = <0 MBUS_ID(0xf0, 0x01) 0 0x100000>;
+
+        mbusc: mbus-controller@20000 {
+            reg = <0x20000 0x100>, <0x20180 0x20>, <0x20250 0x8>;
+        };
+
+        interrupt-controller@20000 {
+            reg = <0x20a00 0x2d0>, <0x21070 0x58>;
+        };
+    };
+};
+```
+在这个示例中，展示了如何配置一个 SoC 的设备树，包括了内部寄存器、PCIe 控制器和 NOR Flash 等组件。

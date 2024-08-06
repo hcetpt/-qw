@@ -1,0 +1,35 @@
+* Marvell Armada 370/375/380/XP 热管理
+
+所需属性：
+
+- compatible: 应设置为以下之一：
+    * marvell,armada370-thermal
+    * marvell,armada375-thermal
+    * marvell,armada380-thermal
+    * marvell,armadaxp-thermal
+    * marvell,armada-ap806-thermal
+    * marvell,armada-ap807-thermal
+    * marvell,armada-cp110-thermal
+
+注意：对于 AP806/CP110，这些绑定已被弃用，而应当遵循以下文档中描述的规则：
+Documentation/devicetree/bindings/arm/marvell/ap80x-system-controller.txt
+Documentation/devicetree/bindings/arm/marvell/cp110-system-controller.txt
+
+- reg: 设备的寄存器空间
+预期有两个条目，请参见下面的例子。第一个指向状态寄存器（4字节）。第二个指向控制寄存器（8字节）。
+注意：兼容项 marvell,armada370-thermal、marvell,armada380-thermal 和 marvell,armadaxp-thermal 必须指向 "control MSB/control 1"，大小为4字节（已弃用的绑定），或者指向 "control LSB/control 0"，大小为8字节（当前绑定）。所有其他兼容项必须指向 "control LSB/control 0"，大小为8字节。
+
+示例：
+
+	/* 过时的绑定 */
+	thermal@d0018300 {
+		compatible = "marvell,armada370-thermal";
+		reg = <0xd0018300 0x4
+		       0xd0018304 0x4>;
+	};
+
+	ap_thermal: thermal@6f8084 {
+		compatible = "marvell,armada-ap806-thermal";
+		reg = <0x6f808C 0x4>,
+		      <0x6f8084 0x8>;
+	};

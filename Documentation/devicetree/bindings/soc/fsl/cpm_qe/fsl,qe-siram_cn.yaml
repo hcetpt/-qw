@@ -1,0 +1,38 @@
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/soc/fsl/cpm_qe/fsl,qe-siram.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: Freescale QUICC Engine 模块串行接口块RAM (SIRAM)
+
+维护者:
+  - Frank Li <Frank.Li@nxp.com>
+
+描述:
+  用于存储串行接口的路由条目
+
+属性:
+  compatible:
+    oneOf:
+      - items:
+          - enum:
+              - fsl,ls1043-qe-siram
+          - const: fsl,t1040-qe-siram
+      - const: fsl,t1040-qe-siram
+
+  reg:
+    maxItems: 1
+
+必需:
+  - compatible
+  - reg
+
+附加属性: false
+
+示例:
+  - |
+    siram@1000 {
+        compatible = "fsl,t1040-qe-siram";
+        reg = <0x1000 0x800>;
+    };

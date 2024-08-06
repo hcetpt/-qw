@@ -1,0 +1,51 @@
+真正NT35597 DSI显示驱动
+
+真正NT35597是一个通用的显示驱动，目前仅配置用于Qualcomm SDM845 MTP板上的2K显示屏。
+必需属性：
+- compatible（兼容性）：应为"truly,nt35597-2K-display"
+- vdda-supply（VDDA供电）：提供供电电压的稳压器的phandle，电源IC供电
+- vdispp-supply（VDISPP供电）：提供LCD正偏置供电电压的稳压器的phandle
+- vdispn-supply（VDISPN供电）：提供LCD负偏置供电电压的稳压器的phandle
+- reset-gpios（复位GPIO）：复位线的GPIO的phandle。这应该是8mA，GPIO可以通过mux、pinctrl和pinctrl-names进行配置（低电平有效）
+- mode-gpios（模式GPIO）：选择显示屏模式（单DSI或双DSI）的GPIO的phandle。对于双DSI应设置为低电平，对于单DSI模式应设置为高电平
+- ports（端口）：此设备有两个由两个DSI驱动的视频端口。它们的连接采用OF图绑定规范，该规范在Documentation/devicetree/bindings/graph.txt中指定
+- port@0：由主DSI驱动的DSI输入端口
+  - port@1：由次级DSI驱动的DSI输入端口
+
+示例：
+
+```dtb
+dsi@ae94000 {
+    panel@0 {
+        compatible = "truly,nt35597-2K-display";
+        reg = <0>;
+        vdda-supply = <&pm8998_l14>;
+        vdispp-supply = <&lab_regulator>;
+        vdispn-supply = <&ibb_regulator>;
+        pinctrl-names = "default", "suspend";
+        pinctrl-0 = <&dpu_dsi_active>;
+        pinctrl-1 = <&dpu_dsi_suspend>;
+
+        reset-gpios = <&tlmm 6 GPIO_ACTIVE_LOW>;
+        mode-gpios = <&tlmm 52 GPIO_ACTIVE_HIGH>;
+        ports {
+            #address-cells = <1>;
+            #size-cells = <0>;
+            port@0 {
+                reg = <0>;
+                panel0_in: endpoint {
+                    remote-endpoint = <&dsi0_out>;
+                };
+            };
+
+            port@1 {
+                reg = <1>;
+                panel1_in: endpoint {
+                    remote-endpoint = <&dsi1_out>;
+                };
+            };
+        };
+    };
+};
+```
+```

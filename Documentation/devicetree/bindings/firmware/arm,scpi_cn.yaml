@@ -1,0 +1,219 @@
+# SPDX-文件许可人: (GPL-2.0 或 BSD-2-Clause)
+# 版权所有 2021 ARM 有限公司
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/firmware/arm,scpi.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: 系统控制和电源接口 (SCPI) 消息协议
+
+maintainers:
+  - Sudeep Holla <sudeep.holla@arm.com>
+
+description: |
+  实现了 ARM 文档编号为 ARM DUI 0922B（"ARM 计算子系统 SCP：消息接口协议"）[0] 中描述的 SCPI 的固件可以被 Linux 使用来发起各种系统控制和电源操作。此绑定旨在定义在设备树中实现 SCPI 的固件为 OSPM 提供的接口。
+[0] http://infocenter.arm.com/help/topic/com.arm.doc.dui0922b/index.html
+
+properties:
+  $nodename:
+    const: scpi
+
+  compatible:
+    description:
+      遵守 SCPI v1.0 及以上版本或遵守所有 SCPI v1.0 之前的未版本化发布的 SCPI 合规固件
+    oneOf:
+      - const: arm,scpi               # SCPI v1.0 及以上
+      - const: arm,scpi-pre-1.0       # SCPI v1.0 之前的未版本化版本
+      - items:
+          - enum:
+              - amlogic,meson-gxbb-scpi
+          - const: arm,scpi-pre-1.0
+
+  mboxes:
+    description:
+      远程 SCP 固件为 SCPI 消息协议预留的所有通道的 phandle 和邮箱通道指定符列表，这些通道可以以任何顺序指定
+minItems: 1
+    maxItems: 4
+
+  shmem:
+    description:
+      指向使用这些邮箱进行 IPC 的处理器之间共享内存 (SHM) 区域的 phandle 列表，每个邮箱一个 SHM 可以是为这些处理器之间的通信预留的任意内存
+minItems: 1
+    maxItems: 4
+
+  power-controller:
+    type: object
+    description:
+      此子节点表示 SCPI 电源域控制器
+properties:
+      compatible:
+        const: arm,scpi-power-domains
+
+      '#power-domain-cells':
+        const: 1
+
+      num-domains:
+        $ref: /schemas/types.yaml#/definitions/uint32
+        description:
+          SCPI 提供的电源域总数。这是必要的，因为 SCPI 消息协议缺乏运行时查询此信息的机制
+required:
+      - compatible
+      - '#power-domain-cells'
+      - num-domains
+
+    additionalProperties: false
+
+  sensors:
+    type: object
+    description: |
+      此子节点表示 SCPI 传感器控制器
+properties:
+      compatible:
+        oneOf:
+          - const: arm,scpi-sensors
+          - items:
+              - enum:
+                  - amlogic,meson-gxbb-scpi-sensors
+              - const: arm,scpi-sensors
+
+      '#thermal-sensor-cells':
+        const: 1
+
+    required:
+      - compatible
+      - '#thermal-sensor-cells'
+
+    additionalProperties: false
+
+  clocks:
+    type: object
+    description:
+      这是一个容器节点。每个子节点代表一种类型的时钟控制器 —— 索引类型或全范围类型
+properties:
+      compatible:
+        const: arm,scpi-clocks
+
+    patternProperties:
+      "^clocks-[0-9a-f]+$":
+        type: object
+        description: |
+          此子节点代表一种类型的时钟控制器
+          —— 索引类型或全范围类型
+Here is the translation of the provided text into Chinese:
+
+"arm,scpi-dvfs-clocks" - 所有可变且基于索引的时钟。这些时钟并不提供在限制范围内的所有值，而仅提供该范围内的离散点。固件为每个这样的工作频率及其关联的索引提供了映射关系。固件还适当地管理与时钟缩放相关的电压缩放。
+
+"arm,scpi-variable-clocks" - 所有可变并且在指定范围内提供完整范围的时钟。固件提供在指定范围内的值的范围。
+
+属性:
+          compatible:
+            枚举:
+              - arm,scpi-dvfs-clocks
+              - arm,scpi-variable-clocks
+
+          '#clock-cells':
+            常量: 1
+
+          clock-output-names: 真
+
+          clock-indices:
+            $引用: /schemas/types.yaml#/definitions/uint32-array
+            描述:
+              该节点中时钟（即clock_id）的标识编号。它可以是非线性的，因此提供标识符到clock-output-names数组中的映射。
+所需:
+          - compatible
+          - '#clock-cells'
+          - clock-output-names
+          - clock-indices
+
+        额外属性: false
+
+    必需:
+      - compatible
+
+    额外属性: false
+
+额外属性: false
+
+必需:
+  - compatible
+  - mboxes
+  - shmem
+
+示例:
+  - |
+    firmware {
+        scpi {
+            compatible = "arm,scpi";
+            mboxes = <&mhuA 1>;
+            shmem = <&cpu_scp_hpri>; /* HP-非安全 */
+
+            scpi_devpd: power-controller {
+                compatible = "arm,scpi-power-domains";
+                num-domains = <2>;
+                #power-domain-cells = <1>;
+            };
+
+            clocks {
+                compatible = "arm,scpi-clocks";
+
+                scpi_dvfs: clocks-0 {
+                    compatible = "arm,scpi-dvfs-clocks";
+                    #clock-cells = <1>;
+                    clock-indices = <0>, <1>, <2>;
+                    clock-output-names = "atlclk", "aplclk","gpuclk";
+                };
+
+                scpi_clk: clocks-1 {
+                    compatible = "arm,scpi-variable-clocks";
+                    #clock-cells = <1>;
+                    clock-indices = <3>, <4>;
+                    clock-output-names = "pxlclk0", "pxlclk1";
+                };
+            };
+
+            scpi_sensors: sensors {
+                compatible = "arm,scpi-sensors";
+                #thermal-sensor-cells = <1>;
+            };
+
+        };
+    };
+
+    soc {
+        #address-cells = <2>;
+        #size-cells = <2>;
+
+        sram@50000000 {
+            compatible = "mmio-sram";
+            reg = <0x0 0x50000000 0x0 0x10000>;
+
+            #address-cells = <1>;
+            #size-cells = <1>;
+            ranges = <0 0x0 0x50000000 0x10000>;
+
+            cpu_scp_lpri: scp-sram-section@0 {
+                compatible = "arm,scp-shmem";
+                reg = <0x0 0x200>;
+            };
+
+            cpu_scp_hpri: scp-sram-section@200 {
+                compatible = "arm,scp-shmem";
+                reg = <0x200 0x200>;
+            };
+        };
+    };
+
+  - |
+    firmware {
+        scpi {
+            compatible = "amlogic,meson-gxbb-scpi", "arm,scpi-pre-1.0";
+            mboxes = <&mailbox 1>, <&mailbox 2>;
+            shmem = <&cpu_scp_lpri>, <&cpu_scp_hpri>;
+
+            scpi_sensors1: sensors {
+                compatible = "amlogic,meson-gxbb-scpi-sensors", "arm,scpi-sensors";
+                #thermal-sensor-cells = <1>;
+            };
+        };
+    };

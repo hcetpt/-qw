@@ -1,0 +1,40 @@
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/soc/microchip/microchip,mpfs-sys-controller.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: Microchip PolarFire SoC (MPFS) MSS (微处理器子系统) 系统控制器
+
+维护者:
+  - Conor Dooley <conor.dooley@microchip.com>
+
+描述: |
+  PolarFire SoC 设备包含一个充当系统控制器的微控制器，它为主处理器和 FPGA 布局提供“服务”。这些服务包括硬件随机数生成器、FPGA 的重新编程以及 eNVM 内容验证等。有关这些服务的更多信息可以在网上找到，位于
+  https://onlinedocs.microchip.com/pr/GUID-1409CF11-8EF9-4C24-A94E-70979A688632-en-US-1/index.html
+
+  与系统控制器通信是通过一个邮箱完成的，其中客户端部分在这里进行文档说明。
+属性:
+  mboxes:
+    maxItems: 1
+
+  compatible:
+    const: microchip,mpfs-sys-controller
+
+  microchip,bitstream-flash:
+    $ref: /schemas/types.yaml#/definitions/phandle
+    描述:
+      连接到系统控制器 QSPI 控制器的 SPI 闪存
+系统控制器可以从该闪存中获取 FPGA 位流以执行在应用编程 (IAP) 或在设备初始化期间用于自动更新。MSS 和系统控制器有独立的 QSPI 控制器，此闪存连接到两者。在 MSS 中运行的软件可以将位流写入到闪存中。
+必需:
+  - compatible
+  - mboxes
+
+附加属性: false
+
+示例:
+  - |
+    syscontroller {
+      compatible = "microchip,mpfs-sys-controller";
+      mboxes = <&mbox 0>;
+    };

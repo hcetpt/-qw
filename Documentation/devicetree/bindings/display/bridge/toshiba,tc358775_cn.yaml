@@ -1,0 +1,232 @@
+```yaml
+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/display/bridge/toshiba,tc358775.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: 东芝 TC358775 DSI 至 LVDS 桥接器
+
+maintainers:
+  - Vinay Simha BN <simhavcs@gmail.com>
+
+description: |
+  本绑定支持 DSI 至 LVDS 桥接器 TC358765 和 TC358775
+
+  MIPI DSI-RX 数据 4 路，时钟 1 路，数据速率高达每路 800 Mbps
+视频帧大小：
+  单链路 LVDS 显示面板最高可达 1600x1200 24 位/像素分辨率
+  受限于 135 MHz 的 LVDS 速度
+  对于双链路 LVDS 显示面板，最高可达 WUXGA（1920x1200 24 位像素）分辨率
+  受限于 270 MHz 的 LVDS 速度
+properties:
+  compatible:
+    enum:
+      - toshiba,tc358765
+      - toshiba,tc358775
+
+  reg:
+    maxItems: 1
+    description: 桥接器的 I2C 地址，0x0f
+
+  vdd-supply:
+    description: 1.2V LVDS 电源供应
+
+  vddio-supply:
+    description: 1.8V IO 电源供应
+
+  stby-gpios:
+    maxItems: 1
+    description: 待机引脚，低电平有效
+
+  reset-gpios:
+    maxItems: 1
+    description: 硬件复位，低电平有效
+
+  ports:
+    $ref: /schemas/graph.yaml#/properties/ports
+
+    properties:
+      port@0:
+        $ref: /schemas/graph.yaml#/$defs/port-base
+        unevaluatedProperties: false
+        description: |
+          DSI 输入。远程端点 phandle 应该指向一个
+          合法的 mipi_dsi_host 设备节点
+properties:
+          endpoint:
+            $ref: /schemas/media/video-interfaces.yaml#
+            unevaluatedProperties: false
+
+            properties:
+              data-lanes:
+                description: 物理 DSI 数据通道索引数组
+minItems: 1
+                items:
+                  - const: 1
+                  - const: 2
+                  - const: 3
+                  - const: 4
+
+      port@1:
+        $ref: /schemas/graph.yaml#/properties/port
+        description: |
+          LVDS 输出的视频端口（面板或连接器）
+port@2:
+        $ref: /schemas/graph.yaml#/properties/port
+        description: |
+          双链路 LVDS 输出的视频端口（面板或连接器）
+required:
+      - port@0
+      - port@1
+
+required:
+  - compatible
+  - reg
+  - vdd-supply
+  - vddio-supply
+  - reset-gpios
+  - ports
+
+allOf:
+  - if:
+      properties:
+        compatible:
+          contains:
+            const: toshiba,tc358765
+    then:
+      properties:
+        stby-gpios: false
+
+additionalProperties: false
+
+examples:
+  - |
+    #include <dt-bindings/gpio/gpio.h>
+
+    /* 对于单链路 LVDS 显示面板 */
+
+    i2c@78b8000 {
+        /* 在高速扩展上 */
+        label = "HS-I2C2";
+        reg = <0x078b8000 0x500>;
+        clock-frequency = <400000>; /* 快速模式操作 */
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        tc_bridge: bridge@f {
+            compatible = "toshiba,tc358775";
+            reg = <0x0f>;
+
+            vdd-supply = <&pm8916_l2>;
+            vddio-supply = <&pm8916_l6>;
+
+            stby-gpios = <&msmgpio 99 GPIO_ACTIVE_LOW>;
+            reset-gpios = <&msmgpio 72 GPIO_ACTIVE_LOW>;
+
+            ports {
+                #address-cells = <1>;
+                #size-cells = <0>;
+
+                port@0 {
+                    reg = <0>;
+                    d2l_in_test: endpoint {
+                        remote-endpoint = <&dsi0_out>;
+                        data-lanes = <1 2 3 4>;
+                    };
+                };
+
+                port@1 {
+                    reg = <1>;
+                    lvds_out: endpoint {
+                        remote-endpoint = <&panel_in>;
+                    };
+                };
+            };
+        };
+    };
+
+    dsi@1a98000 {
+        reg = <0x1a98000 0x25c>;
+        reg-names = "dsi_ctrl";
+
+        ports {
+            #address-cells = <1>;
+            #size-cells = <0>;
+            port@1 {
+                reg = <1>;
+                dsi0_out: endpoint {
+                    remote-endpoint = <&d2l_in_test>;
+                };
+             };
+         };
+     };
+
+  - |
+    /* 对于双链路 LVDS 显示面板 */
+
+    i2c@78b8000 {
+        /* 在高速扩展上 */
+        label = "HS-I2C2";
+        reg = <0x078b8000 0x500>;
+        clock-frequency = <400000>; /* 快速模式操作 */
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        tc_bridge_dual: bridge@f {
+            compatible = "toshiba,tc358775";
+            reg = <0x0f>;
+
+            vdd-supply = <&pm8916_l2>;
+            vddio-supply = <&pm8916_l6>;
+
+            stby-gpios = <&msmgpio 99 GPIO_ACTIVE_LOW>;
+            reset-gpios = <&msmgpio 72 GPIO_ACTIVE_LOW>;
+
+            ports {
+                #address-cells = <1>;
+                #size-cells = <0>;
+
+                port@0 {
+                    reg = <0>;
+                    d2l_in_dual: endpoint {
+                        remote-endpoint = <&dsi0_out_dual>;
+                        data-lanes = <1 2 3 4>;
+                    };
+                };
+
+                port@1 {
+                    reg = <1>;
+                    lvds0_out: endpoint {
+                        remote-endpoint = <&panel_in0>;
+                    };
+                };
+
+                port@2 {
+                    reg = <2>;
+                    lvds1_out: endpoint {
+                        remote-endpoint = <&panel_in1>;
+                    };
+                };
+            };
+        };
+    };
+
+    dsi@1a98000 {
+        reg = <0x1a98000 0x25c>;
+        reg-names = "dsi_ctrl";
+
+        ports {
+            #address-cells = <1>;
+            #size-cells = <0>;
+            port@1 {
+                reg = <1>;
+                dsi0_out_dual: endpoint {
+                    remote-endpoint = <&d2l_in_dual>;
+                };
+             };
+         };
+     };
+..
+```
+以上是将提供的 YAML 文件翻译为中文版本的内容。请注意，某些技术术语和专有名词保持了英文原样，以避免可能的误解。

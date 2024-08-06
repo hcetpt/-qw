@@ -1,0 +1,50 @@
+```yaml
+# SPDX-许可证标识符: (GPL-2.0 或 BSD-2-Clause)
+# 版权所有 (C) 2022, Intel Corporation
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/soc/intel/intel,hps-copy-engine.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: Intel HPS 复制引擎
+
+维护者:
+  - Matthew Gerlach <matthew.gerlach@linux.intel.com>
+
+描述: |
+  Intel 硬件处理器系统 (HPS) 复制引擎是一个用于将可启动映像从主机内存复制到 HPS DDR 的 IP 模块。此外，还有一个寄存器，HPS 可以使用它来指示所复制映像的启动状态以及向主机提供存活状态指示。
+属性:
+  compatible:
+    常量: intel,hps-copy-engine
+
+  '#dma-cells':
+    常量: 1
+
+  reg:
+    最大项数: 1
+
+必需:
+  - compatible
+  - reg
+
+附加属性: false
+
+示例:
+  - |
+    bus@80000000 {
+        compatible = "simple-bus";
+        reg = <0x80000000 0x60000000>,
+              <0xf9000000 0x00100000>;
+        reg-names = "axi_h2f", "axi_h2f_lw";
+        #address-cells = <2>;
+        #size-cells = <1>;
+        ranges = <0x00000000 0x00000000 0xf9000000 0x00001000>;
+
+        dma-controller@0 {
+            compatible = "intel,hps-copy-engine";
+            reg = <0x00000000 0x00000000 0x00001000>;
+            #dma-cells = <1>;
+        };
+    };
+```
+请注意，代码中的注释和文本已尽可能地进行了准确的翻译。

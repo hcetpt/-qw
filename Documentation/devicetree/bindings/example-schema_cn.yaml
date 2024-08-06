@@ -1,0 +1,218 @@
+```yaml
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+# 版权所有 2018 Linaro Ltd
+%YAML 1.2
+---
+# 所有顶级键都是标准的 json-schema 关键词，除了 'maintainers' 和 'select'
+
+# $id 是基于文件名的唯一标识符。该 URL 可能存在或不存在文件
+$id: http://devicetree.org/schemas/example-schema.yaml#
+# $schema 是用来验证此模式的元模式
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: 示例设备
+
+maintainers:
+  - Rob Herring <robh@kernel.org>
+
+description: |
+  绑定的更详细的多行描述。
+  关于硬件设备及其数据手册链接的详细信息可以放在这里。
+  字面量块通过 '|' 标记开始。其结束标记为比字面量块首行缩进少的行。行也不能以制表符开始。
+select: false
+  # 'select' 是一个应用于设备树节点的模式，用于确定是否应将此绑定模式应用于节点。它是可选的，默认情况下，可能的兼容字符串会被提取并用于匹配
+# 在这种情况下，'false' 模式永远不会匹配
+properties:
+  # 此绑定模式的设备树属性字典
+  compatible:
+    # 更复杂的模式可以使用 oneOf（异或）、anyOf（或）、allOf（与）来处理不同条件
+# 在这种情况下，需要这样做来处理可变数量的值，因为没有其他方式来表达对最后一个字符串值的约束
+```
+### 布尔模式必须是模式列表
+`oneOf`:
+  - `items`:
+      # `items` 是属性可能值的列表。值的数量由列表中的元素数量决定。
+      # 列表中的顺序很重要，字典中的顺序则不重要。
+      # 必须先是第一个枚举，然后是第二个枚举。
+      #
+      # `items` 中的每个元素应该是 'enum' 或 'const'
+      - `enum`:
+          - `vendor,soc4-ip`
+          - `vendor,soc3-ip`
+          - `vendor,soc2-ip`
+      - `const`: `vendor,soc1-ip`
+      # `additionalItems` 为 false 是默认的
+      # `minItems`/`maxItems` 等于 2 是默认的
+  - `items`:
+      # `const` 只是一个具有单一可能值的枚举的特殊情况
+      - `const`: `vendor,soc1-ip`
+
+`reg`:
+    # 核心模式已经检查了 `reg` 值是否为数字，因此特定设备的模式不需要再进行这些检查。
+    # 每个元素的描述定义了顺序，并隐含地定义了 `reg` 条目的数量。
+  `items`:
+      - 描述: 核心寄存器
+      - 描述: 辅助寄存器
+    # `minItems`/`maxItems` 等于 2 是默认的
+
+`reg-names`:
+    # 核心模式强制要求 `-names` 类型为字符串数组。
+  `items`:
+      - `const`: `core`
+      - `const`: `aux`
+
+`clocks`:
+    # 对于只有一个条目的情况，只需通过 `maxItems` 表示这一点即可。
+    `maxItems`: 1
+    描述: 总线时钟。如果只有一个条目且有独特内容需要添加，则需要描述。
+  项目应具有固定的顺序，因此不鼓励使用模式匹配名称。
+`clock-names`:
+    # 对于 `clocks`、`resets` 等单条目列表，`xxx-names` 经常没有价值，
+    # 尤其是当它们复制 IP 块名称时。在这种情况下，可以省略 `xxx-names`。
+  `items`:
+      - `const`: `bus`
+
+`interrupts`:
+    # 可以存在 1 个或 2 个中断。
+    `minItems`: 1
+    `items`:
+      - 描述: 发送或组合中断
+      - 描述: 接收中断
+    描述:
+      如果中断的数量是可变的，则需要描述影响中断数量的条件。否则，标准属性上不需要描述。
+  项目应具有固定的顺序，因此不鼓励使用模式匹配名称。
+`interrupt-names`:
+    # 这里必须指定 `minItems`，因为默认值将是 2。
+    `minItems`: 1
+    `items`:
+      - `const`: `tx irq`
+      - `const`: `rx irq`
+
+`#interrupt-cells`:
+    # 一个简单的情况，值必须总是 '2'。
+### 核心模式处理了这必须是一个单一整数的情况
+常量: 2
+
+  中断控制器: 真
+    # 核心检查这是一个布尔值，因此只需要在这里列出它来使这个绑定有效
+时钟频率:
+    # 类型在核心模式中设置。每设备模式只需设置可能值的约束
+最小值: 100
+    最大值: 400000
+    # 如果属性不存在时应使用的值
+    默认值: 200
+
+  foo-GPIOs:
+    最大项数: 1
+    描述: "foo" GPIO线的一个连接
+# *-supply总是单个phandle，因此无需进一步定义
+foo-供电: 真
+
+  ### 厂商特定属性
+  ###
+  # 厂商特定属性与通用属性相比具有略微不同的模式要求。它们必须至少有一个类型定义和“描述”
+厂商,整型属性:
+    描述: 厂商特定属性必须有描述
+    $ref: /schemas/types.yaml#/definitions/uint32
+    枚举: [2, 4, 6, 8, 10]
+
+  厂商,布尔属性:
+    描述: 厂商特定属性必须有描述。布尔属性是少数几个可以直接使用json模式'type'关键字的情况之一
+类型: 布尔
+
+  厂商,字符串数组属性:
+    描述: 厂商特定属性应当引用核心模式中的类型
+$ref: /schemas/types.yaml#/definitions/string-array
+    项:
+      - 枚举: [foo, bar]
+      - 枚举: [baz, boo]
+
+  厂商,标准单位微伏特属性:
+    描述: 具有标准单位后缀的厂商特定属性不需要类型
+枚举: [ 100, 200, 300 ]
+
+  厂商,整型数组变长及受约束值:
+    描述: 数组可以定义可能使用的元素类型（例如
+这段文本描述了一个基于 JSON Schema 的数据结构，用于定义设备树（Device Tree, DT）节点的规范。下面是中文翻译：
+
+### 属性范围 (`their range`)
+
+```yaml
+$ref: /schemas/types.yaml#/definitions/uint32-array
+minItems: 2
+maxItems: 3
+items:
+  minimum: 0
+  maximum: 8
+```
+
+- `uint32-array`: 引用 `/schemas/types.yaml` 中定义的无符号32位整数数组。
+- `minItems`: 最少包含2个元素。
+- `maxItems`: 最多包含3个元素。
+- `items.minimum`: 数组中的每个元素最小值为0。
+- `items.maximum`: 数组中的每个元素最大值为8。
+
+### 子节点 (`child-node`)
+- **描述**: 从JSON Schema的角度来看，子节点只是另一个属性。
+- **类型**: 对象 (DT 节点是 JSON 对象)。
+- **子节点还需要**:
+  - `additionalProperties`: 设置为 `false` 表示不允许额外属性。
+  - `properties`:
+    - `vendor,a-child-node-property`:
+      - **描述**: 子节点属性有相同的模式要求。
+      - **类型**: 布尔值。
+- **必需属性**:
+  - `vendor,a-child-node-property`
+
+### 属性间的关系
+- **依赖关系**:
+  - `'vendor,bool-property'` 只在 `'vendor,string-array-property'` 存在时才允许出现。
+  - `'vendor,string-array-property'` 和 `'vendor,bool-property'` 必须同时存在或都不存在。
+- **必需属性**:
+  - `compatible`
+  - `reg`
+  - `interrupts`
+  - `interrupt-controller`
+
+### 条件约束 (`if/then` schema)
+- **如果** `'compatible'` 包含 `'vendor,soc2-ip'`:
+  - **则** 必须包含 `'foo-supply'`。
+  - **否则**:
+    - `'foo-supply'` 不被允许。
+- **如果** `'vendor,bool-property'` 存在:
+  - **则** `'vendor,int-property'` 的值必须为 `[2, 4, 6]` 之一。
+
+### 其他注意事项
+- **理想情况下**，应指定 `additionalProperties: false` 以禁止任何其他属性的存在。但某些通用属性如 `'status'` 和 `'pinctrl-*'` 会自动添加。
+- **特殊情况**:
+  - 当引用了另一个模式文档时，不能使用 `additionalProperties: false`。
+  - 如果引用了另一个模式且可以出现任意子节点，则可以使用 `"unevaluatedProperties: false"`。
+  - 一个典型例子是 I2C 控制器，对于子节点无法添加名称匹配规则。
+翻译如下：
+
+`additionalProperties: false`
+
+示例：
+  # 示例现在使用dtc编译并根据模式进行验证
+  #
+  # 示例默认具有 #address-cells 和 #size-cells 的值为1。这可以被覆盖，或者应该显示一个合适的父级总线节点（例如在I2C总线上）
+  #
+  # 使用的任何包含都必须明确地包含进来。使用4个空格作为缩进
+- |
+    node@1000 {
+        compatible = "vendor,soc4-ip", "vendor,soc1-ip";
+        reg = <0x1000 0x80>,
+              <0x3000 0x80>;
+        reg-names = "core", "aux";
+        interrupts = <10>;
+        interrupt-controller;
+    };
+
+解释：
+- `additionalProperties: false` 表示不允许有额外未定义的属性。
+- 在示例中，`node@1000` 是一个设备节点。
+- `compatible` 属性指定了此节点兼容的设备类型。
+- `reg` 属性指定了设备的内存地址范围。
+- `reg-names` 属性为这些地址区域命名。
+- `interrupts` 属性指定了中断编号。
+- `interrupt-controller` 标识该节点是一个中断控制器。

@@ -1,0 +1,17 @@
+针对MediaTek电源管理集成电路 (PMIC) 上的电源控制器的设备树绑定
+
+在PMIC上找到的电源控制器负责通过BBPU电路对外部的远程MediaTek系统级芯片 (SoC) 进行上电或断电操作。
+必需的属性：
+- compatible: 应该是以下选项之一
+       "mediatek,mt6323-pwrc": 适用于MT6323 PMIC
+
+示例：
+
+       pmic {
+               compatible = "mediatek,mt6323";
+
+               ..
+power-controller {
+                       compatible = "mediatek,mt6323-pwrc";
+               };
+       }

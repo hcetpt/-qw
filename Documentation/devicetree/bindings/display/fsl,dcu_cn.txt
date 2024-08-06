@@ -1,0 +1,35 @@
+Freescale DCU DRM 驱动的设备树绑定
+
+必需属性：
+- compatible：应为以下之一
+    * "fsl,ls1021a-dcu"
+    * "fsl,vf610-dcu"
+- reg：DCU寄存器集的地址和长度
+- clocks：指向"dcu"和"pix"时钟的句柄（按以下顺序）
+            这可以是同一个时钟（例如，LS1021a）
+            详情请参阅 ../clocks/clock-bindings.txt
+- clock-names：应为"dcu"和"pix"
+            详情请参阅 ../clocks/clock-bindings.txt
+- big-endian：布尔属性，LS1021A DCU 寄存器采用大端字节序
+- port：面板输出的视频端口
+
+可选属性：
+- fsl,tcon：指向时序控制器节点的句柄
+
+示例：
+```
+dcu: dcu@2ce0000 {
+    compatible = "fsl,ls1021a-dcu";
+    reg = <0x0 0x2ce0000 0x0 0x10000>;
+    clocks = <&platform_clk 0>, <&platform_clk 0>;
+    clock-names = "dcu", "pix";
+    big-endian;
+    fsl,tcon = <&tcon>;
+
+    port {
+        dcu_out: endpoint {
+            remote-endpoint = <&panel_out>;
+        };
+    };
+};
+```

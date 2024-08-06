@@ -1,0 +1,101 @@
+下面是给定内容的中文翻译：
+
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/mfd/canaan,k210-sysctl.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: Canaan Kendryte K210 系统控制器
+
+维护者:
+  - Damien Le Moal <dlemoal@kernel.org>
+
+描述:
+  Canaan Inc. Kendryte K210 SoC 系统控制器提供了用于控制 SoC 的时钟、复位信号和引脚电源域的寄存器映射。
+属性:
+  compatible:
+    items:
+      - 常量: canaan,k210-sysctl
+      - 常量: syscon
+      - 常量: simple-mfd
+
+  clocks:
+    最大项数: 1
+    描述:
+      系统控制器高级电源总线 (APB) 接口时钟源
+clock-names:
+    items:
+      - 常量: pclk
+
+  reg:
+    最大项数: 1
+
+  clock-controller:
+    # 子节点
+    类型: 对象
+    $ref: /schemas/clock/canaan,k210-clk.yaml
+    描述:
+      用于 SoC 时钟的时钟控制器。此子节点定义应遵循指定于
+      文档/devicetree/bindings/clock/canaan,k210-clk.yaml 中的绑定规则。
+reset-controller:
+    # 子节点
+    类型: 对象
+    $ref: /schemas/reset/canaan,k210-rst.yaml
+    描述:
+      用于 SoC 的复位控制器。此子节点定义应遵循指定于
+      文档/devicetree/bindings/reset/canaan,k210-rst.yaml 中的绑定规则。
+syscon-reboot:
+    # 子节点
+    类型: 对象
+    $ref: /schemas/power/reset/syscon-reboot.yaml
+    描述:
+      用于 SoC 的重启方法。此子节点定义应遵循指定于
+      文档/devicetree/bindings/power/reset/syscon-reboot.yaml 中的绑定规则。
+必需:
+  - compatible
+  - clocks
+  - reg
+  - clock-controller
+
+其他属性: false
+
+示例:
+  - |
+    #include <dt-bindings/clock/k210-clk.h>
+    #include <dt-bindings/reset/k210-rst.h>
+
+    clocks {
+      in0: oscllator {
+        compatible = "fixed-clock";
+        #clock-cells = <0>;
+        clock-frequency = <26000000>;
+      };
+    };
+
+    sysctl: syscon@50440000 {
+      compatible = "canaan,k210-sysctl",
+                   "syscon", "simple-mfd";
+      reg = <0x50440000 0x100>;
+      clocks = <&sysclk K210_CLK_APB1>;
+      clock-names = "pclk";
+
+      sysclk: clock-controller {
+        #clock-cells = <1>;
+        compatible = "canaan,k210-clk";
+        clocks = <&in0>;
+      };
+
+      sysrst: reset-controller {
+        compatible = "canaan,k210-rst";
+        #reset-cells = <1>;
+      };
+
+      reboot: syscon-reboot {
+        compatible = "syscon-reboot";
+        regmap = <&sysctl>;
+        offset = <48>;
+        mask = <1>;
+        value = <1>;
+      };
+    };

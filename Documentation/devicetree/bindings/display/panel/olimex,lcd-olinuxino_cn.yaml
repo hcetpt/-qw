@@ -1,0 +1,69 @@
+# SPDX-许可证标识符: GPL-2.0
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/display/panel/olimex,lcd-olinuxino.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: Olimex有限公司的LCD-OLinuXino桥接面板
+维护者:
+  - Stefan Mavrodiev <stefan@olimex.com>
+
+描述: |
+  此设备可用作主机控制器和LCD面板之间的桥梁。
+  目前支持的LCD包括：
+    - LCD-OLinuXino-4.3TS
+    - LCD-OLinuXino-5
+    - LCD-OLinuXino-7
+    - LCD-OLinuXino-10
+
+  面板本身包含：
+    - AT24C16C EEPROM，用于存储面板识别信息和时序要求
+    - AR1021电阻式触摸屏控制器（可选）
+    - FT5x6电容式触摸屏控制器（可选）
+    - GT911/GT928电容式触摸屏控制器（可选）
+
+  上述芯片共享同一个I2C总线。EEPROM在出厂时已预先编程有设备信息（ID、序列号等）和时序要求。
+  触摸屏绑定可以在以下文件中找到：
+    - input/touchscreen/goodix.yaml
+    - input/touchscreen/edt-ft5x06.txt
+    - input/touchscreen/ar1021.txt
+
+allOf:
+  - $ref: panel-common.yaml#
+
+属性:
+  compatible:
+    常量: olimex,lcd-olinuxino
+
+  reg:
+    最大项目数: 1
+
+  backlight: true
+  enable-gpios: true
+  power-supply: true
+
+必需:
+  - compatible
+  - reg
+  - power-supply
+
+附加属性: false
+
+示例:
+  - |
+    #include <dt-bindings/gpio/gpio.h>
+
+    i2c {
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        panel@50 {
+            compatible = "olimex,lcd-olinuxino";
+            reg = <0x50>;
+            power-supply = <&reg_vcc5v0>;
+            enable-gpios = <&pio 7 8 GPIO_ACTIVE_HIGH>;
+            backlight = <&backlight>;
+        };
+    };
+
+..

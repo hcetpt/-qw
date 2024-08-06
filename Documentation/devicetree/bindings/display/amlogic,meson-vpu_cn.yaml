@@ -1,0 +1,142 @@
+# SPDX-许可证标识符: (GPL-2.0 或 BSD-2-Clause)
+# 版权所有 2019 BayLibre, SAS
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/display/amlogic,meson-vpu.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: Amlogic Meson 显示控制器
+
+维护者:
+  - Neil Armstrong <neil.armstrong@linaro.org>
+
+描述: |
+  Amlogic Meson 显示控制器由多个组件组成，这些组件将在下面进行说明。
+
+  DMC|---------------VPU (视频处理单元)----------------|------HHI------|
+     | vd1   _______     _____________    _________________     |               |
+  D  |-------|      |----|            |   |                |    |   HDMI PLL    |
+  D  | vd2   | VIU  |    | 视频后置处 |   | 视频编码器 |<---|-----VCLK      |
+  R  |-------|      |----| 理         |   |                |    |               |
+     | osd2  |      |    |            |---| Enci ----------|----|-----VDAC------|
+  R  |-------| CSC  |----| 缩放器    |   | Encp ----------|----|----HDMI-TX----|
+  A  | osd1  |      |    | 混合器   |   | Encl ----------|----|---------------|
+  M  |-------|______|----|____________|   |________________|    |               |
+  ___|__________________________________________________________|_______________|
+
+
+  VIU: 视频输入单元
+  ---------------------
+  
+  视频输入单元负责从DDR内存中扫描像素。它从“画布”内存中获取帧地址、步幅和参数。
+  这一部分还负责CSC（色彩空间转换）。
+  它可以处理2个OSD平面和2个视频平面。
+  VPP: 视频后置处理
+  --------------------------
+
+  视频后置处理单元负责将各种平面缩放和混合成单一的像素流。
+  有一个特殊的“预混合”，用于视频平面，具有专用的缩放器和一个“后混合”，用于与OSD平面合并。
+  OSD平面也具有一个专用的缩放器用于其中一个OSD。
+  VENC: 视频编码器
+  --------------------
+
+  VENC由多个像素编码器组成
+   - ENCI：用于CVBS和交错HDMI的交错视频编码器
+   - ENCP：用于HDMI的逐行视频编码器
+   - ENCL：LCD LVDS 编码器
+  VENC单元从专用的HDMI PLL和时钟树获取像素时钟(VCLK)，并为VPP和VIU提供扫描时钟。
+  ENCI连接到一个单独的VDAC以用于复合输出。
+  ENCI和ENCP连接到一个片上HDMI收发器。
+The provided YAML snippet describes a schema for defining a hardware component (specifically a Video Processing Unit, VPU) in Device Tree format, which is commonly used in Linux and other embedded systems to describe the hardware configuration of a system. Below is the translation into Chinese:
+
+属性:
+  compatible:
+    oneOf:
+      - items:
+          - enum:
+              - amlogic,meson-gxbb-vpu # GXBB (S905)
+              - amlogic,meson-gxl-vpu # GXL (S905X, S905D)
+              - amlogic,meson-gxm-vpu # GXM (S912)
+          - const: amlogic,meson-gx-vpu
+      - enum:
+          - amlogic,meson-g12a-vpu # G12A (S905X2, S905Y2, S905D2)
+
+  reg:
+    maxItems: 2
+
+  reg-names:
+    items:
+      - const: vpu
+      - const: hhi
+
+  interrupts:
+    maxItems: 1
+
+  amlogic,canvas:
+    description: 应指向一个画布提供节点
+    $ref: /schemas/types.yaml#/definitions/phandle
+
+  power-domains:
+    maxItems: 1
+    description: 指向相关电源域的phandle
+
+  port@0:
+    $ref: /schemas/graph.yaml#/properties/port
+    description:
+      指向CVBS VDAC端口节点的一个端口节点
+  port@1:
+    $ref: /schemas/graph.yaml#/properties/port
+    description:
+      指向HDMI-TX端口节点的一个端口节点
+  port@2:
+    $ref: /schemas/graph.yaml#/properties/port
+    description:
+      指向DPI端口节点（例如DSI或LVDS发射器）的一个端口节点
+
+  "#address-cells":
+    const: 1
+
+  "#size-cells":
+    const: 0
+
+required:
+  - compatible
+  - reg
+  - interrupts
+  - port@0
+  - port@1
+  - "#address-cells"
+  - "#size-cells"
+  - amlogic,canvas
+
+additionalProperties: false
+
+示例:
+  - |
+    vpu: vpu@d0100000 {
+        compatible = "amlogic,meson-gxbb-vpu", "amlogic,meson-gx-vpu";
+        reg = <0xd0100000 0x100000>, <0xc883c000 0x1000>;
+        reg-names = "vpu", "hhi";
+        interrupts = <3>;
+        #address-cells = <1>;
+        #size-cells = <0>;
+        amlogic,canvas = <&canvas>;
+
+        /* CVBS VDAC输出端口 */
+        port@0 {
+            reg = <0>;
+
+            cvbs_vdac_out: endpoint {
+                remote-endpoint = <&tv_connector_in>;
+            };
+        };
+
+        /* HDMI TX输出端口 */
+        port@1 {
+            reg = <1>;
+
+            hdmi_tx_out: endpoint {
+                remote-endpoint = <&hdmi_tx_in>;
+            };
+        };
+    };

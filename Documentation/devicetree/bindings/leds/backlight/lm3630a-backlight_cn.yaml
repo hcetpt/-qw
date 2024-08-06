@@ -1,0 +1,135 @@
+# SPDX-许可证标识符: (GPL-2.0 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/leds/backlight/lm3630a-backlight.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: TI LM3630A 高效双串白光LED驱动器
+
+维护者:
+  - Lee Jones <lee@kernel.org>
+  - Daniel Thompson <daniel.thompson@linaro.org>
+  - Jingoo Han <jingoohan1@gmail.com>
+
+描述: |
+  LM3630A 是一种电流模式升压转换器，它为每串最多10个LED的两串提供功率并控制电流。
+  [链接](https://www.ti.com/product/LM3630A)
+
+属性:
+  compatible:
+    常量: ti,lm3630a
+
+  reg:
+    最大项数: 1
+
+  '#address-cells':
+    常量: 1
+
+  '#size-cells':
+    常量: 0
+
+  enable-gpios:
+    描述: 用于启用/禁用背光（HWEN引脚）的GPIO
+最大项数: 1
+
+必需:
+  - compatible
+  - reg
+  - '#address-cells'
+  - '#size-cells'
+
+模式属性:
+  "^led@[01]$":
+    类型: 对象
+    描述: |
+      连接LED串的属性
+属性:
+      reg:
+        描述: |
+          用于编程两个电流阱的控制库。LM3630A有两个控制库（A和B），在此属性中表示为0或1。
+          两个电流阱可以独立地通过两个库进行控制，或者库A可以通过led-sources属性来控制两个电流阱。
+最小值: 0
+        最大值: 1
+
+      标签:
+        最大项数: 1
+
+      led-sources:
+        allOf:
+          - 最小项数: 1
+            最大项数: 2
+            物品:
+              最小值: 0
+              最大值: 1
+
+      默认亮度:
+        描述: 启动时的默认亮度级别
+最小值: 0
+        最大值: 255
+
+      最大亮度:
+        描述: 运行时允许的最大亮度
+最小值: 0
+        最大值: 255
+
+      ti,linear-mapping-mode:
+        描述: |
+          启用线性映射模式。如果禁用，则将使用指数映射模式，在该模式下，渐变上升/下降在人眼看来似乎具有更均匀的过渡
+类型: 布尔
+
+    必需:
+      - reg
+
+    不允许额外属性: false
+
+不允许额外属性: false
+
+示例:
+  - |
+    #include <dt-bindings/gpio/gpio.h>
+    i2c {
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        led-controller@38 {
+                compatible = "ti,lm3630a";
+                reg = <0x38>;
+                enable-gpios = <&gpio2 5 GPIO_ACTIVE_HIGH>;
+
+                #address-cells = <1>;
+                #size-cells = <0>;
+
+                led@0 {
+                        reg = <0>;
+                        led-sources = <0 1>;
+                        label = "lcd-backlight";
+                        default-brightness = <200>;
+                        max-brightness = <255>;
+                };
+        };
+    };
+  - |
+    i2c {
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        led-controller@38 {
+                compatible = "ti,lm3630a";
+                reg = <0x38>;
+
+                #address-cells = <1>;
+                #size-cells = <0>;
+
+                led@0 {
+                        reg = <0>;
+                        default-brightness = <150>;
+                        ti,linear-mapping-mode;
+                };
+
+                led@1 {
+                        reg = <1>;
+                        default-brightness = <225>;
+                        ti,linear-mapping-mode;
+                };
+        };
+    };

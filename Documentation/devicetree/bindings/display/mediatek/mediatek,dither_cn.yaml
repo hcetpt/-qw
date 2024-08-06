@@ -1,0 +1,79 @@
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/display/mediatek/mediatek,dither.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: Mediatek 显示抖动处理器
+
+维护者:
+  - 春光 胡 <chunkuang.hu@kernel.org>
+  - 菲利普·扎贝尔 <p.zabel@pengutronix.de>
+
+描述: |
+  Mediatek 显示抖动处理器，即 DITHER，通过近似无法提供的颜色以及混合匹配可用的颜色来模仿那些不可用的颜色。
+DITHER 设备节点必须是中心 MMSYS_CONFIG 节点的同级节点。
+关于 MMSYS_CONFIG 绑定的描述，请参见
+  文档/devicetree/bindings/arm/mediatek/mediatek,mmsys.yaml
+  中的详细信息。
+属性:
+  compatible:
+    oneOf:
+      - 枚举:
+          - mediatek,mt8183-disp-dither
+      - items:
+          - 枚举:
+              - mediatek,mt8186-disp-dither
+              - mediatek,mt8188-disp-dither
+              - mediatek,mt8192-disp-dither
+              - mediatek,mt8195-disp-dither
+              - mediatek,mt8365-disp-dither
+          - 常量: mediatek,mt8183-disp-dither
+
+  reg:
+    最大项数: 1
+
+  interrupts:
+    最大项数: 1
+
+  power-domains:
+    描述: 根据 phandle 所指定的电源控制器绑定定义的句柄和 PM 域标识符。详情请参阅
+      文档/devicetree/bindings/power/power-domain.yaml
+时钟:
+    items:
+      - 描述: DITHER 时钟
+
+  mediatek,gce-client-reg:
+    描述: 该属性定义了4个参数的客户驱动程序寄存器，可以由 GCE 配置，如 GCE 的句柄、子系统 ID、寄存器偏移量和大小。每个 GCE 子系统 ID 都映射到头文件 include/dt-bindings/gce/<chip>-gce.h 中定义的一个客户端。
+$ref: /schemas/types.yaml#/definitions/phandle-array
+    最大项数: 1
+
+必需:
+  - compatible
+  - reg
+  - interrupts
+  - power-domains
+  - clocks
+
+额外属性: false
+
+示例:
+  - |
+    #include <dt-bindings/interrupt-controller/arm-gic.h>
+    #include <dt-bindings/clock/mt8183-clk.h>
+    #include <dt-bindings/power/mt8183-power.h>
+    #include <dt-bindings/gce/mt8183-gce.h>
+
+    soc {
+        #address-cells = <2>;
+        #size-cells = <2>;
+
+        dither0: dither@14012000 {
+            compatible = "mediatek,mt8183-disp-dither";
+            reg = <0 0x14012000 0 0x1000>;
+            interrupts = <GIC_SPI 235 IRQ_TYPE_LEVEL_LOW>;
+            power-domains = <&spm MT8183_POWER_DOMAIN_DISP>;
+            clocks = <&mmsys CLK_MM_DISP_DITHER0>;
+            mediatek,gce-client-reg = <&gce SUBSYS_1401XXXX 0x2000 0x1000>;
+        };
+    };

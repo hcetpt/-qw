@@ -1,0 +1,51 @@
+下面是给定内容的中文翻译：
+
+```yaml
+# SPDX-文件许可人: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/rtc/nxp,pcf8523.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: NXP PCF8523 实时时钟
+
+maintainers:
+  - Sam Ravnborg <sam@ravnborg.org>
+
+allOf:
+  - $ref: rtc.yaml#
+
+properties:
+  compatible:
+    const: nxp,pcf8523
+
+  reg:
+    maxItems: 1
+
+  quartz-load-femtofarads:
+    description:
+      晶振的电容负载，以飞法拉（fF）为单位表示
+    enum: [ 7000, 12500 ]
+    default: 12500
+
+required:
+  - compatible
+  - reg
+
+unevaluatedProperties: false
+
+examples:
+  - |
+    i2c {
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        rtc@68 {
+            compatible = "nxp,pcf8523";
+            reg = <0x68>;
+            quartz-load-femtofarads = <7000>;
+        };
+    };
+```
+
+请注意，这里的`$schema`, `$id`, `allOf` 和 `$ref` 是 YAML 文件中的特殊语法，并且在中文翻译中保持不变。

@@ -1,0 +1,155 @@
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/display/panel/panel-mipi-dbi-spi.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: MIPI DBI SPI 显示屏
+
+维护者:
+  - Noralf Trønnes <noralf@tronnes.org>
+
+描述: |
+  此绑定适用于使用符合MIPI DBI标准的控制器并工作在SPI模式下的显示面板。
+MIPI联盟为显示总线接口定义了电气和逻辑接口，这些接口传统上用于手机中。该标准定义了4种显示架构类型，而此绑定针对的是第1类，它具有完整的帧存储器。标准中定义了3种接口类型，其中C型是串行接口。
+该标准为C型定义了以下接口信号：
+  - 电源:
+    - Vdd: 显示模块的电源供应
+      在此绑定中称为 `power-supply`
+    - Vddi: 接口信号的逻辑电平电源
+      在此绑定中称为 `io-supply`
+- 接口:
+    - CSx: 芯片选择
+    - SCL: 串行时钟
+    - Dout: 串行输出
+    - Din: 串行输入
+    - SDA: 双向输入/输出
+    - D/CX: 数据/命令选择，高电平=数据，低电平=命令
+      在此绑定中称为 `dc-gpios`
+- RESX: 低电平时复位
+      在此绑定中称为 `reset-gpios`
+C型接口有3个选项：
+
+    - 选项1: 9位模式且D/CX作为第9位
+      |              命令              |  下一个命令或后续数据  |
+      |<0><D7><D6><D5><D4><D3><D2><D1><D0>|<D/CX><D7><D6><D5><D4><D3><D2><D1><D0>|
+
+    - 选项2: 16位模式且D/CX作为第9位
+      |              命令或数据                              |
+      |<X><X><X><X><X><X><X><D/CX><D7><D6><D5><D4><D3><D2><D1><D0>|
+
+    - 选项3: 8位模式且D/CX作为单独的接口线
+      |        命令或数据         |
+      |<D7><D6><D5><D4><D3><D2><D1><D0>|
+
+  标准为C型定义了一种像素格式：RGB111。然而，业界决定也提供A/B型接口的像素格式到C型接口上，并且其中最常见的是RGB565和RGB666。
+MIPI DCS命令 `set_address_mode` (36h) 中有一个位用来控制 RGB/BGR 的顺序。这为每种支持的RGB格式提供了一个BGR变体。
+显示屏分辨率通过 `panel-timing` 节点属性 `hactive`（宽度）和 `vactive`（高度）指定。其他必需的 `panel-timing` 属性应设置为零，除非 `clock-frequency`，它可以可选地设置以告知实际的像素时钟频率。
+如果面板连接到控制器时存在偏移，请使用 `hback-porch`（X偏移）和 `vback-porch`（Y偏移）来指定。
+The provided text describes a configuration schema and example for a SPI (Serial Peripheral Interface) display panel using YAML format. Below is a translation of the key parts into Chinese:
+
+### 全部包括:
+- `- $ref: panel-common.yaml#`
+- `- $ref: /schemas/spi/spi-peripheral-props.yaml#`
+
+### 属性:
+- `compatible`: 
+  - 列表项:
+    - 枚举:
+      - `saef,sftc154b`
+      - `sainsmart18`
+      - `shineworld,lh133k`
+    - 常量: `panel-mipi-dbi-spi`
+
+- `reg`:
+  - 最大项目数: 1
+
+- `write-only`:
+  - 类型: 布尔值
+  - 描述:
+    - 控制器不可读（即，SPI接口上的Din (MISO) 未连线）
+
+- `dc-gpios`:
+  - 最大项目数: 1
+  - 描述: |
+    4线SPI模式下控制器的数据/命令选择 (D/CX)
+    如果未设置，则控制器处于3线SPI模式
+
+- `io-supply`:
+  - 描述: |
+    接口信号的逻辑电平电源 (Vddi)
+    如果与电源相同则无需设置
+
+- `spi-3wire`: `true`
+
+- `format`:
+  - 描述: >
+    按位顺序在传输线上表示的像素格式：
+      * `x2r1g1b1r1g1b1` - RGB111，每字节2个像素
+      * `x2b1g1r1b1g1r1` - BGR111，每字节2个像素
+      * `x1r1g1b1x1r1g1b1` - RGB111，每字节2个像素
+      * `x1b1g1r1x1b1g1r1` - BGR111，每字节2个像素
+      * `r5g6b5` - RGB565，2字节
+      * `b5g6r5` - BGR565，2字节
+      * `r6x2g6x2b6x2` - RGB666，3字节
+      * `b6x2g6x2r6x2` - BGR666，3字节
+  - 枚举:
+    - `x2r1g1b1r1g1b1`
+    - `x2b1g1r1b1g1r1`
+    - `x1r1g1b1x1r1g1b1`
+    - `x1b1g1r1x1b1g1r1`
+    - `r5g6b5`
+    - `b5g6r5`
+    - `r6x2g6x2b6x2`
+    - `b6x2g6x2r6x2`
+  - 默认值: `r5g6b5`
+
+- `required`:
+  - `compatible`
+  - `reg`
+  - `width-mm`
+  - `height-mm`
+  - `panel-timing`
+
+- `unevaluatedProperties`: `false`
+
+### 示例:
+```yaml
+#include <dt-bindings/gpio/gpio.h>
+
+spi {
+    #address-cells = <1>;
+    #size-cells = <0>;
+
+    display@0{
+        compatible = "sainsmart18", "panel-mipi-dbi-spi";
+        reg = <0>;
+        spi-max-frequency = <40000000>;
+
+        dc-gpios = <&gpio 24 GPIO_ACTIVE_HIGH>;
+        reset-gpios = <&gpio 25 GPIO_ACTIVE_HIGH>;
+        write-only;
+
+        format = "r5g6b5";
+
+        backlight = <&backlight>;
+
+        width-mm = <35>;
+        height-mm = <28>;
+
+        panel-timing {
+            hactive = <160>;
+            vactive = <128>;
+            hback-porch = <0>;
+            vback-porch = <0>;
+            clock-frequency = <0>;
+            hfront-porch = <0>;
+            hsync-len = <0>;
+            vfront-porch = <0>;
+            vsync-len = <0>;
+        };
+    };
+};
+```
+
+这段配置描述了一个SPI显示面板的兼容性、寄存器地址、是否只写、数据/命令选择GPIO、逻辑电平电源、SPI三线模式、像素格式等属性，并给出了一个具体的示例。

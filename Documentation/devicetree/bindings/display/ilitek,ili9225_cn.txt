@@ -1,0 +1,23 @@
+Ilitek ILI9225 显示屏面板
+
+此绑定适用于使用 Ilitek ILI9225 控制器并处于 SPI 模式的显示屏面板。
+必需的属性：
+- compatible: "vot,v220hf01a-t", "ilitek,ili9225"
+- rs-gpios: 寄存器选择信号
+- reset-gpios: 重置引脚
+
+此驱动程序的节点必须是 SPI 控制器子节点，因此在 ../spi/spi-bus.txt 中描述的所有强制性属性都必须指定。
+可选属性：
+- rotation: 逆时针方向的面板旋转角度（0、90、180、270）
+
+示例：
+``` 
+display@0 {
+	compatible = "vot,v220hf01a-t", "ilitek,ili9225";
+	reg = <0>;
+	spi-max-frequency = <12000000>;
+	rs-gpios = <&gpio0 9 GPIO_ACTIVE_HIGH>;
+	reset-gpios = <&gpio0 8 GPIO_ACTIVE_HIGH>;
+	rotation = <270>;
+};
+```

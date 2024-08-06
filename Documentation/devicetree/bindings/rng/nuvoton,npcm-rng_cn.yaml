@@ -1,0 +1,41 @@
+```yaml
+# SPDX-许可证标识符: GPL-2.0-only 或 BSD-2-Clause
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/rng/nuvoton,npcm-rng.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: Nuvoton NPCM SoC 随机数生成器
+
+maintainers:
+  - Avi Fishman <avifishman70@gmail.com>
+  - Tomer Maimon <tmaimon77@gmail.com>
+  - Tali Perry <tali.perry1@gmail.com>
+  - Patrick Venture <venture@google.com>
+  - Nancy Yuen <yuenn@google.com>
+  - Benjamin Fair <benjaminfair@google.com>
+
+properties:
+  compatible:
+    enum:
+      - nuvoton,npcm750-rng
+      - nuvoton,npcm845-rng
+
+  reg:
+    maxItems: 1
+
+required:
+  - compatible
+  - reg
+
+additionalProperties: false
+
+examples:
+  - |
+    rng@f000b000 {
+        compatible = "nuvoton,npcm750-rng";
+        reg = <0xf000b000 0x8>;
+    };
+```
+
+说明：这段 YAML 文件定义了一个设备树规范，用于描述 Nuvoton NPCM 系列系统芯片中的随机数生成器（RNG）。该文件指定了兼容性、寄存器地址范围等属性，并给出了一个示例配置。

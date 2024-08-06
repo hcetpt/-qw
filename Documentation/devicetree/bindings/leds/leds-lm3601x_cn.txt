@@ -1,0 +1,51 @@
+* 德州仪器 (Texas Instruments) - LM3601X 单 LED 闪光驱动器
+
+LM3601X 是超小型 LED 闪光驱动器，提供了高度的可调节性。
+所需属性：
+    - compatible（兼容）: 可以是以下之一
+        "ti,lm36010"
+        "ti,lm36011"
+    - reg：I2C 从设备地址
+    - #address-cells（地址单元数量）: 1
+    - #size-cells（大小单元数量）: 0
+
+所需子属性：
+    - reg：0 - 表示红外模式
+        1 - 表示手电筒（白光 LED）模式
+
+对于 LED 闪光灯子节点所需属性：
+    请参阅文档/devicetree/bindings/leds/common.txt
+    - flash-max-microamp（最大闪光电流）: 范围为 11mA 至 1.5A
+    - flash-max-timeout-us（最大闪光超时时间）: 范围为 40ms 至 1600ms
+    - led-max-microamp（最大 LED 电流）: 范围为 2.4mA 至 376mA
+
+可选子属性：
+    - function（功能）: 请参阅文档/devicetree/bindings/leds/common.txt
+    - color（颜色）: 请参阅文档/devicetree/bindings/leds/common.txt
+    - label（标签）: 请参阅文档/devicetree/bindings/leds/common.txt（已弃用）
+
+示例：
+
+```device-tree
+#include <dt-bindings/leds/common.h>
+
+led-controller@64 {
+	compatible = "ti,lm36010";
+	#address-cells = <1>;
+	#size-cells = <0>;
+	reg = <0x64>;
+
+	led@0 {
+		reg = <1>;
+		function = LED_FUNCTION_TORCH;
+		color = <LED_COLOR_ID_WHITE>;
+		led-max-microamp = <376000>;
+		flash-max-microamp = <1500000>;
+		flash-max-timeout-us = <1600000>;
+	};
+};
+```
+
+如需了解更多产品信息，请访问以下链接：
+https://www.ti.com/product/LM36010  
+https://www.ti.com/product/LM36011

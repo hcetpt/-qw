@@ -1,0 +1,193 @@
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/bus/ti-sysc.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: 德州仪器互联目标模块
+
+维护者:
+  - Tony Lindgren <tony@atomide.com>
+
+描述:
+  德州仪器的SoC可以有一个通用的互联目标模块，用于连接到各种互联上（例如使用Arteris NoC的L3互联和使用Sonics s3220的L4互联）。此模块主要用于与电源、复位和时钟管理器PRCM进行交互。它参与了OCP断开协议，除此之外，它在很大程度上独立于具体的互联。每个互联目标模块可以有一个或多个设备连接到它。有一组控制寄存器用于管理互联目标模块的时钟、空闲模式和互联级别的复位。
+  互联目标模块的控制寄存器散布在由该互联目标模块管理的第一个子设备IP块未使用的寄存器地址空间中。通常这些寄存器的名字是REVISION、SYSCONFIG 和 SYSSTATUS。
+
+属性:
+  $nodename:
+    模式: "^target-module(@[0-9a-f]+)?$"
+
+  compatible:
+    oneOf:
+      - items:
+          - 枚举:
+              - ti,sysc-omap2
+              - ti,sysc-omap4
+              - ti,sysc-omap4-simple
+              - ti,sysc-omap2-timer
+              - ti,sysc-omap4-timer
+              - ti,sysc-omap3430-sr
+              - ti,sysc-omap3630-sr
+              - ti,sysc-omap4-sr
+              - ti,sysc-omap3-sham
+              - ti,sysc-omap-aes
+              - ti,sysc-mcasp
+              - ti,sysc-dra7-mcasp
+              - ti,sysc-usb-host-fs
+              - ti,sysc-dra7-mcan
+              - ti,sysc-pruss
+          - 常量: ti,sysc
+      - items:
+          - 常量: ti,sysc
+
+  reg:
+    描述:
+      互联目标模块的控制寄存器，包括 REVISION、SYSCONFIG 和 SYSSTATUS 寄存器，如 SoC 的技术参考手册中所定义。
+minItems: 1
+    maxItems: 3
+
+  reg-names:
+    描述:
+      互联目标模块的控制寄存器名称，包括 "rev"、"sysc" 和 "syss"
+oneOf:
+      - minItems: 1
+        items:
+          - 常量: rev
+          - 常量: sysc
+          - 常量: syss
+      - items:
+          - 常量: rev
+          - 常量: syss
+      - 枚举: [ sysc, syss ]
+
+  power-domains:
+    描述: 如果可用，则为目标模块提供电源域
+maxItems: 1
+
+  clocks:
+    描述:
+      目标模块的时钟，包括一个功能时钟、一个接口时钟以及最多8个模块特定的可选时钟。某些模块可能只有功能时钟，而有些则没有可配置的时钟。
+minItems: 1
+    maxItems: 4
+
+  clock-names:
+    描述:
+      如果时钟是可配置的，则为目标模块提供时钟名称，例如 "fck"、"ick"、"optck1"、"optck2"。
+oneOf:
+      - 枚举: [ ick, fck, sys_clk ]
+      - items:
+          - 常量: fck
+          - 枚举: [ ick, dbclk, osc, sys_clk, dss_clk, ahclkx ]
+      - items:
+          - 常量: fck
+          - 常量: phy-clk
+          - 常量: phy-clk-div
+      - items:
+          - 常量: fck
+          - 常量: hdmi_clk
+          - 常量: sys_clk
+          - 常量: tv_clk
+      - items:
+          - 常量: fck
+          - 常量: ahclkx
+          - 常量: ahclkr
+
+  resets:
+    描述:
+      如果为模块连线的话，则为RSTCTRL寄存器中的目标模块复位位。
+请注意，其他的复位位应该被映射以供子设备驱动程序使用。
+- maxItems: 1
+
+  reset-names:
+    描述:
+      目标模块在RSTCTRL寄存器中的复位名称，通常命名为"rstctrl"如果只有一个复位位与该模块相连。
+    items:
+      - 常量: rstctrl
+
+  '#address-cells':
+    枚举: [1, 2]
+
+  '#size-cells':
+    枚举: [1, 2]
+
+  ranges: 真
+
+  dma-ranges: 真
+
+  ti,sysc-mask:
+    描述: SYSCONFIG寄存器中支持的寄存器位的掩码
+    $ref: /schemas/types.yaml#/definitions/uint32
+
+  ti,sysc-midle:
+    描述: 列表包含硬件支持的空闲模式
+    $ref: /schemas/types.yaml#/definitions/uint32-array
+
+  ti,sysc-sidle:
+    描述: 列表包含硬件支持的空闲模式
+    $ref: /schemas/types.yaml#/definitions/uint32-array
+
+  ti,syss-mask:
+    描述: SYSSTATUS寄存器中支持的寄存器位的掩码
+    $ref: /schemas/types.yaml#/definitions/uint32
+
+  ti,sysc-delay-us:
+    描述: 在访问SYSCONFIG之前，在OCP软复位后所需的延迟
+    默认: 0
+    最小值: 0
+    最大值: 2
+
+  ti,no-reset-on-init:
+    描述: 初始化时不应复位互连目标模块
+    类型: 布尔值
+
+  ti,no-idle-on-init:
+    描述: 初始化时不应使互连目标模块进入空闲状态
+    类型: 布尔值
+
+  ti,no-idle:
+    描述: 不应使互连目标模块进入空闲状态
+    类型: 布尔值
+
+  ti,hwmods:
+    描述: 使用遗留hwmod数据时的互连模块名称
+    $ref: /schemas/types.yaml#/definitions/string
+    过时: 真
+
+必需字段:
+  - 兼容性
+  - '#address-cells'
+  - '#size-cells'
+  - ranges
+
+附加属性:
+  类型: 对象
+
+示例:
+  - |
+    #include <dt-bindings/bus/ti-sysc.h>
+    #include <dt-bindings/clock/omap4.h>
+
+    target-module@2b000 {
+        compatible = "ti,sysc-omap2", "ti,sysc";
+        ti,hwmods = "usb_otg_hs";
+        reg = <0x2b400 0x4>,
+              <0x2b404 0x4>,
+              <0x2b408 0x4>;
+        reg-names = "rev", "sysc", "syss";
+        clocks = <&l3_init_clkctrl OMAP4_USB_OTG_HS_CLKCTRL 0>;
+        clock-names = "fck";
+        ti,sysc-mask = <(SYSC_OMAP2_ENAWAKEUP |
+                         SYSC_OMAP2_SOFTRESET |
+                         SYSC_OMAP2_AUTOIDLE)>;
+        ti,sysc-midle = <SYSC_IDLE_FORCE>,
+                        <SYSC_IDLE_NO>,
+                        <SYSC_IDLE_SMART>;
+        ti,sysc-sidle = <SYSC_IDLE_FORCE>,
+                        <SYSC_IDLE_NO>,
+                        <SYSC_IDLE_SMART>,
+                        <SYSC_IDLE_SMART_WKUP>;
+        ti,syss-mask = <1>;
+        #address-cells = <1>;
+        #size-cells = <1>;
+        ranges = <0 0x2b000 0x1000>;
+    };

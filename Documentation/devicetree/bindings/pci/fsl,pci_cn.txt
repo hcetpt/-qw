@@ -1,0 +1,19 @@
+飞思卡尔 PCI-X 代理模式下的总线枚举
+
+通常，任何被配置为代理模式的飞思卡尔 PCI-X 桥接硬件都会被阻止进行总线枚举。PrPMC 形式因素要求所有中板（mezzanine）都必须是 PCI-X 代理，但每个系统中仍可以有一个进行总线枚举。
+下面定义的属性将允许一个即使被配置为代理模式的 PCI-X 桥接器用于总线枚举。
+必需的属性：
+- `fsl,pci-agent-force-enum`：此属性没有关联值。该属性本身被视为布尔值。
+示例：
+
+	/* 知道是 PrPMC Monarch 的 PCI-X 桥接器 */
+	pci0: pci@ef008000 {
+		fsl,pci-agent-force-enum;
+		#interrupt-cells = <1>;
+		#size-cells = <2>;
+		#address-cells = <3>;
+		compatible = "fsl,mpc8540-pcix", "fsl,mpc8540-pci";
+		device_type = "pci";
+		..
+		..
+	};

@@ -1,0 +1,33 @@
+海思Hi655x电源管理集成电路（PMIC）
+
+从应用处理器SoC Hi6220访问PMIC Hi655x的硬件布局
+在PMIC Hi655x和Hi6220之间，物理信号通道是SSI
+我们可以使用内存映射I/O进行通信
++----------------+             +-------------+
+|                |             |             |
+|    Hi6220      |   SSI bus   |   Hi655x    |
+|                |-------------|             |
+|                |(REGMAP_MMIO)|             |
++----------------+             +-------------+
+
+必需属性：
+- compatible:           应该设置为"hisilicon,hi655x-pmic"
+- reg:                  在Hi6220 SoC上的PMIC基地址
+- interrupt-controller: Hi655x具有内部中断（有自己的中断域）
+- pmic-gpios:           PMIC中断使用的GPIO
+- #clock-cells:         来自通用时钟绑定；应该设置为0
+
+可选属性：
+- clock-output-names: 来自通用时钟绑定以覆盖默认输出时钟名称
+
+示例：
+```
+pmic: pmic@f8000000 {
+	compatible = "hisilicon,hi655x-pmic";
+	reg = <0x0 0xf8000000 0x0 0x1000>;
+	interrupt-controller;
+	#interrupt-cells = <2>;
+	pmic-gpios = <&gpio1 2 GPIO_ACTIVE_HIGH>;
+	#clock-cells = <0>;
+}
+```

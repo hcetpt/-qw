@@ -1,0 +1,119 @@
+下面是给定 YAML 文档的中文翻译：
+
+```yaml
+# SPDX 许可标识符: GPL-2.0-only
+%YAML 1.2
+---
+$id: 'http://devicetree.org/schemas/display/bridge/ti,tfp410.yaml#'
+$schema: 'http://devicetree.org/meta-schemas/core.yaml#'
+
+title: TFP410 DPI 到 DVI 编码器
+
+maintainers:
+  - Tomi Valkeinen <tomi.valkeinen@ti.com>
+  - Jyri Sarha <jsarha@ti.com>
+
+properties:
+  compatible:
+    const: ti,tfp410
+
+  reg:
+    description: 设备的 I2C 地址
+    maxItems: 1
+
+  powerdown-gpios:
+    maxItems: 1
+
+  ti,deskew:
+    description: |
+      数据去偏斜值，以 350ps 的增量从 0 到 7，由 DK[3:1] 引脚配置。去偏斜倍数计算为 (DK[3:1] - 4)，因此其范围从 -4 到 3。
+    $ref: '/schemas/types.yaml#/definitions/uint32'
+    minimum: 0
+    maximum: 7
+
+  ports:
+    $ref: '/schemas/graph.yaml#/properties/ports'
+
+    properties:
+      port@0:
+        $ref: '/schemas/graph.yaml#/$defs/port-base'
+        unevaluatedProperties: false
+        description: DPI 输入端口
+        properties:
+          endpoint:
+            $ref: '/schemas/graph.yaml#/$defs/endpoint-base'
+            unevaluatedProperties: false
+
+            properties:
+              pclk-sample:
+                description: |
+                  端点采样边沿
+                enum:
+                  - 0  # 下降沿
+                  - 1  # 上升沿
+                default: 0
+
+              bus-width:
+                description: |
+                  端点总线宽度
+                enum:
+                  - 12  # 连接了 12 条数据线且处于双沿模式
+                  - 24  # 连接了 24 条数据线且处于单沿模式
+                default: 24
+
+      port@1:
+        $ref: '/schemas/graph.yaml#/properties/port'
+        description: DVI 输出端口
+        required:
+          - port@0
+          - port@1
+
+required:
+  - compatible
+  - ports
+
+if:
+  required:
+    - reg
+then:
+  properties:
+    ti,deskew: false
+else:
+  required:
+    - ti,deskew
+
+additionalProperties: false
+
+examples:
+  - |
+    #include <dt-bindings/gpio/gpio.h>
+
+    tfp410: encoder {
+        compatible = "ti,tfp410";
+        powerdown-gpios = <&twl_gpio 2 GPIO_ACTIVE_LOW>;
+        ti,deskew = <3>;
+
+        ports {
+            #address-cells = <1>;
+            #size-cells = <0>;
+
+            port@0 {
+                reg = <0>;
+                tfp410_in: endpoint {
+                    pclk-sample = <1>;
+                    bus-width = <24>;
+                    remote-endpoint = <&dpi_out>;
+                };
+            };
+
+            port@1 {
+                reg = <1>;
+                tfp410_out: endpoint {
+                    remote-endpoint = <&dvi_connector_in>;
+                };
+            };
+        };
+    };
+```
+
+此文档描述了一个用于 Device Tree 的 TFP410 DPI 到 DVI 编码器的模式文件，包括维护者信息、属性定义以及一个示例配置。

@@ -1,0 +1,129 @@
+# SPDX-许可证标识符: GPL-2.0-only OR BSD-2-Clause
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/soc/qcom/qcom,smp2p.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: 高通共享内存点对点通信
+
+维护者:
+  - Andy Gross <agross@kernel.org>
+  - Bjorn Andersson <bjorn.andersson@linaro.org>
+  - Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+
+描述:
+  共享内存点到点（SMP2P）协议便于两个处理器之间单个32位值的通信。每个值有一个写入端（本地侧）和一个读取端（远程侧）。系统中值通过有向边（本地处理器ID到远程处理器ID）和一个字符串标识符唯一确定。
+
+属性:
+  compatible:
+    常量: qcom,smp2p
+
+  interrupts:
+    最大项数: 1
+
+  mboxes:
+    最大项数: 1
+    描述:
+      指向表示此客户端在APCS中的出站门铃的邮箱的引用
+qcom,ipc:
+    $ref: /schemas/types.yaml#/definitions/phandle-array
+    项:
+      - 项:
+          - 描述: 指向代表APCS寄存器的syscon节点的phandle
+          - 描述: 表示寄存器内偏移的u32
+          - 描述: 表示寄存器内的ipc位的u32
+    描述:
+      三个条目指定用于通知smp2p边的远程端点的出站ipc位
+过时: true
+
+  qcom,local-pid:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    描述:
+      此边的本地端点的标识符
+qcom,remote-pid:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    描述:
+      此边的远程端点的标识符
+qcom,smem:
+    $ref: /schemas/types.yaml#/definitions/uint32-array
+    项:
+      最大项数: 2
+    描述:
+      两个标识符，分别表示此边使用的入站和出站smem项
+模式属性:
+  "^master-kernel|slave-kernel|ipa-ap-to-modem|ipa-modem-to-ap|wlan-ap-to-wpss|wlan-wpss-to-ap$":
+    类型: 对象
+    描述:
+      每个SMP2P对包含一组入站和出站条目，这些条目在smp2p设备节点的子节点中描述。节点名称不重要
+属性:
+      interrupt-controller:
+        描述:
+          标记此条目为入站；该节点应指定为双单元中断控制器。如果没有指定，此节点将表示出站条目
+'#interrupt-cells':
+        常量: 2
+
+      qcom,entry-name:
+        $ref: /schemas/types.yaml#/definitions/string
+        描述:
+          此条目的名称，对于入站条目，这将用于与远程分配的条目匹配，并且对于出站条目，此名称用于分配条目
+'#qcom,smem-state-cells':
+        $ref: /schemas/types.yaml#/definitions/uint32
+        常量: 1
+        描述:
+          出站条目必需
+这段文本定义了一个设备树 (Device Tree) 的配置片段，用于描述高通 (Qualcomm) 系统中的共享内存和处理器间通信的配置。下面是这段文本的中文翻译：
+
+```plaintext
+# 必需字段：
+#   - qcom,entry-name
+
+# 以下两个条件之一必须满足：
+#   - 包含interrupt-controller 和 "#interrupt-cells"
+#   - 包含 "#qcom,smem-state-cells"
+
+# 不允许额外属性
+
+# 必需字段：
+#   - compatible
+#   - interrupts
+#   - qcom,local-pid
+#   - qcom,remote-pid
+#   - qcom,smem
+
+# 以下两个条件之一必须满足：
+#   - 包含 mboxes
+#   - 包含 qcom,ipc
+
+# 不允许额外属性
+
+# 示例
+# 下面的例子展示了从8974应用处理器的角度来看与无线处理器之间的SMP2P设置。它包含一个入向通道和一个出向通道。
+- |
+    #include <dt-bindings/interrupt-controller/arm-gic.h>
+
+    shared-memory {
+        compatible = "qcom,smp2p";
+        qcom,smem = <431>, <451>;
+        interrupts = <GIC_SPI 143 IRQ_TYPE_EDGE_RISING>;
+        mboxes = <&apcs 18>;
+        qcom,local-pid = <0>;
+        qcom,remote-pid = <4>;
+
+        wcnss_smp2p_out: master-kernel {
+            qcom,entry-name = "master-kernel";
+            #qcom,smem-state-cells = <1>;
+        };
+
+        wcnss_smp2p_in: slave-kernel {
+            qcom,entry-name = "slave-kernel";
+            interrupt-controller;
+            #interrupt-cells = <2>;
+        };
+    };
+```
+
+说明：
+- `#` 表示注释或元数据。
+- `required` 和 `oneOf` 是 YAML 格式的语法，用于指定配置项的结构要求。
+- `additionalProperties: false` 指定不允许有超出指定之外的其他属性。
+- `examples` 部分提供了一个具体的配置示例，展示了如何在设备树中具体使用这些配置项。

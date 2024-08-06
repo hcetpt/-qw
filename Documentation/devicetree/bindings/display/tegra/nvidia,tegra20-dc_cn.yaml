@@ -1,0 +1,182 @@
+下面是给定 YAML 文档的中文翻译：
+
+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/display/tegra/nvidia,tegra20-dc.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: NVIDIA Tegra 显示控制器
+
+maintainers:
+  - Thierry Reding <thierry.reding@gmail.com>
+  - Jon Hunter <jonathanh@nvidia.com>
+
+properties:
+  $nodename:
+    pattern: "^dc@[0-9a-f]+$"
+
+  compatible:
+    oneOf:
+      - enum:
+          - nvidia,tegra20-dc
+          - nvidia,tegra30-dc
+          - nvidia,tegra114-dc
+          - nvidia,tegra124-dc
+          - nvidia,tegra210-dc
+
+      - items:
+          - const: nvidia,tegra124-dc
+          - const: nvidia,tegra132-dc
+
+  reg:
+    maxItems: 1
+
+  interrupts:
+    maxItems: 1
+
+  clocks:
+    minItems: 1
+    items:
+      - description: 显示控制器像素时钟
+      - description: 父时钟 # 可选
+
+  clock-names:
+    minItems: 1
+    items:
+      - const: dc
+      - const: parent # 可选
+
+  resets:
+    items:
+      - description: 模块重置
+
+  reset-names:
+    items:
+      - const: dc
+
+  interconnect-names: true
+  interconnects: true
+
+  iommus:
+    maxItems: 1
+
+  operating-points-v2: true
+
+  power-domains:
+    items:
+      - description: 核心电源域的phandle
+
+  memory-region: true
+
+  nvidia,head:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    description: 显示控制器头的数量。用于设置从指定头接收视频数据的各种输出类型。
+
+  nvidia,outputs:
+    $ref: /schemas/types.yaml#/definitions/phandle-array
+    description: 此显示控制器可以驱动的输出列表
+
+  rgb:
+    type: object
+
+allOf:
+  - if:
+      properties:
+        compatible:
+          contains:
+            enum:
+              - nvidia,tegra20-dc
+              - nvidia,tegra30-dc
+              - nvidia,tegra114-dc
+    then:
+      properties:
+        interconnects:
+          items:
+            - description: 窗口A内存客户端
+            - description: 窗口B内存客户端
+            - description: 窗口B内存客户端（垂直滤波器）
+            - description: 窗口C内存客户端
+            - description: 光标内存客户端
+
+        interconnect-names:
+          items:
+            - const: wina
+            - const: winb
+            - const: winb-vfilter
+            - const: winc
+            - const: cursor
+
+        rgb:
+          description: 每个显示控制器节点都有一个名为"rgb"的子节点，表示与控制器关联的RGB输出
+          type: object
+          properties:
+            nvidia,ddc-i2c-bus:
+              $ref: /schemas/types.yaml#/definitions/phandle
+              description: DDC EDID探测使用的I2C控制器的phandle
+
+            nvidia,hpd-gpio:
+              description: 规定了用于热插拔检测的GPIO
+              maxItems: 1
+
+            nvidia,edid:
+              $ref: /schemas/types.yaml#/definitions/uint8-array
+              description: 提供二进制EDID blob
+
+            nvidia,panel:
+              $ref: /schemas/types.yaml#/definitions/phandle
+              description: 显示面板的phandle
+
+  - if:
+      properties:
+        compatible:
+          contains:
+            enum:
+              - nvidia,tegra124-dc
+    then:
+      properties:
+        interconnects:
+          minItems: 4
+          items:
+            - description: 窗口A内存客户端
+            - description: 窗口B内存客户端
+            - description: 窗口C内存客户端
+            - description: 光标内存客户端
+            - description: 窗口D内存客户端
+            - description: 窗口T内存客户端
+
+        interconnect-names:
+          minItems: 4
+          items:
+            - const: wina
+            - const: winb
+            - const: winc
+            - const: cursor
+            - const: wind
+            - const: wint
+
+additionalProperties: false
+
+required:
+  - compatible
+  - reg
+  - interrupts
+  - clocks
+  - clock-names
+  - resets
+  - reset-names
+
+examples:
+  - |
+    #include <dt-bindings/clock/tegra20-car.h>
+    #include <dt-bindings/interrupt-controller/arm-gic.h>
+
+    dc@54200000 {
+        compatible = "nvidia,tegra20-dc";
+        reg = <0x54200000 0x00040000>;
+        interrupts = <GIC_SPI 73 IRQ_TYPE_LEVEL_HIGH>;
+        clocks = <&tegra_car TEGRA20_CLK_DISP1>;
+        clock-names = "dc";
+        resets = <&tegra_car 27>;
+        reset-names = "dc";
+    };

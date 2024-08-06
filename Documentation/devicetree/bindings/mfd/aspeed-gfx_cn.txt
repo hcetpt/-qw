@@ -1,0 +1,16 @@
+Aspeed SoC 显示控制器（GFX）的设备树绑定
+
+Aspeed SoC 显示控制器主要如其名称所示处理显示功能，但在 g5 系统芯片上也会参与引脚复用请求。因此，它被视为一个系统控制器（syscon）设备。
+
+必需属性：
+- compatible: 必须包含 "aspeed,ast2500-gfx" 和 "syscon"
+- reg: 包含 GFX 内存区域的偏移量/长度值
+
+示例：
+
+```
+gfx: display@1e6e6000 {
+	compatible = "aspeed,ast2500-gfx", "syscon";
+	reg = <0x1e6e6000 0x1000>;
+};
+```

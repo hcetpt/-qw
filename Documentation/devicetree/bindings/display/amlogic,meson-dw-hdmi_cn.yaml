@@ -1,0 +1,108 @@
+此文档定义了Amlogic针对Synopsys Designware HDMI控制器的特定扩展。
+
+- **许可证**: (GPL-2.0 或 BSD-2-Clause)
+- **版权所有**: 2019 BayLibre, SAS
+- **YAML版本**: 1.2
+- **标识符**: `http://devicetree.org/schemas/display/amlogic,meson-dw-hdmi.yaml`
+- **模式**: `http://devicetree.org/meta-schemas/core.yaml`
+
+**标题**: Amlogic针对Synopsys Designware HDMI控制器的特定扩展
+
+**维护者**:
+  - Neil Armstrong <neil.armstrong@linaro.org>
+
+**基于**:
+  - `/schemas/sound/dai-common.yaml`
+
+**描述**: 
+  Amlogic Meson Synopsys Designware HDMI集成包括以下部分:
+  - Synopsys DesignWare HDMI 控制器IP
+  - 用于控制时钟和PHY的TOP控制块
+  - 用于将视频信号转换为TMDS信号的自定义HDMI PHY
+  ![架构图]
+  - HDMI TOP仅支持HPD感测
+  - Synopsys HDMI控制器中断通过TOP块中断进行路由
+  - 与TOP块及Synopsys HDMI控制器之间的通信通过一对专用地址+读写寄存器实现
+  - HDMI PHY由HHI寄存器块中的寄存器配置
+  - 像素数据以“4:4:4”格式从VENC块到达，VPU HDMI复用器选择ENCI编码器用于576i或480i格式，或ENCP编码器用于其他所有格式，包括交错HD格式
+  - VENC在ENCI或ENCP编码器之上使用DVI编码器生成HDMI控制器所需的DVI定时
+  - Amlogic Meson GXBB, GXL 和 GXM 系列SoC嵌入了Synopsys DesignWare HDMI TX IP版本2.01a，包含HDCP和I2C&S/PDIF音频源接口
+
+**兼容性属性**:
+  - `compatible`: 必须指定如下之一:
+    - `amlogic,meson-gxbb-dw-hdmi` (GXBB/S905)
+    - `amlogic,meson-gxl-dw-hdmi` (GXL/S905X, S905D)
+    - `amlogic,meson-gxm-dw-hdmi` (GXM/S912)
+    - `amlogic,meson-gx-dw-hdmi` (通用)
+    - `amlogic,meson-g12a-dw-hdmi` (G12A/S905X2, S905Y2, S905D2)
+
+**硬件资源属性**:
+  - `reg`: 单项
+  - `interrupts`: 单项
+  - `clocks`: 至少三项
+  - `clock-names`: 包含`isfr`, `iahb`, `venci`
+  - `power-domains`: 单项, 指向相关电源域
+  - `resets`: 至少三项
+  - `reset-names`: 包含`hdmitx_apb`, `hdmitx`, `hdmitx_phy`
+  - `hdmi-supply`: 指向外部5V稳压器以供电HDMI逻辑
+
+**端口节点**:
+  - `port@0`: 指向VENC输入端口节点
+  - `port@1`: 指向TMDS输出端口节点
+
+**其他属性**:
+  - `#address-cells`: 常数1
+  - `#size-cells`: 常数0
+  - `#sound-dai-cells`: 常数0
+  - `sound-name-prefix`: 真
+
+**必需属性**:
+  - `compatible`
+  - `reg`
+  - `interrupts`
+  - `clocks`
+  - `clock-names`
+  - `resets`
+  - `reset-names`
+  - `port@0`
+  - `port@1`
+  - `#address-cells`
+  - `#size-cells`
+
+**额外属性**: 不允许
+
+**示例**:
+```yaml
+hdmi_tx: hdmi-tx@c883a000 {
+    compatible = "amlogic,meson-gxbb-dw-hdmi", "amlogic,meson-gx-dw-hdmi";
+    reg = <0xc883a000 0x1c>;
+    interrupts = <57>;
+    resets = <&reset_apb>, <&reset_hdmitx>, <&reset_hdmitx_phy>;
+    reset-names = "hdmitx_apb", "hdmitx", "hdmitx_phy";
+    clocks = <&clk_isfr>, <&clk_iahb>, <&clk_venci>;
+    clock-names = "isfr", "iahb", "venci";
+    power-domains = <&pd_vpu>;
+    #address-cells = <1>;
+    #size-cells = <0>;
+
+    /* VPU VENC Input */
+    hdmi_tx_venc_port: port@0 {
+        reg = <0>;
+
+        hdmi_tx_in: endpoint {
+            remote-endpoint = <&hdmi_tx_out>;
+        };
+    };
+
+    /* TMDS Output */
+    hdmi_tx_tmds_port: port@1 {
+         reg = <1>;
+
+         hdmi_tx_tmds_out: endpoint {
+             remote-endpoint = <&hdmi_connector_in>;
+         };
+    };
+};
+```
+
+请注意，上述文本中提到的架构图并未实际提供，但根据文本描述可以理解其内容。

@@ -1,0 +1,29 @@
+SKY81452背光绑定
+
+必需属性：
+- compatible		：必须为"skyworks,sky81452-backlight"
+
+可选属性：
+- name			：背光设备的名称。默认值为'lcd-backlight'
+- gpios			：用于EN引脚的GPIO
+请参阅Documentation/devicetree/bindings/gpio/gpio.txt
+- led-sources		：从0到5的已启用通道列表
+请参阅Documentation/devicetree/bindings/leds/common.txt
+- skyworks,ignore-pwm	：忽略两个PWM输入
+- skyworks,dpwm-mode	：启用DPWM调光模式，否则使用模拟调光
+- skyworks,phase-shift	：启用相移模式
+- skyworks,short-detection-threshold-volt	：应为4、5、6或7伏之一
+- skyworks,current-limit-mA	：应为2300mA或2750mA
+
+示例：
+
+```
+backlight {
+	compatible = "skyworks,sky81452-backlight";
+	name = "pwm-backlight";
+	led-sources = <0 1 2 5>;
+	skyworks,ignore-pwm;
+	skyworks,phase-shift;
+	skyworks,current-limit-mA = <2300>;
+};
+```

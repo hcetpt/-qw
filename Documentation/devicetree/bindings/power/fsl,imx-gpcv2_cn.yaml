@@ -1,0 +1,131 @@
+# SPDX-文件许可人: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/power/fsl,imx-gpcv2.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: Freescale i.MX 通用电源控制器 V2
+
+维护者:
+  - Andrey Smirnov <andrew.smirnov@gmail.com>
+
+描述: |
+  i.MX7S/D 通用电源控制 (GPC) 块包含针对各种电源域的电源门控控制 (PGC)。
+  在 GPC 节点内所包含的电源域是通用电源域提供者，其在
+  文档/devicetree/bindings/power/power-domain.yaml 中有详细说明，这些电源域作为电源门控控制器 'pgc' 节点的子节点来描述。
+  属于某个电源域的 IP 核应包含一个 'power-domains' 属性，该属性为表示该域的 PGC 节点的 phandle。
+属性:
+  compatible:
+    枚举:
+      - fsl,imx7d-gpc
+      - fsl,imx8mn-gpc
+      - fsl,imx8mq-gpc
+      - fsl,imx8mm-gpc
+      - fsl,imx8mp-gpc
+
+  reg:
+    maxItems: 1
+
+  interrupts:
+    maxItems: 1
+
+  interrupt-controller: true
+  '#interrupt-cells':
+    常量: 3
+
+  pgc:
+    类型: 对象
+    additionalProperties: false
+    描述: 由该控制器提供的电源域列表
+属性:
+      '#address-cells':
+        常量: 1
+
+      '#size-cells':
+        常量: 0
+
+    patternProperties:
+      "power-domain@[0-9a-f]+$":
+        类型: 对象
+        additionalProperties: false
+
+        属性:
+
+          '#power-domain-cells':
+            常量: 0
+
+          reg:
+            描述: |
+              电源域索引。有效值定义在
+              include/dt-bindings/power/imx7-power.h 对于 fsl,imx7d-gpc 和
+              include/dt-bindings/power/imx8m-power.h 对于 fsl,imx8mq-gpc
+              include/dt-bindings/power/imx8mm-power.h 对于 fsl,imx8mm-gpc
+              include/dt-bindings/power/imx8mp-power.h 对于 fsl,imx8mp-gpc
+            maxItems: 1
+
+          clocks:
+            描述: |
+              需要在域上电序列期间启用的时钟的 phandle 数量，以确保位于此电源域内的设备的复位传播
+minItems: 1
+            maxItems: 5
+
+          power-supply: true
+
+          power-domains:
+            maxItems: 1
+
+          resets:
+            描述: |
+              在域上电序列期间需要置位的复位的 phandle 数量。这些复位属于位于电源域内的设备，
+              这些设备需要在整个上电序列中保持在复位状态。因此，在通用电源域绑定中没有手段来指定每个复位是什么。
+minItems: 1
+            maxItems: 4
+
+        必须:
+          - '#power-domain-cells'
+          - reg
+
+    必须:
+      - '#address-cells'
+      - '#size-cells'
+
+必须:
+  - compatible
+  - reg
+  - interrupts
+  - pgc
+
+additionalProperties: false
+
+示例:
+  - |
+    #include <dt-bindings/interrupt-controller/arm-gic.h>
+
+    gpc@303a0000 {
+        compatible = "fsl,imx7d-gpc";
+        reg = <0x303a0000 0x1000>;
+        interrupts = <GIC_SPI 87 IRQ_TYPE_LEVEL_HIGH>;
+
+        pgc {
+            #address-cells = <1>;
+            #size-cells = <0>;
+
+            pgc_mipi_phy: power-domain@0 {
+                #power-domain-cells = <0>;
+                reg = <0>;
+                power-supply = <&reg_1p0d>;
+            };
+
+            pgc_pcie_phy: power-domain@1 {
+                #power-domain-cells = <0>;
+                reg = <1>;
+                power-supply = <&reg_1p0d>;
+            };
+
+            pgc_hsic_phy: power-domain@2 {
+                #power-domain-cells = <0>;
+                reg = <2>;
+                power-supply = <&reg_1p2>;
+            };
+        };
+    };

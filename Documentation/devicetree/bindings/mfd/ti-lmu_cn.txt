@@ -1,0 +1,263 @@
+TI LMU（照明管理单元）设备树绑定
+
+TI LMU 驱动支持以下照明设备：
+名称                  子节点
+------      ---------------------------------
+LM3631       背光和稳压器
+LM3632       背光和稳压器
+LM3633       背光、LED 和故障监控
+LM3695       背光
+LM36274      背光和稳压器
+
+必需属性：
+- compatible：应为以下之一：
+                "ti,lm3631"
+                "ti,lm3632"
+                "ti,lm3633"
+                "ti,lm3695"
+                "ti,lm36274"
+- reg：I2C 从设备地址
+0x11 对于 LM3632
+         0x29 对于 LM3631
+         0x36 对于 LM3633
+         0x63 对于 LM3695
+         0x11 对于 LM36274
+
+可选属性：
+- enable-gpios：硬件使能引脚的 GPIO 指定符
+- ramp-up-us：电流从一个亮度级别到较高亮度级别的渐变时间
+范围从 2048 微秒至 117.44 秒
+- ramp-down-us：电流从一个亮度级别到较低亮度级别的渐变时间
+                 范围从 2048 微秒至 117.44 秒
+- ti,brightness-resolution - 这决定了是使用 8 位亮度模式还是 11 位亮度模式。如果未设置此值，则设备默认为数据手册第 7.3.4.1 节中所推荐的 8 位亮度模式。此设置可以位于父节点中或作为 LED 子节点的一部分。这取决于部件本身，如果字符串具有公共亮度寄存器或单独的亮度寄存器。
+可能的值为 255（8 位）或 2047（11 位）
+
+必需节点：
+- backlight：所有 LMU 设备都有背光子节点
+对于属性的具体信息，请参见 [1]
+
+可选节点：
+- fault-monitor：LM3633 和 LM3697 的硬件故障监控驱动程序
+### Required Properties:
+
+- `compatible`: 应为以下之一：
+                    "ti,lm3633-fault-monitor"
+- `leds`: LM3633 的 LED 属性。请参考 [2]
+          LM36274 的 LED 属性。请参考 [4]
+- `regulators`: LM3631 和 LM3632 的稳压器属性。请参考 [3]
+
+#### 参考资料
+[1] ../leds/backlight/ti-lmu-backlight.txt
+[2] ../leds/leds-lm3633.txt
+[3] ../regulator/lm363x-regulator.txt
+[4] ../leds/leds-lm36274.txt
+
+```text
+lm3631@29 {
+    compatible = "ti,lm3631";
+    reg = <0x29>;
+
+    regulators {
+        compatible = "ti,lm363x-regulator";
+
+        vboost {
+            regulator-name = "lcd_boost";
+            regulator-min-microvolt = <4500000>;
+            regulator-max-microvolt = <6350000>;
+            regulator-always-on;
+        };
+
+        vcont {
+            regulator-name = "lcd_vcont";
+            regulator-min-microvolt = <1800000>;
+            regulator-max-microvolt = <3300000>;
+        };
+
+        voref {
+            regulator-name = "lcd_voref";
+            regulator-min-microvolt = <4000000>;
+            regulator-max-microvolt = <6000000>;
+        };
+
+        vpos {
+            regulator-name = "lcd_vpos";
+            regulator-min-microvolt = <4000000>;
+            regulator-max-microvolt = <6000000>;
+            regulator-boot-on;
+        };
+
+        vneg {
+            regulator-name = "lcd_vneg";
+            regulator-min-microvolt = <4000000>;
+            regulator-max-microvolt = <6000000>;
+            regulator-boot-on;
+        };
+    };
+
+    backlight {
+        compatible = "ti,lm3631-backlight";
+
+        lcd_bl {
+            led-sources = <0 1>;
+            ramp-up-us = <300000>;
+        };
+    };
+};
+
+lm3632@11 {
+    compatible = "ti,lm3632";
+    reg = <0x11>;
+
+    enable-gpios = <&pioC 2 GPIO_ACTIVE_HIGH>; /* PC2 */
+
+    regulators {
+        compatible = "ti,lm363x-regulator";
+
+        enable-gpios = <&pioC 0 GPIO_ACTIVE_HIGH>,
+                       <&pioC 1 GPIO_ACTIVE_HIGH>;
+
+        vboost {
+            regulator-name = "lcd_boost";
+            regulator-min-microvolt = <4500000>;
+            regulator-max-microvolt = <6400000>;
+            regulator-always-on;
+        };
+
+        vpos {
+            regulator-name = "lcd_vpos";
+            regulator-min-microvolt = <4000000>;
+            regulator-max-microvolt = <6000000>;
+        };
+
+        vneg {
+            regulator-name = "lcd_vneg";
+            regulator-min-microvolt = <4000000>;
+            regulator-max-microvolt = <6000000>;
+        };
+    };
+
+    backlight {
+        compatible = "ti,lm3632-backlight";
+
+        pwms = <&pwm0 0 10000 0>; /* pwm number, period, polarity */
+        pwm-names = "lmu-backlight";
+
+        lcd {
+            led-sources = <0 1>;
+            pwm-period = <10000>;
+        };
+    };
+};
+
+lm3633@36 {
+    compatible = "ti,lm3633";
+    reg = <0x36>;
+
+    enable-gpios = <&pioC 2 GPIO_ACTIVE_HIGH>;
+
+    backlight {
+        compatible = "ti,lm3633-backlight";
+
+        main {
+            label = "main_lcd";
+            led-sources = <1 2>;
+            ramp-up-us = <500000>;
+            ramp-down-us = <500000>;
+        };
+
+        front {
+            label = "front_lcd";
+            led-sources = <0>;
+            ramp-up-us = <1000000>;
+            ramp-down-us = <0>;
+        };
+    };
+
+    leds {
+        compatible = "ti,lm3633-leds";
+
+        chan1 {
+            label = "status";
+            led-sources = <1>;
+            led-max-microamp = <6000>;
+        };
+
+        chan345 {
+            label = "rgb";
+            led-sources = <3 4 5>;
+            led-max-microamp = <10000>;
+        };
+    };
+
+    fault-monitor {
+        compatible = "ti,lm3633-fault-monitor";
+    };
+};
+
+lm3695@63 {
+    compatible = "ti,lm3695";
+    reg = <0x63>;
+
+    enable-gpios = <&pioC 2 GPIO_ACTIVE_HIGH>;
+
+    backlight {
+        compatible = "ti,lm3695-backlight";
+
+        lcd {
+            label = "bl";
+            led-sources = <0 1>;
+        };
+    };
+};
+
+lm36274@11 {
+    compatible = "ti,lm36274";
+    #address-cells = <1>;
+    #size-cells = <0>;
+    reg = <0x11>;
+
+    enable-gpios = <&pioC 2 GPIO_ACTIVE_HIGH>;
+    regulators {
+        #address-cells = <1>;
+        #size-cells = <0>;
+        compatible = "ti,lm363x-regulator";
+
+        enable-gpios = <&pioC 0 GPIO_ACTIVE_HIGH>,
+                       <&pioC 1 GPIO_ACTIVE_HIGH>;
+
+        vboost {
+            regulator-name = "lcd_boost";
+            regulator-min-microvolt = <4000000>;
+            regulator-max-microvolt = <7150000>;
+            regulator-always-on;
+        };
+
+        vpos {
+            regulator-name = "lcd_vpos";
+            regulator-min-microvolt = <4000000>;
+            regulator-max-microvolt = <6500000>;
+        };
+
+        vneg {
+            regulator-name = "lcd_vneg";
+            regulator-min-microvolt = <4000000>;
+            regulator-max-microvolt = <6500000>;
+        };
+    };
+
+    backlight {
+        #address-cells = <1>;
+        #size-cells = <0>;
+        compatible = "ti,lm36274-backlight";
+
+        led@0 {
+            reg = <0>;
+            led-sources = <0 2>;
+            label = "white:backlight_cluster";
+            linux,default-trigger = "backlight";
+        };
+    };
+};
+```
+
+以上内容描述了不同设备（LM3631、LM3632、LM3633、LM3695 和 LM36274）的配置细节，包括它们的兼容性声明、GPIO 配置、稳压器配置以及背光和 LED 控制特性。这些设备用于控制显示背光和其他 LED 灯。每个设备都有特定的配置选项来满足其功能需求。

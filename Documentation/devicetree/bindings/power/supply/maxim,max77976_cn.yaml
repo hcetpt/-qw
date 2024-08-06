@@ -1,0 +1,43 @@
+# SPDX-许可证标识符: (GPL-2.0 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/power/supply/maxim,max77976.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: Maxim Integrated MAX77976 电池充电器
+
+maintainers:
+  - Luca Ceresoli <luca.ceresoli@bootlin.com>
+
+description: |
+  Maxim MAX77976 是一款 19Vin / 5.5A, 1-单元 Li+ 电池充电器，
+  可通过 I2C 配置
+allOf:
+  - $ref: power-supply.yaml#
+
+properties:
+  compatible:
+    const: maxim,max77976
+
+  reg:
+    maxItems: 1
+
+required:
+  - compatible
+  - reg
+
+unevaluatedProperties: false
+
+examples:
+  - |
+    i2c {
+      #address-cells = <1>;
+      #size-cells = <0>;
+
+      charger@6b {
+        compatible = "maxim,max77976";
+        reg = <0x6b>;
+      };
+    };
+
+..

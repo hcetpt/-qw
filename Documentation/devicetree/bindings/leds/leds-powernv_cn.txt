@@ -1,0 +1,23 @@
+IBM Power Systems 中 LED 的设备树绑定
+-------------------------------------------------
+
+必需属性：
+- compatible：应为 "ibm,opal-v3-led"
+- led-mode：应为 "lightpath" 或 "guidinglight"
+每个 FRU/机箱的位置代码必须以子节点的形式表示。
+子节点的必需属性：
+- led-types：支持的 LED 类型（注意/标识/故障），以字符串数组形式提供
+
+示例：
+
+```
+leds {
+	compatible = "ibm,opal-v3-led";
+	led-mode = "lightpath";
+
+	U78C9.001.RST0027-P1-C1 {
+		led-types = "identify", "fault";
+	};
+	...
+};
+```

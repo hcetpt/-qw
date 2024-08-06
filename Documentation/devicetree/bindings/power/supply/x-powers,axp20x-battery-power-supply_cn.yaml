@@ -1,0 +1,36 @@
+```yaml
+# SPDX-文件许可人: GPL-2.0
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/power/supply/x-powers,axp20x-battery-power-supply.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: AXP20x 电池电源供应
+
+description: |
+  支持的设备可以通过读取来自ADC的ADC通道来读取电池电压、充电和放电电流。
+maintainers:
+  - Chen-Yu Tsai <wens@csie.org>
+  - Sebastian Reichel <sre@kernel.org>
+
+allOf:
+  - $ref: power-supply.yaml#
+
+properties:
+  compatible:
+    oneOf:
+      - const: x-powers,axp202-battery-power-supply
+      - const: x-powers,axp209-battery-power-supply
+      - const: x-powers,axp221-battery-power-supply
+      - items:
+          - const: x-powers,axp803-battery-power-supply
+          - const: x-powers,axp813-battery-power-supply
+      - const: x-powers,axp813-battery-power-supply
+
+required:
+  - compatible
+
+additionalProperties: false
+```
+
+请注意，某些细节（如邮件地址和URL）在实际应用中不会被翻译，但在上下文中已经尽可能地进行了调整。

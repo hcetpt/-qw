@@ -1,0 +1,34 @@
+亚马逊的Annapurna Labs温感器
+
+一种简单的温感设备，允许通过单一的MMIO（内存映射I/O）交易来读取温度。
+所需属性：
+- compatible（兼容性）: "amazon,al-thermal"
+- reg（寄存器）: 传感器寄存器的物理基地址和长度
+- #thermal-sensor-cells: 必须为1。详情描述请参考Documentation/devicetree/bindings/thermal/thermal-sensor.yaml
+示例：
+```device-tree
+thermal: 温感器 {
+	compatible = "amazon,al-thermal";
+	reg = <0x0 0x05002860 0x0 0x1>; // 物理基地址与长度
+	#thermal-sensor-cells = <0x1>;
+};
+
+温区配置 {
+	温区z0 {
+		被动轮询延迟 = <250>;
+		主动轮询延迟 = <1000>;
+		温感器 = <&温感器 0>;
+		阈值设置 {
+			临界状态 {
+				温度 = <105000>;
+				迟滞 = <2000>;
+				类型 = "临界状态";
+			};
+		};
+
+	};
+};
+```
+
+说明：
+这段代码定义了一个使用亚马逊Annapurna Labs技术的温感器设备。该设备通过单一的MMIO交易实现温度读取功能。在示例中，定义了一个名为`thermal`的温感器，并指定了它的兼容性、寄存器配置等属性。此外，还定义了一个名为`温区配置`的结构，其中包含一个名为`温区z0`的温区，该温区设置了轮询延迟、关联的温感器以及温度阈值设置，包括临界状态的温度值和迟滞值。

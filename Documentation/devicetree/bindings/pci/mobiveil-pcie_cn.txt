@@ -1,0 +1,62 @@
+* Mobiveil AXI PCIe 根端口桥接器 DT 描述
+
+Mobiveil 的 GPEX 4.0 是一款 PCIe 第四代根端口桥接器 IP。这款可配置的 IP 支持多达 8 个出站和入站窗口以进行地址转换。
+所需属性：
+- `#address-cells`：根端口的地址表示，设置为 `<3>`；
+- `#size-cells`：根端口的大小表示，设置为 `<2>`；
+- `#interrupt-cells`：指定编码中断源所需的单元格数量。该值必须是 1；
+- `compatible`：应包含 `"mbvl,gpex40-pcie"`；
+- `reg`：应包含 PCIe 寄存器的位置和长度；
+    - 必需项：
+        - `"config_axi_slave"`：PCIe 控制器寄存器
+        - `"csr_axi_slave"`：桥接器配置寄存器
+    - 可选项：
+        - `"gpio_slave"`：用于控制插槽电源的 GPIO 寄存器
+        - `"apb_csr"`：MSI 寄存器
+
+- `device_type`：必须是 `"pci"`；
+- `apio-wins`：请求的 APIO 出站窗口数量，默认配置 2 个出站窗口：
+    - 1. 配置窗口
+    - 2. 内存窗口
+- `ppio-wins`：请求的 PPIO 入站窗口数量，默认配置 1 个入站内存窗口；
+- `bus-range`：覆盖的 PCI 总线编号；
+- `interrupt-controller`：将节点标识为中断控制器；
+- `#interrupt-cells`：指定编码中断源所需的单元格数量。该值必须是 1；
+- `interrupts`：PCIe 控制器的中断线，此字段的最后一个单元格设置为 4 以表示为 IRQ_TYPE_LEVEL_HIGH 类型的中断；
+- `interrupt-map-mask`、`interrupt-map`：标准 PCI 属性，定义 PCI 接口到中断号的映射；
+- `ranges`：PCI 内存区域的范围（硬件不支持 I/O 空间区域）；
+
+请参考标准 PCI 总线绑定文档获取更详细的说明。
+
+示例：
+++++++++
+``` 
+pcie0: pcie@a0000000 {
+	#address-cells = <3>;
+	#size-cells = <2>;
+	compatible = "mbvl,gpex40-pcie";
+	reg =	<0xa0000000 0x00001000>,
+		<0xb0000000 0x00010000>,
+		<0xff000000 0x00200000>,
+		<0xb0010000 0x00001000>;
+	reg-names =	"config_axi_slave",
+			"csr_axi_slave",
+			"gpio_slave",
+			"apb_csr";
+	device_type = "pci";
+	apio-wins = <2>;
+	ppio-wins = <1>;
+	bus-range = <0x00000000 0x000000ff>;
+	interrupt-controller;
+	interrupt-parent = <&gic>;
+	#interrupt-cells = <1>;
+	interrupts = < 0 89 4 >;
+	interrupt-map-mask = <0 0 0 7>;
+	interrupt-map = <0 0 0 0 &pci_express 0>,
+			<0 0 0 1 &pci_express 1>,
+			<0 0 0 2 &pci_express 2>,
+			<0 0 0 3 &pci_express 3>;
+	ranges = < 0x83000000 0 0x00000000 0xa8000000 0 0x8000000>;
+
+};
+```

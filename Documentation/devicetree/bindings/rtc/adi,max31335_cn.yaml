@@ -1,0 +1,70 @@
+```yaml
+# SPDX-文件许可标识: GPL-2.0-only 或 BSD-2-Clause
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/rtc/adi,max31335.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: Analog Devices MAX31335 实时时钟
+
+maintainers:
+  - Antoniu Miclaus <antoniu.miclaus@analog.com>
+
+description:
+  Analog Devices MAX31335 I2C 实时时钟 ±2ppm 汽车级实时时钟，内置 MEMS 谐振器
+allOf:
+  - $ref: rtc.yaml#
+
+properties:
+  compatible:
+    const: adi,max31335
+
+  reg:
+    maxItems: 1
+
+  interrupts:
+    maxItems: 1
+
+  "#clock-cells":
+    description:
+      实时时钟可以通过其时钟输出引脚用作时钟源
+    const: 0
+
+  adi,tc-diode:
+    description:
+      选择涓流充电器的二极管配置
+    schottky - 串联的肖特基二极管
+    standard+schottky - 标准二极管 + 串联的肖特基二极管
+    enum: [schottky, standard+schottky]
+
+  trickle-resistor-ohms:
+    description:
+      选择用于涓流充电器的电阻。如果要启用涓流充电器，则应指定该值
+    enum: [3000, 6000, 11000]
+
+required:
+  - compatible
+  - reg
+
+unevaluatedProperties: false
+
+examples:
+  - |
+    #include <dt-bindings/interrupt-controller/irq.h>
+    i2c {
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        rtc@68 {
+            compatible = "adi,max31335";
+            reg = <0x68>;
+            pinctrl-0 = <&rtc_nint_pins>;
+            interrupts-extended = <&gpio1 16 IRQ_TYPE_LEVEL_HIGH>;
+            aux-voltage-chargeable = <1>;
+            trickle-resistor-ohms = <6000>;
+            adi,tc-diode = "schottky";
+        };
+    };
+```
+
+请注意，上述翻译中的 `aux-voltage-chargeable` 在原始 YAML 示例中未定义描述，因此在翻译中保留了英文原词，并且在实际使用中可能需要根据上下文或具体文档来确定其含义。此外，某些术语如 `pinctrl-0` 和 `interrupts-extended` 等保持了英文原词，这是因为这些术语在特定技术文档和代码中通常使用英文表示。

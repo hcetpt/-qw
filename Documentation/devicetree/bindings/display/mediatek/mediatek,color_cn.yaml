@@ -1,0 +1,88 @@
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/display/mediatek/mediatek,color.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: Mediatek 显示色彩处理器
+
+维护者:
+  - 春光 胡 <chunkuang.hu@kernel.org>
+  - 菲利普·扎贝尔 <p.zabel@pengutronix.de>
+
+描述: |
+  Mediatek 显示色彩处理器，即 COLOR，提供了色调、亮度和饱和度调整功能以获得更好的图像质量，并使一个面板在输出特性上与其他面板相似。
+  COLOR 设备节点必须是中心 MMSYS_CONFIG 节点的同级节点。
+  关于 MMSYS_CONFIG 绑定的详细描述，请参阅
+  文档/devicetree/bindings/arm/mediatek/mediatek,mmsys.yaml。
+
+属性:
+  compatible:
+    oneOf:
+      - enum:
+          - mediatek,mt2701-disp-color
+          - mediatek,mt8167-disp-color
+          - mediatek,mt8173-disp-color
+          - mediatek,mt8195-mdp3-color
+      - items:
+          - enum:
+              - mediatek,mt7623-disp-color
+              - mediatek,mt2712-disp-color
+          - const: mediatek,mt2701-disp-color
+      - items:
+          - enum:
+              - mediatek,mt6795-disp-color
+              - mediatek,mt8183-disp-color
+              - mediatek,mt8186-disp-color
+              - mediatek,mt8188-disp-color
+              - mediatek,mt8192-disp-color
+              - mediatek,mt8195-disp-color
+              - mediatek,mt8365-disp-color
+          - const: mediatek,mt8173-disp-color
+  reg:
+    maxItems: 1
+
+  interrupts:
+    maxItems: 1
+
+  power-domains:
+    描述: 由 phandle 和电源域指定符定义的电源控制器绑定中定义的句柄。详细信息请参阅
+      文档/devicetree/bindings/power/power-domain.yaml
+时钟:
+    items:
+      - 描述: COLOR 时钟
+
+  mediatek,gce-client-reg:
+    描述: 该属性定义了4个参数，允许 gce 配置客户端驱动程序的寄存器，如 gce 的 phandle、子系统 ID、寄存器偏移量和大小。每个 GCE 子系统 ID 对应于头文件 include/dt-bindings/gce/<chip>-gce.h 中定义的一个客户端
+$ref: /schemas/types.yaml#/definitions/phandle-array
+    maxItems: 1
+
+必需项:
+  - compatible
+  - reg
+  - interrupts
+  - power-domains
+  - clocks
+
+附加属性: false
+
+示例:
+  - |
+    #include <dt-bindings/interrupt-controller/arm-gic.h>
+    #include <dt-bindings/clock/mt8173-clk.h>
+    #include <dt-bindings/power/mt8173-power.h>
+    #include <dt-bindings/gce/mt8173-gce.h>
+
+    soc {
+        #address-cells = <2>;
+        #size-cells = <2>;
+
+        color0: color@14013000 {
+            compatible = "mediatek,mt8173-disp-color";
+            reg = <0 0x14013000 0 0x1000>;
+            interrupts = <GIC_SPI 187 IRQ_TYPE_LEVEL_LOW>;
+            power-domains = <&scpsys MT8173_POWER_DOMAIN_MM>;
+            clocks = <&mmsys CLK_MM_DISP_COLOR0>;
+            mediatek,gce-client-reg = <&gce SUBSYS_1401XXXX 0x3000 0x1000>;
+        };
+    };

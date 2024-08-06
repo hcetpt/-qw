@@ -1,0 +1,36 @@
+德州仪器 TWL 系列（例如 twl4030）中的重置和电源管理模块
+
+TWL 系列内部的电源管理模块提供了多种设施来控制电源资源，包括电源脚本。目前，此绑定仅支持在关机后对系统的完全关闭。
+必需属性：
+- compatible：必须是以下选项之一
+    - "ti,twl4030-power"
+    - "ti,twl4030-power-reset"
+    - "ti,twl4030-power-idle"
+    - "ti,twl4030-power-idle-osc-off"
+
+至少在需要特殊配置才能使热重启生效的 3530 上推荐使用 "ti,twl4030-power-reset"。
+当使用 "ti,twl4030-power-idle" 时，TWL4030 PMIC 将加载 TI 推荐的空闲模式配置。
+当使用 "ti,twl4030-power-idle-osc-off" 时，将采用 TI 推荐的配置，其中外部振荡器在非空闲状态下被关闭。需要注意的是，并非所有板子都适用此配置，具体取决于外部振荡器的接线方式。
+可选属性：
+
+- ti,system-power-controller：表示 TWL4030 是系统的电源供应主控器。设置此标志后，芯片将在系统关机时发起从 ACTIVE 到 OFF 或从 SLEEP 到 OFF 的转换。
+- ti,use_poweroff：这是 ti,system-power-controller 的过时名称。
+
+示例：
+```yaml
+&i2c1 {
+    clock-frequency = <2600000>;
+
+    twl: twl@48 {
+        reg = <0x48>;
+        interrupts = <7>; /* SYS_NIRQ 级联到 intc */
+        interrupt-parent = <&intc>;
+
+        twl_power: power {
+            compatible = "ti,twl4030-power";
+            ti,use_poweroff;
+        };
+    };
+};
+```
+在这个示例中，我们定义了一个 I2C 总线上的 TWL4030 设备，并指定了其地址、中断等信息。电源管理部分使用了兼容属性 "ti,twl4030-power" 并启用了过时的 "ti,use_poweroff" 标志。

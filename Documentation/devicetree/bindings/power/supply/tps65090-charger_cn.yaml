@@ -1,0 +1,36 @@
+# SPDX-许可证标识符: GPL-2.0
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/power/supply/tps65090-charger.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: 带开关模式充电器的TPS65090前端PMU
+
+maintainers:
+  - Sebastian Reichel <sre@kernel.org>
+
+allOf:
+  - $ref: power-supply.yaml#
+
+properties:
+  compatible:
+    const: ti,tps65090-charger
+
+  ti,enable-low-current-chrg:
+    type: boolean
+    description: |
+      在检测到低电流时启用充电，而默认逻辑是停止充电
+
+required:
+  - compatible
+
+additionalProperties: false
+
+examples:
+  - |
+    pmic {
+      charger {
+        compatible = "ti,tps65090-charger";
+        ti,enable-low-current-chrg;
+      };
+    };

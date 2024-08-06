@@ -1,0 +1,36 @@
+Freescale QUICC Engine USB 控制器
+
+必需属性：
+- `compatible`：应为 "fsl,<chip>-qe-usb", "fsl,mpc8323-qe-usb"
+- `reg`：前两个单元应包含USB寄存器的位置和长度，接下来的两个单元应包含PRAM的位置和长度
+- `interrupts`：应包含USB中断
+- `fsl,fullspeed-clock`：指定全速USB时钟源:
+  - "none": 时钟源被禁用
+  - "brg1" 至 "brg16": 时钟源分别是BRG1至BRG16
+  - "clk1" 至 "clk24": 时钟源分别是CLK1至CLK24
+- `fsl,lowspeed-clock`：指定低速USB时钟源:
+  - "none": 时钟源被禁用
+  - "brg1" 至 "brg16": 时钟源分别是BRG1至BRG16
+  - "clk1" 至 "clk24": 时钟源分别是CLK1至CLK24
+- `hub-power-budget`：根集线器的USB电源预算，单位是mA
+- `gpios`：应按以下顺序指定GPIOs: USBOE, USBTP, USBTN, USBRP, USBRN, SPEED（可选）, 和 POWER（可选）
+
+示例：
+
+```yaml
+usb@6c0 {
+    compatible = "fsl,mpc8360-qe-usb", "fsl,mpc8323-qe-usb";
+    reg = <0x6c0 0x40 0x8b00 0x100>;
+    interrupts = <11>;
+    interrupt-parent = <&qeic>;
+    fsl,fullspeed-clock = "clk21";
+    gpios = <&qe_pio_b  2 0 /* USBOE */
+             &qe_pio_b  3 0 /* USBTP */
+             &qe_pio_b  8 0 /* USBTN */
+             &qe_pio_b  9 0 /* USBRP */
+             &qe_pio_b 11 0 /* USBRN */
+             &qe_pio_e 20 0 /* SPEED */
+             &qe_pio_e 21 0 /* POWER */>;
+};
+```
+请注意，这个配置文件示例用于定义一个特定的USB控制器硬件设备，并且这些配置项需要根据实际硬件进行调整。

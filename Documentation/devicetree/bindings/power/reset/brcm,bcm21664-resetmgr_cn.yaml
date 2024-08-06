@@ -1,0 +1,34 @@
+```yaml
+# SPDX-文件许可标识: GPL-2.0-only 或 BSD-2-Clause
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/power/reset/brcm,bcm21664-resetmgr.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: Broadcom Kona 系列重置管理器
+
+maintainers:
+  - Florian Fainelli <f.fainelli@gmail.com>
+
+properties:
+  compatible:
+    const: brcm,bcm21664-resetmgr
+
+  reg:
+    maxItems: 1
+
+required:
+  - compatible
+  - reg
+
+additionalProperties: false
+
+examples:
+  - |
+    reset-controller@35001f00 {
+        compatible = "brcm,bcm21664-resetmgr";
+        reg = <0x35001f00 0x24>;
+    };
+```
+
+此段文本描述了一个设备树（Device Tree）配置文件的模式，用于定义Broadcom Kona系列中的重置管理器。该模式规定了必要的属性和其格式要求，并给出了一个示例。

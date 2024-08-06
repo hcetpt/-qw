@@ -1,0 +1,37 @@
+### Zodiac Inflight Innovations RAVE 监控处理器
+
+**RAVE 监控处理器**通过UART与SoC进行通信。预期其设备树节点被指定为用于通信的UART控制器节点的子节点。
+#### 必需的父设备属性：
+
+- **compatible：** 应该是以下之一：
+    - `"zii,rave-sp-niu"`
+    - `"zii,rave-sp-mezz"`
+    - `"zii,rave-sp-esb"`
+    - `"zii,rave-sp-rdu1"`
+    - `"zii,rave-sp-rdu2"`
+
+- **current-speed：** 应该设置为SP设备使用的波特率。
+
+**RAVE SP**由以下子设备组成：
+
+| 设备             | 描述                                 |
+|------------------|--------------------------------------|
+| rave-sp-wdt      | : 看门狗                             |
+| rave-sp-nvmem    | : 与板载EEPROM的接口                 |
+| rave-sp-backlight| : 显示屏背光                         |
+| rave-sp-hwmon    | : 与板载硬件传感器的接口             |
+| rave-sp-leds     | : 与板载LED的接口                     |
+| rave-sp-input    | : 与板载电源按钮的接口               |
+
+#### 使用示例：
+
+```plaintext
+rdu {
+    compatible = "zii,rave-sp-rdu2";
+    current-speed = <1000000>;
+
+    watchdog {
+        compatible = "zii,rave-sp-watchdog";
+    };
+};
+```

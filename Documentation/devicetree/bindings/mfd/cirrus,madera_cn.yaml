@@ -1,0 +1,284 @@
+# SPDX-文件许可人: GPL-2.0-only 或 BSD-2-Clause
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/mfd/cirrus,madera.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: Cirrus Logic Madera 类音频编解码器多功能设备
+
+维护者:
+  - patches@opensource.cirrus.com
+
+描述: |
+  这些设备是具备广泛数字功能及一系列模拟输入/输出的音频系统芯片。
+更多信息参见以下子驱动绑定：
+
+    bindings/pinctrl/cirrus,madera.yaml
+    bindings/regulator/wlf,arizona.yaml
+    bindings/sound/cirrus,madera.yaml
+
+allOf:
+  - $ref: /schemas/pinctrl/cirrus,madera.yaml#
+  - $ref: /schemas/regulator/wlf,arizona.yaml#
+  - $ref: /schemas/sound/cirrus,madera.yaml#
+  - 如果:
+      属性:
+        compatible:
+          包含:
+            枚举:
+              - cirrus,cs47l85
+              - wlf,wm1840
+    那么:
+      属性:
+        SPKVDDL-supply:
+          描述:
+            左侧扬声器驱动电源供应
+SPKVDDR-supply:
+          描述:
+            右侧扬声器驱动电源供应
+必需:
+        - SPKVDDL-supply
+        - SPKVDDR-supply
+    否则:
+      必需:
+        - DCVDD-supply
+  - 如果:
+      属性:
+        compatible:
+          包含:
+            枚举:
+              - cirrus,cs47l15
+              - cirrus,cs47l35
+    那么:
+      属性:
+        SPKVDD-supply:
+          描述:
+            单声道扬声器驱动电源供应
+必需:
+        - SPKVDD-supply
+  - 如果:
+      属性:
+        compatible:
+          包含:
+            枚举:
+              - cirrus,cs47l35
+              - cirrus,cs47l85
+              - cirrus,cs47l90
+              - cirrus,cs47l91
+              - wlf,wm1840
+    那么:
+      属性:
+        DBVDD2-supply:
+          描述:
+            数据总线电源供应
+必需:
+        - DBVDD2-supply
+  - 如果:
+      属性:
+        compatible:
+          包含:
+            枚举:
+              - cirrus,cs47l85
+              - cirrus,cs47l90
+              - cirrus,cs47l91
+              - wlf,wm1840
+    那么:
+      属性:
+        DBVDD3-supply:
+          描述:
+            数据总线电源供应
+DBVDD4-supply:
+          描述:
+            数据总线电源供应
+  - 如果:
+      属性:
+        compatible:
+          包含:
+            枚举:
+              - cirrus,cs47l15
+    那么:
+      必需:
+        - MICVDD-supply
+    否则:
+      属性:
+        CPVDD2-supply:
+          描述:
+            辅助电荷泵电源供应
+必需:
+        - CPVDD2-supply
+
+属性:
+  compatible:
+    枚举:
+      - cirrus,cs47l15
+      - cirrus,cs47l35
+      - cirrus,cs47l85
+      - cirrus,cs47l90
+      - cirrus,cs47l91
+      - cirrus,cs42l92
+      - cirrus,cs47l92
+      - cirrus,cs47l93
+      - cirrus,wm1840
+
+  reg:
+    最大项数: 1
+
+  gpio-controller: true
+
+  '#gpio-cells':
+    描述:
+      第一个单元是引脚编号。第二个单元为将来使用预留，必须为零
+    常量: 2
+
+  interrupt-controller: true
+
+  '#interrupt-cells':
+    描述:
+      第一个单元是IRQ编号
+      第二个单元是标志位，编码为来自
+      bindings/interrupt-controller/interrupts.txt 中的触发掩码
+    常量: 2
+
+  interrupts:
+    最大项数: 1
+
+  reset-gpios:
+    描述:
+      一个条目指定控制 /RESET 的 GPIO。根据
+      bindings/gpio.txt 定义。虽然可选，但强烈建议使用硬件复位
+下面是提供的 YAML 格式的配置描述翻译为中文：
+
+### 配置项说明
+- `maxItems`: 1
+
+  - `clocks`:
+    - **描述**:
+      - 应该引用在 MCLK1、MCLK2 和 MCLK3 上提供的时钟。
+    - `minItems`: 1
+    - `maxItems`: 3
+
+  - `clock-names`:
+    - **描述**: 
+      - 可以包含最多三个字符串：
+        - `"mclk1"` 对于 MCLK1 上提供的时钟，推荐为高质量音频参考时钟
+        - `"mclk2"` 对于 MCLK2 上提供的时钟，要求为始终开启的 32k 时钟
+        - `"mclk3"` 对于 MCLK3 上提供的时钟
+    - **一个示例**:
+      - `items`:
+          - `const`: mclk1
+      - `items`:
+          - `const`: mclk2
+      - `items`:
+          - `const`: mclk3
+      - `items`:
+          - `const`: mclk1
+          - `const`: mclk2
+      - `items`:
+          - `const`: mclk1
+          - `const`: mclk3
+      - `items`:
+          - `const`: mclk2
+          - `const`: mclk3
+      - `items`:
+          - `const`: mclk1
+          - `const`: mclk2
+          - `const`: mclk3
+
+  - `AVDD-supply`:
+    - **描述**: 模拟电源供应
+
+  - `DBVDD1-supply`:
+    - **描述**: 数据总线电源供应
+
+  - `CPVDD1-supply`:
+    - **描述**: 充电泵电源供应
+
+  - `DCVDD-supply`:
+    - **描述**: 数字电源供应，在 CS47L85 和 WM1840 中可选，可以内部提供
+
+  - `MICVDD-supply`:
+    - **描述**: 麦克风电源供应，通常内部提供，除了在 cs47l24 和 wm1831 中是必需的
+
+- **必需项**:
+  - `compatible`
+  - `gpio-controller`
+  - `#gpio-cells`
+  - `interrupt-controller`
+  - `#interrupt-cells`
+  - `interrupts`
+  - `AVDD-supply`
+  - `DBVDD1-supply`
+  - `CPVDD1-supply`
+
+- `unevaluatedProperties`: false
+
+### 示例
+```yaml
+- |
+  #include <dt-bindings/sound/madera.h>
+  i2c@e0004000 {
+      #address-cells = <1>;
+      #size-cells = <0>;
+      reg = <0xe0004000 0x1000>;
+
+      cs47l85: codec@1a {
+          compatible = "cirrus,cs47l85";
+          reg = <0x1a>;
+
+          reset-gpios = <&gpio 0>;
+          wlf,ldoena = <&gpio 1>;
+
+          interrupt-controller;
+          #interrupt-cells = <2>;
+          interrupts = <4 1 0>;
+
+          gpio-controller;
+          #gpio-cells = <2>;
+
+          AVDD-supply = <&vdd1v8>;
+          DBVDD1-supply = <&vdd1v8>;
+          DBVDD2-supply = <&vdd1v8>;
+          DBVDD3-supply = <&vdd1v8>;
+          DBVDD4-supply = <&vdd1v8>;
+          CPVDD1-supply = <&vdd1v8>;
+          CPVDD2-supply = <&vdd1v2>;
+          SPKVDDL-supply = <&vdd5v>;
+          SPKVDDR-supply = <&vdd5v>;
+
+          clocks = <&clks 0>, <&clks 1>, <&clks 2>;
+          clock-names = "mclk1", "mclk2", "mclk3";
+
+          cirrus,dmic-ref = <0 0 MADERA_DMIC_REF_MICBIAS1>;
+          cirrus,inmode = <
+              MADERA_INMODE_SE   MADERA_INMODE_SE
+              MADERA_INMODE_SE   MADERA_INMODE_SE
+              MADERA_INMODE_DIFF MADERA_INMODE_DIFF
+          >;
+          cirrus,max-channels-clocked = <2 0 0>;
+
+          pinctrl-names = "default";
+          pinctrl-0 = <&pinsettings>;
+
+          pinsettings: pin-settings {
+              aif1-pins {
+                  groups = "aif1";
+                  function = "aif1";
+                  bias-bus-hold;
+              };
+
+              aif2-pins {
+                  groups = "aif2";
+                  function = "aif2";
+                  bias-bus-hold;
+              };
+
+              aif3-pins {
+                  groups = "aif3";
+                  function = "aif3";
+                  bias-bus-hold;
+              };
+          };
+      };
+  };
+```
+以上内容翻译了给定 YAML 文件中的配置项和示例。

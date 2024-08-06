@@ -1,0 +1,9 @@
+* 通用系统电源控制能力
+
+电源管理集成电路或各种硬件组件有时能够控制系统的电源。与这些组件相关的设备驱动程序可能需要定义这种能力，以此告知内核该驱动程序可用于关闭系统。相应的设备在其设备节点中必须具有标准属性 "system-power-controller"。此属性标记该设备能够控制系统电源。为了以编程方式检测此属性是否存在，可以使用来自 of.h 的辅助函数 "of_device_is_system_power_controller"。
+示例：
+
+act8846: act8846@5 {
+     兼容性 = "active-semi,act8846";
+     system-power-controller;
+}

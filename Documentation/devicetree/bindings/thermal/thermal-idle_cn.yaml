@@ -1,0 +1,142 @@
+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+# Copyright 2020 Linaro Ltd
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/thermal/thermal-idle.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: 热闲置冷却设备
+
+维护者:
+  - Daniel Lezcano <daniel.lezcano@linaro.org>
+
+描述: |
+  热闲置冷却设备允许系统通过注入空闲周期来被动地
+  控制设备的温度，迫使它降温。
+此绑定描述了热闲置节点
+属性:
+  $nodename:
+    常量: thermal-idle
+    描述: |
+      热闲置节点描述了用于高效降低所连接热区域温度的
+      空闲冷却设备的特性
+'#cooling-cells':
+    常量: 2
+    描述: |
+      必须为2，以指定在冷却映射中使用的最小和最大冷却状态。第一个单元是所需的最小冷却状态，
+      第二个单元是所需的最高冷却状态
+duration-us:
+    描述: |
+      设备应该降温的空闲持续时间（微秒）
+exit-latency-us:
+    描述: |
+      为设备注入的空闲状态的退出延迟约束（微秒）。这是选择一个空闲状态时要应用的延迟约束
+所需:
+  - '#cooling-cells'
+
+额外属性: false
+
+示例:
+  - |
+    /{
+        #include <dt-bindings/thermal/thermal.h>
+
+        compatible = "foo";
+        model = "foo";
+        #address-cells = <1>;
+        #size-cells = <1>;
+
+        // 示例：将大核上的空闲冷却设备与cpufreq冷却设备结合使用
+        cpus {
+            #address-cells = <2>;
+            #size-cells = <0>;
+
+            /* ... */
+
+            cpu_b0: cpu@100 {
+                device_type = "cpu";
+                compatible = "arm,cortex-a72";
+                reg = <0x0 0x100>;
+                enable-method = "psci";
+                capacity-dmips-mhz = <1024>;
+                dynamic-power-coefficient = <436>;
+                #cooling-cells = <2>; /* 最小值后跟最大值 */
+                cpu-idle-states = <&CPU_SLEEP>, <&CLUSTER_SLEEP>;
+                cpu_b0_therm: thermal-idle {
+                    #cooling-cells = <2>;
+                    duration-us = <10000>;
+                    exit-latency-us = <500>;
+                };
+            };
+
+            cpu_b1: cpu@101 {
+                device_type = "cpu";
+                compatible = "arm,cortex-a72";
+                reg = <0x0 0x101>;
+                enable-method = "psci";
+                capacity-dmips-mhz = <1024>;
+                dynamic-power-coefficient = <436>;
+                #cooling-cells = <2>; /* 最小值后跟最大值 */
+                cpu-idle-states = <&CPU_SLEEP>, <&CLUSTER_SLEEP>;
+                cpu_b1_therm: thermal-idle {
+                    #cooling-cells = <2>;
+                    duration-us = <10000>;
+                    exit-latency-us = <500>;
+                };
+            };
+
+            /* ... */
+
+        };
+
+        /* ... */
+
+        thermal_zones {
+            cpu_thermal: cpu {
+                polling-delay-passive = <100>;
+                polling-delay = <1000>;
+
+                /* ... */
+
+                trips {
+                    cpu_alert0: cpu_alert0 {
+                        temperature = <65000>;
+                        hysteresis = <2000>;
+                        type = "passive";
+                    };
+
+                    cpu_alert1: cpu_alert1 {
+                        temperature = <70000>;
+                        hysteresis = <2000>;
+                        type = "passive";
+                    };
+
+                    cpu_alert2: cpu_alert2 {
+                        temperature = <75000>;
+                        hysteresis = <2000>;
+                        type = "passive";
+                    };
+
+                    cpu_crit: cpu_crit {
+                        temperature = <95000>;
+                        hysteresis = <2000>;
+                        type = "critical";
+                    };
+                };
+
+                cooling-maps {
+                    map0 {
+                        trip = <&cpu_alert1>;
+                        cooling-device = <&cpu_b0_therm 0 15 >,
+                                         <&cpu_b1_therm 0 15>;
+                    };
+
+                    map1 {
+                        trip = <&cpu_alert2>;
+                        cooling-device = <&cpu_b0 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
+                                         <&cpu_b1 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>;
+                    };
+                };
+            };
+        };
+    };

@@ -1,0 +1,33 @@
+# SPDX-许可证标识符: GPL-2.0
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/display/panel/startek,startek-kd050c.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: Startek 电子科技公司的 KD050C 5.0" WVGA TFT 液晶显示屏
+
+维护者:
+  - 尼基塔·基里亚诺夫 <nikita@compulab.co.il>
+
+allOf:
+  - $ref: panel-dpi.yaml#
+
+属性:
+  compatible:
+    项目:
+      - 常量: startek,startek-kd050c
+      - {} # panel-dpi，但为了避免错误选择此处未列出
+
+  backlight: 真
+  enable-gpios: 真
+  height-mm: 真
+  label: 真
+  panel-timing: 真
+  port: 真
+  power-supply: 真
+  reset-gpios: 真
+  width-mm: 真
+
+额外属性: 错误
+
+..

@@ -1,0 +1,57 @@
+为 Hisilicon ADE 显示控制器驱动程序的设备树绑定
+
+ADE（高级显示引擎）是显示控制器，它从内存中获取图像数据，进行合成、后图像处理、生成RGB时序流，并传输到DSI。
+必需属性：
+- compatible：值应为 "hisilicon,hi6220-ade"
+- reg：ADE 控制器寄存器的物理基地址和长度
+- hisilicon,noc-syscon：ADE NOC QoS 系统控制节点
+- resets：ADE 重置控制器节点
+- interrupt：用于 LDI VBlank 中断的编号
+- clocks：一系列 phandle + 时钟指定符对，对应于 clock-names 中的每一项
+- clock-names：应包含：
+  "clk_ade_core" —— 对于 ADE 核心时钟
+  "clk_codec_jpeg" —— 对于媒体 NOC QoS 时钟，其与 JPEG 编码器使用相同的时钟
+  "clk_ade_pix" —— 对于 ADE 像素时钟
+以下内容为设备树配置示例中的属性描述及一个HiKey板载hi6220系统级芯片特定的设备树（Device Tree，简称DT）条目示例。
+
+- `assigned-clocks`: 应包含"clk_ade_core"和"clk_codec_jpeg"时钟及其对应的phandle+时钟标识符对。
+- `assigned-clock-rates`: 时钟速率，对应`assigned-clocks`中的每一项。例如："clk_ade_core"的速率可以是"360000000"或"180000000"；"clk_codec_jpeg"的速率可以是"1440000000"或更低。这些速率值可以根据性能和功耗需求进行配置。
+- `port`: 输出端口。该端口包含一个子节点endpoint，其`remote-endpoint`被设置为连接的DSI输入端点的phandle。
+  
+更多关于设备图（device graph）的信息，请参阅文档`Documentation/devicetree/bindings/graph.txt`。
+
+可选属性：
+- `dma-coherent`: 如果DMA操作是连贯的，则存在此属性。
+
+下面是一个HiKey板载hi6220系统级芯片特定的设备树条目的示例：
+
+```text
+ade: ade@f4100000 { // 设备标识符
+    compatible = "hisilicon,hi6220-ade"; // 兼容性声明
+    reg = <0x0 0xf4100000 0x0 0x7800>; // 寄存器基址范围
+    reg-names = "ade_base"; // 寄存器名称
+    hisilicon,noc-syscon = <&medianoc_ade>; // NoC系统控制节点
+    resets = <&media_ctrl MEDIA_ADE>; // 重置控制
+    interrupts = <0 115 4>; // 中断信息
+
+    clocks = <&media_ctrl HI6220_ADE_CORE>,
+             <&media_ctrl HI6220_CODEC_JPEG>,
+             <&media_ctrl HI6220_ADE_PIX_SRC>; // 时钟源
+    clock-names  = "clk_ade_core", // 时钟名称
+                   "clk_codec_jpeg",
+                   "clk_ade_pix";
+
+    assigned-clocks = <&media_ctrl HI6220_ADE_CORE>, // 分配的时钟
+                       <&media_ctrl HI6220_CODEC_JPEG>;
+    assigned-clock-rates = <360000000>, <288000000>; // 分配的时钟速率
+    dma-coherent; // DMA一致性
+
+    port { // 输出端口
+        ade_out: endpoint { // 端点
+            remote-endpoint = <&dsi_in>; // 远程端点
+        };
+    };
+};
+```
+
+请注意，上述示例中`assigned-clock-rates`的值仅为示例，并且根据具体应用场景可能需要调整。

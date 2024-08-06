@@ -1,0 +1,100 @@
+下面是给定内容的中文翻译：
+
+# SPDX-文件许可标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/display/bridge/fsl,imx8qxp-pxl2dpi.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: NXP i.MX8qxp 像素链路到显示像素接口
+
+维护者:
+  - Liu Ying <victor.liu@nxp.com>
+
+描述: |
+  NXP i.MX8qxp 像素链路到显示像素接口 (PXL2DPI) 将像素链路的 36 位数据输出与 DSI 控制器的 MIPI-DPI 24 位数据输入以及用于 LVDS 模式的 LVDS 显示桥接 (LDB) 模块的输入相连接，以重新映射这些模块之间的像素颜色编码。
+  此模块完全由组合逻辑构成。
+  i.MX8qxp PXL2DPI 通过控制和状态寄存器 (CSR) 模块进行控制。
+  作为系统控制器的 CSR 模块包含 PXL2DPI 的配置寄存器。
+
+属性:
+  compatible:
+    常量: fsl,imx8qxp-pxl2dpi
+
+  fsl,sc-resource:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    描述: 与此 PXL2DPI 实例关联的 SCU 资源 ID
+电源域:
+    最大项数: 1
+
+  fsl,companion-pxl2dpi:
+    $ref: /schemas/types.yaml#/definitions/phandle
+    描述: |
+      一个指向下游 LVDS 显示桥接 (LDB) 在拆分模式下使用的配套 PXL2DPI 的 phandle
+端口:
+    $ref: /schemas/graph.yaml#/properties/ports
+
+    属性:
+      port@0:
+        $ref: /schemas/graph.yaml#/properties/port
+        描述: 从像素链路到 PXL2DPI 的输入端口节点
+port@1:
+        $ref: /schemas/graph.yaml#/properties/port
+        描述: 从 PXL2DPI 到下游桥接的输出端口节点
+必需:
+      - port@0
+      - port@1
+
+必需:
+  - compatible
+  - fsl,sc-resource
+  - 电源域
+  - 端口
+
+其他属性: false
+
+示例:
+  - |
+    #include <dt-bindings/firmware/imx/rsrc.h>
+    pxl2dpi {
+        compatible = "fsl,imx8qxp-pxl2dpi";
+        fsl,sc-resource = <IMX_SC_R_MIPI_0>;
+        电源域 = <&pd IMX_SC_R_MIPI_0>;
+
+        端口 {
+            #address-cells = <1>;
+            #size-cells = <0>;
+
+            port@0 {
+                #address-cells = <1>;
+                #size-cells = <0>;
+                reg = <0>;
+
+                mipi_lvds_0_pxl2dpi_dc_pixel_link0: endpoint@0 {
+                    reg = <0>;
+                    远程端点 = <&dc_pixel_link0_mipi_lvds_0_pxl2dpi>;
+                };
+
+                mipi_lvds_0_pxl2dpi_dc_pixel_link1: endpoint@1 {
+                     reg = <1>;
+                     远程端点 = <&dc_pixel_link1_mipi_lvds_0_pxl2dpi>;
+                };
+            };
+
+            port@1 {
+                #address-cells = <1>;
+                #size-cells = <0>;
+                reg = <1>;
+
+                mipi_lvds_0_pxl2dpi_mipi_lvds_0_ldb_ch0: endpoint@0 {
+                    reg = <0>;
+                    远程端点 = <&mipi_lvds_0_ldb_ch0_mipi_lvds_0_pxl2dpi>;
+                };
+
+                mipi_lvds_0_pxl2dpi_mipi_lvds_0_ldb_ch1: endpoint@1 {
+                    reg = <1>;
+                    远程端点 = <&mipi_lvds_0_ldb_ch1_mipi_lvds_0_pxl2dpi>;
+                };
+            };
+        };
+    };

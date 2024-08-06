@@ -1,0 +1,76 @@
+Texas Instruments LM36274 是一款集成的四通道白光 LED (WLED) 驱动器和 LCD 偏置电源。背光升压电路可以为四个并联的 LED 串供电，总输出电压最高可达 29V。通过 I²C 总线或逻辑电平脉冲宽度调制 (PWM) 输入可编程设置 11 位的 LED 电流，范围从 60 μA 到 30 mA。
+
+关于主设备属性的文档，请参考：
+Documentation/devicetree/bindings/mfd/ti-lmu.txt
+
+关于稳压器属性的文档，请参考：
+Documentation/devicetree/bindings/regulator/lm363x-regulator.txt
+
+必需的背光属性包括：
+- compatible: 
+    "ti,lm36274-backlight"
+- reg : 0
+- #address-cells : 1
+- #size-cells : 0
+- led-sources : 指示将启用哪些 LED 串
+   数值范围从 0 到 3，源编号从 0 开始，因此 LED 串的编号为源编号值加 1
+
+可选的背光属性包括：
+- label : 请参阅 Documentation/devicetree/bindings/leds/common.txt
+- linux,default-trigger : 请参阅 Documentation/devicetree/bindings/leds/common.txt
+
+示例：
+
+HVLED 串 1 和 3 由控制银行 A 控制，HVLED 串 2 由控制银行 B 控制。
+lm36274@11 {
+	compatible = "ti,lm36274";
+	#address-cells = <1>;
+	#size-cells = <0>;
+	reg = <0x11>;
+
+	enable-gpios = <&gpio1 28 GPIO_ACTIVE_HIGH>;
+
+	regulators {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		compatible = "ti,lm363x-regulator";
+
+		enable-gpios = <&pioC 0 GPIO_ACTIVE_HIGH>,
+			       <&pioC 1 GPIO_ACTIVE_HIGH>;
+
+		vboost {
+			regulator-name = "lcd_boost";
+			regulator-min-microvolt = <4000000>;
+			regulator-max-microvolt = <7150000>;
+			regulator-always-on;
+		};
+
+		vpos {
+			regulator-name = "lcd_vpos";
+			regulator-min-microvolt = <4000000>;
+			regulator-max-microvolt = <6500000>;
+		};
+
+		vneg {
+			regulator-name = "lcd_vneg";
+			regulator-min-microvolt = <4000000>;
+			regulator-max-microvolt = <6500000>;
+		};
+	};
+
+	backlight {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		compatible = "ti,lm36274-backlight";
+
+		led@0 {
+			reg = <0>;
+			led-sources = <0 2>;
+			label = "white:backlight_cluster";
+			linux,default-trigger = "backlight";
+		};
+	};
+};
+
+如需了解更多产品信息，请访问以下链接：
+https://www.ti.com/lit/ds/symlink/lm36274.pdf

@@ -1,0 +1,96 @@
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/mfd/nxp,bbnsm.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: NXP 电池支持的非安全模块
+
+维护者:
+  - Jacky Bai <ping.bai@nxp.com>
+
+描述: |
+  NXP BBNSM 作为系统中的非易失性逻辑和存储。
+  它集成了实时时钟（RTC）与开/关控制功能。
+  即使主芯片断电，RTC 也能保持其状态并继续计数。当实时计数器的最高有效 32 位与时间报警寄存器中的值匹配时，将生成一个时间报警。
+  BBNSM 内部的开/关逻辑允许直接连接到电源管理 IC（PMIC）或其他电压调节设备。支持智能 PMIC 模式和简单 PMIC 模式。
+
+属性:
+  compatible:
+    items:
+      - 枚举:
+          - nxp,imx93-bbnsm
+      - 常量: syscon
+      - 常量: simple-mfd
+
+  reg:
+    maxItems: 1
+
+  rtc:
+    类型: 对象
+    $ref: /schemas/rtc/rtc.yaml#
+
+    属性:
+      compatible:
+        枚举:
+          - nxp,imx93-bbnsm-rtc
+
+      interrupts:
+        maxItems: 1
+
+      start-year: 真
+
+    必需:
+      - compatible
+      - interrupts
+
+    额外属性: 错误
+
+  pwrkey:
+    类型: 对象
+    $ref: /schemas/input/input.yaml#
+
+    属性:
+      compatible:
+        枚举:
+          - nxp,imx93-bbnsm-pwrkey
+
+      interrupts:
+        maxItems: 1
+
+      linux,code: 真
+
+    必需:
+      - compatible
+      - interrupts
+
+    额外属性: 错误
+
+必需:
+  - compatible
+  - reg
+  - rtc
+  - pwrkey
+
+额外属性: 错误
+
+示例:
+  - |
+    #include <dt-bindings/input/linux-event-codes.h>
+    #include <dt-bindings/interrupt-controller/arm-gic.h>
+
+    bbnsm: bbnsm@44440000 {
+        compatible = "nxp,imx93-bbnsm", "syscon", "simple-mfd";
+        reg = <0x44440000 0x10000>;
+
+        bbnsm_rtc: rtc {
+            compatible = "nxp,imx93-bbnsm-rtc";
+            interrupts = <GIC_SPI 73 IRQ_TYPE_LEVEL_HIGH>;
+        };
+
+        bbnsm_pwrkey: pwrkey {
+            compatible = "nxp,imx93-bbnsm-pwrkey";
+            interrupts = <GIC_SPI 73 IRQ_TYPE_LEVEL_HIGH>;
+            linux,code = <KEY_POWER>;
+        };
+    };

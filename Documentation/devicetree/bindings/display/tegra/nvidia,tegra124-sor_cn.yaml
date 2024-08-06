@@ -1,0 +1,190 @@
+# SPDX-文件许可人: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/display/tegra/nvidia,tegra124-sor.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: NVIDIA Tegra SOR 输出编码器
+
+maintainers:
+  - Thierry Reding <thierry.reding@gmail.com>
+  - Jon Hunter <jonathanh@nvidia.com>
+
+description: |
+  串行输出资源 (SOR) 可用于驱动 HDMI、LVDS、eDP 和 DP 输出。
+properties:
+  $nodename:
+    pattern: "^sor@[0-9a-f]+$"
+
+  compatible:
+    oneOf:
+      - enum:
+          - nvidia,tegra124-sor
+          - nvidia,tegra210-sor
+          - nvidia,tegra210-sor1
+          - nvidia,tegra186-sor
+          - nvidia,tegra186-sor1
+          - nvidia,tegra194-sor
+
+      - items:
+          - const: nvidia,tegra132-sor
+          - const: nvidia,tegra124-sor
+
+  reg:
+    maxItems: 1
+
+  interrupts:
+    maxItems: 1
+
+  clocks:
+    minItems: 5
+    maxItems: 6
+
+  clock-names:
+    minItems: 5
+    maxItems: 6
+
+  resets:
+    items:
+      - description: 模块复位
+
+  reset-names:
+    items:
+      - const: sor
+
+  power-domains:
+    maxItems: 1
+
+  avdd-io-hdmi-dp-supply:
+    description: HDMI/DP 的 I/O 供电
+
+  vdd-hdmi-dp-pll-supply:
+    description: HDMI/DP 的 PLL 供电
+
+  hdmi-supply:
+    description: +5.0V HDMI 连接器供电，对于 HDMI 是必需的
+
+  # Tegra186 及以后版本
+  nvidia,interface:
+    description: SOR 接口的索引
+    $ref: /schemas/types.yaml#/definitions/uint32
+
+  nvidia,ddc-i2c-bus:
+    description: 用于 DDC EDID 探测的 I2C 控制器的 phandle
+    $ref: /schemas/types.yaml#/definitions/phandle
+
+  nvidia,hpd-gpio:
+    description: 规定了用于热插拔检测的 GPIO
+    maxItems: 1
+
+  nvidia,edid:
+    description: 提供二进制 EDID 数据块
+    $ref: /schemas/types.yaml#/definitions/uint8-array
+
+  nvidia,panel:
+    description: 显示面板的 phandle，对于 eDP 是必需的
+    $ref: /schemas/types.yaml#/definitions/phandle
+
+  nvidia,xbar-cfg:
+    description: 包含交叉矩阵配置的 5 个单元格
+每个 SOR 的通道通过交叉矩阵映射到由单元格值指定的端口
+$ref: /schemas/types.yaml#/definitions/uint32-array
+
+  # 当驱动 eDP 输出时是可选的
+  nvidia,dpaux:
+    description: 显示端口 AUX 接口的 phandle
+    $ref: /schemas/types.yaml#/definitions/phandle
+
+allOf:
+  - if:
+      properties:
+        compatible:
+          contains:
+            enum:
+              - nvidia,tegra186-sor
+              - nvidia,tegra194-sor
+    then:
+      properties:
+        clocks:
+          items:
+            - description: SOR 硬件的时钟输入
+            - description: SOR 输出时钟
+            - description: 像素时钟的输入
+            - description: SOR 时钟的参考时钟
+            - description: SOR 时钟在上电期间的安全参考时钟
+            - description: SOR 端口输出时钟
+
+        clock-names:
+          items:
+            - const: sor
+            - enum:
+                - source # 已弃用
+                - out
+            - const: parent
+            - const: dp
+            - const: safe
+            - const: pad
+    else:
+      properties:
+        clocks:
+          items:
+            - description: SOR 硬件的时钟输入
+            - description: SOR 输出时钟
+            - description: 像素时钟的输入
+            - description: SOR 时钟的参考时钟
+            - description: SOR 时钟在上电期间的安全参考时钟
+
+        clock-names:
+          items:
+            - const: sor
+            - enum:
+                - source # 已弃用
+                - out
+            - const: parent
+            - const: dp
+            - const: safe
+
+additionalProperties: false
+
+required:
+  - compatible
+  - reg
+  - interrupts
+  - clocks
+  - clock-names
+  - resets
+  - reset-names
+  - avdd-io-hdmi-dp-supply
+  - vdd-hdmi-dp-pll-supply
+
+examples:
+  - |
+    #include <dt-bindings/clock/tegra210-car.h>
+    #include <dt-bindings/gpio/tegra-gpio.h>
+    #include <dt-bindings/interrupt-controller/arm-gic.h>
+
+    sor0: sor@54540000 {
+        compatible = "nvidia,tegra210-sor";
+        reg = <0x54540000 0x00040000>;
+        interrupts = <GIC_SPI 76 IRQ_TYPE_LEVEL_HIGH>;
+        clocks = <&tegra_car TEGRA210_CLK_SOR0>,
+                 <&tegra_car TEGRA210_CLK_SOR0_OUT>,
+                 <&tegra_car TEGRA210_CLK_PLL_D_OUT0>,
+                 <&tegra_car TEGRA210_CLK_PLL_DP>,
+                 <&tegra_car TEGRA210_CLK_SOR_SAFE>;
+        clock-names = "sor", "out", "parent", "dp", "safe";
+        resets = <&tegra_car 182>;
+        reset-names = "sor";
+        pinctrl-0 = <&state_dpaux_aux>;
+        pinctrl-1 = <&state_dpaux_i2c>;
+        pinctrl-2 = <&state_dpaux_off>;
+        pinctrl-names = "aux", "i2c", "off";
+        power-domains = <&pd_sor>;
+
+        avdd-io-hdmi-dp-supply = <&avdd_1v05>;
+        vdd-hdmi-dp-pll-supply = <&vdd_1v8>;
+        hdmi-supply = <&vdd_hdmi>;
+
+        nvidia,ddc-i2c-bus = <&hdmi_ddc>;
+        nvidia,hpd-gpio = <&gpio TEGRA_GPIO(CC, 1) GPIO_ACTIVE_LOW>;
+    };

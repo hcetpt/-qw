@@ -1,0 +1,45 @@
+* Marvell Armada 7K/8K PCIe 接口
+
+此 PCIe 主机控制器基于 Synopsys DesignWare PCIe IP，
+因此继承了在 `snps,dw-pcie.yaml` 中定义的所有通用属性。
+必需的属性：
+- `compatible`: "marvell,armada8k-pcie"
+- `reg`: 必须包含两个寄存器区域
+   - 控制寄存器区域
+   - 配置空间区域
+- `reg-names`:
+   - "ctrl" 表示控制寄存器区域
+   - "config" 表示配置空间区域
+- `interrupts`: PCIe 控制器的中断指定符
+- `clocks`: 对 PCIe 控制器时钟的引用
+- `clock-names`: 如果存在第二个时钟，则为必填项；在此情况下，第一个时钟的名称必须为 "core"，第二个时钟的名称为 "reg"
+
+可选属性：
+- `phys`: PHY 节点的 phandle（一个或多个），这些 PHY 节点遵循通用 PHY 绑定。根据 PCIe 通道的数量，可能需要 1、2 或 4 个 PHY。
+- `phy-names`: 对应于通道数量的 PHY 名称。对于 2 个 PHY，名称必须为 "cp0-pcie0-x4-lane0-phy" 和 "cp0-pcie0-x4-lane1-phy"。
+
+示例：
+
+```yaml
+pcie@f2600000 {
+    compatible = "marvell,armada8k-pcie", "snps,dw-pcie";
+    reg = <0 0xf2600000 0 0x10000>, <0 0xf6f00000 0 0x80000>;
+    reg-names = "ctrl", "config";
+    #address-cells = <3>;
+    #size-cells = <2>;
+    #interrupt-cells = <1>;
+    device_type = "pci";
+    dma-coherent;
+
+    bus-range = <0 0xff>;
+    ranges = <0x81000000 0 0xf9000000 0  0xf9000000 0 0x10000  /* 下游 I/O */
+              0x82000000 0 0xf6000000 0  0xf6000000 0 0xf00000>; /* 不可预取内存 */
+    interrupt-map-mask = <0 0 0 0>;
+    interrupt-map = <0 0 0 0 &gic 0 GIC_SPI 32 IRQ_TYPE_LEVEL_HIGH>;
+    interrupts = <GIC_SPI 32 IRQ_TYPE_LEVEL_HIGH>;
+    num-lanes = <1>;
+    clocks = <&cpm_syscon0 1 13>;
+};
+```
+
+以上是关于 Marvell Armada 7K/8K 系列中 PCIe 接口的配置说明和示例。

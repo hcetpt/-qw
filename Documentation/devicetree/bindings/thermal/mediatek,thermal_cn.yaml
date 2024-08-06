@@ -1,0 +1,93 @@
+# SPDX-许可证标识符: GPL-2.0-only 或 BSD-2-Clause
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/thermal/mediatek,thermal.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: 用于片上温度的联发科热控制器
+
+维护者:
+  - Sascha Hauer <s.hauer@pengutronix.de>
+
+描述:
+  该设备没有自己的ADC，而是通过AHB总线访问直接控制AUXADC。因此它需要指向AUXADC的phandle。此外，它还通过AHB总线访问来控制apmixedsys寄存器空间中的复用器，因此也需要指向APMIXEDSYS的phandle。
+allOf:
+  - $ref: thermal-sensor.yaml#
+
+属性:
+  compatible:
+    枚举:
+      - mediatek,mt2701-thermal
+      - mediatek,mt2712-thermal
+      - mediatek,mt7622-thermal
+      - mediatek,mt7981-thermal
+      - mediatek,mt7986-thermal
+      - mediatek,mt8173-thermal
+      - mediatek,mt8183-thermal
+      - mediatek,mt8365-thermal
+      - mediatek,mt8516-thermal
+
+  reg:
+    最大项目数: 1
+
+  interrupts:
+    最大项目数: 1
+
+  clocks:
+    项目:
+      - 描述: 用于寄存器访问的主要时钟
+      - 描述: AUXADC时钟
+
+  clock-names:
+    项目:
+      - 常量: therm
+      - 常量: auxadc
+
+  mediatek,auxadc:
+    $ref: /schemas/types.yaml#/definitions/phandle
+    描述: 指向热控制器使用的AUXADC的phandle
+
+  mediatek,apmixedsys:
+    $ref: /schemas/types.yaml#/definitions/phandle
+    描述: 指向APMIXEDSYS控制器的phandle
+
+  resets:
+    描述: 控制热控制器的重置控制器
+
+  nvmem-cells:
+    项目:
+      - 描述:
+          NVMEM单元，其中包含指向由NVMEM设备提供的校准数据的EEPROMA phandle。如果未指定，则应使用默认值
+nvmem-cell-names:
+    项目:
+      - 常量: calibration-data
+
+必需:
+  - reg
+  - interrupts
+  - clocks
+  - clock-names
+  - mediatek,auxadc
+  - mediatek,apmixedsys
+
+未评估属性: false
+
+示例:
+  - |
+    #include <dt-bindings/interrupt-controller/irq.h>
+    #include <dt-bindings/clock/mt8173-clk.h>
+    #include <dt-bindings/reset/mt8173-resets.h>
+
+    thermal@1100b000 {
+        compatible = "mediatek,mt8173-thermal";
+        reg = <0x1100b000 0x1000>;
+        interrupts = <0 70 IRQ_TYPE_LEVEL_LOW>;
+        clocks = <&pericfg CLK_PERI_THERM>, <&pericfg CLK_PERI_AUXADC>;
+        clock-names = "therm", "auxadc";
+        resets = <&pericfg MT8173_PERI_THERM_SW_RST>;
+        mediatek,auxadc = <&auxadc>;
+        mediatek,apmixedsys = <&apmixedsys>;
+        nvmem-cells = <&thermal_calibration_data>;
+        nvmem-cell-names = "calibration-data";
+        #thermal-sensor-cells = <1>;
+    };

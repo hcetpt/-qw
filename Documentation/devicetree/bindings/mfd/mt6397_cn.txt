@@ -1,0 +1,101 @@
+MediaTek MT6397/MT6323 多功能设备驱动程序
+
+MT6397/MT6323 是一款具有以下子模块的多功能设备：
+- 电压调节器（Regulator）
+- 实时时钟（RTC）
+- 音频编解码器（Audio codec）
+- 通用输入输出接口（GPIO）
+- 时钟（Clock）
+- 发光二极管（LED）
+- 按键（Keys）
+- 电源控制器（Power controller）
+
+该设备通过SPI接口与主机控制器进行通信，使用一个名为PMIC封装器或pwrap的专有硬件。MT6397/MT6323多功能设备是pwrap的一个子设备。
+有关pwrap节点定义，请参阅：`../soc/mediatek/mediatek,pwrap.yaml`
+
+本文档描述了多功能设备及其子模块的绑定规则。
+**必需属性**：
+- `compatible`：
+    - 对于PMIC MT6323，应为 `"mediatek,mt6323"`
+    - 对于PMIC MT6331，应为 `"mediatek,mt6331"`
+    - 对于PMIC MT6332，应为 `"mediatek,mt6331"` (假设与MT6331兼容)
+    - 对于PMIC MT6357，应为 `"mediatek,mt6357"`
+    - 对于PMIC MT6358，应为 `"mediatek,mt6358"`
+    - 对于PMIC MT6359，应为 `"mediatek,mt6359"`
+    - 对于PMIC MT6366，应为 `"mediatek,mt6366"` 或 `"mediatek,mt6358"` (假设与MT6358兼容)
+    - 对于PMIC MT6397，应为 `"mediatek,mt6397"`
+
+**可选子节点**：
+
+- `rtc`（实时时钟）：
+    - 必需属性：应为以下之一
+        - `compatible`: `"mediatek,mt6323-rtc"`
+        - `compatible`: `"mediatek,mt6331-rtc"`
+        - `compatible`: `"mediatek,mt6358-rtc"`
+        - `compatible`: `"mediatek,mt6397-rtc"`
+    - 详情请参阅 `../rtc/rtc-mt6397.txt`
+- `regulators`（电压调节器）：
+    - 必需属性：
+        - `compatible`: `"mediatek,mt6323-regulator"`，详情请参阅 `../regulator/mt6323-regulator.txt`
+        - `compatible`: `"mediatek,mt6358-regulator"`，详情请参阅 `../regulator/mt6358-regulator.txt`
+        - `compatible`: `"mediatek,mt6366-regulator"` 或 `"mediatek-mt6358-regulator"`，详情请参阅 `../regulator/mt6358-regulator.txt`
+        - `compatible`: `"mediatek,mt6397-regulator"`，详情请参阅 `../regulator/mt6397-regulator.txt`
+- `codec`（音频编解码器）：
+    - 必需属性：
+        - `compatible`: `"mediatek,mt6397-codec"` 或 `"mediatek,mt6358-sound"`
+- `clk`（时钟）：
+    - 必需属性：
+        - `compatible`: `"mediatek,mt6397-clk"`
+- `led`（发光二极管）：
+    - 必需属性：
+        - `compatible`: `"mediatek,mt6323-led"`，详情请参阅 `../leds/leds-mt6323.txt`
+- `keys`（按键）：
+    - 必需属性：应为以下之一
+        - `compatible`: `"mediatek,mt6323-keys"`
+        - `compatible`: `"mediatek,mt6331-keys"`
+        - `compatible`: `"mediatek,mt6397-keys"`
+    - 详情请参阅 `../input/mtk-pmic-keys.txt`
+- `power-controller`（电源控制器）：
+    - 必需属性：
+        - `compatible`: `"mediatek,mt6323-pwrc"`，详情请参阅 `../power/reset/mt6323-poweroff.txt`
+- `pin-controller`（引脚控制器）：
+    - 必需属性：
+        - `compatible`: `"mediatek,mt6397-pinctrl"`，详情请参阅 `../pinctrl/pinctrl-mt65xx.txt`
+
+**示例**：
+```yaml
+pwrap: pwrap@1000f000 {
+    compatible = "mediatek,mt8135-pwrap";
+
+    ...
+
+    pmic {
+        compatible = "mediatek,mt6397";
+
+        codec: mt6397codec {
+            compatible = "mediatek,mt6397-codec";
+        };
+
+        regulators {
+            compatible = "mediatek,mt6397-regulator";
+
+            mt6397_vpca15_reg: buck_vpca15 {
+                regulator-compatible = "buck_vpca15";
+                regulator-name = "vpca15";
+                regulator-min-microvolt = <850000>;
+                regulator-max-microvolt = <1400000>;
+                regulator-ramp-delay = <12500>;
+                regulator-always-on;
+            };
+
+            mt6397_vgp4_reg: ldo_vgp4 {
+                regulator-compatible = "ldo_vgp4";
+                regulator-name = "vgp4";
+                regulator-min-microvolt = <1200000>;
+                regulator-max-microvolt = <3300000>;
+                regulator-enable-ramp-delay = <218>;
+            };
+        };
+    };
+};
+```

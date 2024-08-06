@@ -1,0 +1,33 @@
+# SPDX-许可证标识符: GPL-2.0-only 或 BSD-2-Clause
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/power/reset/qcom,pshold.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: 高通 SoC 重启和关机
+
+维护者:
+  - Bjorn Andersson <bjorn.andersson@linaro.org>
+
+描述:
+  一个电源供应保持 (ps-hold) 位被设置以供电给高通芯片组。
+清除该位允许我们进行重启/关机。重启与关机之间的区别由特定的电源管理 IC 设置决定。
+属性:
+  compatible:
+    常量: qcom,pshold
+
+  reg:
+    最大项数: 1
+
+必需:
+  - compatible
+  - reg
+
+额外属性: false
+
+示例:
+  - |
+    reset-controller@fc4ab000 {
+        compatible = "qcom,pshold";
+        reg = <0xfc4ab000 0x4>;
+    };

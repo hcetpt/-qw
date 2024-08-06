@@ -1,0 +1,174 @@
+# SPDX-许可证标识符: GPL-2.0
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/display/bridge/lvds-codec.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: 透明的 LVDS 编码器和解码器
+
+维护者:
+  - Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
+
+描述: |
+  此绑定支持那些不需要任何配置的透明 LVDS 编码器和解码器。
+LVDS 是在 ANSI/TIA/EIA-644-A 中定义的一种物理层规范。随着时间推移，已经使用了多种不兼容的数据链路层来向 LVDS 面板传输图像数据。此绑定仅针对以下规范兼容的设备：
+[JEIDA] "显示器数字接口标准", JEIDA-59-1999, 1999 年 2 月 (版本 1.0), 日本电子工业发展协会 (JEIDA)
+[LDI] "开放 LVDS 显示接口", 1999 年 5 月 (版本 0.95), 国家半导体
+[VESA] "VESA 笔记本面板标准", 2007 年 10 月 (版本 1.0), 视频电子标准协会 (VESA)
+
+  这些设备通常以 FPD-Link 和 FlatLink 等品牌名称销售。
+属性:
+  compatible:
+    oneOf:
+      - items:
+          - enum:
+              - ti,ds90c185   # 对于 TI DS90C185 FPD-Link 序列化器
+              - ti,ds90c187   # 对于 TI DS90C187 FPD-Link 序列化器
+              - ti,sn75lvds83 # 对于 TI SN75LVDS83 FlatLink 发射器
+          - const: lvds-encoder # 通用 LVDS 编码器兼容回退
+      - items:
+          - enum:
+              - ti,ds90cf364a # 对于 DS90CF364A FPD-Link LVDS 接收器
+              - ti,ds90cf384a # 对于 DS90CF384A FPD-Link LVDS 接收器
+              - ti,sn65lvds94 # 对于 SN65DS94 LVDS 串并转换器
+          - const: lvds-decoder # 通用 LVDS 解码器兼容回退
+      - enum:
+          - thine,thc63lvdm83d # 对于 THC63LVDM83D LVDS 序列化器
+
+  ports:
+    $ref: /schemas/graph.yaml#/properties/ports
+
+    properties:
+      port@0:
+        $ref: /schemas/graph.yaml#/$defs/port-base
+        unevaluatedProperties: false
+        description: |
+          对于 LVDS 编码器，端口 0 是并行输入
+          对于 LVDS 解码器，端口 0 是 LVDS 输入
+
+        properties:
+          endpoint:
+            $ref: /schemas/media/video-interfaces.yaml#
+            unevaluatedProperties: false
+
+            properties:
+              data-mapping:
+                enum:
+                  - jeida-18
+                  - jeida-24
+                  - vesa-24
+                description: |
+                  颜色信号映射顺序。详情见
+                  文档/devicetree/bindings/display/lvds.yaml
+
+      port@1:
+        $ref: /schemas/graph.yaml#/properties/port
+        description: |
+          对于 LVDS 编码器，端口 1 是 LVDS 输出
+          对于 LVDS 解码器，端口 1 是并行输出
+
+    required:
+      - port@0
+      - port@1
+
+  pclk-sample:
+    description:
+      在上升沿或下降沿进行数据采样
+enum:
+      - 0  # 下降沿
+      - 1  # 上升沿
+    default: 0
+
+  powerdown-gpios:
+    description:
+      用于控制该设备电源线的 GPIO
+maxItems: 1
+
+  power-supply: true
+
+allOf:
+  - if:
+      not:
+        properties:
+          compatible:
+            contains:
+              const: lvds-decoder
+    then:
+      properties:
+        ports:
+          properties:
+            port@0:
+              properties:
+                endpoint:
+                  properties:
+                    data-mapping: false
+
+  - if:
+      not:
+        properties:
+          compatible:
+            contains:
+              const: lvds-encoder
+    then:
+      properties:
+        pclk-sample: false
+
+required:
+  - compatible
+  - ports
+
+additionalProperties: false
+
+
+示例:
+  - |
+    lvds-encoder {
+      compatible = "ti,ds90c185", "lvds-encoder";
+
+      ports {
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        port@0 {
+          reg = <0>;
+
+          lvds_enc_in: endpoint {
+            remote-endpoint = <&display_out_rgb>;
+          };
+        };
+
+        port@1 {
+          reg = <1>;
+
+          lvds_enc_out: endpoint {
+            remote-endpoint = <&lvds_panel_in>;
+          };
+        };
+      };
+    };
+
+  - |
+    lvds-decoder {
+      compatible = "ti,ds90cf384a", "lvds-decoder";
+
+      ports {
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        port@0 {
+          reg = <0>;
+
+          lvds_dec_in: endpoint {
+            remote-endpoint = <&display_out_lvds>;
+          };
+        };
+
+        port@1 {
+          reg = <1>;
+
+          lvds_dec_out: endpoint {
+            remote-endpoint = <&rgb_panel_in>;
+          };
+        };
+      };
+    };

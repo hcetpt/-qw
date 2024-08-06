@@ -1,0 +1,124 @@
+以下是提供的 YAML 文件的中文翻译：
+
+```yaml
+# SPDX-许可证标识符: GPL-2.0
+# 版权 (C) 2021 Sebastian Reichel
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/power/supply/bq24257.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: Bq24250、bq24251 和 bq24257 锂离子充电器
+
+维护者:
+  - Sebastian Reichel <sre@kernel.org>
+
+allOf:
+  - $ref: power-supply.yaml#
+
+属性:
+  compatible:
+    枚举:
+      - ti,bq24250
+      - ti,bq24251
+      - ti,bq24257
+
+  reg:
+    最大项数: 1
+
+  interrupts:
+    最大项数: 1
+
+  ti,battery-regulation-voltage:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    描述: 最大充电电压（微伏）
+
+  ti,charge-current:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    描述: 最大充电电流（微安）
+
+  ti,termination-current:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    描述: |
+      当恒压阶段的充电电流下降到此值（微安）以下时，将终止充电。
+
+  pg-gpios:
+    描述: |
+      用于连接 bq2425x 设备 PG（电源良好）引脚的 GPIO。
+      此引脚并非所有设备都有，但如果可能的话应该使用，因为这是获取充电器输入 PG 状态的推荐方法。如果没有指定此引脚，则会采用基于软件的方法来检测 PG。
+    最大项数: 1
+
+  ti,current-limit:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    描述: |
+      充电器输入的最大电流（微安）
+      如果未指定此属性，则会自动设置输入限流电流，使用 USB D+/D- 信号来检测充电器类型。
+      如果硬件不支持基于 D+/D- 的检测，则默认使用 500,000（=500毫安）。
+
+  ti,ovp-voltage:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    描述: |
+      配置过压保护电压（微伏）
+      如果未指定，则使用默认值 6,5000,000（=6.5伏）。
+
+  ti,in-dpm-voltage:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    描述: |
+      配置动态功率路径管理的阈值输入电压（微伏）
+      如果未指定，则使用默认值 4,360,000（=4.36伏）。
+
+必需:
+  - compatible
+  - reg
+  - interrupts
+  - ti,battery-regulation-voltage
+  - ti,charge-current
+  - ti,termination-current
+
+额外属性: false
+
+示例:
+  - |
+    #include <dt-bindings/gpio/gpio.h>
+    #include <dt-bindings/interrupt-controller/irq.h>
+    i2c {
+      #address-cells = <1>;
+      #size-cells = <0>;
+
+      charger@6a {
+        compatible = "ti,bq24257";
+        reg = <0x6a>;
+        interrupt-parent = <&gpio1>;
+        interrupts = <16 IRQ_TYPE_EDGE_BOTH>;
+
+        pg-gpios = <&gpio1 28 GPIO_ACTIVE_HIGH>;
+
+        ti,battery-regulation-voltage = <4200000>;
+        ti,charge-current = <1000000>;
+        ti,termination-current = <50000>;
+      };
+    };
+  - |
+    #include <dt-bindings/gpio/gpio.h>
+    #include <dt-bindings/interrupt-controller/irq.h>
+    i2c {
+      #address-cells = <1>;
+      #size-cells = <0>;
+
+      charger@6a {
+        compatible = "ti,bq24250";
+        reg = <0x6a>;
+        interrupt-parent = <&gpio1>;
+        interrupts = <16 IRQ_TYPE_EDGE_BOTH>;
+
+        ti,battery-regulation-voltage = <4200000>;
+        ti,charge-current = <500000>;
+        ti,termination-current = <50000>;
+        ti,current-limit = <900000>;
+        ti,ovp-voltage = <9500000>;
+        ti,in-dpm-voltage = <4440000>;
+      };
+    };
+```
+
+请注意，由于 YAML 是一种数据格式，其关键字和结构通常不会翻译。因此，上面的翻译保留了原始 YAML 结构中的关键字和符号，并仅翻译了描述性文本。

@@ -1,0 +1,110 @@
+d) Xilinx IP 核心
+
+Xilinx EDK 工具链随附了一套 IP 核心（设备），用于在 Xilinx Spartan 和 Virtex 现场可编程门阵列 (FPGA) 中使用。这些设备覆盖了整个标准设备类型范围（如网络、串行等）以及各种其他设备（如 GPIO、LCD、SPI 等）。此外，由于这些设备是在 FPGA 布局内实现的，因此每个设备实例都可以用不同的选项进行综合，以改变其行为。
+每个 IP 核心都有一组参数，FPGA 设计人员可以使用这些参数来控制核心如何被综合。传统上，EDK 工具会提取与设备驱动程序相关的设备参数，并将它们以 `#define` 符号的形式复制到 `xparameters.h` 文件中。这告诉设备驱动程序 IP 核心是如何配置的，但它要求每当 FPGA 位流重新综合时都要重新编译内核。
+新的方法是将这些参数导出到设备树中，并且每次 FPGA 位流发生变化时生成一个新的设备树。以前作为 `#define` 符号导出的参数现在将成为设备节点的属性。一般来说，IP 核心的设备节点将采取以下形式：
+
+	(name): (generic-name)@(base-address) {
+		compatible = "xlnx,(ip-core-name)-(HW_VER)"
+			     [, (list of compatible devices), ...];
+		reg = <(baseaddr) (size)>;
+		interrupt-parent = <&interrupt-controller-phandle>;
+		interrupts = < ... >;
+		xlnx,(parameter1) = "(string-value)";
+		xlnx,(parameter2) = <(int-value)>;
+	};
+
+	(generic-name):   一个开放固件风格的名称，描述设备的一般类别。最好是一个单词，比如“serial”或“ethernet”
+(ip-core-name):	IP 块的名称（在 system.mhs 中 BEGIN 指令后给出）。应为小写，所有下划线 '_' 应转换为破折号 '-'
+(name):	来源于 "PARAMETER INSTANCE" 的值
+(parameter#):	system.mhs 中的 C_* 参数。从参数名称中去掉 C_ 前缀，将名称转换为小写，并将所有下划线 '_' 字符转换为破折号 '-'
+(baseaddr):	baseaddr 参数值（通常命名为 C_BASEADDR）
+(HW_VER):	HW_VER 参数
+(size):	地址范围大小（通常是 C_HIGHADDR - C_BASEADDR + 1）
+通常，兼容列表将包括确切的 IP 核心版本，后面跟着较旧的 IP 核心版本，该版本实现了相同的接口，或者任何具有相同接口的其他设备。
+'reg' 和 'interrupts' 都是可选属性。
+例如，system.mhs 中的以下块：
+
+```
+BEGIN opb_uartlite
+	PARAMETER INSTANCE = opb_uartlite_0
+	PARAMETER HW_VER = 1.00.b
+	PARAMETER C_BAUDRATE = 115200
+	PARAMETER C_DATA_BITS = 8
+	PARAMETER C_ODD_PARITY = 0
+	PARAMETER C_USE_PARITY = 0
+	PARAMETER C_CLK_FREQ = 50000000
+	PARAMETER C_BASEADDR = 0xEC100000
+	PARAMETER C_HIGHADDR = 0xEC10FFFF
+	BUS_INTERFACE SOPB = opb_7
+	PORT OPB_Clk = CLK_50MHz
+	PORT Interrupt = opb_uartlite_0_Interrupt
+	PORT RX = opb_uartlite_0_RX
+	PORT TX = opb_uartlite_0_TX
+	PORT OPB_Rst = sys_bus_reset_0
+END
+```
+
+转换为以下设备树节点：
+
+```
+opb_uartlite_0: serial@ec100000 {
+	device_type = "serial";
+	compatible = "xlnx,opb-uartlite-1.00.b";
+	reg = <ec100000 10000>;
+	interrupt-parent = <&opb_intc_0>;
+	interrupts = <1 0>; // 这是从 opb_intc 参数中得到的
+	current-speed = <d#115200>;	// 标准串行设备属性
+	clock-frequency = <d#50000000>;	// 标准串行设备属性
+	xlnx,data-bits = <8>;
+	xlnx,odd-parity = <0>;
+	xlnx,use-parity = <0>;
+};
+```
+
+这涵盖了将Xilinx IP内核绑定到设备树的一般方法。以下是针对特定设备的绑定：
+
+1) Xilinx ML300 帧缓冲器
+
+这是来自 ML300 参考设计（同样也在 ML403 参考设计以及其他设计中）的简单帧缓冲器设备。
+可选属性：
+   - resolution = <xres yres>：帧缓冲器的像素分辨率。某些实现使用不同的分辨率，默认值为 <d#640 d#480>。
+   - virt-resolution = <xvirt yvirt>：内存中的帧缓冲器大小，默认值为 <d#1024 d#480>。
+   - rotate-display（空）：旋转显示 180 度。
+
+2) Xilinx SystemACE
+
+Xilinx SystemACE 设备用于从 CF 卡上存储的 FPGA 位流编程 FPGA。它还可以用作通用 CF 接口设备。
+可选属性：
+   - 8-bit（空）：对于处于 8 位模式下的 SystemACE 设置此属性。
+
+3) Xilinx EMAC 和 Xilinx TEMAC
+
+Xilinx 以太网设备。除了上述一般的 Xilinx 属性外，这些设备的节点还应包含一个 phy-handle 属性，并且可能还包括其他常见的网络设备属性，如 local-mac-address。
+
+4) Xilinx Uartlite
+
+Xilinx Uartlite 设备是简单的固定速度串行端口。
+必需属性：
+   - current-speed：Uartlite 的波特率。
+
+5) Xilinx hwicap
+
+Xilinx hwicap 设备提供了通过内部配置访问端口 (ICAP) 访问 FPGA 配置逻辑的功能。ICAP 支持 FPGA 的部分重构、配置信息的读回以及对 FPGA 织构“热启动”的一些控制。
+所需属性：
+    - xlnx,family：FPGA 的系列，这是必需的，因为底层 ICAP 硬件的功能在不同的系列之间有所不同。可以是 'virtex2p'、'virtex4' 或 'virtex5'。
+- compatible：应当包含 "xlnx,xps-hwicap-1.00.a" 或 "xlnx,opb-hwicap-1.00.b"
+
+vi) Xilinx UART 16550
+
+      Xilinx UART 16550 设备与 NS16550 非常相似，但具有不同的寄存器间隔和相对于基地址的偏移量。
+所需属性：
+       - clock-frequency：时钟输入的频率
+       - reg-offset：需要一个值为 3
+       - reg-shift：需要一个值为 2
+
+      vii) Xilinx USB 主控制器
+
+      Xilinx USB 主控制器与 EHCI 兼容，但 EHCI 寄存器的基本地址不同，并且它始终是一个大端模式的 USB 主控制器。硬件可以配置为仅支持高速模式，或同时支持高速/全速混合模式。
+所需属性：
+      - xlnx,support-usb-fs：值为 0 表示核心仅构建为高速模式。值为 1 表示核心还支持全速设备。

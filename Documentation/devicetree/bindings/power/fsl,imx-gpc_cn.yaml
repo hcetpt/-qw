@@ -1,0 +1,138 @@
+# SPDX-文件许可人: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/power/fsl,imx-gpc.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: Freescale i.MX 通用电源控制器
+
+维护者:
+  - Philipp Zabel <p.zabel@pengutronix.de>
+
+描述: |
+  i.MX6 通用电源控制 (GPC) 模块包含 DVFS 负载跟踪计数器和电源门控控制 (PGC)。
+  电源域是作为通用电源域提供者，具体文档请参考
+  文档/devicetree/bindings/power/power-domain.yaml。它们被描述为 GPC 的电源门控控制器 'pgc' 节点的子节点。
+  属于某个电源域的 IP 核心应包含一个 'power-domains' 属性，该属性是一个指向设备所属电源域的 phandle。
+
+属性:
+  compatible:
+    oneOf:
+      - 枚举:
+          - fsl,imx6q-gpc
+      - items:
+          - 枚举:
+              - fsl,imx6qp-gpc
+              - fsl,imx6sl-gpc
+              - fsl,imx6sx-gpc
+              - fsl,imx6ul-gpc
+          - 常量: fsl,imx6q-gpc
+
+  reg:
+    maxItems: 1
+
+  interrupts:
+    maxItems: 1
+
+  interrupt-controller: true
+  '#interrupt-cells':
+    常量: 3
+
+  clocks:
+    maxItems: 1
+
+  clock-names:
+    常量: ipg
+
+  pgc:
+    类型: 对象
+    additionalProperties: false
+    描述: 由这个控制器提供的电源域列表
+属性:
+      '#address-cells':
+        常量: 1
+
+      '#size-cells':
+        常量: 0
+
+    patternProperties:
+      "power-domain@[0-9]$":
+        类型: 对象
+        additionalProperties: false
+
+        属性:
+
+          '#power-domain-cells':
+            常量: 0
+
+          reg:
+            描述: |
+              下列的 DOMAIN_INDEX 值对于 i.MX6Q 是有效的:
+                ARM_DOMAIN     0
+                PU_DOMAIN      1
+              下列额外的 DOMAIN_INDEX 值对于 i.MX6SL 是有效的:
+                DISPLAY_DOMAIN 2
+              下列额外的 DOMAIN_INDEX 值对于 i.MX6SX 是有效的:
+                PCI_DOMAIN     3
+            maxItems: 1
+
+          clocks:
+            描述: |
+              一系列时钟的 phandle，在域启动顺序中需要启用这些时钟以确保重置传播到此电源域内的设备
+minItems: 1
+            maxItems: 7
+
+          power-supply: true
+
+        必需:
+          - '#power-domain-cells'
+          - reg
+
+    必需:
+      - '#address-cells'
+      - '#size-cells'
+
+必需:
+  - compatible
+  - reg
+  - interrupts
+  - clocks
+  - clock-names
+  - pgc
+
+additionalProperties: false
+
+示例:
+  - |
+    #include <dt-bindings/clock/imx6qdl-clock.h>
+    #include <dt-bindings/interrupt-controller/arm-gic.h>
+
+    gpc@20dc000 {
+        compatible = "fsl,imx6q-gpc";
+        reg = <0x020dc000 0x4000>;
+        interrupts = <0 89 IRQ_TYPE_LEVEL_HIGH>;
+        clocks = <&clks IMX6QDL_CLK_IPG>;
+        clock-names = "ipg";
+
+        pgc {
+            #address-cells = <1>;
+            #size-cells = <0>;
+
+            power-domain@0 {
+                reg = <0>;
+                #power-domain-cells = <0>;
+            };
+
+            pd_pu: power-domain@1 {
+                reg = <1>;
+                #power-domain-cells = <0>;
+                power-supply = <&reg_pu>;
+                clocks = <&clks IMX6QDL_CLK_GPU3D_CORE>,
+                         <&clks IMX6QDL_CLK_GPU3D_SHADER>,
+                         <&clks IMX6QDL_CLK_GPU2D_CORE>,
+                         <&clks IMX6QDL_CLK_GPU2D_AXI>,
+                         <&clks IMX6QDL_CLK_OPENVG_AXI>,
+                         <&clks IMX6QDL_CLK_VPU_AXI>;
+            };
+        };
+    };

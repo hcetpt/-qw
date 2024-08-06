@@ -1,0 +1,86 @@
+下面是给定 YAML 文档的中文翻译：
+
+```yaml
+# SPDX-文件许可标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/interconnect/qcom,sm7150-rpmh.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: Qualcomm SM7150 上的 RPMh 网络-on-芯片互连
+
+maintainers:
+  - Danila Tikhonov <danila@jiaxyga.com>
+
+description: |
+  RPMh 互连提供者通过 RPMh 硬件加速器即总线时钟管理器（BCM）支持系统带宽需求。
+参见:: include/dt-bindings/interconnect/qcom,sm7150-rpmh.h
+
+allOf:
+  - $ref: qcom,rpmh-common.yaml#
+
+properties:
+  compatible:
+    enum:
+      - qcom,sm7150-aggre1-noc
+      - qcom,sm7150-aggre2-noc
+      - qcom,sm7150-compute-noc
+      - qcom,sm7150-config-noc
+      - qcom,sm7150-dc-noc
+      - qcom,sm7150-gem-noc
+      - qcom,sm7150-mc-virt
+      - qcom,sm7150-mmss-noc
+      - qcom,sm7150-system-noc
+
+  reg:
+    maxItems: 1
+
+# 子节点属性
+patternProperties:
+  '^interconnect-[0-9]+$':
+    type: object
+    description:
+      互连提供者没有单独的 QoS 寄存器空间，而是共享父级的空间
+allOf:
+      - $ref: qcom,rpmh-common.yaml#
+
+    properties:
+      compatible:
+        enum:
+          - qcom,sm7150-camnoc-virt
+
+    required:
+      - compatible
+
+    unevaluatedProperties: false
+
+required:
+  - compatible
+  - reg
+
+unevaluatedProperties: false
+
+examples:
+  - |
+    mc_virt: interconnect@1380000 {
+        compatible = "qcom,sm7150-mc-virt";
+        reg = <0x01380000 0x40000>;
+        #interconnect-cells = <2>;
+        qcom,bcm-voters = <&apps_bcm_voter>;
+    };
+
+    system_noc: interconnect@1620000 {
+        compatible = "qcom,sm7150-system-noc";
+        reg = <0x01620000 0x40000>;
+        #interconnect-cells = <2>;
+        qcom,bcm-voters = <&apps_bcm_voter>;
+
+        camnoc_virt: interconnect-0 {
+            compatible = "qcom,sm7150-camnoc-virt";
+            #interconnect-cells = <2>;
+            qcom,bcm-voters = <&apps_bcm_voter>;
+        };
+    };
+```
+
+请注意，由于 YAML 是一种数据格式，并非所有的内容都可以直接翻译为中文，例如变量、函数和路径等需要保持原样。因此，在翻译过程中，我尽量保留了这些元素的英文形式。

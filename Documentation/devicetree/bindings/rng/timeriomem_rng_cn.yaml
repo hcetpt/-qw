@@ -1,0 +1,43 @@
+# SPDX-许可证标识符: GPL-2.0-only
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/rng/timeriomem_rng.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: TimerIO 随机数生成器
+
+维护者:
+  - Krzysztof Kozlowski <krzk@kernel.org>
+
+属性:
+  compatible:
+    常量: timeriomem_rng
+
+  period:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    描述: 在样本之间等待的微秒时间
+
+  quality:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    默认: 0
+    描述:
+      从 rng 每读取 1024 位数据中估计的真实熵比特数。
+      默认值为零，这会导致使用内核的默认质量替代。注意，默认质量通常是零，这会禁用使用此 rng 自动填充内核的熵池。
+reg:
+    maxItems: 1
+    描述:
+      采样的基地址。目前 'reg' 必须至少为四个字节宽且 32 位对齐。
+所需:
+  - compatible
+  - period
+  - reg
+
+额外属性: false
+
+示例:
+  - |
+    rng@44 {
+        compatible = "timeriomem_rng";
+        reg = <0x44 0x04>;
+        period = <1000000>;
+    };

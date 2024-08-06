@@ -1,0 +1,46 @@
+下面是给定内容的中文翻译：
+
+```yaml
+# SPDX-文件许可人: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/power/reset/reboot-mode.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: 通用重启模式核心映射
+
+maintainers:
+  - Andy Yan <andy.yan@rock-chips.com>
+
+description: |
+  本驱动程序获取重启模式参数，并调用写接口将魔法值存储在特定寄存器或RAM中。
+  然后，引导加载程序可以读取该值，并根据所存储的参数采取不同的行动。
+所有模式属性都是供应商特定的，它指示引导加载程序在系统重启时应执行的操作，
+并且应该命名为 mode-xxx = <magic>（xxx 是模式名称，magic 应是一个非零值）。
+例如，在 Android 平台上常见的模式包括：
+    - normal: 正常重启模式，通过命令 "reboot" 重启系统
+- recovery: Android 恢复模式，这是一种用于格式化设备或更新新镜像的模式
+- bootloader: Android 快速启动模式，这是一种用于重新刷新基于 Android 的设备上的分区的模式
+- loader: 引导加载模式，这是一种用于在 Rockchip 平台上下载镜像的模式，
+           通常在开发中使用
+properties:
+  mode-normal:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    description:
+      如果没有提供命令，则在重启时设置的默认值
+patternProperties:
+  "^mode-.*$":
+    $ref: /schemas/types.yaml#/definitions/uint32
+
+additionalProperties: true
+
+examples:
+  - |
+    reboot-mode {
+      mode-normal = <0>;
+      mode-recovery = <1>;
+      mode-bootloader = <2>;
+      mode-loader = <3>;
+    };
+```
+```

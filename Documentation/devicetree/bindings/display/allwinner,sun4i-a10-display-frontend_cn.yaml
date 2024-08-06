@@ -1,0 +1,116 @@
+# SPDX-许可证标识符: GPL-2.0
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/display/allwinner,sun4i-a10-display-frontend.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: Allwinner A10 显示引擎前端
+
+维护者:
+  - 陈宇蔡 <wens@csie.org>
+  - 马克西姆·里帕德 <mripard@kernel.org>
+
+描述: |
+  显示引擎前端执行格式转换、缩放、去交织和色彩空间转换。
+属性:
+  compatible:
+    枚举:
+      - allwinner,sun4i-a10-display-frontend
+      - allwinner,sun5i-a13-display-frontend
+      - allwinner,sun6i-a31-display-frontend
+      - allwinner,sun7i-a20-display-frontend
+      - allwinner,sun8i-a23-display-frontend
+      - allwinner,sun8i-a33-display-frontend
+      - allwinner,sun9i-a80-display-frontend
+
+  reg:
+    最大项数: 1
+
+  interrupts:
+    最大项数: 1
+
+  clocks:
+    项:
+      - 描述: 前端接口时钟
+      - 描述: 前端模块时钟
+      - 描述: 前端DRAM时钟
+
+  clock-names:
+    项:
+      - 常量: ahb
+      - 常量: mod
+      - 常量: ram
+
+  # FIXME: 应该最终要求这一点，一旦所有SoC都有MBUS声明
+互连:
+    最大项数: 1
+
+  # FIXME: 应该最终要求这一点，一旦所有SoC都有MBUS声明
+互连名称:
+    常量: dma-mem
+
+  resets:
+    最大项数: 1
+
+  ports:
+    $ref: /schemas/graph.yaml#/properties/ports
+
+    属性:
+      port@0:
+        $ref: /schemas/graph.yaml#/properties/port
+        描述: |
+          控制器的输入端点
+      port@1:
+        $ref: /schemas/graph.yaml#/properties/port
+        描述: |
+          控制器的输出端点
+必需:
+      - port@1
+
+必需:
+  - compatible
+  - reg
+  - interrupts
+  - clocks
+  - clock-names
+  - resets
+  - ports
+
+其他属性: false
+
+示例:
+  - |
+    #include <dt-bindings/clock/sun4i-a10-ccu.h>
+    #include <dt-bindings/reset/sun4i-a10-ccu.h>
+
+    fe0: display-frontend@1e00000 {
+        compatible = "allwinner,sun4i-a10-display-frontend";
+        reg = <0x01e00000 0x20000>;
+        interrupts = <47>;
+        clocks = <&ccu CLK_AHB_DE_FE0>, <&ccu CLK_DE_FE0>,
+                 <&ccu CLK_DRAM_DE_FE0>;
+        clock-names = "ahb", "mod",
+                      "ram";
+        resets = <&ccu RST_DE_FE0>;
+
+        ports {
+            #address-cells = <1>;
+            #size-cells = <0>;
+
+            fe0_out: port@1 {
+                #address-cells = <1>;
+                #size-cells = <0>;
+                reg = <1>;
+
+                fe0_out_be0: endpoint@0 {
+                    reg = <0>;
+                    remote-endpoint = <&be0_in_fe0>;
+                };
+
+                fe0_out_be1: endpoint@1 {
+                    reg = <1>;
+                    remote-endpoint = <&be1_in_fe0>;
+                };
+            };
+        };
+    };

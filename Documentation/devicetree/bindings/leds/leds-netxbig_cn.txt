@@ -1,0 +1,94 @@
+### 绑定用于 LaCie/Seagate 某些主板上的 CPLD LED（GPIO 扩展总线）（示例：2Big/5Big Network v2，2Big NAS）
+
+**所需属性：**
+- `compatible`: `"lacie,netxbig-leds"`
+- `gpio-ext`: GPIO扩展总线的Phandle
+
+**可选属性：**
+- `timers`: 定时器数组。每个定时器条目由三个整数表示：
+  - 模式（GPIO扩展总线）
+  - `delay_on`: 开启延迟
+  - `delay_off`: 关闭延迟
+
+**每个 LED 作为 netxbig-leds 设备的子节点表示**
+
+**必需的子节点属性：**
+- `mode-addr`: GPIO扩展总线上模式寄存器地址
+- `mode-val`: 模式到值的映射。每个条目由两个整数表示：
+  - 一种模式和相应的GPIO扩展总线上的值
+- `bright-addr`: GPIO扩展总线上亮度寄存器地址
+- `max-brightness`: 最大亮度值
+
+**可选的子节点属性：**
+- `label`: 此LED的名称。如果省略，则从节点名称中获取标签。
+在Linux中，default-trigger: 分配给LED的触发器。
+示例：
+
+netxbig-leds {
+	兼容 = "lacie,netxbig-leds";
+
+	gpio-ext = &gpio_ext;
+
+	定时器 = <NETXBIG_LED_TIMER1 500 500 
+		  NETXBIG_LED_TIMER2 500 1000>;
+
+	蓝光-电源 {
+		标签 = "netxbig:blue:power";
+		模式地址 = <0>;
+		模式值 = <NETXBIG_LED_OFF 0 
+			    NETXBIG_LED_ON 1 
+			    NETXBIG_LED_TIMER1 3 
+			    NETXBIG_LED_TIMER2 7>;
+		亮度地址 = <1>;
+		最大亮度 = <7>;
+	};
+	红光-电源 {
+		标签 = "netxbig:red:power";
+		模式地址 = <0>;
+		模式值 = <NETXBIG_LED_OFF 0 
+			    NETXBIG_LED_ON 2 
+			    NETXBIG_LED_TIMER1 4>;
+		亮度地址 = <1>;
+		最大亮度 = <7>;
+	};
+	蓝光-SATA0 {
+		标签 = "netxbig:blue:sata0";
+		模式地址 = <3>;
+		模式值 = <NETXBIG_LED_OFF 0 
+			    NETXBIG_LED_ON 7 
+			    NETXBIG_LED_SATA 1 
+			    NETXBIG_LED_TIMER1 3>;
+		亮度地址 = <2>;
+		最大亮度 = <7>;
+	};
+	红光-SATA0 {
+		标签 = "netxbig:red:sata0";
+		模式地址 = <3>;
+		模式值 = <NETXBIG_LED_OFF 0 
+			    NETXBIG_LED_ON 2 
+			    NETXBIG_LED_TIMER1 4>;
+		亮度地址 = <2>;
+		最大亮度 = <7>;
+	};
+	蓝光-SATA1 {
+		标签 = "netxbig:blue:sata1";
+		模式地址 = <4>;
+		模式值 = <NETXBIG_LED_OFF 0 
+			    NETXBIG_LED_ON 7 
+			    NETXBIG_LED_SATA 1 
+			    NETXBIG_LED_TIMER1 3>;
+		亮度地址 = <2>;
+		最大亮度 = <7>;
+	};
+	红光-SATA1 {
+		标签 = "netxbig:red:sata1";
+		模式地址 = <4>;
+		模式值 = <NETXBIG_LED_OFF 0 
+			    NETXBIG_LED_ON 2 
+			    NETXBIG_LED_TIMER1 4>;
+		亮度地址 = <2>;
+		最大亮度 = <7>;
+	};
+};
+
+请注意，“兼容”、“定时器”等关键词在此上下文中保持英文形式，因为这些是特定的技术术语。其他部分已经翻译成中文。

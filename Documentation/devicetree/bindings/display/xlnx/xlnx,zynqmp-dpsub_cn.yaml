@@ -1,0 +1,224 @@
+以下是提供的 YAML 文档的中文翻译：
+
+```yaml
+# SPDX-文件许可标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/display/xlnx/xlnx,zynqmp-dpsub.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: Xilinx ZynqMP DisplayPort 子系统
+
+描述: |
+  Xilinx ZynqMP (Zynq UltraScale+ MPSoC) 的 DisplayPort 子系统实现了基于 DisplayPort v1.2 标准的显示和音频管道。该子系统包括以下多个功能模块：
+
+               +------------------------------------------------------------+
+  +--------+   | +----------------+     +-----------+                       |
+  | DPDMA  | --->|                | --> |   视频   | 视频 +-------------+ |
+  | 4x 视频 |   | | 音频/视频     | --> | 渲染管道 | -+--> |             | |   +------+
+  | 2x 音频 |   | | 缓冲管理器   |     |           |  |    | DisplayPort |---> | PHY0 |
+  +--------+   | | 和同步控制   |     +-----------+  |    | 源控制器  | |   +------+
+               | |                |     +-----------+  |    | 控制器    |---> | PHY1 |
+  实时视频 --->|                | --> |   音频   | 音频 |             | |   +------+
+               | |                |     | 混音器   | --+-> |             | |   +------+
+  实时音频 --->|                | --> |           |  ||   +-------------+ |
+               | +----------------+     +-----------+  ||                     |
+               +---------------------------------------||---------------------+
+                                                      vv
+                                                融合视频与
+                                                混合音频至可编程逻辑
+
+  缓冲管理器与外部接口交互，例如 DMA 引擎或来自可编程逻辑的实时音频/视频流。视频渲染管道融合视频和图形层并执行颜色空间转换。音频混音器混合输入音频流。DisplayPort 源控制器处理 DisplayPort 协议并与外部 PHY 连接。
+子系统支持 2 路视频和 2 路音频流，以及各种像素格式和深度，最高可达 4K@30 分辨率。
+请参考 “Zynq UltraScale+ 设备技术参考手册” 
+  (https://www.xilinx.com/support/documentation/user_guides/ug1085-zynq-ultrascale-trm.pdf)
+获取更多详细信息
+维护者:
+  - Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+
+属性:
+  compatible:
+    常量: xlnx,zynqmp-dpsub-1.7
+
+  reg:
+    最大项数: 4
+  reg-names:
+    项:
+      - 常量: dp
+      - 常量: blend
+      - 常量: av_buf
+      - 常量: aud
+
+  interrupts:
+    最大项数: 1
+
+  clocks:
+    描述:
+      APB 时钟和至少一个视频时钟是必须的，音频时钟是可选的
+最小项数: 2
+    项:
+      - 描述: dp_apb_clk 是 APB 时钟
+      - 描述: dp_aud_clk 是音频时钟
+      - 描述:
+          dp_vtc_pixel_clk_in 是非实时视频时钟（来自处理系统）
+      - 描述:
+          dp_live_video_in_clk 是实时视频时钟（来自可编程逻辑）
+  clock-names:
+    oneOf:
+      - 最小项数: 2
+        项:
+          - 常量: dp_apb_clk
+          - 枚举: [ dp_vtc_pixel_clk_in, dp_live_video_in_clk ]
+          - 枚举: [ dp_vtc_pixel_clk_in, dp_live_video_in_clk ]
+      - 最小项数: 3
+        项:
+          - 常量: dp_apb_clk
+          - 常量: dp_aud_clk
+          - 枚举: [ dp_vtc_pixel_clk_in, dp_live_video_in_clk ]
+          - 枚举: [ dp_vtc_pixel_clk_in, dp_live_video_in_clk ]
+
+  power-domains:
+    最大项数: 1
+
+  resets:
+    最大项数: 1
+
+  dmas:
+    项:
+      - 描述: 视频层，平面 0（RGB 或亮度）
+      - 描述: 视频层，平面 1（U/V 或 U）
+      - 描述: 视频层，平面 2（V）
+      - 描述: 图形层
+  dma-names:
+    项:
+      - 常量: vid0
+      - 常量: vid1
+      - 常量: vid2
+      - 常量: gfx0
+
+  phys:
+    描述: DP 数据通道的 PHY
+    最小项数: 1
+    最大项数: 2
+  phy-names:
+    最小项数: 1
+    项:
+      - 常量: dp-phy0
+      - 常量: dp-phy1
+
+  ports:
+    $ref: /schemas/graph.yaml#/properties/ports
+    描述: |
+      与可编程逻辑和 DisplayPort PHY 的连接。每个端口应当只有一个端点
+属性:
+      port@0:
+        $ref: /schemas/graph.yaml#/properties/port
+        描述: 来自可编程逻辑的实时视频输入
+
+      port@1:
+        $ref: /schemas/graph.yaml#/properties/port
+        描述: 来自可编程逻辑的实时图形输入
+
+      port@2:
+        $ref: /schemas/graph.yaml#/properties/port
+        描述: 来自可编程逻辑的实时音频输入
+
+      port@3:
+        $ref: /schemas/graph.yaml#/properties/port
+        描述: 发送到可编程逻辑的融合视频输出
+
+      port@4:
+        $ref: /schemas/graph.yaml#/properties/port
+        描述: 发送到可编程逻辑的混合音频输出
+
+      port@5:
+        $ref: /schemas/graph.yaml#/properties/port
+        描述: DisplayPort 输出
+
+    必需:
+      - port@0
+      - port@1
+      - port@2
+      - port@3
+      - port@4
+      - port@5
+
+必需:
+  - compatible
+  - reg
+  - reg-names
+  - interrupts
+  - clocks
+  - clock-names
+  - power-domains
+  - resets
+  - dmas
+  - dma-names
+  - phys
+  - phy-names
+  - ports
+
+其他属性: false
+
+示例:
+  - |
+    #include <dt-bindings/phy/phy.h>
+    #include <dt-bindings/reset/xlnx-zynqmp-resets.h>
+
+    display@fd4a0000 {
+        compatible = "xlnx,zynqmp-dpsub-1.7";
+        reg = <0xfd4a0000 0x1000>,
+              <0xfd4aa000 0x1000>,
+              <0xfd4ab000 0x1000>,
+              <0xfd4ac000 0x1000>;
+        reg-names = "dp", "blend", "av_buf", "aud";
+        interrupts = <0 119 4>;
+        interrupt-parent = <&gic>;
+
+        clock-names = "dp_apb_clk", "dp_aud_clk", "dp_live_video_in_clk";
+        clocks = <&dp_aclk>, <&clkc 17>, <&si570_1>;
+
+        power-domains = <&pd_dp>;
+        resets = <&reset ZYNQMP_RESET_DP>;
+
+        dma-names = "vid0", "vid1", "vid2", "gfx0";
+        dmas = <&xlnx_dpdma 0>,
+               <&xlnx_dpdma 1>,
+               <&xlnx_dpdma 2>,
+               <&xlnx_dpdma 3>;
+
+        phys = <&psgtr 1 PHY_TYPE_DP 0 3>,
+               <&psgtr 0 PHY_TYPE_DP 1 3>;
+
+        phy-names = "dp-phy0", "dp-phy1";
+
+        ports {
+            #address-cells = <1>;
+            #size-cells = <0>;
+
+            port@0 {
+                reg = <0>;
+            };
+            port@1 {
+                reg = <1>;
+            };
+            port@2 {
+                reg = <2>;
+            };
+            port@3 {
+                reg = <3>;
+            };
+            port@4 {
+                reg = <4>;
+            };
+            port@5 {
+                reg = <5>;
+                dpsub_dp_out: endpoint {
+                    remote-endpoint = <&dp_connector>;
+                };
+            };
+        };
+    };
+..
+```
+```

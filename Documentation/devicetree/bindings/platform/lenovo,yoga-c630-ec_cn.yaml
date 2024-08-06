@@ -1,0 +1,83 @@
+```yaml
+# SPDX-文件许可标识: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/platform/lenovo,yoga-c630-ec.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: Lenovo Yoga C630 嵌入式控制器
+maintainers:
+  - Bjorn Andersson <andersson@kernel.org>
+
+description:
+  基于 Qualcomm Snapdragon 的 Lenovo Yoga C630 配备了一个嵌入式控制器 (EC)，该控制器处理诸如电池和 USB Type-C 等事务。此绑定描述了通过 I2C 总线与该 EC 的接口。
+properties:
+  compatible:
+    const: lenovo,yoga-c630-ec
+
+  reg:
+    const: 0x70
+
+  '#address-cells':
+    const: 1
+
+  '#size-cells':
+    const: 0
+
+  interrupts:
+    maxItems: 1
+
+patternProperties:
+  '^connector@[01]$':
+    $ref: /schemas/connector/usb-connector.yaml#
+
+    properties:
+      reg:
+        maxItems: 1
+
+    unevaluatedProperties: false
+
+required:
+  - compatible
+  - reg
+  - interrupts
+
+additionalProperties: false
+
+examples:
+  - |+
+    #include <dt-bindings/interrupt-controller/irq.h>
+    i2c1 {
+        clock-frequency = <400000>;
+
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        embedded-controller@70 {
+            compatible = "lenovo,yoga-c630-ec";
+            reg = <0x70>;
+
+            interrupts-extended = <&tlmm 20 IRQ_TYPE_LEVEL_HIGH>;
+
+            #address-cells = <1>;
+            #size-cells = <0>;
+
+            connector@0 {
+                compatible = "usb-c-connector";
+                reg = <0>;
+                power-role = "source";
+                data-role = "host";
+            };
+
+            connector@1 {
+                compatible = "usb-c-connector";
+                reg = <1>;
+                power-role = "source";
+                data-role = "host";
+            };
+        };
+    };
+..
+```
+
+这段 YAML 文件定义了一个设备树的绑定，用于描述基于 Qualcomm Snapdragon 的 Lenovo Yoga C630 设备中的嵌入式控制器 (EC)。这个控制器负责管理电池和 USB Type-C 接口等功能，并且通过 I2C 总线进行通信。同时，它还定义了两个 USB Type-C 连接器的属性。

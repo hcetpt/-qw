@@ -1,0 +1,385 @@
+# SPDX-许可证标识符: GPL-2.0-only 或 BSD-2-Clause
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/leds/leds-bcm6328.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: 与 Broadcom BCM6328 控制器相连的 LED
+
+维护者:
+  - Álvaro Fernández Rojas <noltari@gmail.com>
+
+描述: |
+  此控制器存在于 BCM6318、BCM6328、BCM6362 和 BCM63268 中。
+  在这些 SoC 中，可以将 LED 作为 GPIO 或通过硬件进行控制。
+  然而，在某些设备上存在串行 LED（连接到 74x164 控制器的 LED），
+  这些 LED 可以通过软件（将 74x164 导出为 spi-gpio。参见
+  文档/devicetree/bindings/gpio/fairchild,74hc595.yaml）或使用此驱动程序通过硬件进行控制。
+  其中一些串行 LED 是通过硬件控制的（例如，以太网 LED），将 74x164 导出为 spi-gpio 会阻止这些 LED 的硬件控制，
+  因此唯一的选择是使用此驱动程序来保持它们正常工作。
+  BCM6328 LED 控制器有一个 HWDIS 寄存器，用于控制一个 LED 是否由硬件信号而不是 MODE 寄存器值控制，
+  其中 0 表示启用硬件控制，1 表示禁用硬件控制。这通常是硬件到 LED 信号的 1:1 映射，
+  但通过活动/链接寄存器，您可以在一定程度上控制 LED 的重定向（如后文 brcm,link-signal-sources 中所述）。
+  即使 LED 是通过硬件控制的，您仍然可以让它闪烁或点亮，除非硬件决定将其点亮，否则无法关闭。
+  因此，由硬件控制的 LED 不注册为 LED 类别设备。
+  每个 LED 作为一个子节点表示在 brcm,bcm6328-leds 设备属性中。
+
+属性:
+  compatible:
+    常量: brcm,bcm6328-leds
+
+  reg:
+    最大项数: 1
+
+  brcm,serial-leds:
+    类型: 布尔值
+    描述: 启用串行 LED
+
+  brcm,serial-mux:
+    类型: 布尔值
+    描述: 启用串行 LED 多路复用
+
+  brcm,serial-clk-low:
+    类型: 布尔值
+    描述: 使时钟信号处于低电平有效
+
+  brcm,serial-dat-low:
+    类型: 布尔值
+    描述: 使数据信号处于低电平有效
+下面是给定内容的中文翻译：
+
+### `brcm,serial-shift-inv`:
+- **类型**: 布尔值
+- **描述**: 反转串行LED移位方向
+
+### `#address-cells`:
+- **常量**: 1
+
+### `#size-cells`:
+- **常量**: 0
+
+### `patternProperties`:
+- **`"@[a-f0-9]+$"`**:
+  - **类型**: 对象
+  - **$ref**: common.yaml
+  - **属性**:
+    - `reg`:
+      - **项**:
+        - **最大值**: 23
+      - **描述**: LED引脚编号（仅0到23号LED有效）
+
+### `brcm,hardware-controlled`:
+- **类型**: 布尔值
+- **描述**: 使这个LED由硬件控制
+
+### `brcm,link-signal-sources`:
+- **$ref**: `/schemas/types.yaml#/definitions/uint32-array`
+- **最小项数**: 1
+- **最大项数**: 4
+- **描述**:
+  - 硬件链路信号源数组。最多四个链路硬件信号可以复用到这些LED上。仅对0到7号LED有效，其中0到3号LED信号可复用到0到3号LED上，4到7号信号可复用到4到7号LED上。一个信号可以复用到多个LED，一个LED也可以有多个源信号。
+
+### `brcm,activity-signal-sources`:
+- **$ref**: `/schemas/types.yaml#/definitions/uint32-array`
+- **最小项数**: 1
+- **最大项数**: 4
+- **描述**:
+  - 硬件活动信号源数组。最多四个活动硬件信号可以复用到这些LED上。仅对0到7号LED有效，其中0到3号LED信号可复用到0到3号LED上，4到7号信号可复用到4到7号LED上。一个信号可以复用到多个LED，一个LED也可以有多个源信号。
+
+### 示例:
+
+#### BCM6328 的 4 个 EPHY LED:
+```yaml
+/* BCM6328 的 4 个 EPHY LED */
+led-controller@10000800 {
+    compatible = "brcm,bcm6328-leds";
+    #address-cells = <1>;
+    #size-cells = <0>;
+    reg = <0x10000800 0x24>;
+
+    alarm_red@2 {
+        reg = <2>;
+        active-low;
+        label = "红:报警";
+    };
+
+    inet_green@3 {
+        reg = <3>;
+        active-low;
+        label = "绿:网络";
+    };
+
+    power_green@4 {
+        reg = <4>;
+        active-low;
+        label = "绿:电源";
+        default-state = "开";
+    };
+
+    ephy0_spd@17 {
+        reg = <17>;
+        brcm,hardware-controlled;
+    };
+
+    ephy1_spd@18 {
+        reg = <18>;
+        brcm,hardware-controlled;
+    };
+
+    ephy2_spd@19 {
+        reg = <19>;
+        brcm,hardware-controlled;
+    };
+
+    ephy3_spd@20 {
+        reg = <20>;
+        brcm,hardware-controlled;
+    };
+};
+```
+
+#### BCM63268 的串行/GPHY0 LED:
+```yaml
+/* BCM63268 的串行/GPHY0 LED */
+led-controller@10001900 {
+    compatible = "brcm,bcm6328-leds";
+    #address-cells = <1>;
+    #size-cells = <0>;
+    reg = <0x10001900 0x24>;
+    brcm,serial-leds;
+    brcm,serial-dat-low;
+    brcm,serial-shift-inv;
+
+    gphy0_spd0@0 {
+        reg = <0>;
+        brcm,hardware-controlled;
+        brcm,link-signal-sources = <0>;
+    };
+
+    gphy0_spd1@1 {
+        reg = <1>;
+        brcm,hardware-controlled;
+        brcm,link-signal-sources = <1>;
+    };
+
+    inet_red@2 {
+        reg = <2>;
+        active-low;
+        label = "红:网络";
+    };
+
+    dsl_green@3 {
+        reg = <3>;
+        active-low;
+        label = "绿:DSL";
+    };
+
+    usb_green@4 {
+        reg = <4>;
+        active-low;
+        label = "绿:USB";
+    };
+
+    wps_green@7 {
+        reg = <7>;
+        active-low;
+        label = "绿:WPS";
+    };
+
+    inet_green@8 {
+        reg = <8>;
+        active-low;
+        label = "绿:网络";
+    };
+
+    ephy0_act@9 {
+        reg = <9>;
+        brcm,hardware-controlled;
+    };
+
+    ephy1_act@10 {
+        reg = <10>;
+        brcm,hardware-controlled;
+    };
+
+    ephy2_act@11 {
+        reg = <11>;
+        brcm,hardware-controlled;
+    };
+
+    gphy0_act@12 {
+        reg = <12>;
+        brcm,hardware-controlled;
+    };
+
+    ephy0_spd@13 {
+        reg = <13>;
+        brcm,hardware-controlled;
+    };
+
+    ephy1_spd@14 {
+        reg = <14>;
+        brcm,hardware-controlled;
+    };
+
+    ephy2_spd@15 {
+        reg = <15>;
+        brcm,hardware-controlled;
+    };
+
+    power_green@20 {
+        reg = <20>;
+        active-low;
+        label = "绿:电源";
+        default-state = "开";
+    };
+};
+```
+
+#### BCM6362 每个 EPHY 一个 LED:
+```yaml
+/* BCM6362 每个 EPHY 一个 LED */
+led-controller@10001900 {
+    compatible = "brcm,bcm6328-leds";
+    #address-cells = <1>;
+    #size-cells = <0>;
+    reg = <0x10001900 0x24>;
+
+    usb@0 {
+        reg = <0>;
+        brcm,hardware-controlled;
+        brcm,link-signal-sources = <0>;
+        brcm,activity-signal-sources = <0>;
+        /* USB 链接/活动路由至 USB LED */
+    };
+
+    inet@1 {
+        reg = <1>;
+        brcm,hardware-controlled;
+        brcm,activity-signal-sources = <1>;
+        /* INET 活动路由至 INET LED */
+    };
+
+    ephy0@4 {
+        reg = <4>;
+        brcm,hardware-controlled;
+        brcm,link-signal-sources = <4>;
+        /* EPHY0 链接路由至 EPHY0 LED */
+    };
+
+    ephy1@5 {
+        reg = <5>;
+        brcm,hardware-controlled;
+        brcm,link-signal-sources = <5>;
+        /* EPHY1 链接路由至 EPHY1 LED */
+    };
+
+    ephy2@6 {
+        reg = <6>;
+        brcm,hardware-controlled;
+        brcm,link-signal-sources = <6>;
+        /* EPHY2 链接路由至 EPHY2 LED */
+    };
+
+    ephy3@7 {
+        reg = <7>;
+        brcm,hardware-controlled;
+        brcm,link-signal-sources = <7>;
+        /* EPHY3 链接路由至 EPHY3 LED */
+    };
+
+    power_green@20 {
+        reg = <20>;
+        active-low;
+        label = "绿:电源";
+        default-state = "开";
+    };
+};
+```
+
+#### BCM6362 所有 EPHY 共享一个 LED:
+```yaml
+/* BCM6362 所有 EPHY 共享一个 LED */
+led-controller@10001900 {
+    compatible = "brcm,bcm6328-leds";
+    #address-cells = <1>;
+    #size-cells = <0>;
+    reg = <0x10001900 0x24>;
+
+    usb@0 {
+        reg = <0>;
+        brcm,hardware-controlled;
+        brcm,link-signal-sources = <0 1>;
+        brcm,activity-signal-sources = <0 1>;
+        /* USB/INET 链接/活动路由至 USB LED */
+    };
+
+    ephy@4 {
+        reg = <4>;
+        brcm,hardware-controlled;
+        brcm,link-signal-sources = <4 5 6 7>;
+        /* EPHY0/1/2/3 链接路由至 EPHY0 LED */
+    };
+
+    power_green@20 {
+        reg = <20>;
+        active-low;
+        label = "绿:电源";
+        default-state = "开";
+    };
+};
+```
+
+#### BCM6362 EPHY LED 交换:
+```yaml
+/* BCM6362 EPHY LED 交换 */
+led-controller@10001900 {
+    compatible = "brcm,bcm6328-leds";
+    #address-cells = <1>;
+    #size-cells = <0>;
+    reg = <0x10001900 0x24>;
+
+    usb@0 {
+        reg = <0>;
+        brcm,hardware-controlled;
+        brcm,link-signal-sources = <0>;
+        brcm,activity-signal-sources = <0 1>;
+        /* USB 链接/活动和 INET 活动路由至 USB LED */
+    };
+
+    ephy0@4 {
+        reg = <4>;
+        brcm,hardware-controlled;
+        brcm,link-signal-sources = <7>;
+        /* EPHY3 链接路由至 EPHY0 LED */
+    };
+
+    ephy1@5 {
+        reg = <5>;
+        brcm,hardware-controlled;
+        brcm,link-signal-sources = <6>;
+        /* EPHY2 链接路由至 EPHY1 LED */
+    };
+
+    ephy2@6 {
+        reg = <6>;
+        brcm,hardware-controlled;
+        brcm,link-signal-sources = <5>;
+        /* EPHY1 链接路由至 EPHY2 LED */
+    };
+
+    ephy3@7 {
+        reg = <7>;
+        brcm,hardware-controlled;
+        brcm,link-signal-sources = <4>;
+        /* EPHY0 链接路由至 EPHY3 LED */
+    };
+
+    power_green@20 {
+        reg = <20>;
+        active-low;
+        label = "绿:电源";
+        default-state = "开";
+    };
+};
+```

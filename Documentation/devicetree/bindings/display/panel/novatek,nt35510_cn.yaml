@@ -1,0 +1,57 @@
+# SPDX-文件许可人: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/display/panel/novatek,nt35510.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: 基于Novatek NT35510的显示面板
+
+maintainers:
+  - Linus Walleij <linus.walleij@linaro.org>
+
+allOf:
+  - $ref: panel-common.yaml#
+
+properties:
+  compatible:
+    items:
+      - enum:
+          - frida,frd400b25025
+          - hydis,hva40wv1
+      - const: novatek,nt35510
+    description: 这表示使用NT35510面板驱动程序的面板制造商。兼容字符串确定了NT35510面板驱动程序如何配置以与指示的面板一起工作。novatek,nt35510 兼容性始终应作为备选方案提供。
+reg:
+    maxItems: 1
+
+  reset-gpios: 真
+  vdd-supply:
+    description: 提供电压vdd的稳压器
+  vddi-supply:
+    description: 提供电压vddi的稳压器
+  backlight: 真
+  port: 真
+
+required:
+  - compatible
+  - reg
+
+additionalProperties: false
+
+examples:
+  - |
+    #include <dt-bindings/gpio/gpio.h>
+
+    dsi {
+        #address-cells = <1>;
+        #size-cells = <0>;
+        panel@0 {
+            compatible = "hydis,hva40wv1", "novatek,nt35510";
+            reg = <0>;
+            vdd-supply = <&ab8500_ldo_aux4_reg>;
+            vddi-supply = <&ab8500_ldo_aux6_reg>;
+            reset-gpios = <&gpio4 11 GPIO_ACTIVE_LOW>;
+            backlight = <&gpio_bl>;
+        };
+    };
+
+..

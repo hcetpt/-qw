@@ -1,0 +1,74 @@
+### 德州仪器 OMAP3 显示子系统
+
+请参阅 `Documentation/devicetree/bindings/display/ti/ti,omap-dss.txt` 获取关于 OMAP 显示子系统的通用描述。
+
+#### DSS 核心
+
+**必需属性：**
+- `compatible`: `"ti,omap3-dss"`
+- `reg`: 寄存器空间的地址和长度
+- `ti,hwmods`: `"dss_core"`
+- `clocks`: 对 `fclk` 的引用
+- `clock-names`: `"fck"`
+
+**可选节点：**
+- 视频端口：
+    - 端口 0: DPI 输出
+    - 端口 1: SDI 输出
+
+**DPI 终端必需属性：**
+- `data-lines`: 使用的线路数
+
+**SDI 终端必需属性：**
+- `datapairs`: 使用的数据对数
+
+#### DISPC
+
+**必需属性：**
+- `compatible`: `"ti,omap3-dispc"`
+- `reg`: 寄存器空间的地址和长度
+- `ti,hwmods`: `"dss_dispc"`
+- `interrupts`: DISPC 中断
+- `clocks`: 对 `fclk` 的引用
+- `clock-names`: `"fck"`
+
+**可选属性：**
+- `max-memory-bandwidth`: 输入内存（从主内存到 DISPC）带宽限制，单位为每秒字节
+
+#### RFBI
+
+**必需属性：**
+- `compatible`: `"ti,omap3-rfbi"`
+- `reg`: 寄存器空间的地址和长度
+- `ti,hwmods`: `"dss_rfbi"`
+- `clocks`: 对 `fclk` 和 `iclk` 的引用
+- `clock-names`: `"fck"`, `"ick"`
+
+#### VENC
+
+**必需属性：**
+- `compatible`: `"ti,omap3-venc"`
+- `reg`: 寄存器空间的地址和长度
+- `ti,hwmods`: `"dss_venc"`
+- `vdda-supply`: DAC 的电源供应
+- `clocks`: 对 `fclk` 的引用
+- `clock-names`: `"fck"`
+
+**VENC 终端必需属性：**
+- `ti,invert-polarity`: 反转视频信号的极性
+- `ti,channels`: 1 表示复合视频，2 表示 S-Video
+
+#### DSI
+
+**必需属性：**
+- `compatible`: `"ti,omap3-dsi"`
+- `reg`: `'proto'`、`'phy'` 和 `'pll'` 的寄存器空间地址和长度
+- `reg-names`: `"proto"`, `"phy"`, `"pll"`
+- `interrupts`: DSI 中断线
+- `ti,hwmods`: `"dss_dsi1"`
+- `vdd-supply`: DSI 的电源供应
+- `clocks`: 对 `fclk` 和 PLL 时钟的引用
+- `clock-names`: `"fck"`, `"sys_clk"`
+
+**DSI 终端必需属性：**
+- `lanes`: DSI 车道的针脚编号列表：CLK+、CLK-、DATA0+、DATA0-、DATA1+、DATA1- 等

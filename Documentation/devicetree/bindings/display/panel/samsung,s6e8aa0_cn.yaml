@@ -1,0 +1,101 @@
+# SPDX-许可证标识符: GPL-2.0
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/display/panel/samsung,s6e8aa0.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: Samsung S6E8AA0 AMOLED 液晶显示屏 5.3 英寸面板
+
+维护者:
+  - Andrzej Hajda <a.hajda@samsung.com>
+
+allOf:
+  - $ref: panel-common.yaml#
+
+属性:
+  compatible:
+    常量: samsung,s6e8aa0
+
+  reg:
+    最大项数: 1
+
+  reset-gpios: 真
+  display-timings: 真
+
+  vdd3-supply:
+    描述: 核心电压供电
+
+  vci-supply:
+    描述: 模拟电路的电压供电
+
+  power-on-delay:
+    描述: 在开启稳压器后的延迟 [毫秒]
+    $ref: /schemas/types.yaml#/definitions/uint32
+
+  reset-delay:
+    描述: 复位序列后的延迟 [毫秒]
+    $ref: /schemas/types.yaml#/definitions/uint32
+
+  init-delay:
+    描述: 初始化序列后的延迟 [毫秒]
+    $ref: /schemas/types.yaml#/definitions/uint32
+
+  panel-width-mm:
+    描述: 面板物理宽度 [毫米]
+
+  panel-height-mm:
+    描述: 面板物理高度 [毫米]
+
+  flip-horizontal:
+    描述: 是否水平翻转图像的布尔值
+    类型: 布尔
+
+  flip-vertical:
+    描述: 是否垂直翻转图像的布尔值
+    类型: 布尔
+
+必需:
+  - compatible
+  - reg
+  - vdd3-supply
+  - vci-supply
+  - reset-gpios
+  - display-timings
+
+额外属性: 错误
+
+示例:
+  - |
+    dsi {
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        panel@0 {
+            compatible = "samsung,s6e8aa0";
+            reg = <0>;
+            vdd3-supply = <&vcclcd_reg>;
+            vci-supply = <&vlcd_reg>;
+            reset-gpios = <&gpy4 5 0>;
+            power-on-delay = <50>;
+            reset-delay = <100>;
+            init-delay = <100>;
+            panel-width-mm = <58>;
+            panel-height-mm = <103>;
+            flip-horizontal;
+            flip-vertical;
+
+            display-timings {
+                timing0: timing-0 {
+                    clock-frequency = <57153600>;
+                    hactive = <720>;
+                    vactive = <1280>;
+                    hfront-porch = <5>;
+                    hback-porch = <5>;
+                    hsync-len = <5>;
+                    vfront-porch = <13>;
+                    vback-porch = <1>;
+                    vsync-len = <2>;
+                };
+            };
+        };
+    };

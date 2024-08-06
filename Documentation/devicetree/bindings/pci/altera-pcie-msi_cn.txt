@@ -1,0 +1,28 @@
+### Altera PCIe MSI 控制器
+
+**必需属性：**
+- `compatible`：应当包含 `"altr,msi-1.0"`，表明与Altera MSI 1.0规范兼容。
+- `reg`：指定控制器的物理基地址以及内存映射区域的长度。此属性为复合属性，可以指定多个地址及其长度。
+- `reg-names`：必须包括以下条目：
+  - `"csr"`：CSR（配置状态寄存器）寄存器。
+  - `"vector_slave"`：向量从属端口区域。
+- `interrupts`：指定父中断控制器的中断源。中断标识符的具体格式取决于父中断控制器。
+- `num-vectors`：向量数量，范围在1到32之间。
+- `msi-controller`：指示这是一个MSI（消息信号中断）控制器节点。
+
+**示例**
+
+```plain
+msi0: msi@0xFF200000 {
+    compatible = "altr,msi-1.0";
+    reg = <0xFF200000 0x00000010
+        0xFF200010 0x00000080>; // 指定CSR寄存器基址为0xFF200000，长度为0x10字节；向量从属端口基址为0xFF200010，长度为0x80字节
+    reg-names = "csr", "vector_slave";
+    interrupt-parent = <&hps_0_arm_gic_0>; // 父中断控制器为hps_0_arm_gic_0
+    interrupts = <0 42 4>; // 中断编号为42，触发类型为边沿触发
+    msi-controller;
+    num-vectors = <32>; // 向量数量为32
+};
+```
+
+这个示例定义了一个位于物理地址0xFF200000处的MSI控制器节点，其中包含了CSR寄存器和向量从属端口的配置信息，并指定了一个父中断控制器以及相应的中断编号。

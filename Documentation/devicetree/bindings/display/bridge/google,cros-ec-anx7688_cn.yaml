@@ -1,0 +1,78 @@
+```yaml
+# SPDX-文件许可标识: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/display/bridge/google,cros-ec-anx7688.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: ChromeOS EC ANX7688 通过 Type-C 接口的 HDMI 到 DP 转换器
+
+maintainers:
+  - Nicolas Boichat <drinkcat@chromium.org>
+
+description: |
+  ChromeOS EC ANX7688 是一个显示桥接器，用于将 HDMI 2.0 转换为
+  DisplayPort 1.3 Ultra-HDi（4096x2160p60）。它是一个 Analogix ANX7688 芯片，
+  该芯片与 ChromeOS 嵌入式控制器相连并由其操作（参见 google,cros-ec.yaml）。
+  它通过 EC 的 I2C 隧道进行访问，因此它的节点应该是 EC I2C 隧道节点的子节点
+  （参见 google,cros-ec-i2c-tunnel.yaml）
+properties:
+  compatible:
+    const: google,cros-ec-anx7688
+
+  reg:
+    maxItems: 1
+    description: 设备的 I2C 地址
+ports:
+    $ref: /schemas/graph.yaml#/properties/ports
+
+    properties:
+      port@0:
+        $ref: /schemas/graph.yaml#/properties/port
+        description: HDMI 输入的视频端口
+port@1:
+        $ref: /schemas/graph.yaml#/properties/port
+        description: USB Type-C 连接器
+required:
+      - port@0
+      - port@1
+
+required:
+  - compatible
+  - reg
+  - ports
+
+additionalProperties: false
+
+examples:
+  - |
+    i2c_tunnel_b: i2c-tunnel1 {
+        compatible = "google,cros-ec-i2c-tunnel";
+        google,remote-bus = <1>;
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        anx7688: anx7688@2c {
+            compatible = "google,cros-ec-anx7688";
+            reg = <0x2c>;
+
+            ports {
+                #address-cells = <1>;
+                #size-cells = <0>;
+                port@0 {
+                    reg = <0>;
+                    anx7688_in: endpoint {
+                        remote-endpoint = <&hdmi0_out>;
+                    };
+                };
+                port@1 {
+                    reg = <1>;
+                    anx7688_out: endpoint {
+                        remote-endpoint = <&typec_connector>;
+                    };
+                };
+            };
+        };
+    };
+```
+请注意，`required` 重复了一次，这是原文中的一个错误。在实际使用中，只需要保留一次 `required` 即可。

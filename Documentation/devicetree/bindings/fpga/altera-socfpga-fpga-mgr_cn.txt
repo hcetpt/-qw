@@ -1,0 +1,17 @@
+所需属性：
+- compatible（兼容性）：应当包含"altr,socfpga-fpga-mgr"
+- reg（寄存器）       ：内存映射IO的基本地址和大小
+   - 第一个索引用于FPGA管理器寄存器访问
+   - 第二个索引用于写入FPGA配置数据
+- interrupts（中断）  ：FPGA管理器设备的中断
+
+示例：
+
+	hps_0_fpgamgr: fpgamgr@ff706000 { 
+		compatible = "altr,socfpga-fpga-mgr"; 
+		reg = <0xFF706000 0x1000 
+		       0xFFB90000 0x1000>; 
+		interrupts = <0 175 4>; 
+	}; 
+
+此段代码描述了一个名为`hps_0_fpgamgr`的FPGA管理器设备，它位于内存地址`0xFF706000`处，并且具有`0x1000`字节的内存映射I/O区域。此外，还指定了另一个内存区域`0xFFB90000`，同样具有`0x1000`字节的大小，用于写入FPGA配置数据。该设备与中断号为175的IRQ线相连，并通过IRQ控制器0接收中断信号。

@@ -1,0 +1,119 @@
+此文档定义了Amlogic特定的扩展，用于Synopsys Designware MIPI DSI（移动行业处理器接口）主机控制器。以下是文档的关键部分翻译：
+
+# SPDX 许可证标识符: (GPL-2.0 或 BSD-2-Clause)
+# 版权所有 2020 BayLibre, SAS
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/display/amlogic,meson-g12a-dw-mipi-dsi.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: Amlogic针对Synopsys Designware MIPI DSI主机控制器的特定扩展
+
+维护者:
+  - Neil Armstrong <neil.armstrong@linaro.org>
+
+描述: |
+  Amlogic Meson Synopsys Designware集成包括：
+  - 一个Synopsys DesignWare MIPI DSI主机控制器IP
+  - 一个控制该IP时钟与复位的TOP控制块
+
+allOf:
+  - $ref: dsi-controller.yaml#
+
+属性:
+  compatible:
+    枚举:
+      - amlogic,meson-g12a-dw-mipi-dsi
+
+  reg:
+    最大项数: 1
+
+  clocks:
+    最小项数: 3
+    最大项数: 4
+
+  clock-names:
+    最小项数: 3
+    项:
+      - 常量: pclk
+      - 常量: bit
+      - 常量: px
+      - 常量: meas
+
+  resets:
+    最大项数: 1
+
+  reset-names:
+    项:
+      - 常量: top
+
+  phys:
+    最大项数: 1
+
+  phy-names:
+    项:
+      - 常量: dphy
+
+  ports:
+    $ref: /schemas/graph.yaml#/properties/ports
+
+    属性:
+      port@0:
+        $ref: /schemas/graph.yaml#/properties/port
+        描述: 接收像素数据的输入节点
+      port@1:
+        $ref: /schemas/graph.yaml#/properties/port
+        描述: 输出到面板的DSI节点
+
+必需:
+  - port@0
+  - port@1
+
+必需:
+  - compatible
+  - reg
+  - clocks
+  - clock-names
+  - resets
+  - reset-names
+  - phys
+  - phy-names
+  - ports
+
+未评估属性: false
+
+示例:
+  - |
+    dsi@6000 {
+          compatible = "amlogic,meson-g12a-dw-mipi-dsi";
+          reg = <0x6000 0x400>;
+          resets = <&reset_top>;
+          reset-names = "top";
+          clocks = <&clk_pclk>, <&bit_clk>, <&clk_px>;
+          clock-names = "pclk", "bit", "px";
+          phys = <&mipi_dphy>;
+          phy-names = "dphy";
+
+          ports {
+              #address-cells = <1>;
+              #size-cells = <0>;
+
+              /* VPU VENC 输入 */
+              mipi_dsi_venc_port: port@0 {
+                  reg = <0>;
+
+                  mipi_dsi_in: endpoint {
+                       remote-endpoint = <&dpi_out>;
+                  };
+              };
+
+              /* DSI 输出 */
+              mipi_dsi_panel_port: port@1 {
+                  reg = <1>;
+
+                  mipi_out_panel: endpoint {
+                      remote-endpoint = <&mipi_in_panel>;
+                  };
+              };
+          };
+    };

@@ -1,0 +1,224 @@
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/firmware/qcom,scm.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: 高通安全通道管理器 (SCM)
+
+description: |
+  高通处理器包含一个与安全固件通信的接口。
+  此接口允许客户端请求不同类型的操作，
+  这些操作可以包括CPU上下电、HDCP请求、固件加载和其他各种操作。
+maintainers:
+  - Bjorn Andersson <bjorn.andersson@linaro.org>
+  - Robert Marko <robimarko@gmail.com>
+  - Guru Das Srinagesh <quic_gurus@quicinc.com>
+
+properties:
+  compatible:
+    items:
+      - enum:
+          - qcom,scm-apq8064
+          - qcom,scm-apq8084
+          - qcom,scm-ipq4019
+          - qcom,scm-ipq5018
+          - qcom,scm-ipq5332
+          - qcom,scm-ipq6018
+          - qcom,scm-ipq806x
+          - qcom,scm-ipq8074
+          - qcom,scm-ipq9574
+          - qcom,scm-mdm9607
+          - qcom,scm-msm8226
+          - qcom,scm-msm8660
+          - qcom,scm-msm8916
+          - qcom,scm-msm8953
+          - qcom,scm-msm8960
+          - qcom,scm-msm8974
+          - qcom,scm-msm8976
+          - qcom,scm-msm8994
+          - qcom,scm-msm8996
+          - qcom,scm-msm8998
+          - qcom,scm-qcm2290
+          - qcom,scm-qdu1000
+          - qcom,scm-sa8775p
+          - qcom,scm-sc7180
+          - qcom,scm-sc7280
+          - qcom,scm-sc8180x
+          - qcom,scm-sc8280xp
+          - qcom,scm-sdm670
+          - qcom,scm-sdm845
+          - qcom,scm-sdx55
+          - qcom,scm-sdx65
+          - qcom,scm-sdx75
+          - qcom,scm-sm6115
+          - qcom,scm-sm6125
+          - qcom,scm-sm6350
+          - qcom,scm-sm6375
+          - qcom,scm-sm7150
+          - qcom,scm-sm8150
+          - qcom,scm-sm8250
+          - qcom,scm-sm8350
+          - qcom,scm-sm8450
+          - qcom,scm-sm8550
+          - qcom,scm-sm8650
+          - qcom,scm-qcs404
+          - qcom,scm-x1e80100
+      - const: qcom,scm
+
+  clocks:
+    minItems: 1
+    maxItems: 3
+
+  clock-names:
+    minItems: 1
+    maxItems: 3
+
+  dma-coherent: true
+
+  interconnects:
+    maxItems: 1
+
+  interconnect-names:
+    maxItems: 1
+
+  '#reset-cells':
+    const: 1
+
+  interrupts:
+    description:
+      固件作为握手协议的一部分引发的等待队列中断，用于处理睡眠中的SCM调用
+maxItems: 1
+
+  memory-region:
+    description:
+      预留给共享内存桥到TZ的内存区域的句柄
+maxItems: 1
+
+  qcom,sdi-enabled:
+    description:
+      指示由TZ默认启用的SDI（安全调试映像）需要被禁用
+      如果不被禁用，WDT断言或重启会导致系统挂起在调试模式中
+type: boolean
+
+  qcom,dload-mode:
+    $ref: /schemas/types.yaml#/definitions/phandle-array
+    items:
+      - items:
+          - description: 指向TCSR硬件块的句柄
+          - description: 下载模式控制寄存器的偏移量
+    description: TCSR硬件块
+
+allOf:
+  # 时钟
+  - if:
+      properties:
+        compatible:
+          contains:
+            enum:
+              - qcom,scm-apq8064
+              - qcom,scm-apq8084
+              - qcom,scm-mdm9607
+              - qcom,scm-msm8226
+              - qcom,scm-msm8660
+              - qcom,scm-msm8916
+              - qcom,scm-msm8953
+              - qcom,scm-msm8960
+              - qcom,scm-msm8974
+              - qcom,scm-msm8976
+              - qcom,scm-qcm2290
+              - qcom,scm-sm6375
+    then:
+      required:
+        - clocks
+        - clock-names
+    else:
+      properties:
+        clock-names: false
+        clocks: false
+
+  - if:
+      properties:
+        compatible:
+          contains:
+            enum:
+              - qcom,scm-apq8064
+              - qcom,scm-msm8660
+              - qcom,scm-msm8960
+              - qcom,scm-qcm2290
+              - qcom,scm-sm6375
+    then:
+      properties:
+        clock-names:
+          items:
+            - const: core
+
+        clocks:
+          maxItems: 1
+
+  - if:
+      properties:
+        compatible:
+          contains:
+            enum:
+              - qcom,scm-apq8084
+              - qcom,scm-mdm9607
+              - qcom,scm-msm8226
+              - qcom,scm-msm8916
+              - qcom,scm-msm8953
+              - qcom,scm-msm8974
+              - qcom,scm-msm8976
+    then:
+      properties:
+        clock-names:
+          items:
+            - const: core
+            - const: bus
+            - const: iface
+
+        clocks:
+          minItems: 3
+          maxItems: 3
+
+  # 中断
+  - if:
+      not:
+        properties:
+          compatible:
+            contains:
+              enum:
+                - qcom,scm-sm8450
+                - qcom,scm-sm8550
+                - qcom,scm-sm8650
+    then:
+      properties:
+        interrupts: false
+  - if:
+      not:
+        properties:
+          compatible:
+            contains:
+              enum:
+                - qcom,scm-sa8775p
+    then:
+      properties:
+        memory-region: false
+
+required:
+  - compatible
+
+additionalProperties: false
+
+examples:
+  - |
+    #include <dt-bindings/clock/qcom,gcc-msm8916.h>
+
+    firmware {
+        scm {
+            compatible = "qcom,scm-msm8916", "qcom,scm";
+            clocks = <&gcc GCC_CRYPTO_CLK>,
+                     <&gcc GCC_CRYPTO_AXI_CLK>,
+                     <&gcc GCC_CRYPTO_AHB_CLK>;
+            clock-names = "core", "bus", "iface";
+        };
+    };

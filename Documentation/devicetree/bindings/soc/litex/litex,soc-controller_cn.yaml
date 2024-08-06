@@ -1,0 +1,36 @@
+# SPDX-许可证标识符: GPL-2.0-only 或 BSD-2-Clause
+# 版权所有 2020 Antmicro <www.antmicro.com>
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/soc/litex/litex,soc-controller.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: LiteX SoC 控制器驱动程序
+
+描述: |
+  这是为 LiteX SoC 构建器设计的 SoC 控制器驱动程序。
+它的目的是验证 LiteX CSR（控制与状态寄存器）访问操作，
+并为其他驱动程序提供读写 CSRs 的功能以及检查这些访问器是否准备好使用。
+维护者:
+  - Karol Gugala <kgugala@antmicro.com>
+  - Mateusz Holenko <mholenko@antmicro.com>
+
+属性:
+  compatible:
+    常量: litex,soc-controller
+
+  reg:
+    最大项数: 1
+
+必需:
+  - compatible
+  - reg
+
+额外属性: false
+
+示例:
+  - |
+    soc_ctrl0: soc-controller@f0000000 {
+        compatible = "litex,soc-controller";
+        reg = <0xf0000000 0xc>;
+    };

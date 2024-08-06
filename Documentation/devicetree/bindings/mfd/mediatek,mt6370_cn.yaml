@@ -1,0 +1,277 @@
+下面是给定 YAML 文档的中文翻译：
+
+```yaml
+# SPDX-文件许可标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/mfd/mediatek,mt6370.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: MediaTek MT6370 子电源管理 IC
+
+维护者:
+  - ChiYuan Huang <cy_huang@richtek.com>
+
+描述: |
+  MT6370 是一款高度集成的智能电源管理 IC，其中包括单节锂离子/锂聚合物开关式电池充电器、USB Type-C 与电源传输(PD)控制器、双闪光 LED 电流源、RGB LED 驱动器、背光 WLED 驱动器、显示器偏置驱动器以及用于便携设备的通用 LDO。
+属性:
+  compatible:
+    常量: mediatek,mt6370
+
+  reg:
+    最大项数: 1
+
+  wakeup-source: 真
+
+  interrupts:
+    最大项数: 1
+
+  interrupt-controller: 真
+
+  "#interrupt-cells":
+    常量: 1
+
+  adc:
+    类型: 对象
+    不允许额外属性
+    描述: |
+      提供了9个通道用于系统监控，包括 VBUSDIV5（较低精度，较高测量范围）、VBUSDIV2（较高精度，较低测量范围）、VBAT、VSYS、CHG_VDDP、TS_BAT、IBUS、IBAT 和 TEMP_JC。
+属性:
+      compatible:
+        常量: mediatek,mt6370-adc
+
+      "#io-channel-cells":
+        常量: 1
+
+    必需:
+      - compatible
+      - "#io-channel-cells"
+
+  backlight:
+    类型: 对象
+    $引用: /schemas/leds/backlight/mediatek,mt6370-backlight.yaml#
+
+  charger:
+    类型: 对象
+    $引用: /schemas/power/supply/mediatek,mt6370-charger.yaml#
+
+  tcpc:
+    类型: 对象
+    $引用: /schemas/usb/mediatek,mt6370-tcpc.yaml#
+
+  indicator:
+    类型: 对象
+    $引用: /schemas/leds/mediatek,mt6370-indicator.yaml#
+
+  flashlight:
+    类型: 对象
+    $引用: /schemas/leds/mediatek,mt6370-flashlight.yaml#
+
+  regulators:
+    类型: 对象
+    不允许额外属性
+    描述: |
+      列出了所有支持的稳压器，它们支持对 DisplayBias 电压的控制和一个通常用于驱动振动马达的通用 LDO。
+模式属性:
+      "^(dsvbst|vibldo)$":
+        $引用: /schemas/regulator/regulator.yaml#
+        类型: 对象
+        不评估未定义属性
+
+      "^(dsvpos|dsvneg)$":
+        $引用: /schemas/regulator/regulator.yaml#
+        类型: 对象
+        不评估未定义属性
+
+        属性:
+          enable-gpios:
+            最大项数: 1
+
+必需:
+  - compatible
+  - reg
+  - interrupts
+  - interrupt-controller
+  - "#interrupt-cells"
+  - regulators
+  - adc
+  - backlight
+  - indicator
+  - tcpc
+  - charger
+  - flashlight
+
+不允许额外属性
+
+示例:
+  - |
+    #include <dt-bindings/interrupt-controller/irq.h>
+    #include <dt-bindings/leds/common.h>
+    #include <dt-bindings/iio/adc/mediatek,mt6370_adc.h>
+    #include <dt-bindings/usb/pd.h>
+    i2c {
+      #address-cells = <1>;
+      #size-cells = <0>;
+
+      pmic@34 {
+        compatible = "mediatek,mt6370";
+        reg = <0x34>;
+        wakeup-source;
+        interrupts-extended = <&gpio26 3 IRQ_TYPE_LEVEL_LOW>;
+        interrupt-controller;
+        #interrupt-cells = <1>;
+
+        mt6370_adc: adc {
+          compatible = "mediatek,mt6370-adc";
+          #io-channel-cells = <1>;
+        };
+
+        backlight {
+          compatible = "mediatek,mt6370-backlight";
+          mediatek,bled-channel-use = /bits/ 8 <15>;
+        };
+
+        charger {
+          compatible = "mediatek,mt6370-charger";
+          interrupts = <68>, <48>, <6>;
+          interrupt-names = "uvp_d_evt", "attach_i", "mivr";
+          io-channels = <&mt6370_adc MT6370_CHAN_IBUS>;
+
+          mt6370_otg_vbus: usb-otg-vbus-regulator {
+            regulator-name = "mt6370-usb-otg-vbus";
+            regulator-min-microvolt = <4350000>;
+            regulator-max-microvolt = <5800000>;
+            regulator-min-microamp = <500000>;
+            regulator-max-microamp = <3000000>;
+          };
+        };
+
+        indicator {
+          compatible = "mediatek,mt6370-indicator";
+          #address-cells = <1>;
+          #size-cells = <0>;
+
+          multi-led@0 {
+            reg = <0>;
+            function = LED_FUNCTION_INDICATOR;
+            color = <LED_COLOR_ID_RGB>;
+            led-max-microamp = <24000>;
+            #address-cells = <1>;
+            #size-cells = <0>;
+            led@0 {
+              reg = <0>;
+              color = <LED_COLOR_ID_RED>;
+            };
+            led@1 {
+              reg = <1>;
+              color = <LED_COLOR_ID_GREEN>;
+            };
+            led@2 {
+              reg = <2>;
+              color = <LED_COLOR_ID_BLUE>;
+            };
+          };
+          led@3 {
+            reg = <3>;
+            function = LED_FUNCTION_INDICATOR;
+            color = <LED_COLOR_ID_WHITE>;
+            led-max-microamp = <6000>;
+          };
+        };
+
+        flashlight {
+          compatible = "mediatek,mt6370-flashlight";
+          #address-cells = <1>;
+          #size-cells = <0>;
+          led@0 {
+            reg = <0>;
+            led-sources = <0>;
+            function = LED_FUNCTION_FLASH;
+            color = <LED_COLOR_ID_WHITE>;
+            function-enumerator = <1>;
+            led-max-microamp = <200000>;
+            flash-max-microamp = <500000>;
+            flash-max-timeout-us = <1248000>;
+          };
+          led@1 {
+            reg = <1>;
+            led-sources = <1>;
+            function = LED_FUNCTION_FLASH;
+            color = <LED_COLOR_ID_WHITE>;
+            function-enumerator = <2>;
+            led-max-microamp = <200000>;
+            flash-max-microamp = <500000>;
+            flash-max-timeout-us = <1248000>;
+          };
+        };
+
+        tcpc {
+          compatible = "mediatek,mt6370-tcpc";
+          interrupts-extended = <&gpio26 4 IRQ_TYPE_LEVEL_LOW>;
+
+          connector {
+            compatible = "usb-c-connector";
+            label = "USB-C";
+            vbus-supply = <&mt6370_otg_vbus>;
+            data-role = "dual";
+            power-role = "dual";
+            try-power-role = "sink";
+            source-pdos = <PDO_FIXED(5000, 1000, PDO_FIXED_DUAL_ROLE | PDO_FIXED_DATA_SWAP)>;
+            sink-pdos = <PDO_FIXED(5000, 2000, PDO_FIXED_DUAL_ROLE | PDO_FIXED_DATA_SWAP)>;
+            op-sink-microwatt = <10000000>;
+
+            ports {
+              #address-cells = <1>;
+              #size-cells = <0>;
+
+              port@0 {
+                reg = <0>;
+                endpoint {
+                  remote-endpoint = <&usb_hs>;
+                };
+              };
+              port@1 {
+                reg = <1>;
+                endpoint {
+                  remote-endpoint = <&usb_ss>;
+                };
+              };
+              port@2 {
+                reg = <2>;
+                endpoint {
+                  remote-endpoint = <&dp_aux>;
+                };
+              };
+            };
+          };
+        };
+
+        regulators {
+          dsvbst {
+            regulator-name = "mt6370-dsv-vbst";
+            regulator-min-microvolt = <4000000>;
+            regulator-max-microvolt = <6200000>;
+          };
+          dsvpos {
+            regulator-name = "mt6370-dsv-vpos";
+            regulator-min-microvolt = <4000000>;
+            regulator-max-microvolt = <6000000>;
+            regulator-boot-on;
+          };
+          dsvneg {
+            regulator-name = "mt6370-dsv-vneg";
+            regulator-min-microvolt = <4000000>;
+            regulator-max-microvolt = <6000000>;
+            regulator-boot-on;
+          };
+          vibldo {
+            regulator-name = "mt6370-vib-ldo";
+            regulator-min-microvolt = <1600000>;
+            regulator-max-microvolt = <4000000>;
+          };
+        };
+      };
+    };
+```
+
+请注意，上述翻译尽量保持了原文的格式和结构，并尽可能地保留了专有名词和技术术语。

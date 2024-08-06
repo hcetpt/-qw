@@ -1,0 +1,55 @@
+这段 Device Tree 配置描述了 Freescale i.MX 系列处理器中的 LCD 控制器，该控制器在 i.MX1、i.MX21、i.MX25 和 i.MX27 芯片中可以找到。
+
+- **维护者**：
+  - Sascha Hauer <s.hauer@pengutronix.de>
+  - Pengutronix Kernel Team <kernel@pengutronix.de>
+
+- **兼容性**：
+  - `fsl,imx1-fb`：适用于 i.MX1。
+  - `fsl,imx21-fb`：适用于 i.MX21。
+  - `fsl,imx25-fb`：适用于 i.MX25。
+  - `fsl,imx27-fb`：适用于 i.MX27。
+  - `fsl,imx1-lcdc` 和 `fsl,imx21-lcdc`：专为 i.MX1 和 i.MX21 设计的 LCD 控制器。
+
+- **属性**：
+  - **compatible**：指定兼容性字符串。
+  - **clocks**：最多支持三个时钟源。
+  - **clock-names**：指定时钟名称，包括 IPG、AHB 和 PER。
+  - **port**：定义一个端口用于连接外部设备。
+  - **display**：指向显示设备的句柄。
+  - **interrupts**：最多包含一个中断项。
+  - **reg**：定义寄存器地址和大小。
+  - **lcd-supply**：LCD 电源电压调节器。
+  - **fsl,dmacr**：DMA 控制寄存器值。
+  - **fsl,lpccr**：对比度控制寄存器值。
+  - **fsl,lscr1**：LCDC 锐化配置寄存器值。
+
+- **条件**：
+  - 如果兼容性设置为 `fsl,imx1-lcdc` 或 `fsl,imx21-lcdc`，则不需要 `display`、`fsl,dmacr`、`fsl,lpccr` 和 `fsl,lscr1` 属性，并且必须有 `port` 属性。
+  - 否则，`port` 属性无效，并且必须提供 `display` 属性。
+
+- **必需属性**：
+  - `compatible`
+  - `clocks`
+  - `clock-names`
+  - `interrupts`
+  - `reg`
+
+- **示例**：
+  - **示例 1**：i.MX25 的 LCD 控制器配置。
+    - 兼容性：`fsl,imx25-lcdc`, `fsl,imx21-lcdc`
+    - 寄存器地址：0x53fbc000
+    - 中断：IRQ 39
+    - 时钟源：IPG、AHB、PER
+    - 端口：连接到面板输入端点。
+  - **示例 2**：i.MX21 显示帧缓冲配置。
+    - 兼容性：`fsl,imx21-fb`
+    - 中断：IRQ 61
+    - 寄存器地址：0x10021000
+    - 显示设备：指向 `display0`
+    - 时钟源：IPG、AHB、PER
+  - **示例 3**：`display0` 显示设备配置。
+    - 模型：Primeview-PD050VL1
+    - 每像素位数：16
+    - PCR 寄存器值：非标准但需要
+    - 显示定时信息：包括分辨率、前/后门廊、同步长度等。

@@ -1,0 +1,111 @@
+这段 Device Tree 文件描述了 NXP i.MX 系列处理器中的温度监控模块的配置。以下是中文翻译：
+
+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/thermal/imx-thermal.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: NXP i.MX 温度监控
+
+维护者:
+  - Shawn Guo <shawnguo@kernel.org>
+
+属性:
+  compatible:
+    oneOf:
+      - 枚举:
+          - fsl,imx6q-tempmon
+          - fsl,imx6sx-tempmon
+          - fsl,imx7d-tempmon
+      - items:
+          - 枚举:
+              - fsl,imx6sll-tempmon
+              - fsl,imx6ul-tempmon
+          - 常量: fsl,imx6sx-tempmon
+
+  interrupts:
+    描述: |
+      控制器的中断输出，i.MX6Q 有一个 IRQ_HIGH，当温度高于高阈值时触发；
+      i.MX6SX 和 i.MX7S/D 比 i.MX6Q 多两个 IRQ，一个是 IRQ_LOW，
+      另一个是 IRQ_PANIC；当温度低于低阈值时 IRQ_LOW 被触发；
+      当温度高于恐慌阈值时 IRQ_PANIC 被触发，系统可以通过 SRC 模块为 IRQ_PANIC 配置自动重启。
+      IRQ_HIGH、IRQ_LOW 和 IRQ_PANIC 共享控制器的同一个中断输出。
+    最大项数: 1
+
+  nvmem-cells:
+    items:
+      - 描述: 指向由 ocotp 提供的校准数据的 Phandle
+      - 描述: 指向由 ocotp 提供的温度等级的 Phandle
+
+  nvmem-cell-names:
+    items:
+      - 常量: calib
+      - 常量: temp_grade
+
+  fsl,tempmon:
+    $ref: /schemas/types.yaml#/definitions/phandle
+    描述: 指向 anatop 系统控制器节点的 Phandle
+  fsl,tempmon-data:
+    $ref: /schemas/types.yaml#/definitions/phandle
+    描述: |
+      已弃用的属性，指向包含 TEMPMON 校准数据的熔丝控制器的 Phandle，
+      例如 iMX6Q 上的 OCOTP。有关校准数据的详细信息，请参阅 SoC 参考手册。
+    已弃用: true
+
+  clocks:
+    最大项数: 1
+
+  "#thermal-sensor-cells":
+    常量: 0
+
+必需:
+  - compatible
+  - interrupts
+  - fsl,tempmon
+  - nvmem-cells
+  - nvmem-cell-names
+
+allOf:
+  - $ref: thermal-sensor.yaml#
+
+附加属性: false
+
+示例:
+  - |
+    #include <dt-bindings/clock/imx6sx-clock.h>
+    #include <dt-bindings/interrupt-controller/arm-gic.h>
+
+    efuse@21bc000 {
+         #address-cells = <1>;
+         #size-cells = <1>;
+         compatible = "fsl,imx6sx-ocotp", "syscon";
+         reg = <0x021bc000 0x4000>;
+         clocks = <&clks IMX6SX_CLK_OCOTP>;
+
+         tempmon_calib: calib@38 {
+             reg = <0x38 4>;
+         };
+
+         tempmon_temp_grade: temp-grade@20 {
+             reg = <0x20 4>;
+         };
+    };
+
+    anatop@20c8000 {
+        compatible = "fsl,imx6q-anatop", "syscon", "simple-mfd";
+        reg = <0x020c8000 0x1000>;
+        interrupts = <0 49 IRQ_TYPE_LEVEL_HIGH>,
+                     <0 54 IRQ_TYPE_LEVEL_HIGH>,
+                     <0 127 IRQ_TYPE_LEVEL_HIGH>;
+
+        tempmon {
+             compatible = "fsl,imx6sx-tempmon";
+             interrupts = <GIC_SPI 49 IRQ_TYPE_LEVEL_HIGH>;
+             fsl,tempmon = <&anatop>;
+             nvmem-cells = <&tempmon_calib>, <&tempmon_temp_grade>;
+             nvmem-cell-names = "calib", "temp_grade";
+             clocks = <&clks IMX6SX_CLK_PLL3_USB_OTG>;
+             #thermal-sensor-cells = <0>;
+        };
+    };

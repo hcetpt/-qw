@@ -1,0 +1,56 @@
+```yaml
+# SPDX-许可证标识符: GPL-2.0-only 或 BSD-2-Clause
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/rtc/mediatek,mt7622-rtc.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: MediaTek MT7622 片上 RTC
+
+allOf:
+  - $ref: rtc.yaml#
+
+maintainers:
+  - Sean Wang <sean.wang@mediatek.com>
+
+properties:
+  compatible:
+    items:
+      - const: mediatek,mt7622-rtc
+      - const: mediatek,soc-rtc
+
+  reg:
+    maxItems: 1
+
+  interrupts:
+    maxItems: 1
+
+  clocks:
+    maxItems: 1
+
+  clock-names:
+    const: rtc
+
+required:
+  - reg
+  - interrupts
+  - clocks
+  - clock-names
+
+unevaluatedProperties: false
+
+examples:
+  - |
+    #include <dt-bindings/clock/mt7622-clk.h>
+    #include <dt-bindings/interrupt-controller/arm-gic.h>
+
+    rtc@10212800 {
+        compatible = "mediatek,mt7622-rtc", "mediatek,soc-rtc";
+        reg = <0x10212800 0x200>;
+        interrupts = <GIC_SPI 129 IRQ_TYPE_LEVEL_LOW>;
+        clocks = <&topckgen CLK_TOP_RTC>;
+        clock-names = "rtc";
+    };
+```
+
+此文档定义了MediaTek MT7622 SoC中实时时钟(RTC)的设备树规范。其中包含了与RTC相关的配置属性，例如兼容性声明、寄存器地址范围、中断配置、时钟源等信息，并给出了一个具体的例子。

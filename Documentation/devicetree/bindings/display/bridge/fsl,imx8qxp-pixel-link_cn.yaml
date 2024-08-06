@@ -1,0 +1,134 @@
+下面是给定内容的中文翻译：
+
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/display/bridge/fsl,imx8qxp-pixel-link.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: Freescale i.MX8qm/qxp 显示像素链接
+
+维护者:
+  - 刘颖 <victor.liu@nxp.com>
+
+描述: |
+  Freescale i.MX8qm/qxp 显示像素链接（DPL）在像素源（显示控制器或摄像头模块）和像素消费者（图像处理或显示器）之间形成了一个标准的异步连接。它由两个独立的功能组成：像素传输功能和控制接口。每个控制通道下可以存在多个像素通道。此绑定文档仅适用于像素源为显示控制器的像素链接。
+  i.MX8qm/qxp 显示像素链接通过系统控制器单元（SCU）固件进行访问。
+
+属性:
+  compatible:
+    枚举:
+      - fsl,imx8qm-dc-pixel-link
+      - fsl,imx8qxp-dc-pixel-link
+
+  fsl,dc-id:
+    $ref: /schemas/types.yaml#/definitions/uint8
+    描述: |
+      表示与像素链接相连的显示控制器索引的 u8 值
+  fsl,dc-stream-id:
+    $ref: /schemas/types.yaml#/definitions/uint8
+    描述: |
+      表示与像素链接相连的显示控制器流索引的 u8 值
+    枚举: [0, 1]
+
+  ports:
+    $ref: /schemas/graph.yaml#/properties/ports
+
+    属性:
+      port@0:
+        $ref: /schemas/graph.yaml#/properties/port
+        描述: 来自上游视频源的像素链接输入端口节点
+patternProperties:
+      "^port@[1-4]$":
+        $ref: /schemas/graph.yaml#/properties/port
+        描述: 连接到下游桥接器的像素链接输出端口节点
+
+所需属性:
+  - port@0
+  - port@1
+  - port@2
+  - port@3
+  - port@4
+
+allOf:
+  - 如果:
+      属性:
+        compatible:
+          包含:
+            常量: fsl,imx8qxp-dc-pixel-link
+    那么:
+      属性:
+        fsl,dc-id:
+          常量: 0
+
+  - 如果:
+      属性:
+        compatible:
+          包含:
+            常量: fsl,imx8qm-dc-pixel-link
+    那么:
+      属性:
+        fsl,dc-id:
+          枚举: [0, 1]
+
+所需属性:
+  - compatible
+  - fsl,dc-id
+  - fsl,dc-stream-id
+  - ports
+
+其他属性: false
+
+示例:
+  - |
+    dc0-pixel-link0 {
+        compatible = "fsl,imx8qxp-dc-pixel-link";
+        fsl,dc-id = /bits/ 8 <0>;
+        fsl,dc-stream-id = /bits/ 8 <0>;
+
+        ports {
+            #address-cells = <1>;
+            #size-cells = <0>;
+
+            /* 来自 dc0 的像素组合器通道0 */
+            port@0 {
+                reg = <0>;
+
+                dc0_pixel_link0_dc0_pixel_combiner_ch0: endpoint {
+                    remote-endpoint = <&dc0_pixel_combiner_ch0_dc0_pixel_link0>;
+                };
+            };
+
+            /* 到 MIPI/LVDS 组合子系统的 PXL2DPIs */
+            port@1 {
+                #address-cells = <1>;
+                #size-cells = <0>;
+                reg = <1>;
+
+                dc0_pixel_link0_mipi_lvds_0_pxl2dpi: endpoint@0 {
+                    reg = <0>;
+                    remote-endpoint = <&mipi_lvds_0_pxl2dpi_dc0_pixel_link0>;
+                };
+
+                dc0_pixel_link0_mipi_lvds_1_pxl2dpi: endpoint@1 {
+                    reg = <1>;
+                    remote-endpoint = <&mipi_lvds_1_pxl2dpi_dc0_pixel_link0>;
+                };
+            };
+
+            /* 未使用 */
+            port@2 {
+                reg = <2>;
+            };
+
+            /* 未使用 */
+            port@3 {
+                reg = <3>;
+            };
+
+            /* 到图像处理子系统 */
+            port@4 {
+                reg = <4>;
+            };
+        };
+    };

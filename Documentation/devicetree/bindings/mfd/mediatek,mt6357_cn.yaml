@@ -1,0 +1,113 @@
+下面是给定内容的中文翻译：
+
+```yaml
+# SPDX 许可标识符: GPL-2.0-only 或 BSD-2-Clause
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/mfd/mediatek,mt6357.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: MediaTek MT6357 电源管理 IC
+
+维护者:
+  - Flora Fu <flora.fu@mediatek.com>
+  - Alexandre Mergnat <amergnat@baylibre.com>
+
+描述: |
+  MT6357 是一款电源管理系统芯片，包含 5 个降压转换器和 29 个低压差稳压器 (LDO)。支持的功能包括音频编解码器、USB 充电、电量计、实时时钟等。
+
+  这是一款多功能设备，具有以下子模块：
+  - 稳压器
+  - 实时时钟
+  - 按键
+
+  它通过专用硬件（称为 PMIC 包装器或 pwrap）使用 SPI 接口与主机控制器通信。此 MFD 是 pwrap 的子设备。
+请参阅以下 pwrap 节点定义：
+  文档/devicetree/bindings/soc/mediatek/mediatek,pwrap.yaml
+
+属性:
+  compatible:
+    常量: mediatek,mt6357
+
+  interrupts:
+    最大项目数: 1
+
+  interrupt-controller: true
+
+  "#interrupt-cells":
+    常量: 2
+
+  regulators:
+    类型: 对象
+    $ref: /schemas/regulator/mediatek,mt6357-regulator.yaml
+    不评估的属性: false
+    描述:
+      MT6357 降压转换器和 LDO 稳压器列表
+rtc:
+    类型: 对象
+    $ref: /schemas/rtc/rtc.yaml#
+    不评估的属性: false
+    描述:
+      MT6357 实时时钟
+属性:
+      compatible:
+        常量: mediatek,mt6357-rtc
+      start-year: true
+    必需:
+      - compatible
+
+  keys:
+    类型: 对象
+    $ref: /schemas/input/mediatek,pmic-keys.yaml
+    不评估的属性: false
+    描述:
+      MT6357 电源和主页按键
+必需:
+  - compatible
+  - regulators
+
+额外属性: false
+
+示例:
+  - |
+    #include <dt-bindings/interrupt-controller/arm-gic.h>
+
+    pwrap {
+        pmic {
+            compatible = "mediatek,mt6357";
+
+            interrupt-parent = <&pio>;
+            interrupts = <145 IRQ_TYPE_LEVEL_HIGH>;
+            interrupt-controller;
+            #interrupt-cells = <2>;
+
+            regulators {
+                mt6357_vproc_reg: buck-vproc {
+                    regulator-name = "vproc";
+                    regulator-min-microvolt = <518750>;
+                    regulator-max-microvolt = <1312500>;
+                    regulator-ramp-delay = <6250>;
+                    regulator-enable-ramp-delay = <220>;
+                    regulator-always-on;
+                };
+
+                // ..
+mt6357_vusb33_reg: ldo-vusb33 {
+                    regulator-name = "vusb33";
+                    regulator-min-microvolt = <3000000>;
+                    regulator-max-microvolt = <3100000>;
+                    regulator-enable-ramp-delay = <264>;
+                };
+            };
+
+            rtc {
+                compatible = "mediatek,mt6357-rtc";
+            };
+
+            keys {
+                compatible = "mediatek,mt6357-keys";
+            };
+        };
+    };
+```
+```

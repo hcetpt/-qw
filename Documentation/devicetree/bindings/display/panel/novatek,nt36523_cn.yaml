@@ -1,0 +1,106 @@
+下面是给定内容的中文翻译：
+
+# SPDX-文件许可标识符: GPL-2.0-only 或 BSD-2-Clause
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/display/panel/novatek,nt36523.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: 基于Novatek NT36523的DSI显示面板
+
+维护者:
+  - 建华 卢 <lujianhua000@gmail.com>
+
+描述: |
+  Novatek NT36523 是一种通用的DSI面板控制IC，用于驱动DSI面板。支持来自中国星光电科技（CSOT）和京东方科技的视频模式面板。
+
+属性:
+  compatible:
+    oneOf:
+      - items:
+          - enum:
+              - xiaomi,elish-boe-nt36523
+              - xiaomi,elish-csot-nt36523
+          - const: novatek,nt36523
+      - items:
+          - enum:
+              - lenovo,j606f-boe-nt36523w
+          - const: novatek,nt36523w
+
+  reg:
+    maxItems: 1
+
+  reset-gpios:
+    maxItems: 1
+    描述: 重置线的GPIO phandle - 这应该为8mA
+
+  vddio-supply:
+    描述: 提供电压I/O电压的调节器
+
+  rotation: true
+  backlight: true
+
+必需:
+  - compatible
+  - reg
+  - vddio-supply
+  - reset-gpios
+
+allOf:
+  - $ref: panel-common-dual.yaml#
+  - if:
+      properties:
+        compatible:
+          contains:
+            enum:
+              - novatek,nt36523w
+    then:
+      properties:
+        ports:
+          properties:
+            port@1: false
+    else:
+      properties:
+        port: false
+        ports:
+          required:
+            - port@1
+
+未评估的属性: false
+
+示例:
+  - |
+    #include <dt-bindings/gpio/gpio.h>
+
+    dsi {
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        panel@0 {
+            compatible = "xiaomi,elish-csot-nt36523", "novatek,nt36523";
+            reg = <0>;
+
+            vddio-supply = <&vreg_l14a_1p88>;
+            reset-gpios = <&tlmm 75 GPIO_ACTIVE_LOW>;
+            backlight = <&backlight>;
+
+            ports {
+                #address-cells = <1>;
+                #size-cells = <0>;
+
+                port@0 {
+                    reg = <0>;
+                    panel_in_0: endpoint {
+                        remote-endpoint = <&dsi0_out>;
+                    };
+                };
+
+                port@1{
+                    reg = <1>;
+                    panel_in_1: endpoint {
+                        remote-endpoint = <&dsi1_out>;
+                    };
+                };
+            };
+        };
+    };

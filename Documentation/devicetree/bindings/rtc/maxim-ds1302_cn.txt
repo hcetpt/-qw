@@ -1,0 +1,38 @@
+Maxim/Dallas Semiconductor DS-1302 实时时钟（RTC）
+
+这是一个简单的设备，可用于在重启之间存储日期/时间。
+该设备使用标准的 MicroWire 半双工传输时序，
+主输出在低电平的时钟上设置，并由 RTC 在上升沿检测；
+主输入由 RTC 在下降沿设置，并在低电平的时钟上被主设备检测。
+
+**必需属性：**
+
+- compatible : 应为 "maxim,ds1302"
+
+**必需的 SPI 属性：**
+
+- reg : 应为设备芯片选择地址在控制器内的地址
+- spi-max-frequency : 如果 DS-1302 以 2.2V 供电，则为 500 kHz；如果以 5V 供电，则为 2 MHz
+- spi-3wire : 设备有一个共享的输入/输出信号线
+- spi-lsb-first : DS-1302 要求先传输最低有效位
+- spi-cs-high: DS-1302 的芯片选择线为高电平有效。除非硬件中已经反相，否则这是必需的
+
+**示例：**
+
+```
+spi@901c {
+	#address-cells = <1>;
+	#size-cells = <0>;
+	compatible = "icpdas,lp8841-spi-rtc";
+	reg = <0x901c 0x1>;
+
+	rtc@0 {
+		compatible = "maxim,ds1302";
+		reg = <0>;
+		spi-max-frequency = <500000>;
+		spi-3wire;
+		spi-lsb-first;
+		spi-cs-high;
+	};
+};
+```

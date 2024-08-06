@@ -1,0 +1,84 @@
+```yaml
+# SPDX-许可证标识符: GPL-2.0
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/power/supply/richtek,rt9455.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: Richtek rt9455 电池充电器
+
+maintainers:
+  - Sebastian Reichel <sre@kernel.org>
+
+allOf:
+  - $ref: power-supply.yaml#
+
+properties:
+  compatible:
+    const: richtek,rt9455
+
+  reg:
+    maxItems: 1
+
+  interrupts:
+    maxItems: 1
+
+  richtek,output-charge-current:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    description: 充电器向电池输出的电流，单位为微安（uA）
+richtek,end-of-charge-percentage:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    description: |
+      输出充电电流的百分比。当恒压阶段的电流降至output_charge_current乘以end_of_charge_percentage时，充电终止
+richtek,battery-regulation-voltage:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    description: 电池的最大电压，单位为微伏（uV）
+richtek,boost-output-voltage:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    description: |
+      当充电器处于升压模式时，提供给终端设备的最大电压，单位为微伏（uV）
+richtek,min-input-voltage-regulation:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    description: |
+      输入电压等级，单位为微伏（uV），用于在输入电源发生过流时降低电压等级。这可以防止由于电源提供的电流不足而导致的输入电压下降。默认值为4500000 uV (4.5V)
+richtek,avg-input-current-regulation:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    description: |
+      充电器从电源抽取的输入电流值，单位为微安（uA）。默认值为500000 uA (500mA)
+required:
+  - compatible
+  - reg
+  - interrupts
+  - richtek,output-charge-current
+  - richtek,end-of-charge-percentage
+  - richtek,battery-regulation-voltage
+  - richtek,boost-output-voltage
+
+additionalProperties: false
+
+examples:
+  - |
+    #include <dt-bindings/interrupt-controller/irq.h>
+    i2c {
+      #address-cells = <1>;
+      #size-cells = <0>;
+
+      charger@22 {
+        compatible = "richtek,rt9455";
+        reg = <0x22>;
+
+        interrupt-parent = <&gpio1>;
+        interrupts = <0 IRQ_TYPE_LEVEL_LOW>;
+
+        richtek,output-charge-current = <500000>;
+        richtek,end-of-charge-percentage = <10>;
+        richtek,battery-regulation-voltage = <4200000>;
+        richtek,boost-output-voltage = <5050000>;
+
+        richtek,min-input-voltage-regulation = <4500000>;
+        richtek,avg-input-current-regulation = <500000>;
+      };
+    };
+```
+
+以上是将给出的 YAML 文件翻译成了中文版本。注意某些专业术语和描述保持了英文原样，以确保准确性和技术细节的一致性。

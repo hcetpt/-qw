@@ -1,0 +1,33 @@
+```yaml
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/thermal/dlg,da9062-thermal.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: Dialog DA9062/61 TJUNC 温度模块
+
+maintainers:
+  - Biju Das <biju.das.jz@bp.renesas.com>
+
+description: |
+  此模块是 DA9061/DA9062 的一部分。关于整个 DA906{1,2} 芯片的更多详细信息，请参阅 Documentation/devicetree/bindings/mfd/dlg,da9063.yaml
+
+  结温温度模块使用中断信号来识别 PMIC 设备上的高 THERMAL_TRIP_HOT 温度
+properties:
+  compatible:
+    oneOf:
+      - const: dlg,da9062-thermal
+      - items:
+          - const: dlg,da9061-thermal
+          - const: dlg,da9062-thermal
+
+  polling-delay-passive:
+    description:
+      指定在毫秒中测量的热区域设备更新检查之间的轮询周期
+required:
+  - compatible
+
+additionalProperties: false
+```
+请注意，此翻译尽量保持了原文格式和结构，并对某些词汇进行了本地化翻译以适应中文习惯。例如，“junction temperature”被翻译为“结温”，这是电子工程领域的一个常见术语。

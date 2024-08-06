@@ -1,0 +1,26 @@
+* APM X-Gene 实时钟 (RTC)
+
+这是 APM X-Gene 实时钟的 RTC 控制器。
+
+必需属性：
+- compatible（兼容性）: 应该是 "apm,xgene-rtc"
+- reg（寄存器）: 控制器的物理基地址和内存映射区域的长度
+- interrupts（中断）: RTC 的 IRQ 线
+- #clock-cells（时钟单元数量）: 应该是 1
+- clocks（时钟）: 指向时钟条目的引用
+示例：
+
+rtcclk: rtcclk {
+	compatible = "fixed-clock"; // 兼容性设置为固定时钟
+	#clock-cells = <1>; // 时钟单元数量为 1
+	clock-frequency = <100000000>; // 时钟频率为 100MHz
+	clock-output-names = "rtcclk"; // 输出时钟名称
+};
+
+rtc: rtc@10510000 { // RTC 控制器实例
+	compatible = "apm,xgene-rtc"; // 兼容性设置为 APM X-Gene RTC
+	reg = <0x0 0x10510000 0x0 0x400>; // 寄存器基地址为 0x10510000，内存映射区域长度为 0x400
+	interrupts = <0x0 0x46 0x4>; // 中断线设置为 IRQ 46
+	#clock-cells = <1>; // 时钟单元数量为 1
+	clocks = <&rtcclk 0>; // 引用 rtcclk 时钟
+};

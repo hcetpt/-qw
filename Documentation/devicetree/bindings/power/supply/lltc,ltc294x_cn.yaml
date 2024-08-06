@@ -1,0 +1,64 @@
+```yaml
+# SPDX-许可证标识符: GPL-2.0
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/power/supply/lltc,ltc294x.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: LTC2941, LTC2942, LTC2943 和 LTC2944 电池电量计
+
+description: |
+  所有芯片均测量电池容量。
+LTC2942 与 LTC2941 引脚兼容，它增加了电压和温度监测，并可在运行时检测。LTC2943 和 LTC2944 在软件上兼容，使用了略有不同的电荷计数器转换公式，并增加了电压、电流和温度监测功能。
+maintainers:
+  - Sebastian Reichel <sre@kernel.org>
+
+allOf:
+  - $ref: power-supply.yaml#
+
+properties:
+  compatible:
+    enum:
+      - lltc,ltc2941
+      - lltc,ltc2942
+      - lltc,ltc2943
+      - lltc,ltc2944
+
+  reg:
+    maxItems: 1
+
+  lltc,resistor-sense:
+    $ref: /schemas/types.yaml#/definitions/int32
+    description: |
+      检测电阻值（毫欧）
+当电池被错误地连接到电阻的一端时，可以是负值。
+  lltc,prescaler-exponent:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    description: |
+      如数据手册中所述的分频器指数。
+这决定了电量计的范围和精度。
+仅当该值与当前设置不同时才将其编程到芯片中。
+当断开电池连接时，该设置将丢失。
+required:
+  - compatible
+  - reg
+  - lltc,resistor-sense
+  - lltc,prescaler-exponent
+
+additionalProperties: false
+
+examples:
+  - |
+    i2c {
+      #address-cells = <1>;
+      #size-cells = <0>;
+      battery@64 {
+        compatible = "lltc,ltc2943";
+        reg = <0x64>;
+        lltc,resistor-sense = <15>;
+        lltc,prescaler-exponent = <5>; /* 2^(2*5) = 1024 */
+      };
+    };
+```
+
+这段 YAML 文件定义了一个设备树配置文件，用于描述 LTC2941, LTC2942, LTC2943 和 LTC2944 系列电池电量计的硬件配置。

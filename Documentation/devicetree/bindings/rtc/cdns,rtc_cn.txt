@@ -1,0 +1,27 @@
+### Cadence 实时钟
+
+带有日期、时间和报警功能的 Cadence RTC 控制器  
+报警可以将系统从低功耗状态唤醒  
+**必需的属性：**
+- compatible（兼容性）: 应为 "cdns,rtc-r109v3"
+- reg（寄存器）: 指定寄存器区域的基本物理地址和大小
+- interrupts（中断）: 单个中断指定符
+- clocks（时钟）: 必须包含两个条目：
+    - pclk: APB 寄存器时钟
+    - ref_clk: 参考 1Hz 或 100Hz 时钟，具体取决于 IP 配置
+   更多详情请参阅 ../clocks/clock-bindings.txt
+
+**示例：**
+```plaintext
+rtc0: rtc@fd080000 { 
+	compatible = "cdns,rtc-r109v3"; 
+	reg = <0xfd080000 0x1000>; 
+
+	clock-names = "pclk", "ref_clk"; 
+	clocks = <&sysclock>, <&refclock>; 
+
+	interrupt-parent = <&gic>; 
+	interrupts = <0 6 IRQ_TYPE_LEVEL_HIGH>; 
+};
+```
+以上是 Cadence RTC 控制器配置的一个示例。

@@ -1,0 +1,278 @@
+# SPDX-许可证标识符: (GPL-2.0 或 MIT)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/riscv/extensions.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: RISC-V ISA 扩展
+
+维护者:
+  - Paul Walmsley <paul.walmsley@sifive.com>
+  - Palmer Dabbelt <palmer@sifive.com>
+  - Conor Dooley <conor@kernel.org>
+
+描述: |
+  RISC-V 拥有大量的扩展，其中一些是“标准”扩展，意味着它们已经被 RISC-V 国际组织批准，而其他则为“供应商”扩展。
+  本文档定义了用于指示一个 hart 是否支持特定扩展的属性。
+  一旦一个标准扩展被批准，其行为就不能再改变，除非创建一个新的扩展。
+  因此，标准扩展的属性映射到它们最初被批准的状态，除了 I、Zicntr 和 Zihpm 扩展除外。
+  更多信息请参阅“i”属性。
+选择:
+  属性:
+    compatible:
+      包含:
+        常量: riscv
+
+属性:
+  riscv,isa:
+    描述:
+      标识 hart 支持的具体 RISC-V 指令集架构。这些在 RISC-V 用户级 ISA 文档中有所记载，可从 https://riscv.org/specifications/ 获取。
+
+      由于 ISA 规范的修订，随着时间的推移出现了一些偏差。
+      特别地，在创建 Zicntr、Zicsr、Zifencei 和 Zihpm 扩展之前就定义了 riscv,isa，因此 "i" 暗示了 "zicntr_zicsr_zifencei_zihpm"。
+      尽管 ISA 规范中的 isa 字符串不区分大小写，但 riscv,isa 字符串中的字母必须全部小写。
+    $ref: /schemas/types.yaml#/definitions/string
+    正则表达式: ^rv(?:64|32)imaf?d?q?c?b?k?j?p?v?h?(?:[hsxz](?:[0-9a-z])+)?(?:_[hsxz](?:[0-9a-z])+)*$
+    已废弃: true
+
+  riscv,isa-base:
+    描述:
+      该 hart 实现的基础 ISA，如 20191213 版本的无特权 ISA 规范所述
+    枚举:
+      - rv32i
+      - rv64i
+
+  riscv,isa-extensions:
+    $ref: /schemas/types.yaml#/definitions/string-array
+    最少项数: 1
+    描述: hart 支持的扩展
+项目：
+      任一选项包括：
+        # 按规范顺序排列的单字母扩展
+        - 常量: i
+          描述: |
+            基础整数指令集，如2019年12月13日版本的非特权ISA规范中所批准的。
+            这不包括第10章“计数器”，这部分在2019年12月13日版本的非特权规范批准后被移到了Zicntr和Zihpm扩展中。
+        - 常量: m
+          描述:
+            标准M扩展用于整数乘法和除法，如2019年12月13日版本的非特权ISA规范中所批准的。
+        - 常量: a
+          描述:
+            标准A扩展用于原子指令，如2019年12月13日版本的非特权ISA规范中所批准的。
+        - 常量: f
+          描述:
+            标准F扩展用于单精度浮点运算，如2019年12月13日版本的非特权ISA规范中所批准的。
+        - 常量: d
+          描述:
+            标准D扩展用于双精度浮点运算，如2019年12月13日版本的非特权ISA规范中所批准的。
+        - 常量: q
+          描述:
+            标准Q扩展用于四精度浮点运算，如2019年12月13日版本的非特权ISA规范中所批准的。
+        - 常量: c
+          描述:
+            标准C扩展用于压缩指令，如2019年12月13日版本的非特权ISA规范中所批准的。
+        - 常量: v
+          描述:
+            标准V扩展用于向量操作，如riscv-v-spec中的提交7a6c8ae（"修正描述vfmv.v.f编码的文字"）前后所批准的。
+        - 常量: h
+          描述:
+            标准H扩展用于虚拟机监控程序，如2019年12月13日版本的特权ISA规范中所批准的。
+# 多字母扩展名，按字母数字顺序排列
+- const: smaia
+  description: |
+    针对机器模式可见的 CSR 和中断行为变化的高级中断架构的标准 Smaia 监管级扩展，该扩展在 riscv-aia 的提交 ccbddab（“合并拉取请求 #42 来自 riscv/jhauser-2023-RC4”）中冻结。
+- const: smstateen
+  description: |
+    控制在 H/S/VS/U/VU 模式下由其他 RISC-V 扩展添加的 CSR 访问的标准 Smstateen 扩展，该扩展在 riscv-state-enable 的提交 a28bfae（“批准 (#7)”）中得到认可。
+- const: ssaia
+  description: |
+    针对监管模式可见的 CSR 和中断行为变化的高级中断架构的标准 Ssaia 监管级扩展，该扩展在 riscv-aia 的提交 ccbddab（“合并拉取请求 #42 来自 riscv/jhauser-2023-RC4”）中冻结。
+- const: sscofpmf
+  description: |
+    针对计数溢出和基于模式的过滤的标准 Sscofpmf 监管级扩展，该扩展在 riscv-count-overflow 的提交 01d1df0（“增加手动触发工作流的能力。(#2)”）中得到认可。
+- const: sstc
+  description: |
+    针对时间比较的标准 Sstc 监管级扩展，该扩展在 riscv-time-compare 的提交 3f9ed34（“增加手动触发工作流的能力。(#2)”）中得到认可。
+- const: svinval
+  description: |
+    针对精细粒度地址转换缓存作废的标准 Svinval 监管级扩展，在特权 ISA 规范 20191213 版本中得到认可。
+- const: svnapot
+  description: |
+    针对 napot 翻译连续性的标准 Svnapot 监管级扩展，在特权 ISA 规范 20191213 版本中得到认可。
+- const: svpbmt
+  description: |
+    针对基于页面的内存类型的监管级扩展 Svpbmt，在特权 ISA 规范 20191213 版本中得到认可。
+- const: zacas
+  description: |
+    原子比较交换 (CAS) 指令的 Zacas 扩展支持，在 riscv-zacas 的提交 5059e0ca641c（“更新至认可版本”）中得到认可。
+- const: zba
+  description: |
+    针对地址生成加速指令的标准 Zba 位操作扩展，在 riscv-bitmanip 的提交 6d33919（“合并拉取请求 #158 来自 hirooih/clmul-fix-loop-end-condition”）中得到认可。
+下面是给定内容的中文翻译：
+
+- const: zbb
+  description: |
+    标准的 Zbb 位操作扩展，用于基本的位操作，该扩展在 riscv-bitmanip 的提交 6d33919（"合并 pull request #158 来自 hirooih/clmul-fix-loop-end-condition"）中被批准。
+- const: zbc
+  description: |
+    标准的 Zbc 位操作扩展，用于无进位乘法，该扩展在 riscv-bitmanip 的提交 6d33919（"合并 pull request #158 来自 hirooih/clmul-fix-loop-end-condition"）中被批准。
+- const: zbkb
+  description:
+    标准的 Zbkb 加密相关的位操作指令，根据 RISC-V 加密扩展第一卷 1.0 版本中被批准。
+- const: zbkc
+  description:
+    标准的 Zbkc 无进位乘法指令，根据 RISC-V 加密扩展第一卷 1.0 版本中被批准。
+- const: zbkx
+  description:
+    标准的 Zbkx 交叉开关置换指令，根据 RISC-V 加密扩展第一卷 1.0 版本中被批准。
+- const: zbs
+  description: |
+    标准的 Zbs 位操作扩展，用于单比特指令，该扩展在 riscv-bitmanip 的提交 6d33919（"合并 pull request #158 来自 hirooih/clmul-fix-loop-end-condition"）中被批准。
+- const: zfa
+  description:
+    标准的 Zfa 扩展，提供额外的浮点运算指令，该扩展在 riscv-isa-manual 的提交 056b6ff（"Zfa 被批准"）中被批准。
+- const: zfh
+  description:
+    标准的 Zfh 扩展，提供 16 位半精度二进制浮点运算指令，该扩展在 riscv-isa-manual 的提交 64074bc（"更新 Zfh/Zfinx 的版本号"）中被批准。
+- const: zfhmin
+  description:
+    标准的 Zfhmin 扩展，提供最小支持的 16 位半精度二进制浮点运算指令，该扩展在 riscv-isa-manual 的提交 64074bc（"更新 Zfh/Zfinx 的版本号"）中被批准。
+- const: zk
+  description:
+    标准的 Zk 标量加密扩展，根据 RISC-V 加密扩展第一卷 1.0 版本中被批准。
+- const: zkn
+  description:
+    作为 RISC-V 加密扩展第一卷规范版本 1.0 中批准的标准 Zkn NIST 算法套件扩展。
+- const: zknd
+  description: |
+    作为 RISC-V 加密扩展第一卷规范版本 1.0 中批准的 NIST 套件标准 Zknd：AES 解密指令。
+- const: zkne
+  description: |
+    作为 RISC-V 加密扩展第一卷规范版本 1.0 中批准的 NIST 套件标准 Zkne：AES 加密指令。
+- const: zknh
+  description: |
+    作为 RISC-V 加密扩展第一卷规范版本 1.0 中批准的 NIST 套件标准 Zknh：哈希函数指令。
+- const: zkr
+  description:
+    作为 RISC-V 加密扩展第一卷规范版本 1.0 中批准的标准 Zkr 熵源扩展。如果存在此字符串，则表示与该扩展相关的 CSR 在所提供的设备树特权级别上是可访问的。
+- const: zks
+  description:
+    作为 RISC-V 加密扩展第一卷规范版本 1.0 中批准的标准 Zks 商密算法套件扩展。
+- const: zksed
+  description: |
+    作为 RISC-V 加密扩展第一卷规范版本 1.0 中批准的商密套件标准 Zksed：SM4 分组密码指令。
+- const: zksh
+  description: |
+    作为 RISC-V 加密扩展第一卷规范版本 1.0 中批准的商密套件标准 Zksh：SM3 哈希函数指令。
+- const: zkt
+  description:
+    作为 RISC-V 加密扩展第一卷规范版本 1.0 中批准的标准 Zkt，用于数据无关执行延迟。
+下面是给定内容的中文翻译：
+
+- const: zicbom
+  description:
+    这是标准的 Zicbom 扩展，用于基础缓存管理操作，该扩展在提交 3dd606f（"创建 cmobase-v1.0.pdf"）中被 RISC-V CMOs 标准化。
+
+- const: zicbop
+  description:
+    这是标准的 Zicbop 扩展，用于缓存块预取指令，该扩展在提交 3dd606f（"创建 cmobase-v1.0.pdf"）中被 RISC-V CMOs 标准化。
+
+- const: zicboz
+  description:
+    这是标准的 Zicboz 扩展，用于缓存块清零操作，该扩展在提交 3dd606f（"创建 cmobase-v1.0.pdf"）中被 RISC-V CMOs 标准化。
+
+- const: zicntr
+  description:
+    这是标准的 Zicntr 扩展，用于基本计数器和定时器，在 2019 年 12 月 13 日版本的无特权 ISA 规范中被标准化。
+
+- const: zicond
+  description:
+    这是标准的 Zicond 扩展，用于条件算术运算和条件选择/移动指令，在提交 95cf1f9（"根据 Ved 在批准期间提出的要求添加变更"）中被 RISC-V Zicond 标准化。
+
+- const: zicsr
+  description: |
+    这是标准的 Zicsr 扩展，用于控制与状态寄存器指令，在 2019 年 12 月 13 日版本的无特权 ISA 规范中被标准化。
+    但不包括第 10 章“计数器”，这部分记录了只读控制与状态寄存器（CSRs）的特殊情况，这些内容在 2019 年 12 月 13 日版本的无特权规范被标准化后被移到了 Zicntr 和 Zihpm 扩展中。
+
+- const: zifencei
+  description:
+    这是标准的 Zifencei 扩展，用于指令获取栅栏，在 2019 年 12 月 13 日版本的无特权 ISA 规范中被标准化。
+
+- const: zihintpause
+  description:
+    这是标准的 Zihintpause 扩展，用于暂停提示，在提交 d8ab5c7（"Zihintpause 被标准化"）中被 RISC-V ISA 手册标准化。
+
+- const: zihintntl
+  description:
+    这是标准的 Zihintntl 扩展，用于非时间局部性提示，在提交 0dc91f5（"Zihintntl 被标准化"）中被 RISC-V ISA 手册标准化。
+下面是给定内容的中文翻译：
+
+- const: zihpm
+          description:
+            这是硬件性能计数器的标准Zihpm扩展，已在2019年12月13日版本的非特权ISA规范中获得批准。
+- const: ztso
+          description:
+            这是全序存储的标准Ztso扩展，在riscv-isa-manual中的提交2e5236（"Ztso现已获得批准。"）中获得批准。
+- const: zvbb
+          description:
+            这是矢量基本位操作指令的标准Zvbb扩展，在riscv-crypto中的提交56ed795（"更新riscv-crypto-spec-vector.adoc"）中获得批准。
+- const: zvbc
+          description:
+            这是矢量无进位乘法指令的标准Zvbc扩展，在riscv-crypto中的提交56ed795（"更新riscv-crypto-spec-vector.adoc"）中获得批准。
+- const: zvfh
+          description:
+            这是矢量半精度浮点指令的标准Zvfh扩展，在riscv-v-spec中的提交e2ccd05（"从Zvfh[min]删除草案警告"）中获得批准。
+- const: zvfhmin
+          description:
+            这是矢量最小化半精度浮点指令的标准Zvfhmin扩展，在riscv-v-spec中的提交e2ccd05（"从Zvfh[min]删除草案警告"）中获得批准。
+- const: zvkb
+          description:
+            这是矢量密码学位操作指令的标准Zvkb扩展，在riscv-crypto中的提交56ed795（"更新riscv-crypto-spec-vector.adoc"）中获得批准。
+- const: zvkg
+          description:
+            这是矢量GCM/GMAC指令的标准Zvkg扩展，在riscv-crypto中的提交56ed795（"更新riscv-crypto-spec-vector.adoc"）中获得批准。
+- const: zvkn
+          description:
+            这是NIST算法套件指令的标准Zvkn扩展，在riscv-crypto中的提交56ed795（"更新riscv-crypto-spec-vector.adoc"）中获得批准。
+- const: zvknc
+          description:
+            这是带有无进位乘法的NIST算法套件指令的标准Zvknc扩展，在riscv-crypto中的提交56ed795（"更新riscv-crypto-spec-vector.adoc"）中获得批准。
+- const: zvkned
+          description:
+            经过 riscv-crypto 项目中提交 56ed795 ("更新 riscv-crypto-spec-vector.adoc") 批准的向量 AES 块加密指令的标准 Zvkned 扩展。
+- const: zvkng
+          description:
+            经过 riscv-crypto 项目中提交 56ed795 ("更新 riscv-crypto-spec-vector.adoc") 批准的支持 GCM 指令的 NIST 算法套件标准 Zvkng 扩展。
+- const: zvknha
+          description: |
+            经过 riscv-crypto 项目中提交 56ed795 ("更新 riscv-crypto-spec-vector.adoc") 批准的支持仅 SHA-256 向量安全哈希指令的 NIST 套件标准 Zvknha 扩展。
+- const: zvknhb
+          description: |
+            经过 riscv-crypto 项目中提交 56ed795 ("更新 riscv-crypto-spec-vector.adoc") 批准的支持 SHA-256 和 SHA-512 向量安全哈希指令的 NIST 套件标准 Zvknhb 扩展。
+- const: zvks
+          description:
+            经过 riscv-crypto 项目中提交 56ed795 ("更新 riscv-crypto-spec-vector.adoc") 批准的尚密算法套件标准 Zvks 扩展。
+- const: zvksc
+          description:
+            经过 riscv-crypto 项目中提交 56ed795 ("更新 riscv-crypto-spec-vector.adoc") 批准的支持无进位乘法指令的尚密算法套件标准 Zvksc 扩展。
+- const: zvksed
+          description: |
+            经过 riscv-crypto 项目中提交 56ed795 ("更新 riscv-crypto-spec-vector.adoc") 批准的支持 SM4 块加密指令的尚密套件标准 Zvksed 扩展。
+- const: zvksh
+          description: |
+            经过 riscv-crypto 项目中提交 56ed795 ("更新 riscv-crypto-spec-vector.adoc") 批准的支持 SM3 安全哈希指令的尚密套件标准 Zvksh 扩展。
+- const: zvksg
+          description:
+            经过 riscv-crypto 项目中提交 56ed795 ("更新 riscv-crypto-spec-vector.adoc") 批准的支持 GCM 指令的尚密算法套件标准 Zvksg 扩展。
+- const: zvkt
+          description:
+            经过 riscv-crypto 项目中提交 56ed795 ("更新 riscv-crypto-spec-vector.adoc") 批准的用于数据无关执行延迟的标准 Zvkt 扩展。
+这段英文的中文翻译如下：
+
+- const: xandespmu
+  description:
+    这是安捷科技性能监控扩展，用于计数器溢出和权限模式过滤。更多细节请参阅AX45MP数据手册中的“与计数器相关的寄存器”部分。
+  [AX45MP数据手册链接](https://www.andestech.com/wp-content/uploads/AX45MP-1C-Rev.-5.0.0-Datasheet.pdf)
+
+  additionalProperties: true
+..

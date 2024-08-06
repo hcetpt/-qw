@@ -1,0 +1,65 @@
+### Texas Instruments TWL6040 系列
+
+TWL6040 是一款 8 通道、高质量、低功耗音频编解码器，在 OMAP4+ 平台上提供音频、振动和通用输出 (GPO) 功能。
+它们通过 I²C 接口与主处理器进行命令通信，通过 McPDM 接口传输音频数据和命令。
+
+**必需属性:**
+- `compatible`: 对于 TWL6040 应为 `"ti,twl6040"`，对于 TWL6041 应为 `"ti,twl6041"`
+- `reg`: 必须设置为 `0x4b` 作为 I²C 地址
+- `interrupts`: TWL6040 拥有一条中断线连接到主系统芯片 (SoC)
+- `gpio-controller`:
+  - `#gpio-cells = <1>`: TWL6040 提供 GPO 线路
+- `#clock-cells = <0>`; TWL6040 是 PDMCLK 的提供者，该时钟被 McPDM 使用
+- `twl6040,audpwron-gpio`: 用于 TWL6040 的电源开启 GPIO 线路
+- `vio-supply`: TWL6040 VIO 电源的调节器
+- `v2v1-supply`: TWL6040 V2V1 电源的调节器
+
+**可选属性:**
+- `enable-active-high`: 在启动过程中开启 TWL6040
+- `clocks`: 针对 32K 时钟和/或 MCLK 时钟提供者的句柄
+- `clock-names`: 必须是 `"clk32k"` 对于 32K 时钟 和 `"mclk"` 对于 MCLK 时钟
+
+**振动功能**
+**必需属性:**
+- `vddvibl-supply`: 左侧振动电机的调节器
+- `vddvibr-supply`: 右侧振动电机的调节器
+- `vibra { }`: 包含以下属性的振动参数配置部分：
+  - `ti,vibldrv-res`: 左侧驱动电阻参数
+  - `ti,vibrdrv-res`: 右侧驱动电阻参数
+  - `ti,viblmotor-res`: 左侧电机电阻参数
+  - `ti,vibrmotor-res`: 右侧电机电阻参数
+
+**在 `vibra { }` 部分中的可选属性:**
+- `vddvibl_uV`: 如果需要改变 `vddvibl` 默认电压
+- `vddvibr_uV`: 如果需要改变 `vddvibr` 默认电压
+
+**示例:**
+```device-tree
+&i2c1 {
+	twl6040: twl@4b {
+		compatible = "ti,twl6040";
+
+		interrupts = <0 119 4>;
+		interrupt-parent = <&gic>;
+		twl6040,audpwron-gpio = <&gpio4 31 0>;
+
+		vio-supply = <&v1v8>;
+		v2v1-supply = <&v2v1>;
+		enable-active-high;
+
+		/* regulators for vibra motor */
+		vddvibl-supply = <&vbat>;
+		vddvibr-supply = <&vbat>;
+
+		vibra {
+			/* Vibra driver, motor resistance parameters */
+			ti,vibldrv-res = <8>;
+			ti,vibrdrv-res = <3>;
+			ti,viblmotor-res = <10>;
+			ti,vibrmotor-res = <10>;
+		};
+	};
+};
+```
+
+**包含:** "twl6040.dtsi"

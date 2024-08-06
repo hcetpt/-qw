@@ -1,0 +1,189 @@
+以下是提供的 YAML 文件的中文翻译：
+
+```yaml
+# SPDX-文件许可标识符: (GPL-2.0 或 BSD-2-Clause)
+# 版权所有 2019 BayLibre, SAS
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/power/amlogic,meson-ee-pwrc.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: Amlogic Meson 其他一切电源域
+
+维护者:
+  - 尼尔·阿姆斯特朗 <neil.armstrong@linaro.org>
+
+描述: |+
+  “其他一切电源域”节点应当是具有以下所需属性的 syscon 节点的子节点:
+
+  - 兼容性: 应当为以下内容之一:
+                "amlogic,meson-gx-hhi-sysctrl", "simple-mfd", "syscon"
+
+  参见在文档中描述的绑定
+  Documentation/devicetree/bindings/mfd/syscon.yaml
+
+属性:
+  compatible:
+    枚举:
+      - amlogic,meson8-pwrc
+      - amlogic,meson8b-pwrc
+      - amlogic,meson8m2-pwrc
+      - amlogic,meson-gxbb-pwrc
+      - amlogic,meson-axg-pwrc
+      - amlogic,meson-g12a-pwrc
+      - amlogic,meson-sm1-pwrc
+
+  clocks:
+    最少项目数: 1
+    最大项目数: 2
+
+  clock-names:
+    最少项目数: 1
+    项目:
+      - 常量: vpu
+      - 常量: vapb
+
+  resets:
+    最少项目数: 5
+    最大项目数: 12
+
+  reset-names:
+    最少项目数: 5
+    最大项目数: 12
+
+  "#power-domain-cells":
+    常量: 1
+
+  amlogic,ao-sysctrl:
+    描述: AO sysctrl 节点的 phandle
+    $ref: /schemas/types.yaml#/definitions/phandle
+
+allOf:
+  - 如果:
+      属性:
+        compatible:
+          枚举:
+            - amlogic,meson8b-pwrc
+            - amlogic,meson8m2-pwrc
+    那么:
+      属性:
+        reset-names:
+          项目:
+            - 常量: dblk
+            - 常量: pic_dc
+            - 常量: hdmi_apb
+            - 常量: hdmi_system
+            - 常量: venci
+            - 常量: vencp
+            - 常量: vdac
+            - 常量: vencl
+            - 常量: viu
+            - 常量: venc
+            - 常量: rdma
+      必需:
+        - resets
+        - reset-names
+
+  - 如果:
+      属性:
+        compatible:
+          枚举:
+            - amlogic,meson-gxbb-pwrc
+    那么:
+      属性:
+        reset-names:
+          项目:
+            - 常量: viu
+            - 常量: venc
+            - 常量: vcbus
+            - 常量: bt656
+            - 常量: dvin
+            - 常量: rdma
+            - 常量: venci
+            - 常量: vencp
+            - 常量: vdac
+            - 常量: vdi6
+            - 常量: vencl
+            - 常量: vid_lock
+      必需:
+        - resets
+        - reset-names
+
+  - 如果:
+      属性:
+        compatible:
+          枚举:
+            - amlogic,meson-axg-pwrc
+    那么:
+      属性:
+        reset-names:
+          项目:
+            - 常量: viu
+            - 常量: venc
+            - 常量: vcbus
+            - 常量: vencl
+            - 常量: vid_lock
+      必需:
+        - resets
+        - reset-names
+
+  - 如果:
+      属性:
+        compatible:
+          枚举:
+            - amlogic,meson-g12a-pwrc
+            - amlogic,meson-sm1-pwrc
+    那么:
+      属性:
+        reset-names:
+          项目:
+            - 常量: viu
+            - 常量: venc
+            - 常量: vcbus
+            - 常量: bt656
+            - 常量: rdma
+            - 常量: venci
+            - 常量: vencp
+            - 常量: vdac
+            - 常量: vdi6
+            - 常量: vencl
+            - 常量: vid_lock
+      必需:
+        - resets
+        - reset-names
+
+必需:
+  - compatible
+  - clocks
+  - clock-names
+  - "#power-domain-cells"
+  - amlogic,ao-sysctrl
+
+附加属性: false
+
+示例:
+  - |
+    pwrc: power-controller {
+          compatible = "amlogic,meson-sm1-pwrc";
+          #power-domain-cells = <1>;
+          amlogic,ao-sysctrl = <&rti>;
+          resets = <&reset_viu>,
+                   <&reset_venc>,
+                   <&reset_vcbus>,
+                   <&reset_bt656>,
+                   <&reset_rdma>,
+                   <&reset_venci>,
+                   <&reset_vencp>,
+                   <&reset_vdac>,
+                   <&reset_vdi6>,
+                   <&reset_vencl>,
+                   <&reset_vid_lock>;
+          reset-names = "viu", "venc", "vcbus", "bt656",
+                        "rdma", "venci", "vencp", "vdac",
+                        "vdi6", "vencl", "vid_lock";
+          clocks = <&clk_vpu>, <&clk_vapb>;
+          clock-names = "vpu", "vapb";
+    };
+```
+
+请注意，由于 YAML 的特殊格式和缩进要求，翻译时尽量保持了原有的结构和格式。

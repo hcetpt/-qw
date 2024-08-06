@@ -1,0 +1,225 @@
+STMicroelectronics stih4xx 平台
+
+- sti-vtg: 视频时序生成器
+  必需属性：
+  - compatible: "st,vtg"
+  - reg: IP 寄存器的物理基地址及内存映射区域长度
+可选属性：
+  - interrupts: VTG 中断号到 CPU
+- st,slave: 从属 vtg 的 phandle
+
+- sti-vtac: 视频时序高级晶片间通信 Rx 和 Tx
+  必需属性：
+  - compatible: "st,vtac-main" 或 "st,vtac-aux"
+  - reg: IP 寄存器的物理基地址及内存映射区域长度
+- clocks: 来自通用时钟绑定：处理硬件 IP 所需时钟，所需时钟数量可能取决于 SoC 类型
+详情请参阅 ../clocks/clock-bindings.txt
+- clock-names: clocks 属性中列出的时钟名称，顺序相同
+
+- sti-display-subsystem: DRM 子组件的主设备
+  此设备必须是所有子组件的父设备，并负责绑定它们
+必需属性：
+  - compatible: "st,sti-display-subsystem"
+  - ranges: 用于探测子设备
+
+- sti-compositor: 帧合成引擎
+  必须是 sti-display-subsystem 的子设备
+  必需属性：
+  - compatible: "st,stih<chip>-compositor"
+  - reg: IP 寄存器的物理基地址及内存映射区域长度
+- clocks: 来自通用时钟绑定：处理硬件 IP 所需时钟，所需时钟数量可能取决于 SoC 类型
+详情请参阅 ../clocks/clock-bindings.txt
+以下是提供的文本的中文翻译：
+
+- clock-names: 时钟名称，这些名称与“clocks”属性中列出的时钟相对应，并且按照相同的顺序排列。
+- resets: 设备所使用的复位信号。
+  详细信息请参阅 `../reset/reset.txt`。
+- reset-names: 复位信号的名称，这些名称与“resets”属性中列出的复位信号相对应，并且按照相同的顺序排列。
+- st,vtg: VTG 设备（主设备和辅助设备）节点的 phandle。
+- sti-tvout: 视频输出硬件模块，
+  必须是 `sti-display-subsystem` 的子节点。
+  所需属性：
+  - compatible: "st,stih<芯片>-tvout"
+  - reg: IP 寄存器的物理基地址及内存映射区域的长度。
+- reg-names: 在 “regs” 属性中列出的映射内存区域的名称，并且按照相同的顺序排列。
+- resets: 设备所使用的复位信号。
+  详细信息请参阅 `../reset/reset.txt`。
+- reset-names: 复位信号的名称，这些名称与“resets”属性中列出的复位信号相对应，并且按照相同的顺序排列。
+- sti-hdmi: HDMI 输出模块，
+  必须是 `sti-display-subsystem` 的子节点。
+  所需属性：
+  - compatible: "st,stih<芯片>-hdmi"
+  - reg: IP 寄存器的物理基地址及内存映射区域的长度。
+- reg-names: 在 “regs” 属性中列出的映射内存区域的名称，并且按照相同的顺序排列。
+中断: HDMI向CPU的中断编号  
+- 中断名称: 按照中断属性中列出的顺序，给出各中断的名称  
+- 时钟: 根据通用时钟绑定规则: 处理硬件IP所需的时钟，时钟的数量可能依赖于SoC的类型  
+- 时钟名称: 按照时钟属性中列出的顺序，给出各时钟的名称  
+- DDC: 用于DDC EDID探测的I2C控制器的phandle值  
+
+sti-hda:
+  必需属性:
+  必须是sti-display-subsystem的子节点
+  - 兼容性: "st,stih<芯片>-hda"
+  - reg: 物理IP寄存器基地址及内存映射区域的长度
+- reg-names: 按照regs属性中列出的顺序，给出各内存映射区域的名称
+- 时钟: 根据通用时钟绑定规则: 处理硬件IP所需的时钟，时钟的数量可能依赖于SoC的类型  
+详情请参阅 ../clocks/clock-bindings.txt  
+- 时钟名称: 按照时钟属性中列出的顺序，给出各时钟的名称  
+
+sti-dvo:
+  必需属性:
+  必须是sti-display-subsystem的子节点
+  - 兼容性: "st,stih<芯片>-dvo"
+  - reg: 物理IP寄存器基地址及内存映射区域的长度
+- reg-names: 按照regs属性中列出的顺序，给出各内存映射区域的名称
+### 时钟 (clocks):
+- **来自通用时钟绑定**: 处理硬件 IP 所需的时钟，时钟的数量可能取决于 SoC 的类型。
+详情请参见 `../clocks/clock-bindings.txt`。
+
+- **clock-names**: 在 `clocks` 属性中列出的时钟名称，按相同顺序排列。
+
+- **pinctrl-0**: 引脚控制句柄
+  - **pinctrl-names**: 要使用的引脚控制状态的名称
+  - **sti,panel**: 与 DVO 输出相连的面板的 phandle
+
+### sti-hqvdp:
+- **必须是 sti-display-subsystem 的子节点**
+  - **compatible**: "st,stih<chip>-hqvdp"
+  - **reg**: IP 寄存器的物理基地址和内存映射区域的长度
+
+### 时钟 (clocks):
+- **来自通用时钟绑定**: 处理硬件 IP 所需的时钟，时钟的数量可能取决于 SoC 的类型。
+详情请参见 `../clocks/clock-bindings.txt`。
+
+- **clock-names**: 在 `clocks` 属性中列出的时钟名称，按相同顺序排列。
+
+- **resets**: 设备要使用的复位信号
+详情请参见 `../reset/reset.txt`。
+
+- **reset-names**: 在 `resets` 属性中列出的复位信号名称，按相同顺序排列。
+
+- **st,vtg**: 对 vtg 主设备节点的 phandle。
+这段代码描述了一个设备树配置，用于定义特定硬件平台上的组件及其属性。下面是这段代码的中文翻译：
+
+/
+{
+    ...
+    vtg_main_slave: sti-vtg-main-slave@fe85a800 {
+        compatible = "st,vtg";
+        reg = <0xfe85A800 0x300>;
+        interrupts = <GIC_SPI 175 IRQ_TYPE_NONE>;
+    };
+
+    vtg_main: sti-vtg-main-master@fd348000 {
+        compatible = "st,vtg";
+        reg = <0xfd348000 0x400>;
+        st,slave = <&vtg_main_slave>;
+    };
+
+    vtg_aux_slave: sti-vtg-aux-slave@fd348400 {
+        compatible = "st,vtg";
+        reg = <0xfe858200 0x300>;
+        interrupts = <GIC_SPI 176 IRQ_TYPE_NONE>;
+    };
+
+    vtg_aux: sti-vtg-aux-master@fd348400 {
+        compatible = "st,vtg";
+        reg = <0xfd348400 0x400>;
+        st,slave = <&vtg_aux_slave>;
+    };
+
+
+    sti-vtac-rx-main@fee82800 {
+        compatible = "st,vtac-main";
+        reg = <0xfee82800 0x200>;
+        clock-names = "vtac";
+        clocks = <&clk_m_a2_div0 CLK_M_VTAC_MAIN_PHY>;
+    };
+
+    sti-vtac-rx-aux@fee82a00 {
+        compatible = "st,vtac-aux";
+        reg = <0xfee82a00 0x200>;
+        clock-names = "vtac";
+        clocks = <&clk_m_a2_div0 CLK_M_VTAC_AUX_PHY>;
+    };
+
+    sti-vtac-tx-main@fd349000 {
+        compatible = "st,vtac-main";
+        reg = <0xfd349000 0x200>, <0xfd320000 0x10000>;
+        clock-names = "vtac";
+        clocks = <&clk_s_a1_hs CLK_S_VTAC_TX_PHY>;
+    };
+
+    sti-vtac-tx-aux@fd349200 {
+        compatible = "st,vtac-aux";
+        reg = <0xfd349200 0x200>, <0xfd320000 0x10000>;
+        clock-names = "vtac";
+        clocks = <&clk_s_a1_hs CLK_S_VTAC_TX_PHY>;
+    };
+
+    sti-display-subsystem {
+        compatible = "st,sti-display-subsystem";
+        ranges;
+
+        sti-compositor@fd340000 {
+            compatible = "st,stih416-compositor";
+            reg = <0xfd340000 0x1000>;
+            clock-names = "compo_main", "compo_aux", "pix_main", "pix_aux";
+            clocks = <&clk_m_a2_div1 CLK_M_COMPO_MAIN>, <&clk_m_a2_div1 CLK_M_COMPO_AUX>, <&clockgen_c_vcc CLK_S_PIX_MAIN>, <&clockgen_c_vcc CLK_S_PIX_AUX>;
+            reset-names = "compo-main", "compo-aux";
+            resets = <&softreset STIH416_COMPO_M_SOFTRESET>, <&softreset STIH416_COMPO_A_SOFTRESET>;
+            st,vtg = <&vtg_main>, <&vtg_aux>;
+        };
+
+        sti-tvout@fe000000 {
+            compatible = "st,stih416-tvout";
+            reg = <0xfe000000 0x1000>, <0xfe85a000 0x400>, <0xfe830000 0x10000>;
+            reg-names = "tvout-reg", "hda-reg", "syscfg";
+            reset-names = "tvout";
+            resets = <&softreset STIH416_HDTVOUT_SOFTRESET>;
+        };
+
+        sti-hdmi@fe85c000 {
+            compatible = "st,stih416-hdmi";
+            reg = <0xfe85c000 0x1000>, <0xfe830000 0x10000>;
+            reg-names = "hdmi-reg", "syscfg";
+            interrupts = <GIC_SPI 173 IRQ_TYPE_NONE>;
+            interrupt-names = "irq";
+            clock-names = "pix", "tmds", "phy", "audio";
+            clocks = <&clockgen_c_vcc CLK_S_PIX_HDMI>, <&clockgen_c_vcc CLK_S_TMDS_HDMI>, <&clockgen_c_vcc CLK_S_HDMI_REJECT_PLL>, <&clockgen_b1 CLK_S_PCM_0>;
+        };
+
+        sti-hda@fe85a000 {
+            compatible = "st,stih416-hda";
+            reg = <0xfe85a000 0x400>, <0xfe83085c 0x4>;
+            reg-names = "hda-reg", "video-dacs-ctrl";
+            clock-names = "pix", "hddac";
+            clocks = <&clockgen_c_vcc CLK_S_PIX_HD>, <&clockgen_c_vcc CLK_S_HDDAC>;
+        };
+
+        sti-dvo@8d00400 {
+            compatible = "st,stih407-dvo";
+            reg = <0x8d00400 0x200>;
+            reg-names = "dvo-reg";
+            clock-names = "dvo_pix", "dvo", "main_parent", "aux_parent";
+            clocks = <&clk_s_d2_flexgen CLK_PIX_DVO>, <&clk_s_d2_flexgen CLK_DVO>, <&clk_s_d2_quadfs 0>, <&clk_s_d2_quadfs 1>;
+            pinctrl-names = "default";
+            pinctrl-0 = <&pinctrl_dvo>;
+            sti,panel = <&panel_dvo>;
+        };
+
+        sti-hqvdp@9c000000 {
+            compatible = "st,stih407-hqvdp";
+            reg = <0x9C00000 0x100000>;
+            clock-names = "hqvdp", "pix_main";
+            clocks = <&clk_s_c0_flexgen CLK_MAIN_DISP>, <&clk_s_d2_flexgen CLK_PIX_MAIN_DISP>;
+            reset-names = "hqvdp";
+            resets = <&softreset STIH407_HDQVDP_SOFTRESET>;
+            st,vtg = <&vtg_main>;
+        };
+    };
+    ...
+};
+
+请注意，这里的“...”表示省略的内容，实际设备树文件中会有更多或更少的内容。

@@ -1,0 +1,55 @@
+运行控制和电源管理
+--------------------
+RCPM（Run Control and Power Management）执行与设备运行控制和电源管理相关的所有设备级任务。
+所需属性：
+  - `reg`：RCPM模块寄存器集的偏移量和长度
+- `#fsl,rcpm-wakeup-cells` ：`fsl,rcpm-wakeup` 属性中 IPPDEXPCR 寄存器单元的数量
+- `compatible`：必须包含特定于芯片的 RCPM 模块兼容字符串，并且（如果适用）可以包含特定于机箱版本的 RCPM 兼容字符串。特定于芯片的字符串形式为 `"fsl,<chip>-rcpm"`，例如：
+    * `"fsl,p2041-rcpm"`
+    * `"fsl,p5020-rcpm"`
+    * `"fsl,t4240-rcpm"`
+
+    特定于机箱版本的字符串形式为 `"fsl,qoriq-rcpm-<version>"`，例如：
+    * `"fsl,qoriq-rcpm-1.0"`：适用于 1.0 版本机箱的 RCPM
+    * `"fsl,qoriq-rcpm-2.0"`：适用于 2.0 版本机箱的 RCPM
+    * `"fsl,qoriq-rcpm-2.1"`：适用于 2.1 版本机箱的 RCPM
+    * `"fsl,qoriq-rcpm-2.1+"`：适用于 2.1+ 版本机箱的 RCPM
+
+    所有提到的“1.0”和“2.0”均指芯片遵循的 QorIQ 机箱版本。
+    | 机箱版本 | 示例芯片 |
+    |:--------:|:--------:|
+    |    1.0   | p4080, p5020, p5040, p2041, p3041 |
+    |    2.0   | t4240, b4860, b4420 |
+    |    2.1   | t1040 |
+    |   2.1+   | ls1021a, ls1012a, ls1043a, ls1046a |
+
+可选属性：
+ - `little-endian`：指定 RCPM 寄存器块采用小端格式。若未指定，则默认为大端格式。
+
+示例：
+T4240 的 RCPM 节点配置如下：
+```device_tree
+rcpm: global-utilities@e2000 {
+    compatible = "fsl,t4240-rcpm", "fsl,qoriq-rcpm-2.0";
+    reg = <0xe2000 0x1000>;
+    #fsl,rcpm-wakeup-cells = <2>;
+};
+```
+
+* Freescale RCPM 唤醒源设备树绑定
+------------------------------------
+如果设备可以作为唤醒源使用，则应在设备节点中添加必需的 `fsl,rcpm-wakeup` 属性。
+- `fsl,rcpm-wakeup`：由指向 RCPM 节点的句柄和 IPPDEXPCR 寄存器单元组成。IPPDEXPCR 寄存器单元的数量在 RCPM 节点中的 `#fsl,rcpm-wakeup-cells` 中定义。第一个寄存器单元是应设置在 IPPDEXPCR0 中的位掩码，第二个寄存器单元用于 IPPDEXPCR1，依此类推。
+注：IPPDEXPCR（IP 功耗降低异常控制寄存器）提供了一种机制，可以在 STANDBY 和 MEM 状态下保持某些区块处于唤醒状态，以便将它们用作唤醒源。
+
+示例：
+```device_tree
+lpuart0: serial@2950000 {
+    compatible = "fsl,ls1021a-lpuart";
+    reg = <0x0 0x2950000 0x0 0x1000>;
+    interrupts = <GIC_SPI 80 IRQ_TYPE_LEVEL_HIGH>;
+    clocks = <&sysclk>;
+    clock-names = "ipg";
+    fsl,rcpm-wakeup = <&rcpm 0x0 0x40000000>;
+};
+```

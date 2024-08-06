@@ -1,0 +1,121 @@
+```yaml
+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/display/panel/panel-simple-lvds-dual-ports.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: 简单的LVDS面板，具有一个电源供应和双LVDS端口
+
+maintainers:
+  - Liu Ying <victor.liu@nxp.com>
+  - Thierry Reding <thierry.reding@gmail.com>
+  - Sam Ravnborg <sam@ravnborg.org>
+
+description: |
+  此绑定文件集合了那些具有双LVDS端口且只需要一个电源供应的LVDS面板。
+  第一个端口接收奇数像素，第二个端口接收偶数像素。
+  可选地，还可能包含背光和启用GPIO。
+  面板可以使用OF图绑定与显示器关联，
+  或者它可能是显示器的直接子节点。
+  如果面板更复杂，则需要一个专用的绑定文件。
+allOf:
+  - $ref: panel-common.yaml#
+
+properties:
+
+  compatible:
+    enum:
+      # compatible 必须按字母顺序列出，并按照 compatible 排序
+      # AU Optronics Corporation 13.3" FHD (1920x1080) TFT LCD 面板
+      - auo,g133han01
+        # AU Optronics Corporation 15.6" FHD (1920x1080) TFT LCD 面板
+      - auo,g156han04
+        # AU Optronics Corporation 18.5" FHD (1920x1080) TFT LCD 面板
+      - auo,g185han01
+        # AU Optronics Corporation 19.0" (1280x1024) TFT LCD 面板
+      - auo,g190ean01
+        # Kaohsiung Opto-Electronics Inc. 10.1" WUXGA (1920 x 1200) LVDS TFT LCD 面板
+      - koe,tx26d202vm0bwa
+        # Lincoln Technology Solutions, LCD185-101CT 10.1" TFT 1920x1200
+      - lincolntech,lcd185-101ct
+        # Microtips Technology MF-101HIEBCAF0 10.1" WUXGA (1920x1200) TFT LCD 面板
+      - microtips,mf-101hiebcaf0
+        # Microtips Technology MF-103HIEB0GA0 10.25" 1920x720 TFT LCD 面板
+      - microtips,mf-103hieb0ga0
+        # NLT Technologies, Ltd. 15.6" FHD (1920x1080) LVDS TFT LCD 面板
+      - nlt,nl192108ac18-02d
+
+  ports:
+    $ref: /schemas/graph.yaml#/properties/ports
+
+    properties:
+      port@0:
+        $ref: /schemas/graph.yaml#/$defs/port-base
+        unevaluatedProperties: false
+        description: 第一个输出端口
+properties:
+          dual-lvds-odd-pixels:
+            type: boolean
+            description: 第一个输出端口用于奇数像素
+required:
+          - dual-lvds-odd-pixels
+
+      port@1:
+        $ref: /schemas/graph.yaml#/$defs/port-base
+        unevaluatedProperties: false
+        description: 第二个输出端口
+```
+
+请注意，部分代码中的注释和描述性文字被翻译为中文，而某些特定的语法结构（如YAML键值对）保持原样，以确保格式正确。
+属性:
+  `dual-lvds-even-pixels`:
+    类型: 布尔值
+    描述: 用于偶数像素的第二个接收端口
+必需:
+  - `dual-lvds-even-pixels`
+
+必需:
+  - `port@0`
+  - `port@1`
+
+背光: 真
+启用GPIOs: 真
+电源供应: 真
+
+不允许额外属性。
+
+必需:
+  - `compatible`
+  - `ports`
+  - `power-supply`
+
+示例:
+  - |
+    面板: panel-lvds {
+      compatible = "koe,tx26d202vm0bwa";
+      power-supply = <&vdd_lcd_reg>;
+
+      ports {
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        port@0 {
+          dual-lvds-odd-pixels;
+          reg = <0>;
+
+          panel_lvds0_in: 终端 {
+            remote-endpoint = <&lvds0_out>;
+          };
+        };
+
+        port@1 {
+          dual-lvds-even-pixels;
+          reg = <1>;
+
+          panel_lvds1_in: 终端 {
+            remote-endpoint = <&lvds1_out>;
+          };
+        };
+      };
+    };

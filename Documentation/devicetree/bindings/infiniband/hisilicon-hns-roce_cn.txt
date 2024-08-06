@@ -1,0 +1,37 @@
+Hisilicon RoCE引擎是网络子系统的一部分。
+其工作依赖于网络子系统的其他部分，例如GMAC（Gigabit Media Access Controller）和DSA Fabric（Distributed Switch Architecture Fabric）。
+以下描述了额外的属性：
+
+必需属性：
+- compatible：应包含"hisilicon,hns-roce-v1"
+- reg：RoCE驱动的物理基地址及内存映射区域的长度
+- eth-handle：phandle，指定一个节点的引用，代表以太网设备
+- dsaf-handle：phandle，指定一个节点的引用，代表DSAf设备
+- node_guid：一个唯一标识设备或组件的数字
+- #address-cells：必须为2
+- #size-cells：必须为2
+可选属性：
+- dma-coherent：如果DMA操作是一致性的，则存在此属性
+- interrupts：应包含32个完成事件中断、1个异步事件中断以及1个事件溢出中断
+- interrupt-names：对于RoCE设备，应有34个中断名
+  - hns-roce-comp-0 ~ hns-roce-comp-31：32个完成事件中断
+  - hns-roce-async：1个异步事件中断
+  - hns-roce-common：名为common的异常警告中断
+
+示例：
+```
+infiniband@c4000000 {
+	compatible = "hisilicon,hns-roce-v1";
+	reg = <0x0 0xc4000000 0x0 0x100000>;
+	dma-coherent;
+	eth-handle = <&eth2 &eth3 &eth4 &eth5 &eth6 &eth7>;
+	dsaf-handle = <&soc0_dsa>;
+	node-guid = [00 9A CD 00 00 01 02 03];
+	#address-cells = <2>;
+	#size-cells = <2>;
+	interrupt-parent = <&mbigen_dsa>;
+	interrupts = <722 1>, <723 1>, <724 1>, <725 1>, <726 1>, <727 1>, <728 1>, <729 1>, <730 1>, <731 1>, <732 1>, <733 1>, <734 1>, <735 1>, <736 1>, <737 1>, <738 1>, <739 1>, <740 1>, <741 1>, <742 1>, <743 1>, <744 1>, <745 1>, <746 1>, <747 1>, <748 1>, <749 1>, <750 1>, <751 1>, <752 1>, <753 1>, <785 1>, <754 4>;
+	interrupt-names = "hns-roce-comp-0", "hns-roce-comp-1", "hns-roce-comp-2", "hns-roce-comp-3", "hns-roce-comp-4", "hns-roce-comp-5", "hns-roce-comp-6", "hns-roce-comp-7", "hns-roce-comp-8", "hns-roce-comp-9", "hns-roce-comp-10", "hns-roce-comp-11", "hns-roce-comp-12", "hns-roce-comp-13", "hns-roce-comp-14", "hns-roce-comp-15", "hns-roce-comp-16", "hns-roce-comp-17", "hns-roce-comp-18", "hns-roce-comp-19", "hns-roce-comp-20", "hns-roce-comp-21", "hns-roce-comp-22", "hns-roce-comp-23", "hns-roce-comp-24", "hns-roce-comp-25", "hns-roce-comp-26", "hns-roce-comp-27", "hns-roce-comp-28", "hns-roce-comp-29", "hns-roce-comp-30", "hns-roce-comp-31", "hns-roce-async", "hns-roce-common";
+};
+```
+```

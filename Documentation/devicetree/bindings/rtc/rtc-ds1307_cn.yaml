@@ -1,0 +1,100 @@
+# SPDX-许可证标识符: GPL-2.0
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/rtc/rtc-ds1307.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: Dallas DS1307 及兼容实时时钟 (RTC)
+
+维护者:
+  - Alexandre Belloni <alexandre.belloni@bootlin.com>
+
+属性:
+  compatible:
+    oneOf:
+      - 枚举:
+          - dallas,ds1307
+          - dallas,ds1308
+          - dallas,ds1337
+          - dallas,ds1338
+          - dallas,ds1339
+          - dallas,ds1388
+          - dallas,ds1340
+          - dallas,ds1341
+          - maxim,ds3231
+          - st,m41t0
+          - st,m41t00
+          - st,m41t11
+          - microchip,mcp7940x
+          - microchip,mcp7941x
+          - pericom,pt7c4338
+          - epson,rx8025
+          - isil,isl12057
+          - epson,rx8130
+
+      - items:
+          - 枚举:
+              - st,m41t00
+          - 常量: dallas,ds1338
+
+  reg:
+    maxItems: 1
+
+  interrupts:
+    minItems: 1
+    maxItems: 2
+
+  interrupt-names:
+    maxItems: 2
+
+  "#clock-cells":
+    常量: 1
+
+  clock-output-names:
+    描述: 根据通用时钟绑定覆盖默认的输出时钟名称
+
+  wakeup-source:
+    描述: 启用在闹钟时唤醒主机系统
+
+  vcc-supply: true
+
+allOf:
+  - $ref: rtc.yaml
+  - 如果:
+      属性:
+        compatible:
+          包含:
+            枚举:
+              - dallas,ds1339
+              - dallas,ds1340
+              - dallas,ds1388
+    然后:
+      属性:
+        trickle-resistor-ohms:
+          描述: 用于涓流充电器的选定电阻。如果要启用涓流充电器，则应指定该值。
+          枚举: [ 250, 2000, 4000 ]
+
+        trickle-diode-disable:
+          描述: 不使用内部涓流充电器二极管。如果要禁用内部涓流充电器二极管（已被aux-voltage-chargeable取代），则应给出此值。
+          过时: true
+
+unevaluatedProperties: false
+
+必需:
+  - compatible
+  - reg
+
+示例:
+  - |
+    i2c {
+      #address-cells = <1>;
+      #size-cells = <0>;
+
+      rtc@68 {
+        compatible = "dallas,ds1337";
+        reg = <0x68>;
+        interrupt-parent = <&gpio4>;
+        interrupts = <20 0>;
+        trickle-resistor-ohms = <250>;
+      };
+    };

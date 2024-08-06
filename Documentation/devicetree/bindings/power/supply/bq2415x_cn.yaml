@@ -1,0 +1,94 @@
+```yaml
+# SPDX-许可证标识符: GPL-2.0
+# 版权 (C) 2021 Sebastian Reichel
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/power/supply/bq2415x.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: TI bq2415x 锂离子充电器
+
+maintainers:
+  - Sebastian Reichel <sre@kernel.org>
+
+allOf:
+  - $ref: power-supply.yaml#
+
+properties:
+  compatible:
+    enum:
+      - ti,bq24150
+      - ti,bq24150a
+      - ti,bq24151
+      - ti,bq24151a
+      - ti,bq24152
+      - ti,bq24153
+      - ti,bq24153a
+      - ti,bq24155
+      - ti,bq24156
+      - ti,bq24156a
+      - ti,bq24158
+
+  reg:
+    maxItems: 1
+
+  ti,current-limit:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    description: 充电器从电源可抽取的初始最大电流（单位：毫安）
+  ti,weak-battery-voltage:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    description: |
+      电池电压较低阈值（单位：毫伏）
+      当电池电压低于此值时，芯片将使用慢速预充
+  ti,battery-regulation-voltage:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    description: 最大充电电压（单位：毫伏）
+  ti,charge-current:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    description: 最大充电电流（单位：毫安）
+  ti,termination-current:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    description: |
+      在恒压阶段，当充电电流下降到低于此值（单位：毫安）时，充电将终止
+  ti,resistor-sense:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    description: 检测电阻的值（单位：毫欧姆）
+  ti,usb-charger-detection:
+    $ref: /schemas/types.yaml#/definitions/phandle
+    description: USB充电检测设备的phandle（自动模式下必需）
+
+required:
+  - compatible
+  - reg
+  - ti,current-limit
+  - ti,weak-battery-voltage
+  - ti,battery-regulation-voltage
+  - ti,charge-current
+  - ti,termination-current
+  - ti,resistor-sense
+
+additionalProperties: false
+
+examples:
+  - |
+    i2c {
+      #address-cells = <1>;
+      #size-cells = <0>;
+
+      charger@6b {
+        compatible = "ti,bq24150a";
+        reg = <0x6b>;
+
+        ti,current-limit = <100>;
+        ti,weak-battery-voltage = <3400>;
+        ti,battery-regulation-voltage = <4200>;
+        ti,charge-current = <650>;
+        ti,termination-current = <100>;
+        ti,resistor-sense = <68>;
+
+        ti,usb-charger-detection = <&isp1704>;
+      };
+    };
+```
+
+这段 YAML 文件描述了 TI bq2415x 系列锂离子充电器在 Device Tree 中的配置。它包括了必要的属性和示例，以便正确配置 bq2415x 充电器。

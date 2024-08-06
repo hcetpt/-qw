@@ -1,0 +1,68 @@
+*Dialog DA9055 电源管理集成电路 (PMIC)
+
+DA9055 包含了一个庞大且多样的子设备组（仅 I2C）：
+
+| 设备 | 供电名称 | 描述 |
+|------|------------|-----------|
+| da9055-gpio | - | GPIOs |
+| da9055-regulator | - | 调压器 |
+| da9055-onkey | - | 开机键 |
+| da9055-rtc | - | 实时时钟 (RTC) |
+| da9055-hwmon | - | 模数转换器 (ADC) |
+| da9055-watchdog | - | 看门狗 |
+
+DA9055 中的 CODEC 设备具有独立、可配置的 I2C 地址，因此与 PMIC 分开实例化。
+关于配套的 CODEC I2C 设备的详细信息，请参阅以下文档：
+`Documentation/devicetree/bindings/sound/da9055.txt`
+
+------
+
+**必需属性：**
+- `compatible`：应为 `"dlg,da9055-pmic"`
+- `reg`：指定 I2C 从设备地址（默认为 0x5a，但可以修改）
+- `interrupts`：DA9055 芯片的中断线信息
+- `interrupt-controller`：DA9055 内置中断（有自己的中断域）
+- `#interrupt-cells`：应为 1，是 DA9055 的本地中断编号
+**子节点：**
+- `regulators`：包含调压器节点。DA9055 的调压器使用下面列出的名字进行绑定：
+
+    `buck1` ：调压器 BUCK1
+    `buck2` ：调压器 BUCK2
+    `ldo1`  ：调压器 LDO1
+    `ldo2`  ：调压器 LDO2
+    `ldo3`  ：调压器 LDO3
+    `ldo4`  ：调压器 LDO4
+    `ldo5`  ：调压器 LDO5
+    `ldo6`  ：调压器 LDO6
+
+  单个调压器设备的具体绑定详情可以在以下文件中找到：
+  `Documentation/devicetree/bindings/regulator/regulator.txt`
+
+**示例：**
+
+```text
+pmic: da9055-pmic@5a {
+    compatible = "dlg,da9055-pmic";
+    reg = <0x5a>;
+    interrupt-parent = <&intc>;
+    interrupts = <5 IRQ_TYPE_LEVEL_LOW>;
+    interrupt-controller;
+    #interrupt-cells = <1>;
+
+    regulators {
+        buck1: BUCK1 {
+            regulator-min-microvolt = <725000>;
+            regulator-max-microvolt = <2075000>;
+        };
+        buck2: BUCK2 {
+            regulator-min-microvolt = <925000>;
+            regulator-max-microvolt = <2500000>;
+        };
+        ldo1: LDO1 {
+            regulator-min-microvolt = <900000>;
+            regulator-max-microvolt = <3300000>;
+        };
+    };
+};
+```
+以上示例展示了如何定义一个 DA9055 PMIC 设备及其部分调压器配置。

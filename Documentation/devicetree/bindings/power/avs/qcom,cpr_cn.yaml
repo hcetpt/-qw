@@ -1,0 +1,150 @@
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/power/avs/qcom,cpr.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: 高通核心功耗降低（CPR）
+
+维护者:
+  - Niklas Cassel <nks@flawful.org>
+
+描述: |
+  CPR（核心功耗降低）是一项技术，用于减少CPU或其他设备的核心功耗。每个设备的OPP（运行性能点）对应一个“工作点”，该工作点在特定频率下有一系列有效的电压值。当设备以特定频率运行时，CPR会监控温度等动态因素，并建议调整电压以节省功耗并满足硅特性要求。
+属性:
+  compatible:
+    items:
+      - 枚举:
+          - qcom,qcs404-cpr
+      - 常量: qcom,cpr
+
+  reg:
+    描述: RBCPR寄存器区域的基本地址和大小
+最大项数: 1
+
+  interrupts:
+    最大项数: 1
+
+  clocks:
+    items:
+      - 描述: 参考时钟
+clock-names:
+    items:
+      - 常量: ref
+
+  vdd-apc-supply:
+    描述: APC调节器电源
+'#power-domain-cells':
+    常量: 0
+
+  operating-points-v2:
+    描述: |
+      指向包含由CPR功耗域支持的性能状态的OPP表的phandle
+acc-syscon:
+    $ref: /schemas/types.yaml#/definitions/phandle
+    描述: 用于写入ACC设置的syscon的phandle
+nvmem-cells:
+    items:
+      - 描述: 工作点1的商偏移
+      - 描述: 工作点2的商偏移
+      - 描述: 工作点3的商偏移
+      - 描述: 工作点1的初始电压
+      - 描述: 工作点2的初始电压
+      - 描述: 工作点3的初始电压
+      - 描述: 工作点1的商
+      - 描述: 工作点2的商
+      - 描述: 工作点3的商
+      - 描述: 工作点1的环形振荡器
+      - 描述: 工作点2的环形振荡器
+      - 描述: 工作点3的环形振荡器
+      - 描述: 熔丝版本
+
+  nvmem-cell-names:
+    items:
+      - 常量: cpr_quotient_offset1
+      - 常量: cpr_quotient_offset2
+      - 常量: cpr_quotient_offset3
+      - 常量: cpr_init_voltage1
+      - 常量: cpr_init_voltage2
+      - 常量: cpr_init_voltage3
+      - 常量: cpr_quotient1
+      - 常量: cpr_quotient2
+      - 常量: cpr_quotient3
+      - 常量: cpr_ring_osc1
+      - 常量: cpr_ring_osc2
+      - 常量: cpr_ring_osc3
+      - 常量: cpr_fuse_revision
+
+必需:
+  - compatible
+  - reg
+  - interrupts
+  - clocks
+  - clock-names
+  - vdd-apc-supply
+  - '#power-domain-cells'
+  - operating-points-v2
+  - nvmem-cells
+  - nvmem-cell-names
+
+额外属性: false
+
+示例:
+  - |
+    #include <dt-bindings/interrupt-controller/arm-gic.h>
+
+    cpr_opp_table: opp-table-cpr {
+        compatible = "operating-points-v2-qcom-level";
+
+        cpr_opp1: opp1 {
+            opp-level = <1>;
+            qcom,opp-fuse-level = <1>;
+        };
+        cpr_opp2: opp2 {
+            opp-level = <2>;
+            qcom,opp-fuse-level = <2>;
+        };
+        cpr_opp3: opp3 {
+            opp-level = <3>;
+            qcom,opp-fuse-level = <3>;
+        };
+    };
+
+    power-controller@b018000 {
+        compatible = "qcom,qcs404-cpr", "qcom,cpr";
+        reg = <0x0b018000 0x1000>;
+        interrupts = <0 15 IRQ_TYPE_EDGE_RISING>;
+        clocks = <&xo_board>;
+        clock-names = "ref";
+        vdd-apc-supply = <&pms405_s3>;
+        #power-domain-cells = <0>;
+        operating-points-v2 = <&cpr_opp_table>;
+        acc-syscon = <&tcsr>;
+
+        nvmem-cells = <&cpr_efuse_quot_offset1>,
+            <&cpr_efuse_quot_offset2>,
+            <&cpr_efuse_quot_offset3>,
+            <&cpr_efuse_init_voltage1>,
+            <&cpr_efuse_init_voltage2>,
+            <&cpr_efuse_init_voltage3>,
+            <&cpr_efuse_quot1>,
+            <&cpr_efuse_quot2>,
+            <&cpr_efuse_quot3>,
+            <&cpr_efuse_ring1>,
+            <&cpr_efuse_ring2>,
+            <&cpr_efuse_ring3>,
+            <&cpr_efuse_revision>;
+        nvmem-cell-names = "cpr_quotient_offset1",
+            "cpr_quotient_offset2",
+            "cpr_quotient_offset3",
+            "cpr_init_voltage1",
+            "cpr_init_voltage2",
+            "cpr_init_voltage3",
+            "cpr_quotient1",
+            "cpr_quotient2",
+            "cpr_quotient3",
+            "cpr_ring_osc1",
+            "cpr_ring_osc2",
+            "cpr_ring_osc3",
+            "cpr_fuse_revision";
+    };

@@ -1,0 +1,85 @@
+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/display/mediatek/mediatek,ovl-2l.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: 联发科技显示叠加2层
+
+maintainers:
+  - 春光·胡 <chunkuang.hu@kernel.org>
+  - 菲利普·扎贝尔 <p.zabel@pengutronix.de>
+
+description: |
+  联发科技显示叠加2层，即OVL-2L，为OVL提供了额外的两层。
+  OVL-2L设备节点必须是中心MMSYS_CONFIG节点的同级节点。
+  关于MMSYS_CONFIG绑定的描述，请参阅
+  文档/devicetree/bindings/arm/mediatek/mediatek,mmsys.yaml以获取详细信息。
+
+properties:
+  compatible:
+    oneOf:
+      - enum:
+          - mediatek,mt8183-disp-ovl-2l
+          - mediatek,mt8192-disp-ovl-2l
+      - items:
+          - enum:
+              - mediatek,mt8186-disp-ovl-2l
+          - const: mediatek,mt8192-disp-ovl-2l
+
+  reg:
+    maxItems: 1
+
+  interrupts:
+    maxItems: 1
+
+  power-domains:
+    description: 根据由phandle指定的电源控制器的绑定定义的phandle和PM域标识符。详情请参阅
+      文档/devicetree/bindings/power/power-domain.yaml
+
+clocks:
+    items:
+      - description: OVL-2L时钟
+
+  iommus:
+    description:
+      此属性应指向带有主端口参数的相应IOMMU块，详情请参阅文档/devicetree/bindings/iommu/mediatek,iommu.yaml
+
+mediatek,gce-client-reg:
+    description: 客户端驱动程序的寄存器可以由gce通过此属性中定义的4个参数进行配置，例如gce的phandle、子系统ID、寄存器偏移量和大小。每个GCE子系统ID映射到头文件include/dt-bindings/gce/<chip>-gce.h中定义的一个客户端
+
+$ref: /schemas/types.yaml#/definitions/phandle-array
+    maxItems: 1
+
+required:
+  - compatible
+  - reg
+  - interrupts
+  - power-domains
+  - clocks
+  - iommus
+
+additionalProperties: false
+
+examples:
+  - |
+    #include <dt-bindings/interrupt-controller/arm-gic.h>
+    #include <dt-bindings/clock/mt8183-clk.h>
+    #include <dt-bindings/power/mt8183-power.h>
+    #include <dt-bindings/gce/mt8183-gce.h>
+    #include <dt-bindings/memory/mt8183-larb-port.h>
+
+    soc {
+        #address-cells = <2>;
+        #size-cells = <2>;
+
+        ovl_2l0: ovl@14009000 {
+            compatible = "mediatek,mt8183-disp-ovl-2l";
+            reg = <0 0x14009000 0 0x1000>;
+            interrupts = <GIC_SPI 226 IRQ_TYPE_LEVEL_LOW>;
+            power-domains = <&spm MT8183_POWER_DOMAIN_DISP>;
+            clocks = <&mmsys CLK_MM_DISP_OVL0_2L>;
+            iommus = <&iommu M4U_PORT_DISP_2L_OVL0_LARB0>;
+            mediatek,gce-client-reg = <&gce SUBSYS_1400XXXX 0x9000 0x1000>;
+        };
+    };

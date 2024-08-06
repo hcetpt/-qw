@@ -1,0 +1,167 @@
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/soc/imx/fsl,imx8mp-media-blk-ctrl.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: NXP i.MX8MP 媒体块控制
+
+维护者:
+  - Paul Elder <paul.elder@ideasonboard.com>
+
+描述:
+  i.MX8MP 媒体块控制 (MEDIA BLK_CTRL) 是一个顶级外设，
+  提供对 NoC 的访问并确保 MEDIAMIX 域内外设的正确供电序列。
+
+属性:
+  compatible:
+    items:
+      - const: fsl,imx8mp-media-blk-ctrl
+      - const: syscon
+
+  reg:
+    maxItems: 1
+
+  '#address-cells':
+    const: 1
+
+  '#size-cells':
+    const: 1
+
+  '#power-domain-cells':
+    const: 1
+
+  power-domains:
+    maxItems: 10
+
+  power-domain-names:
+    items:
+      - const: bus
+      - const: mipi-dsi1
+      - const: mipi-csi1
+      - const: lcdif1
+      - const: isi
+      - const: mipi-csi2
+      - const: lcdif2
+      - const: isp
+      - const: dwe
+      - const: mipi-dsi2
+
+  clocks:
+    items:
+      - description: APB 时钟
+      - description: AXI 时钟
+      - description: 第一个 CSI2 接收器的像素时钟 (aclk)
+      - description: 第二个 CSI2 接收器的像素时钟 (aclk)
+      - description: 第一个 LCDIF 的像素时钟 (pix_clk)
+      - description: 第二个 LCDIF 的像素时钟 (pix_clk)
+      - description: ISP 的核心时钟 (clk)
+      - description: 由 DSI 使用的 MIPI-PHY 参考时钟
+
+  clock-names:
+    items:
+      - const: apb
+      - const: axi
+      - const: cam1
+      - const: cam2
+      - const: disp1
+      - const: disp2
+      - const: isp
+      - const: phy
+
+  interconnects:
+    maxItems: 8
+
+  interconnect-names:
+    items:
+      - const: lcdif-rd
+      - const: lcdif-wr
+      - const: isi0
+      - const: isi1
+      - const: isi2
+      - const: isp0
+      - const: isp1
+      - const: dwe
+
+  bridge@5c:
+    类型: object
+    $ref: /schemas/display/bridge/fsl,ldb.yaml#
+    unevaluatedProperties: false
+
+必需:
+  - compatible
+  - reg
+  - '#address-cells'
+  - '#size-cells'
+  - '#power-domain-cells'
+  - power-domains
+  - power-domain-names
+  - clocks
+  - clock-names
+
+额外属性: false
+
+示例:
+  - |
+    #include <dt-bindings/clock/imx8mp-clock.h>
+    #include <dt-bindings/power/imx8mp-power.h>
+
+    blk-ctrl@32ec0000 {
+        compatible = "fsl,imx8mp-media-blk-ctrl", "syscon";
+        reg = <0x32ec0000 0x138>;
+        power-domains = <&mediamix_pd>, <&mipi_phy1_pd>, <&mipi_phy1_pd>,
+                        <&mediamix_pd>, <&mediamix_pd>, <&mipi_phy2_pd>,
+                        <&mediamix_pd>, <&ispdwp_pd>, <&ispdwp_pd>,
+                        <&mipi_phy2_pd>;
+        power-domain-names = "bus", "mipi-dsi1", "mipi-csi1", "lcdif1", "isi",
+                             "mipi-csi2", "lcdif2", "isp", "dwe", "mipi-dsi2";
+        clocks = <&clk IMX8MP_CLK_MEDIA_APB_ROOT>,
+                 <&clk IMX8MP_CLK_MEDIA_AXI_ROOT>,
+                 <&clk IMX8MP_CLK_MEDIA_CAM1_PIX_ROOT>,
+                 <&clk IMX8MP_CLK_MEDIA_CAM2_PIX_ROOT>,
+                 <&clk IMX8MP_CLK_MEDIA_DISP1_PIX_ROOT>,
+                 <&clk IMX8MP_CLK_MEDIA_DISP2_PIX_ROOT>,
+                 <&clk IMX8MP_CLK_MEDIA_ISP_ROOT>,
+                 <&clk IMX8MP_CLK_MEDIA_MIPI_PHY1_REF_ROOT>;
+        clock-names = "apb", "axi", "cam1", "cam2", "disp1", "disp2",
+                      "isp", "phy";
+        #power-domain-cells = <1>;
+        #address-cells = <1>;
+        #size-cells = <1>;
+
+        bridge@5c {
+            compatible = "fsl,imx8mp-ldb";
+            reg = <0x5c 0x4>, <0x128 0x4>;
+            reg-names = "ldb", "lvds";
+            clocks = <&clk IMX8MP_CLK_MEDIA_LDB>;
+            clock-names = "ldb";
+
+            ports {
+                #address-cells = <1>;
+                #size-cells = <0>;
+
+                port@0 {
+                    reg = <0>;
+
+                    ldb_from_lcdif2: endpoint {
+                        remote-endpoint = <&lcdif2_to_ldb>;
+                    };
+                };
+
+                port@1 {
+                    reg = <1>;
+
+                    ldb_lvds_ch0: endpoint {
+                        remote-endpoint = <&ldb_to_lvdsx4panel>;
+                    };
+                };
+
+                port@2 {
+                    reg = <2>;
+
+                    ldb_lvds_ch1: endpoint {
+                    };
+                };
+            };
+        };
+    };

@@ -1,0 +1,97 @@
+```yaml
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/soc/qcom/qcom,pmic-glink.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: 高通 PMIC GLINK 固件接口用于电池管理、USB Type-C 及其他功能
+maintainers:
+  - Bjorn Andersson <andersson@kernel.org>
+
+description:
+  PMIC GLINK 服务运行在一些现代高通平台的协处理器上，并实现了 USB Type-C 的处理和电池管理。此绑定描述了操作系统中用于与固件通信以及将其资源连接到设备树中所描述资源的组件，特别是 USB Type-C 控制器与 USB 和 DisplayPort 组件之间的关系。
+properties:
+  compatible:
+    oneOf:
+      - items:
+          - enum:
+              - qcom,qcm6490-pmic-glink
+              - qcom,sc8180x-pmic-glink
+              - qcom,sc8280xp-pmic-glink
+              - qcom,sm8350-pmic-glink
+              - qcom,sm8450-pmic-glink
+              - qcom,sm8550-pmic-glink
+          - const: qcom,pmic-glink
+      - items:
+          - enum:
+              - qcom,sm8650-pmic-glink
+              - qcom,x1e80100-pmic-glink
+          - const: qcom,sm8550-pmic-glink
+          - const: qcom,pmic-glink
+
+  '#address-cells':
+    const: 1
+
+  '#size-cells':
+    const: 0
+
+  orientation-gpios:
+    description: 用于指示 Type-C 连接器方向的输入 GPIO 数组
+      GPIO 指示用于检测 Type-C 连接器的方向
+      该数组应包含每个 PMIC Glink 连接器的 GPIO 条目，按 reg 顺序排列
+      定义 GPIO 的活动级别表示 "CC2" 或反转/翻转方向
+patternProperties:
+  '^connector@\d$':
+    $ref: /schemas/connector/usb-connector.yaml#
+    required:
+      - reg
+
+required:
+  - compatible
+
+additionalProperties: false
+
+examples:
+  - |+
+    pmic-glink {
+        compatible = "qcom,sc8280xp-pmic-glink", "qcom,pmic-glink";
+
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        connector@0 {
+            compatible = "usb-c-connector";
+            reg = <0>;
+            power-role = "dual";
+            data-role = "dual";
+
+            ports {
+                #address-cells = <1>;
+                #size-cells = <0>;
+
+                port@0 {
+                    reg = <0>;
+                    endpoint {
+                        remote-endpoint = <&usb_role>;
+                    };
+                };
+
+                port@1 {
+                    reg = <1>;
+                    endpoint {
+                        remote-endpoint = <&ss_phy_out>;
+                    };
+                };
+
+                port@2 {
+                    reg = <2>;
+                    endpoint {
+                        remote-endpoint = <&sbu_mux>;
+                    };
+                };
+            };
+        };
+    };
+```
+请注意，此翻译尽可能保持了原文的结构和格式。

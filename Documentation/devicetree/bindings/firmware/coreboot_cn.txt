@@ -1,0 +1,24 @@
+### COREBOOT 固件信息
+
+用于向内核传达 COREBOOT 在内存中驻留的簿记结构位置的设备树节点。由于 COREBOOT 本身尚无法引导基于设备树的内核，因此需要通过第二阶段引导加载程序（COREBOOT 的“有效负载”）来插入此节点。
+#### 必需属性：
+- `compatible`：应为 "coreboot"
+- `reg`：以下两个内存区域的地址和长度，按顺序排列：
+    1. COREBOOT 表。这是一系列变长描述符的列表，其中包含各种编译时和运行时生成的固件参数。它通过其前四个字节中的魔法字符串 "LBIO" 来标识。
+        - 详情请参阅 COREBOOT 的 `src/commonlib/include/commonlib/coreboot_tables.h`
+    2. CBMEM 区域。这是一个向下增长的内存区域，由 COREBOOT 用来动态分配保持驻留的数据结构。该区域可能或不可能将 COREBOOT 表作为其成员之一。它通过位于该区域最顶部 8 字节中的具有魔法数字 0xc0389481 的根节点描述符来标识。
+        - 详情请参阅 COREBOOT 的 `src/include/imd.h`
+
+#### 示例：
+```plaintext
+firmware {
+    ranges;
+
+    coreboot {
+        compatible = "coreboot";
+        reg = <0xfdfea000 0x264>,
+              <0xfdfea000 0x16000>;
+    };
+};
+```
+在示例中，`0xfdfea000` 地址处的前 `0x264` 字节是 COREBOOT 表的位置；接下来的 `0x16000` 字节则是 CBMEM 区域。

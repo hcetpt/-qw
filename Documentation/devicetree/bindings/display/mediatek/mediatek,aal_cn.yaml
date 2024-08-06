@@ -1,0 +1,86 @@
+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/display/mediatek/mediatek,aal.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: Mediatek 显示自适应环境光处理器
+
+维护者:
+  - 春光 胡 <chunkuang.hu@kernel.org>
+  - 菲利普·扎贝尔 <p.zabel@pengutronix.de>
+
+描述: |
+  Mediatek 显示自适应环境光处理器（简称 AAL）负责背光节能和提高日光下的可见度。
+  AAL 设备节点必须与中央 MMSYS_CONFIG 节点同级。
+  关于 MMSYS_CONFIG 的绑定描述，请参阅
+  Documentation/devicetree/bindings/arm/mediatek/mediatek,mmsys.yaml 获取详细信息。
+
+属性:
+  compatible:
+    oneOf:
+      - 枚举:
+          - mediatek,mt8173-disp-aal
+          - mediatek,mt8183-disp-aal
+          - mediatek,mt8195-mdp3-aal
+      - items:
+          - 枚举:
+              - mediatek,mt2712-disp-aal
+              - mediatek,mt6795-disp-aal
+          - 常量: mediatek,mt8173-disp-aal
+      - items:
+          - 枚举:
+              - mediatek,mt8186-disp-aal
+              - mediatek,mt8188-disp-aal
+              - mediatek,mt8192-disp-aal
+              - mediatek,mt8195-disp-aal
+              - mediatek,mt8365-disp-aal
+          - 常量: mediatek,mt8183-disp-aal
+
+  reg:
+    最大项数: 1
+
+  interrupts:
+    最大项数: 1
+
+  power-domains:
+    描述: 根据由 phandle 指定的电源控制器绑定定义的 phandle 和 PM 域标识符。详情请见
+      Documentation/devicetree/bindings/power/power-domain.yaml
+时钟:
+    items:
+      - 描述: AAL 时钟
+
+  mediatek,gce-client-reg:
+    描述: 客户端驱动程序的寄存器可以被 GCE 配置，此属性中定义了 4 个参数，例如 GCE 的 phandle、子系统 ID、寄存器偏移量和大小。每个 GCE 子系统 ID 对应一个在头文件 include/dt-bindings/gce/<chip>-gce.h 中定义的客户端
+$ref: /schemas/types.yaml#/definitions/phandle-array
+    最大项数: 1
+
+必需:
+  - compatible
+  - reg
+  - interrupts
+  - power-domains
+  - clocks
+
+额外属性: false
+
+示例:
+  - |
+    #include <dt-bindings/interrupt-controller/arm-gic.h>
+    #include <dt-bindings/clock/mt8173-clk.h>
+    #include <dt-bindings/power/mt8173-power.h>
+    #include <dt-bindings/gce/mt8173-gce.h>
+
+    soc {
+        #address-cells = <2>;
+        #size-cells = <2>;
+
+        aal@14015000 {
+           compatible = "mediatek,mt8173-disp-aal";
+           reg = <0 0x14015000 0 0x1000>;
+           interrupts = <GIC_SPI 189 IRQ_TYPE_LEVEL_LOW>;
+           power-domains = <&scpsys MT8173_POWER_DOMAIN_MM>;
+           clocks = <&mmsys CLK_MM_DISP_AAL>;
+           mediatek,gce-client-reg = <&gce SUBSYS_1401XXXX 0x5000 0x1000>;
+       };
+    };

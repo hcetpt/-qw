@@ -1,0 +1,50 @@
+### SKY81452 绑定
+
+**必需属性:**
+- `compatible`: 必须为 "skyworks,sky81452"
+- `reg`: I2C 从设备地址
+
+**必需的子节点:**
+- `backlight`: 用于背光的容器节点，遵循位于 `leds/backlight/sky81452-backlight.txt` 中的绑定
+- `regulator`: 用于稳压器的容器节点，遵循位于 `regulator/sky81452-regulator.txt` 中的绑定
+
+**示例:**
+
+```device-tree
+sky81452@2c {
+	compatible = "skyworks,sky81452";
+	reg = <0x2c>;
+
+	backlight {
+		compatible = "skyworks,sky81452-backlight";
+		name = "pwm-backlight";
+		led-sources = <0 1 2 3 6>;
+		skyworks,ignore-pwm;
+		skyworks,phase-shift;
+		skyworks,current-limit = <2300>;
+	};
+
+	regulator {
+		lout {
+			regulator-name = "sky81452-lout";
+			regulator-min-microvolt = <4500000>;
+			regulator-max-microvolt = <8000000>;
+		};
+	};
+};
+```
+
+### 解释
+此 Device Tree 配置定义了一个使用 I2C 地址 0x2c 的 Skyworks SKY81452 设备。它包含两个子节点：一个用于管理背光（`backlight`），另一个用于管理稳压器（`regulator`）。
+
+- **backlight 子节点**:
+  - 定义了与 `sky81452-backlight.txt` 文件中描述的背光绑定兼容的背光配置。
+  - 指定了 PWM 背光的名称为 "pwm-backlight"。
+  - `led-sources` 属性列出了可以控制的 LED 源索引（在此例中为 0、1、2、3 和 6）。
+  - 包含特定于 Skyworks 的属性，例如忽略 PWM 控制 (`skyworks,ignore-pwm`)、相位移位 (`skyworks,phase-shift`) 以及最大电流限制 (`skyworks,current-limit`)。
+
+- **regulator 子节点**:
+  - 定义了一个名为 `lout` 的稳压器输出，遵循 `sky81452-regulator.txt` 文件中的绑定。
+  - 规定了稳压器的最小输出电压 (4.5V) 和最大输出电压 (8.0V)，单位为微伏。
+  
+以上配置适用于在 Device Tree 中正确设置和初始化 SKY81452 设备及其相关功能。

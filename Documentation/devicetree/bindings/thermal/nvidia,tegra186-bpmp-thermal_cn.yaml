@@ -1,0 +1,32 @@
+```yaml
+# SPDX-文件许可人: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/thermal/nvidia,tegra186-bpmp-thermal.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: NVIDIA Tegra186 (及后续版本) BPMP 温度传感器
+
+maintainers:
+  - Thierry Reding <thierry.reding@gmail.com>
+  - Jon Hunter <jonathanh@nvidia.com>
+
+description: |
+  在 Tegra186 中，BPMP（启动和电源管理处理器）实现了
+  一个接口，用于读取系统温度，包括 CPU 集群和 GPU 温度。此绑定描述了由 BPMP
+  暴露的温度传感器。
+BPMP 温度节点必须直接位于主 BPMP
+  节点内。有关 BPMP 绑定的详细信息，请参阅 ../firmware/nvidia,tegra186-bpmp.yaml
+$ref: thermal-sensor.yaml#
+
+properties:
+  compatible:
+    enum:
+      - nvidia,tegra186-bpmp-thermal
+      - nvidia,tegra194-bpmp-thermal
+
+  '#thermal-sensor-cells':
+    const: 1
+
+unevaluatedProperties: false
+```

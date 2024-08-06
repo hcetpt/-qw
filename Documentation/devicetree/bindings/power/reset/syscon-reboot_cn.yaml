@@ -1,0 +1,61 @@
+# SPDX-许可证标识符: GPL-2.0
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/power/reset/syscon-reboot.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: 通用 SYSCON 映射寄存器复位驱动程序
+
+维护者:
+  - Sebastian Reichel <sre@kernel.org>
+
+描述: |+
+  这是一个使用 SYSCON 映射复位寄存器的通用复位驱动程序。
+  复位通常通过向由 SYSCON 寄存器映射基址加上偏移量定义的复位寄存器写入来执行，值和掩码在重启节点中定义。
+  默认情况下为小端模式，仅支持 32 位访问。SYSCON 寄存器映射通常从父 dt 节点获取。因此，SYSCON 重启节点应作为“syscon”、“simple-mfd”节点的子节点表示。尽管指向系统控制器节点的 regmap 属性也得到支持。
+
+属性:
+  compatible:
+    常量: syscon-reboot
+
+  mask:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    描述: 更新由掩码（32 位）定义的寄存器位
+  offset:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    描述: 在寄存器映射中用于重启寄存器的偏移量（以字节为单位）
+  regmap:
+    $ref: /schemas/types.yaml#/definitions/phandle
+    已废弃: true
+    描述: |
+      指向寄存器映射节点的 phandle。此属性已被废弃，取而代之的是将 syscon-reboot 节点作为系统控制器节点的子节点
+  value:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    描述: 写入到重启寄存器的复位值（32 位访问）
+  priority:
+    默认: 192
+
+必需:
+  - compatible
+  - offset
+
+额外属性: false
+
+allOf:
+  - $ref: restart-handler.yaml#
+  - if:
+      not:
+        必需:
+          - mask
+    then:
+      必需:
+        - value
+
+示例:
+  - |
+    reboot {
+        compatible = "syscon-reboot";
+        regmap = <&regmapnode>;
+        offset = <0x0>;
+        mask = <0x1>;
+    };

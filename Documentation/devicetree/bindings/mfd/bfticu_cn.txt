@@ -1,0 +1,28 @@
+这段英文描述了 KEYMILE bfticu Chassis Management FPGA 的一些特性以及其在设备树(Device Tree)中的配置示例。下面是翻译成中文的内容：
+
+### KEYMILE bfticu 机箱管理 FPGA
+
+bfticu 是一个多功能设备，用于管理整个机箱。
+其主要功能是从整个机箱收集中断请求（IRQs）并将这些中断信号发送给单一的控制器。
+
+#### 必需的属性：
+- `compatible`: "keymile,bfticu"，表明该设备与 keymile,bfticu 兼容；
+- `interrupt-controller`: 表明 bfticu FPGA 是一个中断控制器；
+- `interrupts`: 主中断线，用于将收集到的中断信号发出；
+- `#interrupt-cells`: 为 2，其使用方式符合文档 `Documentation/devicetree/bindings/interrupt-controller/interrupts.txt` 中所描述的 2 单元变体；
+- `reg`: 在父级本地总线上的访问（芯片选择、芯片选择内的偏移量、大小）。
+
+#### 示例：
+
+```plaintext
+chassis-mgmt@3,0 {    // 这里指定了设备在地址空间中的位置
+    compatible = "keymile,bfticu";    // 兼容性
+    interrupt-controller;             // 中断控制器
+    #interrupt-cells = <2>;           // 中断单元数量
+    reg = <3 0 0x100>;                // 注册器地址
+    interrupt-parent = <&mpic>;       // 中断父节点
+    interrupts = <6 1 0 0>;           // 中断信号
+};
+```
+
+在这个例子中，`chassis-mgmt@3,0` 指定了该设备在地址空间中的位置。`reg = <3 0 0x100>` 指定其在父级总线上的访问范围，即芯片选择为 3，偏移量为 0，大小为 0x100。`interrupts = <6 1 0 0>` 表示主中断线，这里具体含义可能需要参考相关的文档或上下文来理解。

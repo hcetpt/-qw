@@ -1,0 +1,354 @@
+此PCIe控制器基于Synopsys DesignWare PCIe IP，因此继承了在`snps,dw-pcie.yaml`中定义的所有通用属性。部分控制器实例为双模式，即它们可以在Root Port模式或Endpoint模式下工作，但每次只能选择一种模式。
+有关Endpoint模式设备树绑定的详细信息，请参阅`nvidia,tegra194-pcie-ep.yaml`。
+
+属性：
+compatible:
+  枚举值:
+    - nvidia,tegra194-pcie
+    - nvidia,tegra234-pcie
+
+reg:
+  最小项数: 4
+  项:
+    - 描述: 控制器的应用逻辑寄存器
+    - 描述: 配置寄存器
+    - 描述: iATU和DMA寄存器。这是PCIe内核的iATU（内部地址转换单元）寄存器对软件访问可用的地方
+    - 描述: Root Port自身的配置寄存器所在的空间
+    - 描述: 通过ECAM访问配置空间的空间
+
+reg-names:
+  最小项数: 4
+  项:
+    - 常量: appl
+    - 常量: config
+    - 常量: atu_dma
+    - 常量: dbi
+    - 常量: ecam
+
+interrupts:
+  项:
+    - 描述: 控制器中断
+    - 描述: MSI中断
+
+interrupt-names:
+  项:
+    - 常量: intr
+    - 常量: msi
+
+clocks:
+  项:
+    - 描述: 模块时钟
+
+clock-names:
+  项:
+    - 常量: core
+
+resets:
+  项:
+    - 描述: APB总线接口复位
+    - 描述: 模块复位
+
+reset-names:
+  项:
+    - 常量: apb
+    - 常量: core
+
+phys:
+  最小项数: 1
+  最大项数: 8
+
+phy-names:
+  最小项数: 1
+  项:
+    - 常量: p2u-0
+    - 常量: p2u-1
+    - 常量: p2u-2
+    - 常量: p2u-3
+    - 常量: p2u-4
+    - 常量: p2u-5
+    - 常量: p2u-6
+    - 常量: p2u-7
+
+power-domains:
+  最大项数: 1
+  描述: |
+    包含控制相应PCIe控制器电源的节点的phandle以及PCIe控制器的指定名称。
+    Tegra194的指定名称定义于`include/dt-bindings/power/tegra194-powergate.h`
+    Tegra234的指定名称定义于`include/dt-bindings/power/tegra234-powergate.h`
+
+interconnects:
+  项:
+    - 描述: 内存读取客户端
+    - 描述: 内存写入客户端
+
+interconnect-names:
+  项:
+    - 常量: dma-mem # 读取
+    - 常量: write
+
+dma-coherent: true
+
+nvidia,bpmp:
+  引用: /schemas/types.yaml#/definitions/phandle-array
+  描述: |
+    必须包含指向BPMP控制器节点的phandle对，后面跟着控制器ID。以下为每个控制器的控制器ID：
+
+    Tegra194
+
+      0: C0
+      1: C1
+      2: C2
+      3: C3
+      4: C4
+      5: C5
+
+    Tegra234
+
+      0: C0
+      1: C1
+      2: C2
+      3: C3
+      4: C4
+      5: C5
+      6: C6
+      7: C7
+      8: C8
+      9: C9
+      10: C10
+
+  项:
+    - 项:
+        - 描述: 指向BPMP控制器节点的phandle
+        - 描述: PCIe控制器ID
+          最大值: 10
+
+nvidia,update-fc-fixup:
+  描述: |
+    这是一个布尔属性，需要存在以提高性能，当平台设计满足以下至少一个条件时，使Root Port能够与下游设备交换最佳数量的FC（流控）信用额度：
+
+    注意：这仅适用于Tegra194
+    1. 如果C0/C4/C5运行在x1/x2链路宽度（无论速度和MPS如何）
+    2. 如果C0/C1/C2/C3/C4/C5在其最大链路宽度下运行，并且
+       a) 速度为Gen-2且MPS为256B
+       b) 速度>= Gen-3且任何MPS
+
+  引用: /schemas/types.yaml#/definitions/flag
+
+nvidia,aspm-cmrt-us:
+  描述: 为ASPM正常运行而指定的常用模式恢复时间（单位：微秒）
+
+nvidia,aspm-pwr-on-t-us:
+  描述: 为ASPM正常运行而指定的上电时间（单位：微秒）
+
+nvidia,aspm-l0s-entrance-latency-us:
+  描述: ASPM L0s进入延迟（单位：微秒）
+
+vddio-pex-ctl-supply:
+  描述: 指向为PCIe侧带信号提供调节电源的调节器的phandle
+
+vpcie3v3-supply:
+  描述: 如果平台有一个这样的插槽（例如，在p2972-0000平台中由C5控制器拥有的x16插槽），则指向为该插槽提供3.3V的调节器节点的phandle
+
+vpcie12v-supply:
+  描述: 如果平台有一个这样的插槽（例如，在p2972-0000平台中由C5控制器拥有的x16插槽），则指向为该插槽提供12V的调节器节点的phandle
+下面是给定的 YAML 配置文件的中文翻译：
+
+```yaml
+# NVIDIA 相关属性定义
+nvidia,enable-srns:
+  description: |
+    如果控制器配置为在 SRNS（独立参考时钟，无展频时钟）模式下运行，则需要存在此布尔属性。
+    注意：这仅适用于 Tegra234。
+  $ref: /schemas/types.yaml#/definitions/flag
+
+nvidia,enable-ext-refclk:
+  description: |
+    如果控制器配置为使用来自外部时钟源的参考时钟，而不是使用内部时钟源，则需要存在此布尔属性。
+  $ref: /schemas/types.yaml#/definitions/flag
+
+# 兼容性配置
+allOf:
+  - $ref: /schemas/pci/snps,dw-pcie.yaml#
+  - if:
+      properties:
+        compatible:
+          contains:
+            enum:
+              - nvidia,tegra194-pcie
+    then:
+      properties:
+        reg:
+          maxItems: 4
+        reg-names:
+          maxItems: 4
+
+  - if:
+      properties:
+        compatible:
+          contains:
+            enum:
+              - nvidia,tegra234-pcie
+    then:
+      properties:
+        reg:
+          minItems: 5
+        reg-names:
+          minItems: 5
+
+unevaluatedProperties: false
+
+# 必须包含的属性
+required:
+  - interrupts
+  - interrupt-names
+  - interrupt-map
+  - interrupt-map-mask
+  - clocks
+  - clock-names
+  - resets
+  - reset-names
+  - power-domains
+  - vddio-pex-ctl-supply
+  - num-lanes
+  - phys
+  - phy-names
+  - nvidia,bpmp
+
+# 示例配置
+examples:
+  - |
+    # 包含必要的绑定
+    #include <dt-bindings/clock/tegra194-clock.h>
+    #include <dt-bindings/interrupt-controller/arm-gic.h>
+    #include <dt-bindings/power/tegra194-powergate.h>
+    #include <dt-bindings/reset/tegra194-reset.h>
+
+    # 总线节点
+    bus@0 {
+        #address-cells = <2>;
+        #size-cells = <2>;
+        ranges = <0x0 0x0 0x0 0x8 0x0>;
+
+        # PCIe 控制器节点
+        pcie@14180000 {
+            compatible = "nvidia,tegra194-pcie";
+            power-domains = <&bpmp TEGRA194_POWER_DOMAIN_PCIEX8B>;
+            reg = <0x0 0x14180000 0x0 0x00020000>, /* 应用寄存器 (128K) */
+                  <0x0 0x38000000 0x0 0x00040000>, /* 配置空间 (256K) */
+                  <0x0 0x38040000 0x0 0x00040000>, /* iATU_DMA 寄存器空间 (256K) */
+                  <0x0 0x38080000 0x0 0x00040000>; /* DBI 寄存器空间 (256K) */
+            reg-names = "appl", "config", "atu_dma", "dbi";
+
+            #address-cells = <3>;
+            #size-cells = <2>;
+            device_type = "pci";
+            num-lanes = <8>;
+            linux,pci-domain = <0>;
+
+            pinctrl-names = "default";
+            pinctrl-0 = <&pex_rst_c5_out_state>, <&clkreq_c5_bi_dir_state>;
+
+            clocks = <&bpmp TEGRA194_CLK_PEX0_CORE_0>;
+            clock-names = "core";
+
+            resets = <&bpmp TEGRA194_RESET_PEX0_CORE_0_APB>,
+                     <&bpmp TEGRA194_RESET_PEX0_CORE_0>;
+            reset-names = "apb", "core";
+
+            interrupts = <GIC_SPI 72 IRQ_TYPE_LEVEL_HIGH>, /* 控制器中断 */
+                         <GIC_SPI 73 IRQ_TYPE_LEVEL_HIGH>; /* MSI 中断 */
+            interrupt-names = "intr", "msi";
+
+            #interrupt-cells = <1>;
+            interrupt-map-mask = <0 0 0 0>;
+            interrupt-map = <0 0 0 0 &gic GIC_SPI 72 IRQ_TYPE_LEVEL_HIGH>;
+
+            nvidia,bpmp = <&bpmp 0>;
+
+            supports-clkreq;
+            nvidia,aspm-cmrt-us = <60>;
+            nvidia,aspm-pwr-on-t-us = <20>;
+            nvidia,aspm-l0s-entrance-latency-us = <3>;
+
+            bus-range = <0x0 0xff>;
+            ranges = <0x81000000 0x0  0x38100000 0x0  0x38100000 0x0 0x00100000>, /* 下游 I/O */
+                     <0x82000000 0x0  0x38200000 0x0  0x38200000 0x0 0x01e00000>, /* 非预取内存 */
+                     <0xc2000000 0x18 0x00000000 0x18 0x00000000 0x4 0x00000000>; /* 可预取内存 */
+
+            vddio-pex-ctl-supply = <&vdd_1v8ao>;
+            vpcie3v3-supply = <&vdd_3v3_pcie>;
+            vpcie12v-supply = <&vdd_12v_pcie>;
+
+            phys = <&p2u_hsio_2>, <&p2u_hsio_3>, <&p2u_hsio_4>,
+                   <&p2u_hsio_5>;
+            phy-names = "p2u-0", "p2u-1", "p2u-2", "p2u-3";
+        };
+    };
+
+  - |
+    # 包含必要的绑定
+    #include <dt-bindings/clock/tegra234-clock.h>
+    #include <dt-bindings/interrupt-controller/arm-gic.h>
+    #include <dt-bindings/power/tegra234-powergate.h>
+    #include <dt-bindings/reset/tegra234-reset.h>
+
+    # 总线节点
+    bus@0 {
+        #address-cells = <2>;
+        #size-cells = <2>;
+        ranges = <0x0 0x0 0x0 0x8 0x0>;
+
+        # PCIe 控制器节点
+        pcie@14160000 {
+            compatible = "nvidia,tegra234-pcie";
+            power-domains = <&bpmp TEGRA234_POWER_DOMAIN_PCIEX4BB>;
+            reg = <0x00 0x14160000 0x0 0x00020000>, /* 应用寄存器 (128K) */
+                  <0x00 0x36000000 0x0 0x00040000>, /* 配置空间 (256K) */
+                  <0x00 0x36040000 0x0 0x00040000>, /* iATU_DMA 寄存器空间 (256K) */
+                  <0x00 0x36080000 0x0 0x00040000>, /* DBI 寄存器空间 (256K) */
+                  <0x24 0x30000000 0x0 0x10000000>; /* ECAM (256MB) */
+            reg-names = "appl", "config", "atu_dma", "dbi", "ecam";
+
+            #address-cells = <3>;
+            #size-cells = <2>;
+            device_type = "pci";
+            num-lanes = <4>;
+            num-viewport = <8>;
+            linux,pci-domain = <4>;
+
+            clocks = <&bpmp TEGRA234_CLK_PEX0_C4_CORE>;
+            clock-names = "core";
+
+            resets = <&bpmp TEGRA234_RESET_PEX0_CORE_4_APB>,
+                     <&bpmp TEGRA234_RESET_PEX0_CORE_4>;
+            reset-names = "apb", "core";
+
+            interrupts = <GIC_SPI 51 IRQ_TYPE_LEVEL_HIGH>, /* 控制器中断 */
+                         <GIC_SPI 52 IRQ_TYPE_LEVEL_HIGH>; /* MSI 中断 */
+            interrupt-names = "intr", "msi";
+
+            #interrupt-cells = <1>;
+            interrupt-map-mask = <0 0 0 0>;
+            interrupt-map = <0 0 0 0 &gic GIC_SPI 51 IRQ_TYPE_LEVEL_HIGH>;
+
+            nvidia,bpmp = <&bpmp 4>;
+
+            nvidia,aspm-cmrt-us = <60>;
+            nvidia,aspm-pwr-on-t-us = <20>;
+            nvidia,aspm-l0s-entrance-latency-us = <3>;
+
+            bus-range = <0x0 0xff>;
+            ranges = <0x43000000 0x21 0x40000000 0x21 0x40000000 0x2 0xe8000000>, /* 可预取 */
+                     <0x02000000 0x0  0x40000000 0x24 0x28000000 0x0 0x08000000>, /* 非预取 */
+                     <0x01000000 0x0  0x36100000 0x00 0x36100000 0x0 0x00100000>; /* 下游 I/O */
+
+            vddio-pex-ctl-supply = <&p3701_vdd_AO_1v8>;
+
+            phys = <&p2u_hsio_4>, <&p2u_hsio_5>, <&p2u_hsio_6>,
+                   <&p2u_hsio_7>;
+            phy-names = "p2u-0", "p2u-1", "p2u-2", "p2u-3";
+        };
+    };
+```
+
+以上是对原始 YAML 配置文件的中文翻译。

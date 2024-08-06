@@ -1,0 +1,29 @@
+* OMAP OCP2SCP - OCP接口到SCP接口
+
+属性:
+- compatible : 对于AM437x处理器，应为"ti,am437x-ocp2scp"
+               对于其他处理器，应为"ti,omap-ocp2scp"
+- reg : 设备寄存器集的地址和长度
+- #address-cells, #size-cells : 如果设备有子节点，则必须存在
+- ranges : 子地址空间以1:1映射到父地址空间
+- ti,hwmods : 必须是"ocp2scp_usb_phy"
+
+子节点:
+所有连接到ocp2scp的设备都通过ocp2scp的子节点进行描述。
+
+ocp2scp@4a0ad000 {
+	compatible = "ti,omap-ocp2scp";
+	reg = <0x4a0ad000 0x1f>;
+	#address-cells = <1>;
+	#size-cells = <1>;
+	ranges;
+	ti,hwmods = "ocp2scp_usb_phy";
+
+	subnode1 {
+	..
+	};
+
+	subnode2 {
+	..
+	};
+};

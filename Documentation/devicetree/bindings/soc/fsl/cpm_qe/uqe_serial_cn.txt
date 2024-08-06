@@ -1,0 +1,16 @@
+所需属性：
+compatible：必须是 "fsl,<chip>-ucc-uart"。对于 t1040，必须是
+"fsl,t1040-ucc-uart"
+port-number：UCC-UART 的端口号
+tx/rx-clock-name：内部时钟源应为 "brg1"-"brg16"，
+		   外部时钟源应为 "clk1"-"clk28"
+示例：
+
+``` 
+ucc_serial: ucc@2200 {
+	compatible = "fsl,t1040-ucc-uart";
+	port-number = <0>;
+	rx-clock-name = "brg2";
+	tx-clock-name = "brg2";
+};
+```

@@ -1,0 +1,46 @@
+### Texas Instruments SmartReflex 绑定
+
+SmartReflex 用于设置和调整片上系统 (SoC) 的工作点。
+#### 必需属性：
+
+- `compatible`: 应为以下之一：
+    - `"ti,omap3-smartreflex-core"`
+    - `"ti,omap3-smartreflex-mpu-iva"`
+    - `"ti,omap4-smartreflex-core"`
+    - `"ti,omap4-smartreflex-mpu"`
+    - `"ti,omap4-smartreflex-iva"`
+
+- `reg`: 应包含设备实例的 I/O 范围。
+
+- `interrupts`: 应包含设备实例的中断。
+
+#### 可选属性：
+
+- `ti,hwmods`: 如果需要，应包含 TI 互连模块名称以供 SoC 使用。
+
+#### 示例：
+
+```yaml
+smartreflex_iva: smartreflex@4a0db000 {
+    compatible = "ti,omap4-smartreflex-iva";
+    reg = <0x4a0db000 0x80>;
+    interrupts = <GIC_SPI 102 IRQ_TYPE_LEVEL_HIGH>;
+    ti,hwmods = "smartreflex_iva";
+};
+
+smartreflex_core: smartreflex@4a0dd000 {
+    compatible = "ti,omap4-smartreflex-core";
+    reg = <0x4a0dd000 0x80>;
+    interrupts = <GIC_SPI 19 IRQ_TYPE_LEVEL_HIGH>;
+    ti,hwmods = "smartreflex_core";
+};
+
+smartreflex_mpu: smartreflex@4a0d9000 {
+    compatible = "ti,omap4-smartreflex-mpu";
+    reg = <0x4a0d9000 0x80>;
+    interrupts = <GIC_SPI 18 IRQ_TYPE_LEVEL_HIGH>;
+    ti,hwmods = "smartreflex_mpu";
+};
+```
+
+以上示例展示了如何定义三种不同的 SmartReflex 实例：`smartreflex_iva`、`smartreflex_core` 和 `smartreflex_mpu`。这些实例分别对应于不同的兼容性字符串，并且每个实例都有其特定的 I/O 地址范围和中断配置。

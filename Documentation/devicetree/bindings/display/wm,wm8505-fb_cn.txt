@@ -1,0 +1,33 @@
+Wondermedia WM8505 帧缓冲器
+-----------------------------------------------------
+
+必需属性：
+- compatible（兼容性）: "wm,wm8505-fb"
+- reg（寄存器）: 应包含1个寄存器范围(地址和长度)
+- bits-per-pixel（每像素位数）: 帧缓冲器的位深度(16或32)
+
+必需的子节点：
+- display-timings（显示定时）: 请参阅display-timing.txt以获取更多信息
+
+示例：
+
+	fb@d8051700 { 
+		compatible = "wm,wm8505-fb"; 
+		reg = <0xd8051700 0x200>; 
+		bits-per-pixel = <16>; 
+
+		display-timings { 
+			native-mode = <&timing0>; 
+			timing0: 800x480 { 
+				clock-frequency = <0>; /* 未使用但必需 */
+				hactive = <800>; 
+				vactive = <480>; 
+				hfront-porch = <40>; 
+				hback-porch = <88>; 
+				hsync-len = <0>; 
+				vback-porch = <32>; 
+				vfront-porch = <11>; 
+				vsync-len = <1>; 
+			}; 
+		}; 
+	};

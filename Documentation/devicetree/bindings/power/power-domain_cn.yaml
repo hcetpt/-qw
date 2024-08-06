@@ -1,0 +1,104 @@
+# SPDX-License-Identifier: GPL-2.0
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/power/power-domain.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: 通用电源管理(PM)域
+
+维护者:
+  - Rafael J. Wysocki <rjw@rjwysocki.net>
+  - Kevin Hilman <khilman@kernel.org>
+  - Ulf Hansson <ulf.hansson@linaro.org>
+
+描述: |+
+  系统芯片设计通常被划分为多个PM域，这些PM域能够通过电源门控来选择性关闭某些IP块以减少泄漏电流，从而节省功耗。此外，在某些情况下，类似的PM域还可能能够为一组IP块提供性能缩放。
+此设备树绑定可以用于将PM域消费者设备与PM域提供商提供的PM域进行绑定。PM域提供商可以由设备树中的任意节点表示，并且可以提供一个或多个PM域。消费者节点可以通过phandle和一组phandle参数（所谓的PM域标识符）来引用提供商，该组参数的长度由PM域提供商节点中的\#power-domain-cells属性指定。
+
+属性:
+  $nodename:
+    模式: "^(power-controller|power-domain|performance-domain)([@-].*)?$"
+
+  domain-idle-states:
+    $ref: /schemas/types.yaml#/definitions/phandle-array
+    items:
+      最大项数: 1
+    描述: |
+      定义了PM域提供商可用状态的空闲状态phandle。空闲状态定义与domain-idle-state绑定兼容，具体在./domain-idle-state.yaml中指定。
+注意，domain-idle-state属性反映的是这个PM域的空闲状态，而不是PM域内设备或子域的空闲状态。设备和子域拥有独立于父域空闲状态的自己的空闲状态。如果没有此属性，则认为该域能够处于上电或断电状态。
+operating-points-v2:
+    描述:
+      可以进行性能缩放的PM域的OPP表的phandle，这些PM域由PM域提供商提供。如果提供商仅提供单一PM域，或者所有由提供商提供的PM域具有相同的OPP表，则此处应包含单个phandle。更多信息请参考../opp/opp-v2-base.yaml
+"#power-domain-cells":
+    描述:
+      PM域标识符中的单元格数量。对于代表单一PM域的节点，通常是0；对于提供多个PM域的节点（例如电源控制器），通常是1，但也可以是任何值，具体取决于特定提供商的设备树绑定文档中的规定。
+power-domains:
+    描述:
+      根据phandle指定的电源控制器绑定定义的phandle和PM域标识符。一些PM域可能从另一个PM域获取供电（或其他硬件特定依赖）。为了表示这种依赖关系，使用标准的PM域消费者绑定。当提供时，由给定提供商创建的所有域都应该是由本绑定指定的域的子域。
+必需:
+  - "#power-domain-cells"
+
+附加属性: true
+
+示例:
+  - |
+    power: power-controller@12340000 {
+        compatible = "foo,power-controller";
+        reg = <0x12340000 0x1000>;
+        #power-domain-cells = <1>;
+    };
+
+    // 上面的节点定义了一个PM域提供商的电源控制器，并期望其phandle参数有一个单元格
+- |
+    parent2: power-controller@12340000 {
+        compatible = "foo,power-controller";
+        reg = <0x12340000 0x1000>;
+        #power-domain-cells = <1>;
+    };
+
+    child2: power-controller@12341000 {
+        compatible = "foo,power-controller";
+        reg = <0x12341000 0x1000>;
+        power-domains = <&parent2 0>;
+        #power-domain-cells = <1>;
+    };
+
+    // 上面的节点定义了两个电源控制器：“parent”和“child”
+// “child”电源控制器创建的域是“parent”电源控制器提供的“0”号PM域的子域
+下面是给定的 Device Tree Blob (DTB) 配置片段的中文翻译：
+
+```plaintext
+# 父节点：power-controller@12340000 {
+    compatible = "foo,power-controller";  // 兼容性标识为 "foo,power-controller"
+    reg = <0x12340000 0x1000>;  // 寄存器地址范围从 0x12340000 到 0x12340fff
+    #power-domain-cells = <0>;  // 指示电源域描述符的单元格数量为 0
+    domain-idle-states = <&DOMAIN_RET>, <&DOMAIN_PWR_DN>;  // 定义了两个空闲状态：保留状态和功率下降状态
+};
+
+# 子节点：power-controller@12341000 {
+    compatible = "foo,power-controller";  // 兼容性标识为 "foo,power-controller"
+    reg = <0x12341000 0x1000>;  // 寄存器地址范围从 0x12341000 到 0x12341fff
+    power-domains = <&parent3>;  // 所属的电源域为父节点
+    #power-domain-cells = <0>;  // 指示电源域描述符的单元格数量为 0
+    domain-idle-states = <&DOMAIN_PWR_DN>;  // 定义了一个空闲状态：功率下降状态
+};
+
+# 定义空闲状态
+domain-idle-states {
+    DOMAIN_RET: domain-retention {  // 保留状态
+        compatible = "domain-idle-state";  // 兼容性标识为 "domain-idle-state"
+        entry-latency-us = <1000>;  // 进入该状态的延迟为 1000 微秒
+        exit-latency-us = <2000>;  // 退出该状态的延迟为 2000 微秒
+        min-residency-us = <10000>;  // 最小驻留时间为 10000 微秒
+    };
+
+    DOMAIN_PWR_DN: domain-pwr-dn {  // 功率下降状态
+        compatible = "domain-idle-state";  // 兼容性标识为 "domain-idle-state"
+        entry-latency-us = <5000>;  // 进入该状态的延迟为 5000 微秒
+        exit-latency-us = <8000>;  // 退出该状态的延迟为 8000 微秒
+        min-residency-us = <7000>;  // 最小驻留时间为 7000 微秒
+    };
+};
+```
+
+这段配置描述了一个电源控制器及其子电源控制器，以及它们支持的不同空闲状态。

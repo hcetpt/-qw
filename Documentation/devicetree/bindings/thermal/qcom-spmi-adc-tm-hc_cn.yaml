@@ -1,0 +1,142 @@
+下面是给定内容的中文翻译：
+
+# SPDX-License-Identifier: (GPL-2.0 OR BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/thermal/qcom-spmi-adc-tm-hc.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: 高通 SPMI PMIC ADC HC 热监控
+maintainers:
+  - Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
+
+$ref: thermal-sensor.yaml#
+
+properties:
+  compatible:
+    const: qcom,spmi-adc-tm-hc
+
+  reg:
+    maxItems: 1
+
+  interrupts:
+    maxItems: 1
+
+  "#thermal-sensor-cells":
+    const: 1
+
+  "#address-cells":
+    const: 1
+
+  "#size-cells":
+    const: 0
+
+  qcom,avg-samples:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    description: 用于测量的样本数量
+  enum:
+      - 1
+      - 2
+      - 4
+      - 8
+      - 16
+    default: 1
+
+  qcom,decimation:
+    $ref: /schemas/types.yaml#/definitions/uint32
+    description: 此参数用于降低 ADC 采样率
+    更快的测量可以通过减少抽取比率来实现
+  enum:
+      - 256
+      - 512
+      - 1024
+    default: 1024
+
+patternProperties:
+  "^([-a-z0-9]*)@[0-7]$":
+    type: object
+    description:
+      表示一个热传感器
+    properties:
+      reg:
+        description: 指定传感器通道。PMIC5 的 ADC TM 有 8 个通道
+        minimum: 0
+        maximum: 7
+
+      io-channels:
+        description:
+          来自通用 IIO 绑定。用于将 PMIC ADC 通道连接到热监控器
+
+      qcom,ratiometric:
+        $ref: /schemas/types.yaml#/definitions/flag
+        description:
+          通道校准类型
+如果指定了此属性，VADC 将使用 VDD 参考（1.875V）和 GND 进行通道校准。如果没有找到该属性，
+则将使用 0V 和 1.25V 参考通道进行校准，也称为绝对校准。
+      qcom,hw-settle-time-us:
+        description: AMUX 被配置与 ADC 开始转换之间的时间
+  enum: [0, 100, 200, 300, 400, 500, 600, 700, 1000, 2000, 4000, 6000, 8000, 10000]
+
+      qcom,pre-scaling:
+        $ref: /schemas/types.yaml#/definitions/uint32-array
+        description: 用于在信号馈送到 VADC 之前对通道输入信号进行缩放
+          此节点的配置是为了了解预设的比例，并使用它来进行后缩放。这是一个整数对，表示输入信号被乘以的分数的分子和分母。例如，<1 3> 表示信号在 ADC 测量前被缩放到其值的 1/3。如果未找到此属性，则会使用依赖于芯片的默认值。
+  items:
+          - const: 1
+          - enum: [ 1, 3, 4, 6, 20, 8, 10 ]
+
+    required:
+      - reg
+      - io-channels
+
+    additionalProperties:
+      false
+
+required:
+  - compatible
+  - reg
+  - interrupts
+  - "#address-cells"
+  - "#size-cells"
+
+unevaluatedProperties: false
+
+examples:
+  - |
+    #include <dt-bindings/iio/qcom,spmi-vadc.h>
+    #include <dt-bindings/interrupt-controller/irq.h>
+
+    pmic {
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        pm8998_adc: adc@3100 {
+            compatible = "qcom,spmi-adc-rev2";
+            reg = <0x3100>;
+            #address-cells = <1>;
+            #size-cells = <0>;
+            #io-channel-cells = <1>;
+
+            /* 其他属性省略 */
+            channel@4c {
+                reg = <ADC5_XO_THERM_100K_PU>;
+            };
+        };
+
+        adc-tm@3400 {
+            compatible = "qcom,spmi-adc-tm-hc";
+            reg = <0x3400>;
+            interrupts = <0x2 0x34 0x0 IRQ_TYPE_EDGE_RISING>;
+            #thermal-sensor-cells = <1>;
+            #address-cells = <1>;
+            #size-cells = <0>;
+
+            thermistor@1 {
+                reg = <1>;
+                io-channels = <&pm8998_adc ADC5_XO_THERM_100K_PU>;
+                qcom,ratiometric;
+                qcom,hw-settle-time-us = <200>;
+            };
+        };
+    };
+..

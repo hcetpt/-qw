@@ -1,0 +1,38 @@
+# SPDX-许可证标识符: (GPL-2.0-only 或 BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/soc/nuvoton/nuvoton,gfxi.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: Nuvoton SoC 中的图形核心信息块
+
+维护者:
+  - Joseph Liu <kwliu@nuvoton.com>
+  - Marvin Lin <kflin@nuvoton.com>
+
+描述:
+  图形核心信息（GFXI）是 Nuvoton 系统级芯片 (SoC) 中的一组寄存器，用于分析图形核心的行为，并在寄存器中提供相关信息。
+
+属性:
+  compatible:
+    项目:
+      - 枚举:
+          - nuvoton,npcm750-gfxi
+          - nuvoton,npcm845-gfxi
+      - 常量: syscon
+
+  reg:
+    最大项数: 1
+
+必需:
+  - compatible
+  - reg
+
+附加属性: false
+
+示例:
+  - |
+    gfxi: gfxi@e000 {
+      compatible = "nuvoton,npcm750-gfxi", "syscon";
+      reg = <0xe000 0x100>;
+    };

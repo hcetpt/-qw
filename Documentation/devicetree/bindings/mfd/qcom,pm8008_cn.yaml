@@ -1,0 +1,156 @@
+下面是给定内容的中文翻译：
+
+# SPDX-文件许可人: GPL-2.0-only 或 BSD-2-Clause
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/mfd/qcom,pm8008.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+标题: 高通技术公司 PM8008 电源管理集成电路
+
+维护者:
+  - Guru Das Srinagesh <quic_gurus@quicinc.com>
+
+描述: |
+  高通技术公司的 PM8008 是一款专为相机设计的电源管理集成电路 (PMIC)，它将所有必要的电源管理、看门狗以及接口支持功能集成到了单一芯片中。
+
+属性:
+  compatible:
+    常量: qcom,pm8008
+
+  reg:
+    最大项目数: 1
+
+  interrupts:
+    最大项目数: 1
+
+  reset-gpios:
+    最大项目数: 1
+
+  vdd-l1-l2-supply: 真
+  vdd-l3-l4-supply: 真
+  vdd-l5-supply: 真
+  vdd-l6-supply: 真
+  vdd-l7-supply: 真
+
+  gpio-controller: 真
+
+  "#gpio-cells":
+    常量: 2
+
+  gpio-ranges:
+    最大项目数: 1
+
+  interrupt-controller: 真
+
+  "#interrupt-cells":
+    常量: 2
+
+  "#thermal-sensor-cells":
+    常量: 0
+
+  pinctrl:
+    类型: 对象
+    其他属性: 假
+    模式属性:
+      "-state$":
+        类型: 对象
+
+        全部满足:
+          - $ref: /schemas/pinctrl/pinmux-node.yaml
+          - $ref: /schemas/pinctrl/pincfg-node.yaml
+
+        属性:
+          pins:
+            项:
+              模式: "^gpio[12]$"
+
+          function:
+            项:
+              - 枚举:
+                  - normal
+
+        必需:
+          - pins
+          - function
+
+        其他属性: 假
+
+  regulators:
+    类型: 对象
+    其他属性: 假
+    模式属性:
+      "^ldo[1-7]$":
+        类型: 对象
+        $ref: /schemas/regulator/regulator.yaml#
+        未评估属性: 假
+
+必需:
+  - compatible
+  - reg
+  - interrupts
+  - vdd-l1-l2-supply
+  - vdd-l3-l4-supply
+  - vdd-l5-supply
+  - vdd-l6-supply
+  - vdd-l7-supply
+  - gpio-controller
+  - "#gpio-cells"
+  - gpio-ranges
+  - interrupt-controller
+  - "#interrupt-cells"
+  - "#thermal-sensor-cells"
+
+其他属性: 假
+
+示例:
+  - |
+    #include <dt-bindings/gpio/gpio.h>
+    #include <dt-bindings/interrupt-controller/irq.h>
+
+    i2c {
+      #address-cells = <1>;
+      #size-cells = <0>;
+
+      pm8008: pmic@8 {
+        compatible = "qcom,pm8008";
+        reg = <0x8>;
+
+        interrupt-parent = <&tlmm>;
+        interrupts = <32 IRQ_TYPE_EDGE_RISING>;
+
+        reset-gpios = <&tlmm 42 GPIO_ACTIVE_LOW>;
+
+        vdd-l1-l2-supply = <&vreg_s8b_1p2>;
+        vdd-l3-l4-supply = <&vreg_s1b_1p8>;
+        vdd-l5-supply = <&vreg_bob>;
+        vdd-l6-supply = <&vreg_bob>;
+        vdd-l7-supply = <&vreg_bob>;
+
+        gpio-controller;
+        #gpio-cells = <2>;
+        gpio-ranges = <&pm8008 0 0 2>;
+
+        interrupt-controller;
+        #interrupt-cells = <2>;
+
+        #thermal-sensor-cells = <0>;
+
+        pinctrl {
+          gpio-keys-state {
+            pins = "gpio1";
+            function = "normal";
+          };
+        };
+
+        regulators {
+          ldo1 {
+            regulator-name = "vreg_l1";
+            regulator-min-microvolt = <950000>;
+            regulator-max-microvolt = <1300000>;
+          };
+        };
+      };
+    };
+
+..

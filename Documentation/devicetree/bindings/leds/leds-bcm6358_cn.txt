@@ -1,0 +1,143 @@
+连接到 Broadcom BCM6358 控制器的 LED
+
+此控制器存在于 BCM6358 和 BCM6368 中。
+在这些系统级芯片 (SoC) 中，有串行 LED（连接到 74x164 控制器的 LED），
+这些 LED 可以通过软件进行控制（将 74x164 导出为 spi-gpio，
+参见文档/devicetree/bindings/gpio/fairchild,74hc595.yaml），或者
+使用本驱动程序通过硬件进行控制。
+必需属性：
+  - compatible：应为 "brcm,bcm6358-leds"
+  - #address-cells ：必须是 1
+  - #size-cells ：必须是 0
+  - reg ：BCM6358 LED 控制器地址和大小
+可选属性：
+  - brcm,clk-div ：SCK 信号分频器。可能的值为 1、2、4 和 8
+默认值：1
+  - brcm,clk-dat-low ：布尔值，使时钟和数据信号处于低电平有效
+默认值：false
+
+每个 LED 都作为 brcm,bcm6358-leds 设备的一个子节点表示。
+### LED 子节点所需属性：
+- `reg`：LED引脚编号（仅0至31的LED有效）
+
+### LED 子节点可选属性：
+- `label`：参见 `Documentation/devicetree/bindings/leds/common.txt`
+- `default-state`：参见 `Documentation/devicetree/bindings/leds/common.txt`
+- `linux,default-trigger`：参见 `Documentation/devicetree/bindings/leds/common.txt`
+
+### 示例：
+
+#### 场景1：BCM6358
+```devicetree
+leds0: led-controller@fffe00d0 { // LED控制器地址为fffe00d0
+    compatible = "brcm,bcm6358-leds"; // 兼容性声明
+    #address-cells = <1>; // 地址单元数量
+    #size-cells = <0>; // 大小单元数量
+    reg = <0xfffe00d0 0x8>; // 注册器地址和大小
+
+    alarm_white { // 报警白色LED
+        reg = <0>; // 引脚编号为0
+        active-low; // 激活状态为低电平
+        label = "white:alarm"; // 标签
+    };
+    tv_white { // 电视白色LED
+        reg = <2>; // 引脚编号为2
+        active-low; // 激活状态为低电平
+        label = "white:tv"; // 标签
+    };
+    tel_white { // 电话白色LED
+        reg = <3>; // 引脚编号为3
+        active-low; // 激活状态为低电平
+        label = "white:tel"; // 标签
+    };
+    adsl_white { // ADSL白色LED
+        reg = <4>; // 引脚编号为4
+        active-low; // 激活状态为低电平
+        label = "white:adsl"; // 标签
+    };
+};
+```
+
+#### 场景2：BCM6368
+```devicetree
+leds0: led-controller@100000d0 { // LED控制器地址为100000d0
+    compatible = "brcm,bcm6358-leds"; // 兼容性声明
+    #address-cells = <1>; // 地址单元数量
+    #size-cells = <0>; // 大小单元数量
+    reg = <0x100000d0 0x8>; // 注册器地址和大小
+    brcm,pol-low; // 极性设置为低
+    brcm,clk-div = <4>; // 时钟分频设置为4
+
+    power_red { // 电源红色LED
+        reg = <0>; // 引脚编号为0
+        active-low; // 激活状态为低电平
+        label = "red:power"; // 标签
+    };
+    power_green { // 电源绿色LED
+        reg = <1>; // 引脚编号为1
+        active-low; // 激活状态为低电平
+        label = "green:power"; // 标签
+        default-state = "on"; // 默认状态为开启
+    };
+    power_blue { // 电源蓝色LED
+        reg = <2>; // 引脚编号为2
+        label = "blue:power"; // 标签
+    };
+    broadband_red { // 宽带红色LED
+        reg = <3>; // 引脚编号为3
+        active-low; // 激活状态为低电平
+        label = "red:broadband"; // 标签
+    };
+    broadband_green { // 宽带绿色LED
+        reg = <4>; // 引脚编号为4
+        label = "green:broadband"; // 标签
+    };
+    broadband_blue { // 宽带蓝色LED
+        reg = <5>; // 引脚编号为5
+        active-low; // 激活状态为低电平
+        label = "blue:broadband"; // 标签
+    };
+    wireless_red { // 无线红色LED
+        reg = <6>; // 引脚编号为6
+        active-low; // 激活状态为低电平
+        label = "red:wireless"; // 标签
+    };
+    wireless_green { // 无线绿色LED
+        reg = <7>; // 引脚编号为7
+        active-low; // 激活状态为低电平
+        label = "green:wireless"; // 标签
+    };
+    wireless_blue { // 无线蓝色LED
+        reg = <8>; // 引脚编号为8
+        label = "blue:wireless"; // 标签
+    };
+    phone_red { // 电话红色LED
+        reg = <9>; // 引脚编号为9
+        active-low; // 激活状态为低电平
+        label = "red:phone"; // 标签
+    };
+    phone_green { // 电话绿色LED
+        reg = <10>; // 引脚编号为10
+        active-low; // 激活状态为低电平
+        label = "green:phone"; // 标签
+    };
+    phone_blue { // 电话蓝色LED
+        reg = <11>; // 引脚编号为11
+        label = "blue:phone"; // 标签
+    };
+    upgrading_red { // 升级红色LED
+        reg = <12>; // 引脚编号为12
+        active-low; // 激活状态为低电平
+        label = "red:upgrading"; // 标签
+    };
+    upgrading_green { // 升级绿色LED
+        reg = <13>; // 引脚编号为13
+        active-low; // 激活状态为低电平
+        label = "green:upgrading"; // 标签
+    };
+    upgrading_blue { // 升级蓝色LED
+        reg = <14>; // 引脚编号为14
+        label = "blue:upgrading"; // 标签
+    };
+};
+```

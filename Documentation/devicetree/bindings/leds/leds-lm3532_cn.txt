@@ -1,0 +1,81 @@
+* 德州仪器 (Texas Instruments) - LM3532 白色 LED 驱动器，具备环境光感应功能
+LM3532 提供了三个高压、低压侧电流阱。该器件可通过一个与 I2C 兼容的接口进行编程，并且每个通道都有独立的电流控制。自适应电流调节方法允许每个电流阱有不同的 LED 电流，从而适用于各种背光和键盘应用。
+LM3532 的主要特性包括双环境光传感器输入（每个都有 32 个内部电压设置电阻）、8 位对数和线性亮度控制、双外部 PWM 亮度控制输入以及高达 1000:1 的调光比，同时还支持可编程渐显和渐隐设置。
+
+**必需属性：**
+- `compatible` ： `"ti,lm3532"`
+- `reg` ：I2C 从设备地址
+- `#address-cells` ：1
+- `#size-cells` ：0
+
+**可选属性：**
+- `enable-gpios` ：用于启用（高电平有效）/禁用设备的 GPIO 引脚
+- `ramp-up-us` - 设备从开启到达初始目标设定点后，从一个电流设定值到另一个电流设定值的运行时间斜坡率/步骤
+- `ramp-down-us` - 设备从开启到达初始目标设定点后，从一个电流设定值到另一个电流设定值的运行时间斜坡率/步骤
+斜坡设置范围：8us - 65536us
+
+**如果使用 ALS 模式，则有以下可选属性：**
+- `ti,als-vmin` - 最小 ALS 电压（以伏特为单位）
+- `ti,als-vmax` - 最大 ALS 电压（以伏特为单位），根据数据手册最大 ALS 电压为 2V，最小为 0V
+- `ti,als1-imp-sel` - ALS1 阻抗电阻选择（以欧姆为单位）
+- `ti,als2-imp-sel` - ALS2 阻抗电阻选择（以欧姆为单位）
+阻抗选择范围：37000 欧姆 - 1190 欧姆；高于 37k 欧姆的值将被设置为“高阻抗”设置
+- `ti,als-avrg-time-us` - 确定设备需要平均两个 ALS 输入的时间长度。仅在输入模式为 `LM3532_ALS_INPUT_AVRG` 时使用
+范围：17920us - 2293760us
+- `ti,als-input-mode` - 确定设备如何使用连接的 ALS 设备
+0x00 - ALS1 和 ALS2 输入平均
+0x01 - ALS1 输入
+0x02 - ALS2 输入
+0x03 - ALS1 和 ALS2 中的最大值
+
+**必需的子节点属性：**
+- `reg` ：指示 LED 串受哪个控制银行控制
+- `led-sources` ：参见 `Documentation/devicetree/bindings/leds/common.txt`
+- `ti,led-mode` ：定义 LED 串是手动控制还是由 ALS 控制
+0x00 - LED 串通过全量程亮度控制寄存器经 I2C 控制
+0x01 - LED 串由 ALS 控制
+
+**可选的 LED 子节点属性：**
+- `label` ：参见 `Documentation/devicetree/bindings/leds/common.txt`
+- `linux,default-trigger` ：参见 `Documentation/devicetree/bindings/leds/common.txt`
+- `led-max-microamp` ：定义每个控制银行的全量程电流值。范围是从 5000uA 到 29800uA，以 800uA 递增
+
+**示例：**
+```device-tree
+led-controller@38 {
+    compatible = "ti,lm3532";
+    #address-cells = <1>;
+    #size-cells = <0>;
+    reg = <0x38>;
+
+    enable-gpios = <&gpio6 12 GPIO_ACTIVE_HIGH>;
+    ramp-up-us = <1024>;
+    ramp-down-us = <65536>;
+
+    ti,als-vmin = <0>;
+    ti,als-vmax = <2000>;
+    ti,als1-imp-sel = <4110>;
+    ti,als2-imp-sel = <2180>;
+    ti,als-avrg-time-us = <17920>;
+    ti,als-input-mode = <0x00>;
+
+    led@0 {
+        reg = <0>;
+        led-sources = <2>;
+        ti,led-mode = <1>;
+        led-max-microamp = <21800>;
+        label = ":backlight";
+        linux,default-trigger = "backlight";
+    };
+
+    led@1 {
+        reg = <1>;
+        led-sources = <1>;
+        ti,led-mode = <0>;
+        label = ":kbd_backlight";
+    };
+};
+```
+
+如需更多信息，请参阅以下链接：
+https://www.ti.com/product/LM3532
