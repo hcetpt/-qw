@@ -1,0 +1,7 @@
+内容：/sys/kernel/uids/<uid>/cpu_shares  
+日期：2007年12月，最终在内核版本2.6.34-rc1中移除  
+联系人：Dhaval Giani <dhaval@linux.vnet.ibm.com>  
+        Srivatsa Vaddagiri <vatsa@linux.vnet.ibm.com>  
+
+描述：
+/sys/kernel/uids/<uid>/cpu_shares 这个可调参数用于设置用户被允许使用的CPU带宽。这是一个比例值。这意味着如果有两个用户登录，并且各自具有相同数量的份额，则他们将获得相等的CPU带宽。另一个例子是，如果用户A的份额为1024，而用户B的份额为2048，那么用户B将获得用户A两倍的CPU带宽。更多详细信息请参阅 Documentation/scheduler/sched-design-CFS.rst。

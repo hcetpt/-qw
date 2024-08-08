@@ -1,0 +1,11 @@
+什么：/sys/fs/selinux/checkreqprot  
+日期：2005年4月（早于git时代）  
+内核版本：2.6.12-rc2（早于git时代）  
+联系人：selinux@vger.kernel.org  
+描述：
+
+**移除更新：** SELinux 的 checkreqprot 功能在2023年3月被移除，下面展示的是最初的弃用通知。
+
+`selinuxfs` 中的 "checkreqprot" 节点允许 SELinux 配置为检查用户空间对于 `mmap/mprotect` 调用请求的保护，而不是内核实际应用的保护。
+这是一个为了支持遗留用户空间和 `READ_IMPLIES_EXEC` 个性标志的兼容机制。但是，如果设置为1，则会削弱安全性，因为它允许未经过策略授权的可执行映射。从Linux v4.4开始，`checkreqprot` 在启动时的默认值被更改为0（即检查实际的保护），并且Android和Linux发行版已经在初始化期间明确地将 "0" 写入 `/sys/fs/selinux/checkreqprot` 有一段时间了。对将 `checkreqprot` 设置为1的支持不会早于2021年6月被移除，在这一点之后，内核将始终停止内部使用 `checkreqprot`，并且总是在 `mmap/mprotect` 调用时检查实际应用的保护。
+当此机制被移除后，`checkreqprot` 的 `selinuxfs` 节点将继续保留以保持向后兼容性，但会忽略写入的 "0" 值，并拒绝写入 "1" 值。

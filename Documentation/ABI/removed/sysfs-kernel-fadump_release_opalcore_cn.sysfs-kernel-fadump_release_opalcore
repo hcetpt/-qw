@@ -1,0 +1,11 @@
+此 ABI 已移至 /sys/firmware/opal/mpipl/release_core
+何为:		/sys/kernel/fadump_release_opalcore
+日期:		2019年9月
+联系:		linuxppc-dev@lists.ozlabs.org
+描述:		只写
+		当系统启动以在基于 OPAL 的机器上收集转储时，可以使用此 sysfs 文件。它用于释放用于收集 opalcore 内存。
+
+- 其中 ABI (Application Binary Interface) 在这个上下文中可能指的是与硬件交互的特定接口。
+- OPAL (Open Platform and Abstraction Layer) 是一种用于 IBM Power 架构的固件接口。
+- fadump 是一种快速应用转储机制，用于保存崩溃或挂起的应用程序状态以供后续分析。
+- mpipl 是 IBM Power 系统中的一个固件组件，负责处理平台初始化和管理。

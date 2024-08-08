@@ -1,0 +1,12 @@
+### rfkill - 射频 (RF) 连接器禁用开关支持
+
+#### 详细信息请参阅：Documentation/driver-api/rfkill.rst
+
+- **路径**：/sys/class/rfkill/rfkill[0-9]+/claim
+- **日期**：09-Jul-2007
+- **内核版本**：v2.6.22
+- **联系人**：linux-wireless@vger.kernel.org
+- **描述**：此文件已被废弃，因为不再有仅控制单个 rfkill 实例的方法。
+  - 该文件计划在2012年被移除，并最终于2016年被移除。
+- **值**：
+  - 0: 内核处理事件

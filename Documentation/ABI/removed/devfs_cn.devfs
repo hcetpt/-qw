@@ -1,0 +1,7 @@
+内容：   devfs
+日期：   2005年7月（计划中），最终在内核版本v2.6.18中移除
+联系人： Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+描述：
+   devfs 多年来一直无人维护，存在无法修复的竞争条件问题，在内核中包含违反 LSB 的命名策略，并且可以使用 udev 替代。
+   文件 fs/devfs/*、include/linux/devfs_fs*.h 已被移除，以及整个内核树中的各种 devfs 函数调用。
+用户：

@@ -1,0 +1,8 @@
+内容：video1394（又称为“OHCI-1394 视频支持”用于 FireWire）
+日期：2010年5月（计划中），最终在内核版本 v2.6.37 中移除
+联系：linux1394-devel@lists.sourceforge.net
+描述：
+    /dev/video1394/* 是字符设备文件，每个 FireWire 控制器对应一个文件，用于等时I/O。它作为一种替代方案被加入以解决 raw1394 的等时I/O功能在其第一代中存在的性能问题。任何使用 video1394 的用户还必须使用 raw1394 + libraw1394，因为 video1394 没有为设备发现和配置提供异步I/O。
+取代：由 /dev/fw* 取代，即 firewire-core 的 <linux/firewire-cdev.h> ABI。
+用户：
+    libdc1394（同样适用于 firewire-cdev，并对库的 ABI 用户透明）
