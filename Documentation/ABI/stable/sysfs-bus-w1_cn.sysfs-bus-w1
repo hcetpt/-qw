@@ -1,0 +1,7 @@
+什么：/sys/bus/w1/devices/.../w1_master_timeout_us  
+日期：2015年4月  
+联系人：Dmitry Khromov <dk@icelogic.net>  
+描述：总线扫描间隔，微秒组件  
+一些通常与物理访问控制系统相关联的1-Wire设备会在短短100毫秒内连接/生成存在信号——因此需要几十到几百毫秒的扫描间隔。  
+请参阅Documentation/w1/w1-generic.rst获取详细信息。  
+用户：任何希望了解总线扫描间隔的用户空间应用程序。

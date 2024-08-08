@@ -1,0 +1,14 @@
+### 信息：
+- **路径:** /sys/bus/w1/devices/.../page1  
+- **日期:** 2021年4月  
+- **联系人:** Luiz Sampaio <sampaio.ime@gmail.com>  
+- **描述:** 读取DS2438的page1内容。  
+  详细信息请参见Documentation/w1/slaves/w1_ds2438.rst。  
+- **用户:** 任何想要与DS2438通信的用户空间应用程序。
+
+- **路径:** /sys/bus/w1/devices/.../offset  
+- **日期:** 2021年4月  
+- **联系人:** Luiz Sampaio <sampaio.ime@gmail.com>  
+- **描述:** 向DS2438的偏移寄存器写入内容。  
+  详细信息请参见Documentation/w1/slaves/w1_ds2438.rst。  
+- **用户:** 任何想要与DS2438通信的用户空间应用程序。

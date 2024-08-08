@@ -1,0 +1,5 @@
+什么：/sys/bus/w1/devices/.../w1_seq  
+日期：2015年4月  
+联系人：Matt Campbell <mattrcampbell@gmail.com>  
+描述：对DS28EA00链序功能的支持，详细信息请参阅Documentation/w1/slaves/w1_therm.rst  
+用户：任何希望与DS28EA00通信的用户空间应用程序

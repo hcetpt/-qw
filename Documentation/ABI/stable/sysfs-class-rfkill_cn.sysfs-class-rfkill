@@ -1,0 +1,73 @@
+### rfkill - 射频 (RF) 连接器禁用开关支持
+
+对于该子系统的详细信息，请参阅 `Documentation/driver-api/rfkill.rst`。
+关于此接口已废弃的 `/sys/class/rfkill/*/claim` 控制项的详情，请查阅 `Documentation/ABI/removed/sysfs-class-rfkill`。
+
+- **位置**：`/sys/class/rfkill`
+- **日期**：2007年7月9日
+- **内核版本**：v2.6.22
+- **联系人**：`linux-wireless@vger.kernel.org`
+- **描述**：射频禁用子系统类文件夹
+  - 每个注册的rfkill驱动程序由一个rfkillX子文件夹表示（X是一个整数，>=0）
+
+- **位置**：`/sys/class/rfkill/rfkill[0-9]+/name`
+- **日期**：2007年7月9日
+- **内核版本**：v2.6.22
+- **联系人**：`linux-wireless@vger.kernel.org`
+- **描述**：驱动程序为这个键分配的名字（接口或驱动程序名称）
+- **值**：任意字符串
+
+- **位置**：`/sys/class/rfkill/rfkill[0-9]+/type`
+- **日期**：2007年7月9日
+- **内核版本**：v2.6.22
+- **联系人**：`linux-wireless@vger.kernel.org`
+- **描述**：驱动程序类型字符串（如"wlan"、"bluetooth"等）
+- **值**：请参见 `include/linux/rfkill.h`
+
+- **位置**：`/sys/class/rfkill/rfkill[0-9]+/persistent`
+- **日期**：2007年7月9日
+- **内核版本**：v2.6.22
+- **联系人**：`linux-wireless@vger.kernel.org`
+- **描述**：是否在启动时从非易失性存储中初始化软阻塞状态
+- **值**：一个数字值：
+  - 0: 假
+  - 1: 真
+
+- **位置**：`/sys/class/rfkill/rfkill[0-9]+/state`
+- **日期**：2007年7月9日
+- **内核版本**：v2.6.22
+- **联系人**：`linux-wireless@vger.kernel.org`
+- **描述**：发射机当前的状态
+这段文档可以翻译为如下中文版本：
+
+此文件原计划在2014年移除，但由于其大量的用户基础，它将保留更长一段时间。尽管被标记为稳定，但更新的“硬”和“软”接口应该优先使用，因为无法通过这个接口表达rfkill驱动程序的‘软阻塞和硬阻塞’状态。未来可能会再次尝试移除它。
+
+值：一个数值
+0: RFKILL_STATE_SOFT_BLOCKED
+    发射器由软件关闭
+1: RFKILL_STATE_UNBLOCKED
+    发射器（可能）处于活动状态
+2: RFKILL_STATE_HARD_BLOCKED
+    发射器被驱动程序控制之外的因素强制关闭
+
+内容：`/sys/class/rfkill/rfkill[0-9]+/hard`
+日期：2010年3月12日
+内核版本：v2.6.34
+联系人：linux-wireless@vger.kernel.org
+描述：当前的硬阻塞状态。此文件只读。
+值：一个数值
+0: 不活跃
+    发射器（可能）处于活动状态
+1: 活跃
+    发射器被驱动程序控制之外的因素强制关闭
+
+内容：`/sys/class/rfkill/rfkill[0-9]+/soft`
+日期：2010年3月12日
+内核版本：v2.6.34
+联系人：linux-wireless@vger.kernel.org
+描述：当前的软阻塞状态。此文件可读写。
+值：一个数值
+0: 不活跃
+    发射器（可能）处于活动状态
+1: 激活
+			发射器由软件关闭

@@ -1,0 +1,565 @@
+所有 InfiniBand 设备通用的 sysfs 接口
+
+- **/sys/class/infiniband/**<device>**/node_type**
+- **/sys/class/infiniband/**<device>**/node_guid**
+- **/sys/class/infiniband/**<device>**/sys_image_guid**
+
+**日期**: 2005 年 4 月  
+**内核版本**: v2.6.12  
+**联系人**: linux-rdma@vger.kernel.org  
+**描述**:  
+| 项 | 描述 |
+|---|---|
+| **node_type:** | (只读) 节点类型（CA, RNIC, usNIC, usNIC UDP, 交换机或路由器） |
+| **node_guid:** | (只读) 节点 GUID |
+| **sys_image_guid:** | (只读) 系统图像 GUID |
+
+- **/sys/class/infiniband/**<device>**/node_desc**
+
+**日期**: 2006 年 2 月  
+**内核版本**: v2.6.17  
+**联系人**: linux-rdma@vger.kernel.org  
+**描述**:  
+(可读写) 更新节点描述信息，例如节点的主机名，以便 InfiniBand 网络管理软件能够将其视图与现实世界关联起来。
+
+- **/sys/class/infiniband/**<device>**/fw_ver**
+
+**日期**: 2016 年 6 月  
+**内核版本**: v4.10  
+**联系人**: linux-rdma@vger.kernel.org  
+**描述**:  
+(只读) 显示固件版本。
+
+- **/sys/class/infiniband/**<device>**/ports/**<port-num>**/lid**
+- **/sys/class/infiniband/**<device>**/ports/**<port-num>**/rate**
+- **/sys/class/infiniband/**<device>**/ports/**<port-num>**/lid_mask_count**
+- **/sys/class/infiniband/**<device>**/ports/**<port-num>**/sm_sl**
+- **/sys/class/infiniband/**<device>**/ports/**<port-num>**/sm_lid**
+- **/sys/class/infiniband/**<device>**/ports/**<port-num>**/state**
+- **/sys/class/infiniband/**<device>**/ports/**<port-num>**/phys_state**
+- **/sys/class/infiniband/**<device>**/ports/**<port-num>**/cap_mask**
+
+**日期**: 2005 年 4 月  
+**内核版本**: v2.6.12  
+**联系人**: linux-rdma@vger.kernel.org  
+**描述**:  
+| 项 | 描述 |
+|---|---|
+| **lid:** | (只读) 端口 LID |
+| **rate:** | (只读) 端口数据速率（活动宽度 * 活动速度） |
+| **lid_mask_count:** | (只读) 端口 LID 遮罩计数 |
+| **sm_sl:** | (只读) 端口子网的子网管理器 SL |
+| **sm_lid:** | (只读) 端口子网的子网管理器 LID |
+| **state:** | (只读) 端口状态（DOWN, INIT, ARMED, ACTIVE 或 ACTIVE_DEFER） |
+| **phys_state:** | (只读) 端口物理状态（Sleep, Polling, LinkUp 等） |
+| **cap_mask:** | (只读) 端口能力遮罩。这里有两位是可设置的 - IsCommunicationManagementSupported（当 CM 模块加载时设置）和 IsSM（通过打开 issmN 文件设置） |
+
+- **/sys/class/infiniband/**<device>**/ports/**<port-num>**/link_layer**
+
+**日期**: 2010 年 10 月  
+**内核版本**: v2.6.37  
+**联系人**: linux-rdma@vger.kernel.org  
+**描述**:  
+(只读) 链路层类型信息（InfiniBand 或 Ethernet 类型）
+
+- **/sys/class/infiniband/**<device>**/ports/**<port-num>**/counters/symbol_error**
+- **/sys/class/infiniband/**<device>**/ports/**<port-num>**/counters/port_rcv_errors**
+- **/sys/class/infiniband/**<device>**/ports/**<port-num>**/counters/port_rcv_remote_physical_errors**
+- **/sys/class/infiniband/**<device>**/ports/**<port-num>**/counters/port_rcv_switch_relay_errors**
+- **/sys/class/infiniband/**<device>**/ports/**<port-num>**/counters/link_error_recovery**
+- **/sys/class/infiniband/**<device>**/ports/**<port-num>**/counters/port_xmit_constraint_errors**
+- **/sys/class/infiniband/**<device>**/ports/**<port-num>**/counters/port_rcv_contraint_errors**
+- **/sys/class/infiniband/**<device>**/ports/**<port-num>**/counters/local_link_integrity_errors**
+- **/sys/class/infiniband/**<device>**/ports/**<port-num>**/counters/excessive_buffer_overrun_errors**
+- **/sys/class/infiniband/**<device>**/ports/**<port-num>**/counters/port_xmit_data**
+- **/sys/class/infiniband/**<device>**/ports/**<port-num>**/counters/port_rcv_data**
+- **/sys/class/infiniband/**<device>**/ports/**<port-num>**/counters/port_xmit_packets**
+- **/sys/class/infiniband/**<device>**/ports/**<port-num>**/counters/port_rcv_packets**
+- **/sys/class/infiniband/**<device>**/ports/**<port-num>**/counters/unicast_rcv_packets**
+- **/sys/class/infiniband/**<device>**/ports/**<port-num>**/counters/unicast_xmit_packets**
+- **/sys/class/infiniband/**<device>**/ports/**<port-num>**/counters/multicast_rcv_packets**
+- **/sys/class/infiniband/**<device>**/ports/**<port-num>**/counters/multicast_xmit_packets**
+- **/sys/class/infiniband/**<device>**/ports/**<port-num>**/counters/link_downed**
+- **/sys/class/infiniband/**<device>**/ports/**<port-num>**/counters/port_xmit_discards**
+- **/sys/class/infiniband/**<device>**/ports/**<port-num>**/counters/VL15_dropped**
+- **/sys/class/infiniband/**<device>**/ports/**<port-num>**/counters/port_xmit_wait**
+
+**日期**: 2005 年 4 月  
+**内核版本**: v2.6.12  
+**联系人**: linux-rdma@vger.kernel.org  
+**描述**:  
+**错误信息**:  
+| 项 | 描述 |
+|---|---|
+| **symbol_error:** | (只读) 在一个或多个物理通道上检测到的总次要链路错误数量 |
+| **port_rcv_errors:** | (只读) 在端口上接收到的包含错误的总数据包数量 |
+| **port_rcv_remote_physical_errors:** | (只读) 在端口上接收到的带有 EBP 分隔符标记的数据包总数 |
+| **port_rcv_switch_relay_errors:** | (只读) 在端口上接收到的由于无法被交换机转发而被丢弃的数据包总数 |
+| **link_error_recovery:** | (只读) 端口训练状态机成功完成链路错误恢复过程的次数总数 |
+| **port_xmit_constraint_errors:** | (只读) 由于出站原始过滤或出站分区或 IP 版本检查失败而未从交换机物理端口发送的数据包总数 |
+| **port_rcv_constraint_errors:** | (只读) 由于入站原始过滤或入站分区或 IP 版本检查失败而在交换机物理端口上丢弃的数据包总数 |
+| **local_link_integrity_errors:** | (只读) 本地物理错误的数量超过 LocalPhyErrors 规定的阈值的次数 |
+| **excessive_buffer_overrun_errors:** | (只读) 此计数器指示输入缓冲区溢出。它可能表明端口配置不当，无论是由子网管理器 (SM) 还是由用户干预造成的。它也可能表明硬件问题或极差的链路信号完整性 |
+
+**数据信息**:  
+| 项 | 描述 |
+|---|---|
+| **port_xmit_data:** | (只读) 在所有 VL 上传输的总数据字节数，除以 4（通道）。这是一个 64 位计数器 |
+| **port_rcv_data:** | (只读) 在所有 VL 上接收的总数据字节数，除以 4（通道）。这是一个 64 位计数器 |
+### 相关计数器说明
+
+- **port_xmit_packets**: （只读）从该端口在所有虚拟通道（VL）上发送的数据包总数。这可能包括带有错误的数据包。
+  - 这是一个64位计数器。
+
+- **port_rcv_packets**: （只读）接收到的数据包总数（这可能包括含有错误的数据包）。这也是一个64位计数器。
+
+- **link_downed**: （只读）端口训练状态机因链路错误恢复失败而导致链路被关闭的总次数。
+
+- **unicast_rcv_packets**: （只读）接收到的单播数据包总数，包括含有错误的单播数据包。
+
+- **unicast_xmit_packets**: （只读）从该端口在所有虚拟通道（VL）上发送的单播数据包总数。这可能包括含有错误的单播数据包。
+
+- **multicast_rcv_packets**: （只读）接收到的多播数据包总数，包括含有错误的多播数据包。
+
+- **multicast_xmit_packets**: （只读）从该端口在所有虚拟通道（VL）上发送的多播数据包总数。这可能包括含有错误的多播数据包。
+
+### 其他信息
+
+- **port_xmit_discards**: （只读）由于端口处于关闭状态或拥塞而被丢弃的出站数据包总数。
+
+- **VL15_dropped**: （只读）由于端口资源限制（例如，缺少缓冲区）而丢弃的传入VL15数据包数量。
+翻译如下：
+
+`port_xmit_wait`: (只读) 在整个时钟周期中，端口有数据需要发送但未发送数据的时钟周期数（可能是由于信用不足或仲裁失败导致）。
+
+每个文件包含的信息对应于端口性能管理计数器属性中的相应值，如《InfiniBand 架构规范》所述。
+
+* **路径**：`/sys/class/infiniband/<device-name>/hw_counters/lifespan`
+* **路径**：`/sys/class/infiniband/<device-name>/ports/<port-num>/hw_counters/lifespan`
+* **日期**：2016年5月
+* **内核版本**：4.6
+* **联系人**：`linux-rdma@vger.kernel.org`
+* **描述**：
+    * 可选的“hw_counters”子目录可以位于父设备目录下、端口子目录下或者两者都有。如果存在，会提供一系列由硬件提供的计数器。这些计数器可能与计数器目录中的某些计数器匹配，但也通常包括许多其他计数器。除了各种计数器外，还会有一个名为“lifespan”的文件，用于配置在访问计数器时核心应多久更新一次计数器（如果不访问，则不更新）。寿命以毫秒为单位，默认为10毫秒，除非驱动程序将其设置为其他值。用户可以通过向lifespan文件写入0到10000之间的值来设置更新间隔时间（毫秒）。
+* **路径**：`/sys/class/infiniband/<hca>/ports/<port-number>/gid_attrs/ndevs/<gid-index>`
+* **日期**：2015年11月29日
+* **内核版本**：4.4.0
+* **联系人**：`linux-rdma@vger.kernel.org`
+* **描述**：与GID相关联的网络设备名称存储在索引`<gid-index>`处。
+* **路径**：`/sys/class/infiniband/<hca>/ports/<port-number>/gid_attrs/types/<gid-index>`
+* **日期**：2015年11月29日
+* **内核版本**：4.4.0
+* **联系人**：`linux-rdma@vger.kernel.org`
+* **描述**：与GID相关的RoCE类型存储在索引`<gid-index>`处。这可以是基于IB和RoCE v1的GIDs的“IB/RoCE v1”，也可以是基于RoCE v2的GIDs的“RoCE v2”。
+* **路径**：`/sys/class/infiniband_mad/umad<N>/ibdev`
+* **路径**：`/sys/class/infiniband_mad/umad<N>/port`
+* **路径**：`/sys/class/infiniband_mad/issm<N>/ibdev`
+* **路径**：`/sys/class/infiniband_mad/issm<N>/port`
+* **日期**：2005年4月
+* **内核版本**：v2.6.12
+* **联系人**：`linux-rdma@vger.kernel.org`
+* **描述**：每个InfiniBand设备的每个端口都附带一个“umad”设备和一个“issm”设备。例如，双端口HCA将有两个umad设备和两个issm设备，而交换机则每种类型有一个设备（用于交换机端口0）。
+* **路径**：`/sys/class/infiniband_mad/abi_version`
+* **日期**：2005年4月
+* **内核版本**：v2.6.12
+* **联系人**：`linux-rdma@vger.kernel.org`
+* **描述**：(只读) 如果对umad和issm设备做了任何破坏用户空间ABI兼容性的更改，则该值递增。
+* **路径**：`/sys/class/infiniband_verbs/uverbs<N>/ibdev`
+* **路径**：`/sys/class/infiniband_verbs/uverbs<N>/abi_version`
+* **日期**：2005年9月
+* **内核版本**：v2.6.14
+* **联系人**：`linux-rdma@vger.kernel.org`
+* **描述**：
+    * ibdev: (只读) 显示InfiniBand (IB) 设备名称
+    * abi_version: (只读) 显示IB设备特定接口的ABI版本
+* **路径**：`/sys/class/infiniband_verbs/abi_version`
+* **日期**：2005年9月
+* **内核版本**：v2.6.14
+* **联系人**：`linux-rdma@vger.kernel.org`
+* **描述**：(只读) 如果对uverbs设备做了任何破坏用户空间ABI兼容性的更改，则该值递增。
+Mellanox IB HCA 低级驱动程序 (mthca) 的 sysfs 接口
+------------------------------------------------------------
+
+**什么：**		`/sys/class/infiniband/mthcaX/hw_rev`  
+**什么：**		`/sys/class/infiniband/mthcaX/hca_type`  
+**什么：**		`/sys/class/infiniband/mthcaX/board_id`  
+**日期：**		四月, 2005  
+**内核版本：**	v2.6.12  
+**联系人：**	linux-rdma@vger.kernel.org  
+**描述：**
+		=============== ================================================
+		hw_rev:		(只读) 硬件修订号  
+
+		hca_type:	(只读) 主机通道适配器类型: MT23108, MT25208
+				(MT23108 兼容模式), MT25208 或 MT25204
+
+		board_id:	(只读) 制造商的板卡ID
+		=============== ================================================
+
+
+Mellanox ConnectX HCA IB 驱动程序 (mlx4) 的 sysfs 接口
+----------------------------------------------------------
+
+**什么：**		`/sys/class/infiniband/mlx4_X/hw_rev`  
+**什么：**		`/sys/class/infiniband/mlx4_X/hca_type`  
+**什么：**		`/sys/class/infiniband/mlx4_X/board_id`  
+**日期：**		九月, 2007  
+**内核版本：**	v2.6.24  
+**联系人：**	linux-rdma@vger.kernel.org  
+**描述：**
+		=============== ===============================
+		hw_rev:		(只读) 硬件修订号  
+
+		hca_type:	(只读) 主机通道适配器类型
+
+		board_id:	(只读) 制造商的板卡ID
+		=============== ===============================
+
+**什么：**		`/sys/class/infiniband/mlx4_X/iov/ports/<port-num>/gids/<n>`  
+**什么：**		`/sys/class/infiniband/mlx4_X/iov/ports/<port-num>/admin_guids/<n>`  
+**什么：**		`/sys/class/infiniband/mlx4_X/iov/ports/<port-num>/pkeys/<n>`  
+**什么：**		`/sys/class/infiniband/mlx4_X/iov/ports/<port-num>/mcgs/`  
+**什么：**		`/sys/class/infiniband/mlx4_X/iov/ports/<pci-slot-num>/ports/<m>/gid_idx/0`  
+**什么：**		`/sys/class/infiniband/mlx4_X/iov/ports/<pci-slot-num>/ports/<m>/pkey_idx/<n>`  
+**日期：**		八月, 2012  
+**内核版本：**	v3.6.15  
+**联系人：**	linux-rdma@vger.kernel.org  
+**描述：**
+		sysfs 的 `iov` 目录用于管理和检查端口 P_Key 和 guid 的半虚拟化。这个目录仅为主机添加 —— 从机没有它。
+在 `iov/ports` 下，管理员可以检查 gid 和 P_Key 表，就像它们存在于设备中（并且像在呈现给 SM 的“网络视图”中所看到的一样）。
+`pkeys` 和 `gids` 子目录对于端口的 P_Key 或 GID 表中的每一项都包含一个文件。例如，`ports/1/pkeys/10` 包含端口 1 的 P_Key 表中的第 10 项。
+======================= ==========================================
+		gids/<n>:		(只读) 物理端口 gids n = 0..127
+
+		admin_guids/<n>:	(读写) 允许检查或更改给定 GUID 的管理状态
+					n = 0..127
+
+		pkeys/<n>:		(只读) 显示物理 key 表的内容 n = 0..126
+
+		mcgs/:			(只读) 多播组表
+
+		<m>/gid_idx/0:		(只读) 显示 GID 映射 m = 1..2
+
+		<m>/pkey_idx/<n>:	(读写) 可写，除了 RoCE pkeys
+m = 1..2, n = 0..126
+
+					在 `iov/<pci slot number>` 目录下，
+					管理员可以将物理表中的索引号码（如在 `iov/ports` 下）
+					映射到访客看到的半虚拟化的索引号码
+例如，如果管理员对于
+					访客 2 上的端口 1 将物理 pkey
+					索引 10 映射到虚拟索引 1，那么该
+					访客，无论何时使用其 pkey 索引
+					1，实际上都将使用真实的 pkey
+					索引 10
+======================= ==========================================
+
+**什么：**		`/sys/class/infiniband/mlx4_X/iov/<pci-slot-num>/ports/<m>/smi_enabled`  
+**什么：**           `/sys/class/infiniband/mlx4_X/iov/<pci-slot-num>/ports/<m>/enable_smi_admin`  
+**日期：**		五月, 2014  
+**内核版本：**	v3.15.7  
+**联系人：**	linux-rdma@vger.kernel.org  
+**描述：**
+		为选定的 VF/port 在 VFs 上启用 QP0。默认情况下，没有任何 VFs 被启用进行 QP0 操作
+================= ==== ===========================================
+		smi_enabled:	  (只读) 表明 smi 是否当前已为指定的 VF/port 启用
+
+		enable_smi_admin: (读写) 由管理员用来请求启用或禁用指定的 VF/port 的 smi 功能。0 = 禁用, 1 = 启用
+================= ==== ===========================================
+
+		请求的启用将在下一次重置 VF 时发生（例如，在拥有该 VF 的虚拟机上的驱动程序重启）
+
+Chelsio T4/T5 RDMA 驱动程序 (cxgb4) 的 sysfs 接口
+-----------------------------------------------------
+
+**什么：**		`/sys/class/infiniband/cxgb4_X/hw_rev`  
+**什么：**		`/sys/class/infiniband/cxgb4_X/hca_type`  
+**什么：**		`/sys/class/infiniband/cxgb4_X/board_id`  
+**日期：**		四月, 2010  
+**内核版本：**	v2.6.35  
+**联系人：**	linux-rdma@vger.kernel.org  
+**描述：**
+
+		=============== =============================================
+		hw_rev:		(只读) 硬件修订号  
+
+		hca_type:	(只读) 驱动器短名称。通常应与
+				其总线驱动结构中的名称匹配（例如
+以下是文档的中文翻译：
+
+---
+
+### Intel IB 驱动程序 qib 的 sysfs 接口
+
+**何为：** `/sys/class/infiniband/qibX/version`  
+**何为：** `/sys/class/infiniband/qibX/hw_rev`  
+**何为：** `/sys/class/infiniband/qibX/hca_type`  
+**何为：** `/sys/class/infiniband/qibX/board_id`  
+**何为：** `/sys/class/infiniband/qibX/boardversion`  
+**何为：** `/sys/class/infiniband/qibX/nctxts`  
+**何为：** `/sys/class/infiniband/qibX/localbus_info`  
+**何为：** `/sys/class/infiniband/qibX/tempsense`  
+**何为：** `/sys/class/infiniband/qibX/serial`  
+**何为：** `/sys/class/infiniband/qibX/nfreectxts`  
+**何为：** `/sys/class/infiniband/qibX/chip_reset`  
+**日期：** 五月，2010  
+**内核版本：** v2.6.35  
+**联系人：** linux-rdma@vger.kernel.org  
+**描述：**
+
+| 名称 | 描述 |
+| --- | --- |
+| version | （只读）显示已安装软件和驱动程序的版本信息。 |
+| hw_rev | （只读）硬件修订号。 |
+| hca_type | （只读）主机通道适配器类型。 |
+| board_id | （只读）制造板卡ID（供应商+设备信息）。 |
+| boardversion | （只读）当前芯片架构版本。 |
+| nctxts | （只读）返回可用的用户端口（上下文）数量。 |
+| localbus_info | （只读）可读性良好的本地总线信息。 |
+| tempsense | （只读）以十进制形式显示温度感应寄存器。 |
+| serial | （只读）HCA序列号。 |
+| nfreectxts | （只读）可用的自由用户端口（上下文）数量。 |
+| chip_reset | （写入）如果可能，则通过向此文件写入“reset”来重置芯片。仅当没有使用芯片资源的打开用户上下文时才允许这样做。 |
+
+**何为：** `/sys/class/infiniband/qibX/ports/<N>/sl2vl/[0-15]`  
+**日期：** 五月，2010  
+**内核版本：** v2.6.35  
+**联系人：** linux-rdma@vger.kernel.org  
+**描述：**
+（只读）该目录包含16个编号从0到15的文件，指定服务级别（SL）。列出SL文件将返回由SL编程的虚拟通道（VL）。
+
+**何为：** `/sys/class/infiniband/qibX/ports/<N>/CCMgtA/cc_settings_bin`  
+**何为：** `/sys/class/infiniband/qibX/ports/<N>/CCMgtA/cc_table_bin`  
+**日期：** 五月，2010  
+**内核版本：** v2.6.35  
+**联系人：** linux-rdma@vger.kernel.org  
+**描述：**
+每个端口的拥塞控制。两者都是二进制属性。
+
+| 名称 | 描述 |
+| --- | --- |
+| cc_table_bin | （只读）拥塞控制表大小后跟表条目。 |
+| cc_settings_bin | （只读）拥塞设置：端口控制、控制映射以及一个包含16个条目的数组，用于拥塞入口——增加、定时器、事件日志触发阈值和最小注入率延迟。 |
+
+**何为：** `/sys/class/infiniband/qibX/ports/<N>/linkstate/loopback`  
+**何为：** `/sys/class/infiniband/qibX/ports/<N>/linkstate/led_override`  
+**何为：** `/sys/class/infiniband/qibX/ports/<N>/linkstate/hrtbt_enable`  
+**何为：** `/sys/class/infiniband/qibX/ports/<N>/linkstate/status`  
+**何为：** `/sys/class/infiniband/qibX/ports/<N>/linkstate/status_str`  
+**日期：** 五月，2010  
+**内核版本：** v2.6.35  
+**联系人：** linux-rdma@vger.kernel.org  
+**描述：**
+
+| 名称 | 描述 |
+| --- | --- |
+| loopback | （写入） |
+| led_override | （写入） |
+| hrtbt_enable | （读写） |
+| status | （只读） |
+| status_str | （只读）显示有关链路状态的信息，可能的电缆/交换机问题，以及硬件错误。可能的状态有：“初始化”，“存在”，“IB_link_up”，“IB_configured”或“Fatal_Hardware_Error”。 |
+
+**何为：** `/sys/class/infiniband/qibX/ports/<N>/diag_counters/rc_resends`  
+**何为：** `/sys/class/infiniband/qibX/ports/<N>/diag_counters/seq_naks`  
+**何为：** `/sys/class/infiniband/qibX/ports/<N>/diag_counters/rdma_seq`  
+**何为：** `/sys/class/infiniband/qibX/ports/<N>/diag_counters/rnr_naks`  
+**何为：** `/sys/class/infiniband/qibX/ports/<N>/diag_counters/other_naks`  
+**何为：** `/sys/class/infiniband/qibX/ports/<N>/diag_counters/rc_timeouts`  
+**何为：** `/sys/class/infiniband/qibX/ports/<N>/diag_counters/look_pkts`  
+**何为：** `/sys/class/infiniband/qibX/ports/<N>/diag_counters/pkt_drops`  
+**何为：** `/sys/class/infiniband/qibX/ports/<N>/diag_counters/dma_wait`  
+**何为：** `/sys/class/infiniband/qibX/ports/<N>/diag_counters/unaligned`  
+**日期：** 五月，2010  
+**内核版本：** v2.6.35  
+**联系人：** linux-rdma@vger.kernel.org  
+**描述：**
+（待记录）
+
+---
+
+### Mellanox Connect-IB HCA 驱动程序 mlx5 的 sysfs 接口
+
+**何为：** `/sys/class/infiniband/mlx5_X/hw_rev`  
+**何为：** `/sys/class/infiniband/mlx5_X/hca_type`  
+**何为：** `/sys/class/infiniband/mlx5_X/reg_pages`  
+**何为：** `/sys/class/infiniband/mlx5_X/fw_pages`  
+**日期：** 七月，2013  
+**内核版本：** v3.11  
+**联系人：** linux-rdma@vger.kernel.org  
+**描述：**
+（待记录）
+
+---
+
+### Cisco VIC (usNIC) Verbs 驱动程序的 sysfs 接口
+
+**何为：** `/sys/class/infiniband/usnic_X/board_id`  
+**何为：** `/sys/class/infiniband/usnic_X/config`  
+**何为：** `/sys/class/infiniband/usnic_X/qp_per_vf`  
+**何为：** `/sys/class/infiniband/usnic_X/max_vf`  
+**何为：** `/sys/class/infiniband/usnic_X/cq_per_vf`  
+**何为：** `/sys/class/infiniband/usnic_X/iface`  
+**日期：** 九月，2013  
+**内核版本：** v3.14  
+**联系人：** Christian Benvenuti <benve@cisco.com>, Dave Goodell <dgoodell@cisco.com>, linux-rdma@vger.kernel.org  
+**描述：**
+
+| 名称 | 描述 |
+| --- | --- |
+| board_id | （只读）制造板卡ID。 |
+| config | （只读）报告此PF的配置。 |
+| qp_per_vf | （只读）每虚拟功能的队列对。 |
+| max_vf | （只读）最大虚拟功能数。 |
+| cq_per_vf | （只读）每虚拟功能的完成队列。 |
+| iface | （只读）显示与此usNIC条目关联的网络接口（可通过ifconfig查看）。 |
+下面是文档的中文翻译：
+
+---
+
+**内容：** `/sys/class/infiniband/usnic_X/qpn/summary`  
+**内容：** `/sys/class/infiniband/usnic_X/qpn/context`  
+**日期：** 九月，2013年  
+**内核版本：** v3.14  
+**联系人：** Christian Benvenuti <benve@cisco.com>, Dave Goodell <dgoodell@cisco.com>, linux-rdma@vger.kernel.org  
+**描述：**  
+**待记录**
+
+**sysfs接口用于Emulex RoCE HCA驱动程序**
+------------------------------------------
+
+**内容：** `/sys/class/infiniband/ocrdmaX/hw_rev`  
+**日期：** 二月，2014年  
+**内核版本：** v3.14  
+**描述：**  
+hw_rev: （只读）硬件修订号
+
+**内容：** `/sys/class/infiniband/ocrdmaX/hca_type`  
+**日期：** 六月，2014年  
+**内核版本：** v3.16  
+**联系人：** linux-rdma@vger.kernel.org  
+**描述：**  
+hca_type: （只读）显示固件版本
+
+**sysfs接口用于Intel Omni-Path驱动程序（HFI1）**
+-------------------------------------------------
+
+**内容：** `/sys/class/infiniband/hfi1_X/hw_rev`  
+**内容：** `/sys/class/infiniband/hfi1_X/board_id`  
+**内容：** `/sys/class/infiniband/hfi1_X/nctxts`  
+**内容：** `/sys/class/infiniband/hfi1_X/serial`  
+**内容：** `/sys/class/infiniband/hfi1_X/chip_reset`  
+**内容：** `/sys/class/infiniband/hfi1_X/boardversion`  
+**内容：** `/sys/class/infiniband/hfi1_X/nfreectxts`  
+**内容：** `/sys/class/infiniband/hfi1_X/tempsense`  
+**日期：** 五月，2016年  
+**内核版本：** v4.6  
+**联系人：** linux-rdma@vger.kernel.org  
+**描述：**  
+hw_rev: （只读）硬件修订号  
+board_id: （只读）制造板ID  
+nctxts: （只读）可用的总上下文数  
+serial: （只读）板卡序列号  
+chip_reset: （写入）写入“reset”以可能重置芯片。仅当没有使用芯片资源的打开用户上下文时才允许  
+boardversion: （只读）可读的板信息  
+nfreectxts: （只读）可用的空闲用户端口（上下文）的数量  
+tempsense: （只读）温度感应信息  
+
+**内容：** `/sys/class/infiniband/hfi1_X/ports/<N>/CCMgtA/cc_settings_bin`  
+**内容：** `/sys/class/infiniband/hfi1_X/ports/<N>/CCMgtA/cc_table_bin`  
+**内容：** `/sys/class/infiniband/hfi1_X/ports/<N>/CCMgtA/cc_prescan`  
+**日期：** 五月，2016年  
+**内核版本：** v4.6  
+**联系人：** linux-rdma@vger.kernel.org  
+**描述：**  
+cc_table_bin: （只读）PSM2拥塞控制使用的CCA表；表大小后跟表项。二进制属性  
+cc_settings_bin: （只读）拥塞设置：端口控制、控制映射和拥塞入口数组（增加、计时器、事件日志触发阈值以及最小注入率延迟）。二进制属性  
+cc_prescan: （读写）启用预扫描以实现更快的BECN响应。写入“on”以启用，“off”以禁用  
+
+**内容：** `/sys/class/infiniband/hfi1_X/ports/<N>/sc2vl/[0-31]`  
+**内容：** `/sys/class/infiniband/hfi1_X/ports/<N>/sl2sc/[0-31]`  
+**内容：** `/sys/class/infiniband/hfi1_X/ports/<N>/vl2mtu/[0-15]`  
+**日期：** 五月，2016年  
+**内核版本：** v4.6  
+**联系人：** linux-rdma@vger.kernel.org  
+**描述：**  
+sc2vl/: （只读）32个文件（0 - 31），用于sl到vl的转换  
+sl2sc/: （只读）32个文件（0 - 31），用于sl到sc的转换  
+vl2mtu/: （只读）16个文件（0 - 15），用于确定vl的MTU  
+
+**内容：** `/sys/class/infiniband/hfi1_X/sdma_<N>/cpu_list`  
+**内容：** `/sys/class/infiniband/hfi1_X/sdma_<N>/vl`  
+**日期：** 九月，2016年  
+**内核版本：** v4.8  
+**联系人：** linux-rdma@vger.kernel.org  
+**描述：**  
+sdma<N>/ 包含每个sdma引擎（0 - 15）的一个目录  
+
+cpu_list: （读写）用于用户进程到sdma引擎分配的CPU列表  
+vl: （只读）显示sdma引擎映射到的虚拟通道（vl）  
+
+此接口使用户能够控制设备的亲和性设置。例如，为了设置一个sdma引擎中断亲和性和使用该sdma引擎的用户进程线程亲和性，使其在NUMA配置或物理CPU位置方面“接近”，用户可以执行如下操作：  
+```
+echo "3" > /proc/irq/<N>/smp_affinity_list
+echo "4-7" > /sys/devices/.../sdma3/cpu_list
+cat /sys/devices/.../sdma3/vl
+0
+echo "8" > /proc/irq/<M>/smp_affinity_list
+echo "9-12" > /sys/devices/.../sdma4/cpu_list
+cat /sys/devices/.../sdma4/vl
+1
+```
+
+确保当进程运行在CPUs 4, 5, 6 或 7，并使用vl = 0时，驱动程序选择sdma引擎3，并且sdma引擎3的中断被导向CPU 3。
+同样地，当一个进程在 CPU 9、10、11 或 12 上运行并设置 vl=1 时，则会选择引擎 4，并且 sdma 引擎 4 的中断会被导向到 CPU 8。这里假设上述的 N 是 "/proc/interrupts" 文件中 "sdma3" 的中断号，而 M 是 "sdma4" 的中断号。
+
+QLogic QEDR 网络接口卡（NIC）驱动程序的 sysfs 接口
+------------------------------------------------------
+
+内容：		/sys/class/infiniband/qedrX/hw_rev
+内容：		/sys/class/infiniband/qedrX/hca_type
+日期：		2016 年 10 月
+内核版本：	v4.10
+联系人：	linux-rdma@vger.kernel.org
+描述：
+
+		=============== ==== ========================
+		hw_rev:		(只读) 硬件修订号
+
+		hca_type:	(只读) 显示 HCA 类型
+		=============== ==== ========================
+
+
+VMware Paravirtual RDMA 驱动程序的 sysfs 接口
+--------------------------------------------------
+
+内容：		/sys/class/infiniband/vmw_pvrdmaX/hw_rev
+内容：		/sys/class/infiniband/vmw_pvrdmaX/hca_type
+内容：		/sys/class/infiniband/vmw_pvrdmaX/board_id
+日期：		2016 年 10 月
+内核版本：	v4.10
+联系人：	linux-rdma@vger.kernel.org
+描述：
+
+		=============== ==== =====================================
+		hw_rev:		(只读) 硬件修订号
+
+		hca_type:	(只读) 主机通道适配器类型
+
+		board_id:	(只读) 显示 PVRDMA 制造商板卡 ID
+		=============== ==== =====================================
+
+
+Broadcom NetXtreme-E RoCE 驱动程序的 sysfs 接口
+----------------------------------------------------
+
+内容：		/sys/class/infiniband/bnxt_reX/hw_rev
+内容：		/sys/class/infiniband/bnxt_reX/hca_type
+日期：		2017 年 2 月
+内核版本：	v4.11
+联系人：	linux-rdma@vger.kernel.org
+描述：
+		=============== ==== =========================
+		hw_rev:		(只读) 硬件修订号
+
+		hca_type:	(只读) 主机通道适配器类型
+		=============== ==== =========================

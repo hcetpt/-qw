@@ -1,0 +1,298 @@
+以下是提供的英文描述及其对应的中文翻译：
+
+- **/sys/bus/dsa/devices/dsa<m>/version**
+  - **日期：** 2020年4月15日
+  - **内核版本：** 5.8.0
+  - **联系人：** dmaengine@vger.kernel.org
+  - **描述：** 硬件版本号
+
+- **/sys/bus/dsa/devices/dsa<m>/cdev_major**
+  - **日期：** 2019年10月25日
+  - **内核版本：** 5.6.0
+  - **联系人：** dmaengine@vger.kernel.org
+  - **描述：** 字符设备驱动为此设备分配的主要数字
+
+- **/sys/bus/dsa/devices/dsa<m>/errors**
+  - **日期：** 2019年10月25日
+  - **内核版本：** 5.6.0
+  - **联系人：** dmaengine@vger.kernel.org
+  - **描述：** 此设备的错误信息
+
+- **/sys/bus/dsa/devices/dsa<m>/max_batch_size**
+  - **日期：** 2019年10月25日
+  - **内核版本：** 5.6.0
+  - **联系人：** dmaengine@vger.kernel.org
+  - **描述：** 批次中的工作描述符的最大数量。当设备不支持批次时，此信息不可见。
+
+- **/sys/bus/dsa/devices/dsa<m>/max_work_queues_size**
+  - **日期：** 2019年10月25日
+  - **内核版本：** 5.6.0
+  - **联系人：** dmaengine@vger.kernel.org
+  - **描述：** 此设备支持的工作队列的最大大小
+
+- **/sys/bus/dsa/devices/dsa<m>/max_engines**
+  - **日期：** 2019年10月25日
+  - **内核版本：** 5.6.0
+  - **联系人：** dmaengine@vger.kernel.org
+  - **描述：** 此设备支持的引擎最大数量
+
+- **/sys/bus/dsa/devices/dsa<m>/max_groups**
+  - **日期：** 2019年10月25日
+  - **内核版本：** 5.6.0
+  - **联系人：** dmaengine@vger.kernel.org
+  - **描述：** 在此设备下可以创建的组的最大数量
+
+- **/sys/bus/dsa/devices/dsa<m>/max_read_buffers**
+  - **日期：** 2021年12月10日
+  - **内核版本：** 5.17.0
+  - **联系人：** dmaengine@vger.kernel.org
+  - **描述：** 此设备支持的读取缓冲区总数。读取缓冲区代表DSA实现内的资源，并且这些资源由引擎分配以支持操作。参阅DSA规范v1.2 9.2.4 总读取缓冲区
+当设备不支持读缓冲区分配控制时，该信息不可见。
+
+何为：/sys/bus/dsa/devices/dsa<m>/max_transfer_size  
+日期：2019年10月25日  
+内核版本：5.6.0  
+联系人：dmaengine@vger.kernel.org  
+描述：从源地址读取以执行操作的字节数。最大传输大小取决于描述符提交的工作队列。
+
+何为：/sys/bus/dsa/devices/dsa<m>/max_work_queues  
+日期：2019年10月25日  
+内核版本：5.6.0  
+联系人：dmaengine@vger.kernel.org  
+描述：此设备支持的最大工作队列号。
+
+何为：/sys/bus/dsa/devices/dsa<m>/numa_node  
+日期：2019年10月25日  
+内核版本：5.6.0  
+联系人：dmaengine@vger.kernel.org  
+描述：此设备的NUMA节点号。
+
+何为：/sys/bus/dsa/devices/dsa<m>/op_cap  
+日期：2019年10月25日  
+内核版本：5.6.0  
+联系人：dmaengine@vger.kernel.org  
+描述：此设备支持的操作类型的操作能力位掩码。
+
+何为：/sys/bus/dsa/devices/dsa<m>/pasid_enabled  
+日期：2020年10月27日  
+内核版本：5.11.0  
+联系人：dmaengine@vger.kernel.org  
+描述：指示此设备是否启用了用户PASID（进程地址空间标识符）。
+
+何为：/sys/bus/dsa/devices/dsa<m>/state  
+日期：2019年10月25日  
+内核版本：5.6.0  
+联系人：dmaengine@vger.kernel.org  
+描述：此设备的状态信息。它可以是启用或禁用状态。
+
+何为：/sys/bus/dsa/devices/dsa<m>/group<m>.<n>  
+日期：2019年10月25日  
+内核版本：5.6.0  
+联系人：dmaengine@vger.kernel.org  
+描述：此设备下的指定组。
+
+何为：/sys/bus/dsa/devices/dsa<m>/engine<m>.<n>  
+日期：2019年10月25日  
+内核版本：5.6.0  
+联系人：dmaengine@vger.kernel.org  
+描述：此设备下的指定引擎。
+
+何为：/sys/bus/dsa/devices/dsa<m>/wq<m>.<n>  
+日期：2019年10月25日  
+内核版本：5.6.0  
+联系人：dmaengine@vger.kernel.org  
+描述：此设备下的指定工作队列。
+### 翻译
+
+#### /sys/bus/dsa/devices/dsa<m>/configurable
+- **日期**: 2019年10月25日
+- **内核版本**: 5.6.0
+- **联系人**: dmaengine@vger.kernel.org
+- **描述**: 表明该设备是否可配置。
+
+#### /sys/bus/dsa/devices/dsa<m>/read_buffer_limit
+- **日期**: 2021年12月10日
+- **内核版本**: 5.17.0
+- **联系人**: dmaengine@vger.kernel.org
+- **描述**: 设备访问低带宽内存时，同时可用于操作的最大读取缓冲区数量。参见DSA规范v1.2中的9.2.8 GENCFG关于全局读取缓冲区限制的部分。当设备不支持读取缓冲区分配控制时，此属性不可见。
+
+#### /sys/bus/dsa/devices/dsa<m>/cmd_status
+- **日期**: 2020年8月28日
+- **内核版本**: 5.10.0
+- **联系人**: dmaengine@vger.kernel.org
+- **描述**: 最后执行的设备管理命令的状态/错误信息。同时也用于覆盖最后的配置错误。写入此文件将清除状态信息。
+
+#### /sys/bus/dsa/devices/dsa<m>/iaa_cap
+- **日期**: 2022年9月14日
+- **内核版本**: 6.0.0
+- **联系人**: dmaengine@vger.kernel.org
+- **描述**: IAA（IAX）功能掩码。导出到用户空间供应用程序使用。此属性仅在IAA设备版本2或更高版本上可见。
+
+#### /sys/bus/dsa/devices/dsa<m>/event_log_size
+- **日期**: 2022年9月14日
+- **内核版本**: 6.4.0
+- **联系人**: dmaengine@vger.kernel.org
+- **描述**: 配置的事件日志大小。默认为64条记录，如果每条EVL记录为64字节，则占用4K大小。仅在支持此功能的平台上可见。
+
+#### /sys/bus/dsa/devices/wq<m>.<n>/block_on_fault
+- **日期**: 2020年10月27日
+- **内核版本**: 5.11.0
+- **联系人**: dmaengine@vger.kernel.org
+- **描述**: 指示是否允许工作队列在发生故障时阻塞，以支持按需分页。
+
+#### /sys/bus/dsa/devices/wq<m>.<n>/group_id
+- **日期**: 2019年10月25日
+- **内核版本**: 5.6.0
+- **联系人**: dmaengine@vger.kernel.org
+- **描述**: 此工作队列所属的组ID。
+### 翻译
+
+- **何为**: /sys/bus/dsa/devices/wq<m>.<n>/size  
+  **日期**: 2019年10月25日  
+  **内核版本**: 5.6.0  
+  **联系人**: dmaengine@vger.kernel.org  
+  **描述**: 此工作队列的工作队列大小。
+
+- **何为**: /sys/bus/dsa/devices/wq<m>.<n>/type  
+  **日期**: 2019年10月25日  
+  **内核版本**: 5.6.0  
+  **联系人**: dmaengine@vger.kernel.org  
+  **描述**: 此工作队列的类型，它可以是“kernel”类型，用于内核空间中的工作队列使用，或者“user”类型，用于用户空间中应用程序使用的工作队列。
+
+- **何为**: /sys/bus/dsa/devices/wq<m>.<n>/cdev_minor  
+  **日期**: 2019年10月25日  
+  **内核版本**: 5.6.0  
+  **联系人**: dmaengine@vger.kernel.org  
+  **描述**: 由字符设备驱动程序为此工作队列分配的次要编号。
+
+- **何为**: /sys/bus/dsa/devices/wq<m>.<n>/mode  
+  **日期**: 2019年10月25日  
+  **内核版本**: 5.6.0  
+  **联系人**: dmaengine@vger.kernel.org  
+  **描述**: 此工作队列的工作队列模式类型。
+
+- **何为**: /sys/bus/dsa/devices/wq<m>.<n>/priority  
+  **日期**: 2019年10月25日  
+  **内核版本**: 5.6.0  
+  **联系人**: dmaengine@vger.kernel.org  
+  **描述**: 此工作队列的优先级值，它是相对于同一组中的其他工作队列的一个值，用于控制从同一组中的多个工作队列调度工作的服务质量。
+
+- **何为**: /sys/bus/dsa/devices/wq<m>.<n>/state  
+  **日期**: 2019年10月25日  
+  **内核版本**: 5.6.0  
+  **联系人**: dmaengine@vger.kernel.org  
+  **描述**: 此工作队列的当前状态。
+
+- **何为**: /sys/bus/dsa/devices/wq<m>.<n>/threshold  
+  **日期**: 2019年10月25日  
+  **内核版本**: 5.6.0  
+  **联系人**: dmaengine@vger.kernel.org  
+  **描述**: 可通过有限端口填充到此工作队列中的条目数量。
+
+- **何为**: /sys/bus/dsa/devices/wq<m>.<n>/max_transfer_size  
+  **日期**: 2020年8月28日  
+  **内核版本**: 5.10.0  
+  **联系人**: dmaengine@vger.kernel.org  
+  **描述**: 此工作队列的最大传输大小。不能超过设备的最大传输大小。可配置参数。
+
+- **何为**: /sys/bus/dsa/devices/wq<m>.<n>/max_batch_size  
+  **日期**: 2020年8月28日  
+  **内核版本**: 5.10.0  
+  **联系人**: dmaengine@vger.kernel.org  
+  **描述**: 此工作队列的最大批次大小。不能超过设备的最大批次大小。可配置参数。
+  
+  当设备不支持批次时，这些信息不会显示。
+### /sys/bus/dsa/devices/wq<m>.<n>/ats_disable
+- **日期:** 2020年11月13日
+- **内核版本:** 5.11.0
+- **联系人:** dmaengine@vger.kernel.org
+- **描述:** 指示是否启用了工作队列的ATS禁用功能。值0表示ATS开启，值1表示ATS对于该工作队列是关闭的。
+
+### /sys/bus/dsa/devices/wq<m>.<n>/prs_disable
+- **日期:** 2022年9月14日
+- **内核版本:** 6.4.0
+- **联系人:** dmaengine@vger.kernel.org
+- **描述:** 控制工作队列中PRS禁用功能是否开启。值0表示PRS开启，值1表示PRS对于该工作队列是关闭的。如果设置此选项，则会覆盖`block_on_fault`属性。此选项仅在支持该功能的平台上可见。
+
+### /sys/bus/dsa/devices/wq<m>.<n>/occupancy
+- **日期:** 2021年5月25日
+- **内核版本:** 5.14.0
+- **联系人:** dmaengine@vger.kernel.org
+- **描述:** 如果WQ支持位WQ能力为1，则显示当前工作队列中的条目数量。
+
+### /sys/bus/dsa/devices/wq<m>.<n>/enqcmds_retries
+- **日期:** 2021年10月29日
+- **内核版本:** 5.17.0
+- **联系人:** dmaengine@vger.kernel.org
+- **描述:** 指示在一个共享WQ上进行enqcmds提交时的重试次数。此属性的最大设置值被限制为64。
+
+### /sys/bus/dsa/devices/wq<m>.<n>/op_config
+- **日期:** 2022年9月14日
+- **内核版本:** 6.0.0
+- **联系人:** dmaengine@vger.kernel.org
+- **描述:** 显示以位图格式呈现的操作能力位，使用`%*pb printk()`输出格式规范。当WQ处于禁用状态时，可以通过配置此属性来使WQ接受特定位，这些位对应允许的操作。此选项仅在支持该功能的平台上可见。
+
+### /sys/bus/dsa/devices/wq<m>.<n>/driver_name
+- **日期:** 2023年9月8日
+- **内核版本:** 6.7.0
+- **联系人:** dmaengine@vger.kernel.org
+- **描述:** 将要绑定到wq的驱动程序名称。
+### 翻译
+
+#### /sys/bus/dsa/devices/engine<m>.<n>/group_id
+- **日期**: 2019年10月25日
+- **内核版本**: 5.6.0
+- **联系人**: dmaengine@vger.kernel.org
+- **描述**: 此引擎所属的组。
+
+#### /sys/bus/dsa/devices/group<m>.<n>/use_read_buffer_limit
+- **日期**: 2021年12月10日
+- **内核版本**: 5.17.0
+- **联系人**: dmaengine@vger.kernel.org
+- **描述**: 启用该组使用全局读缓冲区限制。参见DSA规范v1.2中的9.2.18 GRPCFG 使用全局读缓冲区限制。
+  - 当设备不支持读缓冲区分配控制时，此文件不可见。
+
+#### /sys/bus/dsa/devices/group<m>.<n>/read_buffers_allowed
+- **日期**: 2021年12月10日
+- **内核版本**: 5.17.0
+- **联系人**: dmaengine@vger.kernel.org
+- **描述**: 指示了所有组内的引擎在任意时刻可以使用的最大读缓冲区数量。参见DSA规范v1.2中的9.2.18 GRPCFG 允许的读缓冲区。
+  - 当设备不支持读缓冲区分配控制时，此文件不可见。
+
+#### /sys/bus/dsa/devices/group<m>.<n>/read_buffers_reserved
+- **日期**: 2021年12月10日
+- **内核版本**: 5.17.0
+- **联系人**: dmaengine@vger.kernel.org
+- **描述**: 指示了为组内引擎预留的读缓冲区数量。参见DSA规范v1.2中的9.2.18 GRPCFG 预留的读缓冲区。
+  - 当设备不支持读缓冲区分配控制时，此文件不可见。
+
+#### /sys/bus/dsa/devices/group<m>.<n>/desc_progress_limit
+- **日期**: 2022年9月14日
+- **内核版本**: 6.0.0
+- **联系人**: dmaengine@vger.kernel.org
+- **描述**: 允许控制组内引擎可以同时处理的工作描述符数量，作为ENGCAP寄存器中指定的最大工作描述符进行中值的比例。可接受的值为0（默认）、1（最大值的一半）、2（最大值的四分之一）和3（最大值的八分之一）。仅在支持该功能的平台上可见。
+
+#### /sys/bus/dsa/devices/group<m>.<n>/batch_progress_limit
+- **日期**: 2022年9月14日
+- **内核版本**: 6.0.0
+- **联系人**: dmaengine@vger.kernel.org
+- **描述**: 允许控制组内引擎可以同时处理的批量描述符数量，作为ENGCAP寄存器中指定的最大批量描述符进行中值的比例。可接受的值为0（默认）、1（最大值的一半）、2（最大值的四分之一）和3（最大值的八分之一）。仅在支持该功能的平台上可见。
+
+#### /sys/bus/dsa/devices/wq<m>.<n>/dsa<x>\!wq<m>.<n>/file<y>/cr_faults
+- **日期**: 2022年9月14日
+- **内核版本**: 6.4.0
+- **联系人**: dmaengine@vger.kernel.org
+- **描述**: 显示此应用程序导致的完成记录(CR)故障的数量。
+### 信息一
+- **路径:** /sys/bus/dsa/devices/wq<m>.<n>/dsa<x>\!wq<m>.<n>/file<y>/cr_fault_failures
+- **日期:** 2022年9月14日
+- **内核版本:** 6.4.0
+- **联系人:** dmaengine@vger.kernel.org
+- **描述:** 显示此应用程序导致的Completion Record (CR) 故障失败次数。当驱动程序无法为 CR 错误加载地址时，失败计数器会增加。通常这是由于提交的描述符中编程了错误的地址或恶意提交者故意使用错误的 CR 地址造成的。
+
+### 信息二
+- **路径:** /sys/bus/dsa/devices/wq<m>.<n>/dsa<x>\!wq<m>.<n>/file<y>/pid
+- **日期:** 2022年9月14日
+- **内核版本:** 6.4.0
+- **联系人:** dmaengine@vger.kernel.org
+- **描述:** 显示打开文件的应用程序的进程ID。这对于想要杀死已打开文件的应用程序的监控守护进程来说是很有用的信息。

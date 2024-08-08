@@ -1,0 +1,17 @@
+### 审核登录UID
+- **内容:** 审核登录UID
+- **日期:** 2005-02-01
+- **内核版本:** 2.6.11-rc2 1e2d1492e178 ("[PATCH] audit: 通过proc处理loginuid")
+- **联系人:** linux-audit@redhat.com
+- **用户:** 审核和登录应用
+- **描述:**
+    - `/proc/$pid/loginuid` 假文件用于设置和获取进程 `$pid` 的审核登录UID（十进制无符号整数，格式为 `%u`, `u32`）。如果未设置，不需要权限即可设置它。如果已设置，则写入时访问者必须在初始用户命名空间中具有 `CAP_AUDIT_CONTROL` 权限。如果启用了 `AUDIT_FEATURE_LOGINUID_IMMUTABLE`，则不能再次写入。如果启用了 `AUDIT_FEATURE_ONLY_UNSET_LOGINUID`，则不能取消设置。
+
+### 审核登录会话ID
+- **内容:** 审核登录会话ID
+- **日期:** 2008-03-13
+- **内核版本:** 2.6.25-rc7 1e0bd7550ea9 ("[PATCH] 在procfs中与loginuid一起导出sessionid")
+- **联系人:** linux-audit@redhat.com
+- **用户:** 审核和登录应用
+- **描述:**
+    - `/proc/$pid/sessionid` 假文件用于获取进程 `$pid` 的审核登录会话ID（十进制无符号整数）。它自动设置，并且随着每次新登录顺序分配。

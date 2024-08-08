@@ -1,0 +1,13 @@
+### /sys/bus/fsl-mc/rescan
+- **日期:** 一月 2021
+- **内核版本:** 5.12
+- **联系人:** Ioana Ciornei <ioana.ciornei@nxp.com>
+- **描述:** 向此属性写入非零值将强制重新扫描系统中的 fsl-mc 总线，并同步 fsl-mc 总线下对象与管理复合体固件。
+- **用户:** 用户空间驱动程序和管理工具
+
+### /sys/bus/fsl-mc/autorescan
+- **日期:** 一月 2021
+- **内核版本:** 5.12
+- **联系人:** Ioana Ciornei <ioana.ciornei@nxp.com>
+- **描述:** 向此属性写入零值将禁用用于自动重新扫描 fsl-mc 总线的 DPRC 中断请求。写入非零值将启用这些 DPRC 中断请求。
+- **用户:** 用户空间驱动程序和管理工具

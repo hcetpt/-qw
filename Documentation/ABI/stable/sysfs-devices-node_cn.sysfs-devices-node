@@ -1,0 +1,195 @@
+### 翻译
+
+#### /sys/devices/system/node/possible
+- **日期：** 2002年10月
+- **联系人：** Linux 内存管理列表 <linux-mm@kvack.org>
+- **描述：**
+    - 可能会在某个时刻上线的节点。
+
+#### /sys/devices/system/node/online
+- **日期：** 2002年10月
+- **联系人：** Linux 内存管理列表 <linux-mm@kvack.org>
+- **描述：**
+    - 当前在线的节点。
+
+#### /sys/devices/system/node/has_normal_memory
+- **日期：** 2002年10月
+- **联系人：** Linux 内存管理列表 <linux-mm@kvack.org>
+- **描述：**
+    - 拥有常规内存的节点。
+
+#### /sys/devices/system/node/has_cpu
+- **日期：** 2002年10月
+- **联系人：** Linux 内存管理列表 <linux-mm@kvack.org>
+- **描述：**
+    - 拥有一个或多个CPU的节点。
+
+#### /sys/devices/system/node/has_high_memory
+- **日期：** 2002年10月
+- **联系人：** Linux 内存管理列表 <linux-mm@kvack.org>
+- **描述：**
+    - 拥有常规或高内存的节点。
+    - **依赖于：** CONFIG_HIGHMEM 配置项。
+
+#### /sys/devices/system/node/nodeX
+- **日期：** 2002年10月
+- **联系人：** Linux 内存管理列表 <linux-mm@kvack.org>
+- **描述：**
+    - 当启用 CONFIG_NUMA 时，这是一个目录，包含有关节点 X 的信息，例如与该节点相关的 CPU。每个文件的详细信息如下。
+
+#### /sys/devices/system/node/nodeX/cpumap
+- **日期：** 2002年10月
+- **联系人：** Linux 内存管理列表 <linux-mm@kvack.org>
+- **描述：**
+    - 节点的 CPU 映射。
+
+#### /sys/devices/system/node/nodeX/cpulist
+- **日期：** 2002年10月
+- **联系人：** Linux 内存管理列表 <linux-mm@kvack.org>
+- **描述：**
+    - 与节点关联的 CPU 列表。
+
+#### /sys/devices/system/node/nodeX/meminfo
+- **日期：** 2002年10月
+- **联系人：** Linux 内存管理列表 <linux-mm@kvack.org>
+- **描述：**
+    - 提供关于节点的内存分布和使用情况的信息。类似于 /proc/meminfo，详情请参阅文档文件系统/proc.rst。
+
+#### /sys/devices/system/node/nodeX/numastat
+- **日期：** 2002年10月
+- **联系人：** Linux 内存管理列表 <linux-mm@kvack.org>
+- **描述：**
+    - 节点的命中/未命中统计信息，以页面为单位。
+### 文档位置: See Documentation/admin-guide/numastat.rst
+
+#### 节点距离
+- **路径:** /sys/devices/system/node/nodeX/distance
+- **日期:** 十月 2002
+- **联系人:** Linux 内存管理列表 <linux-mm@kvack.org>
+- **描述:** 
+    - 节点与系统中所有其他节点之间的距离。
+
+#### 节点虚拟内存统计
+- **路径:** /sys/devices/system/node/nodeX/vmstat
+- **日期:** 十月 2002
+- **联系人:** Linux 内存管理列表 <linux-mm@kvack.org>
+- **描述:** 
+    - 节点的分区内虚拟内存统计信息。
+    - 这是 `numastat` 的超集。
+
+#### 节点内存压缩
+- **路径:** /sys/devices/system/node/nodeX/compact
+- **日期:** 二月 2010
+- **联系人:** Mel Gorman <mel@csn.ul.ie>
+- **描述:** 
+    - 当写入此文件时，该节点内的所有内存将被压缩。完成时，内存将被释放为尽可能多的连续页面块。
+
+#### 节点的大页大小控制/查询属性
+- **路径:** /sys/devices/system/node/nodeX/hugepages/hugepages-<size>/
+- **日期:** 十二月 2009
+- **联系人:** Lee Schermerhorn <lee.schermerhorn@hp.com>
+- **描述:** 
+    - 节点的大页大小控制和查询属性。
+    - 更多信息请参阅 Documentation/admin-guide/mm/hugetlbpage.rst。
+
+#### 访问类别“Y”的节点关系
+- **路径:** /sys/devices/system/node/nodeX/accessY/
+- **日期:** 十二月 2018
+- **联系人:** Keith Busch <keith.busch@intel.com>
+- **描述:** 
+    - 该节点与其他节点在访问类别“Y”下的关系。
+
+#### 访问类别“Y”的发起者目录
+- **路径:** /sys/devices/system/node/nodeX/accessY/initiators/
+- **日期:** 十二月 2018
+- **联系人:** Keith Busch <keith.busch@intel.com>
+- **描述:** 
+    - 包含符号链接到具有类别“Y”访问权限的内存发起者节点的目录。不在列表中的 CPU 和其他内存发起者访问此节点的内存可能有不同的性能。
+
+#### 访问类别“Y”的目标目录
+- **路径:** /sys/devices/system/node/nodeX/accessY/targets/
+- **日期:** 十二月 2018
+- **联系人:** Keith Busch <keith.busch@intel.com>
+- **描述:** 
+    - 包含符号链接到此发起者节点具有类别“Y”访问权限的内存目标目录。
+
+#### 访问类别“Y”的读取带宽
+- **路径:** /sys/devices/system/node/nodeX/accessY/initiators/read_bandwidth
+- **日期:** 十二月 2018
+- **联系人:** Keith Busch <keith.busch@intel.com>
+- **描述:** 
+    - 当从这个访问类别的链接发起者节点访问时，此节点的读取带宽（以 MB/s 为单位）。
+
+#### 访问类别“Y”的读取延迟
+- **路径:** /sys/devices/system/node/nodeX/accessY/initiators/read_latency
+- **日期:** 十二月 2018
+- **联系人:** Keith Busch <keith.busch@intel.com>
+- **描述:** 
+    - 当从这个访问类别的链接发起者节点访问时，此节点的读取延迟（以纳秒为单位）。
+
+#### 访问类别“Y”的写入带宽
+- **路径:** /sys/devices/system/node/nodeX/accessY/initiators/write_bandwidth
+- **日期:** 十二月 2018
+- **联系人:** Keith Busch <keith.busch@intel.com>
+- **描述:** 
+    - 当从这个访问类别的链接发起者节点访问时，此节点的写入带宽（以 MB/s 为单位）。
+### /sys/devices/system/node/nodeX/accessY/initiators/write_latency
+**日期：** 2018年12月  
+**联系人：** Keith Busch <keith.busch@intel.com>  
+**描述：** 当从本类关联的发起节点访问时，此节点的写入延迟（以纳秒为单位）。
+
+### /sys/devices/system/node/nodeX/memory_side_cache/indexY/
+**日期：** 2018年12月  
+**联系人：** Keith Busch <keith.busch@intel.com>  
+**描述：** 包含内存侧缓存级别'Y'属性的目录。
+
+### /sys/devices/system/node/nodeX/memory_side_cache/indexY/indexing
+**日期：** 2018年12月  
+**联系人：** Keith Busch <keith.busch@intel.com>  
+**描述：** 缓存的关联性索引：如果是直接映射，则为0；如果是索引的，则为非零值。
+
+### /sys/devices/system/node/nodeX/memory_side_cache/indexY/line_size
+**日期：** 2018年12月  
+**联系人：** Keith Busch <keith.busch@intel.com>  
+**描述：** 在缓存未命中时从下一级缓存访问的字节数量。
+
+### /sys/devices/system/node/nodeX/memory_side_cache/indexY/size
+**日期：** 2018年12月  
+**联系人：** Keith Busch <keith.busch@intel.com>  
+**描述：** 此内存侧缓存的大小（以字节为单位）。
+
+### /sys/devices/system/node/nodeX/memory_side_cache/indexY/write_policy
+**日期：** 2018年12月  
+**联系人：** Keith Busch <keith.busch@intel.com>  
+**描述：** 缓存的写入策略：0表示回写，1表示直写，其他或未知。
+
+### /sys/devices/system/node/nodeX/x86/sgx_total_bytes
+**日期：** 2021年11月  
+**联系人：** Jarkko Sakkinen <jarkko@kernel.org>  
+**描述：** SGX物理内存的总量（以字节为单位）。
+
+### /sys/devices/system/node/nodeX/memory_failure/total
+**日期：** 2023年1月  
+**联系人：** Jiaqi Yan <jiaqiyan@google.com>  
+**描述：** NUMA节点上包含由于内存错误导致的数据损坏页面的总数。
+
+### /sys/devices/system/node/nodeX/memory_failure/ignored
+**日期：** 2023年1月  
+**联系人：** Jiaqi Yan <jiaqiyan@google.com>  
+**描述：** NUMA节点上被忽略的包含数据损坏的页面数。通常是因为对这种类型的页面的支持不可用，内核放弃恢复。
+
+### /sys/devices/system/node/nodeX/memory_failure/failed
+**日期：** 2023年1月  
+**联系人：** Jiaqi Yan <jiaqiyan@google.com>  
+**描述：** NUMA节点上由内存错误恢复尝试失败的包含数据损坏的页面数。这通常意味着关键的恢复操作失败。
+### /sys/devices/system/node/nodeX/memory_failure/delayed
+**日期：** 一月 2023  
+**联系人：** 燕嘉琪 <jiaqiyan@google.com>  
+**描述：**  
+在非统一内存访问 (NUMA) 节点上的中毒页面中，有多少页面因内存错误恢复尝试而被延迟。被延迟的中毒页面通常会被内核重新尝试处理。
+
+### /sys/devices/system/node/nodeX/memory_failure/recovered
+**日期：** 一月 2023  
+**联系人：** 燕嘉琪 <jiaqiyan@google.com>  
+**描述：**  
+在非统一内存访问 (NUMA) 节点上的中毒页面中，有多少页面通过内存错误恢复尝试得以恢复。

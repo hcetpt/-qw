@@ -1,0 +1,258 @@
+### /sys/accessibility/speakup/attrib_bleep
+**内核版本:** 2.6  
+**联系人:** speakup@linux-speakup.org  
+**描述:** 当使用 speakup 审查命令时，如前景色或背景色发生变化，该设置控制是否通过 PC 音箱发出嘟嘟声。值为 1 表示开启，值为 0 表示关闭。
+
+### /sys/accessibility/speakup/bell_pos
+**内核版本:** 2.6  
+**联系人:** speakup@linux-speakup.org  
+**描述:** 类似于打字机的铃声功能。例如，如果设置为 72，则当在一行中键入超过第 72 个字符时，PC 音箱会发出嘟嘟声。
+
+### /sys/accessibility/speakup/bleeps
+**内核版本:** 2.6  
+**联系人:** speakup@linux-speakup.org  
+**描述:** 控制在使用 speakup 的审查命令时是否通过 PC 音箱听到嘟嘟声。
+**待办事项:** 它接受哪些值？
+
+### /sys/accessibility/speakup/bleep_time
+**内核版本:** 2.6  
+**联系人:** speakup@linux-speakup.org  
+**描述:** 控制 speakup 产生的 PC 音箱嘟嘟声的持续时间。
+**待办事项:** 单位是什么？是节拍（jiffies）吗？
+
+### /sys/accessibility/speakup/cursor_time
+**内核版本:** 2.6  
+**联系人:** speakup@linux-speakup.org  
+**描述:** 控制使用方向键时的光标延迟。当连接非常慢时，默认设置下，在使用方向键移动或退格等操作时，speakup 可能会读出错误的字符。可以通过将此值设为更高的数值来调整延迟，并更好地同步光标位置和语音输出。
+
+### /sys/accessibility/speakup/cur_phonetic
+**内核版本:** 6.2  
+**联系人:** speakup@linux-speakup.org  
+**描述:** 允许 speakup 在逐字母移动时以拼音方式朗读字母。这不会影响输入字符时的拼写。当 `cur_phonetic=1` 时，speakup 会在箭头逐字移动时以拼音方式朗读字母；当 `cur_phonetic=0` 时，speakup 将按常规方式朗读字母。
+
+### /sys/accessibility/speakup/delimiters
+**内核版本:** 2.6  
+**联系人:** speakup@linux-speakup.org  
+**描述:** 用于界定 speakup 中单词的分隔符。
+**待办事项:** 添加更多信息。
+
+### /sys/accessibility/speakup/ex_num
+**内核版本:** 2.6  
+**联系人:** speakup@linux-speakup.org  
+**描述:** 待补充描述。
+
+### /sys/accessibility/speakup/key_echo
+**内核版本:** 2.6  
+**联系人:** speakup@linux-speakup.org  
+**描述:** 控制是否在键入按键时通过 speakup 读出按键名称。值为 1 表示开启，值为 0 表示关闭或不读出按键。
+
+### /sys/accessibility/speakup/keymap
+**内核版本:** 2.6  
+**联系人:** speakup@linux-speakup.org  
+**描述:** speakup 键盘映射将按键重新映射到 speakup 功能。它使用二进制格式。需要一个特殊的程序 genmap 来将文本键盘映射编译为二进制格式，然后加载到 `/sys/accessibility/speakup/keymap` 中。
+### /sys/accessibility/speakup/no_interrupt
+**内核版本:** 2.6  
+**联系人:** speakup@linux-speakup.org  
+**描述:** 控制键盘输入是否会中断 speakup 的输出。当 `no_interrupt` 设置为0时，如果使用了例如 `say screen` 命令但在屏幕内容读完之前开始在键盘上打字，则会中断 speakup 的读屏操作。  
+当 `no_interrupt` 设置为1时，即使在使用 `say screen` 命令后立即开始打字，speakup 也会继续读完整个屏幕的内容直到完成。
+
+### /sys/accessibility/speakup/punc_all
+**内核版本:** 2.6  
+**联系人:** speakup@linux-speakup.org  
+**描述:** 当 `punc_level` 设置为4时，此列表包含所有 speakup 应该读出的标点符号。
+
+### /sys/accessibility/speakup/punc_level
+**内核版本:** 2.6  
+**联系人:** speakup@linux-speakup.org  
+**描述:** 控制显示屏幕时读出的标点符号级别。级别范围从0（不读出任何标点）到4（读出所有标点）。1对应于 `punc_some`，2对应于 `punc_most`，3和4都对应于 `punc_all`。一些硬件合成器可能会有不同级别的设置，分别对应 `punc_level` 的3和4。需要注意的是，即使将 `punc_level` 设置为0，并且 `key_echo` 设置为1，敲击的标点仍然会在输入时被读出。
+
+### /sys/accessibility/speakup/punc_most
+**内核版本:** 2.6  
+**联系人:** speakup@linux-speakup.org  
+**描述:** 当 `punc_level` 设置为2时，此列表包含所有 speakup 应该读出的标点符号。
+
+### /sys/accessibility/speakup/punc_some
+**内核版本:** 2.6  
+**联系人:** speakup@linux-speakup.org  
+**描述:** 当 `punc_level` 设置为1时，此列表包含所有 speakup 应该读出的标点符号。
+
+### /sys/accessibility/speakup/reading_punc
+**内核版本:** 2.6  
+**联系人:** speakup@linux-speakup.org  
+**描述:** 类似于 `punc_level`，但 `reading_punc` 控制使用 speakup 的屏幕审阅命令时读出的标点符号级别。区别在于，当 `reading_punc` 设置为3时，会读出所有的标点符号；而设置为4时，除了读出所有标点外还包括空格。
+
+### /sys/accessibility/speakup/repeats
+**内核版本:** 2.6  
+**联系人:** speakup@linux-speakup.org  
+**描述:** 此列表包含 speakup 重复读出的字符。默认情况下，如果有三个以上的相同字符连续出现，speakup 只会读出前三个字符。例如，“......”会被读作“点，点，点”。如果将 “.” 添加到 `repeats` 列表中，则 “......” 将被读作 “点，点，点，共六个”。
+
+### /sys/accessibility/speakup/say_control
+**内核版本:** 2.6  
+**联系人:** speakup@linux-speakup.org  
+**描述:** 如果设置为1，则当按下 shift、alt 和 control 键时，speakup 会读出这些键的名字。如果 `say_control` 设置为0，则按下这些键时不会读出它们的名字。
+
+### /sys/accessibility/speakup/say_word_ctl
+**内核版本:** 2.6  
+**联系人:** speakup@linux-speakup.org  
+**描述:** [待完成]
+
+### /sys/accessibility/speakup/silent
+**内核版本:** 2.6  
+**联系人:** speakup@linux-speakup.org  
+**描述:** [待完成]
+
+### /sys/accessibility/speakup/spell_delay
+**内核版本:** 2.6  
+**联系人:** speakup@linux-speakup.org  
+**描述:** 控制使用 speakup 的 `say word` 审阅命令快速连按两次以拼读当前单词时的速度。设置为0表示字母之间没有间隔地依次读出，而设置为1至4则似乎会在每个字母之间引入更多的停顿。
+### /sys/accessibility/speakup/synth
+**内核版本:** 2.6  
+**联系人:** speakup@linux-speakup.org  
+**描述:** 获取或设置当前正在使用的合成器驱动程序。读取 `synth` 会返回当前正在使用的合成器驱动程序。写入 `synth` 则会切换到指定的合成器驱动程序，前提是该驱动程序已经被编译进内核或者已经作为模块加载。
+
+### /sys/accessibility/speakup/synth_direct
+**内核版本:** 2.6  
+**联系人:** speakup@linux-speakup.org  
+**描述:** 将写入 `synth_direct` 的内容直接发送给正在使用的语音合成器，绕过 speakup。这可以用来让合成器朗读一个字符串，或者发送控制序列来改变合成器的行为方式。
+
+### /sys/accessibility/speakup/version
+**内核版本:** 2.6  
+**联系人:** speakup@linux-speakup.org  
+**描述:** 读取 `version` 会返回 speakup 的版本以及当前正在使用的合成器驱动程序的版本。
+
+### /sys/accessibility/speakup/i18n/announcements
+**内核版本:** 2.6  
+**联系人:** speakup@linux-speakup.org  
+**描述:** 此文件包含各种通用公告，其中大部分无法归类。例如：“您关闭了 Speakup”、“我还活着”、“退出帮助模式”、“停用”、“启用”，以及其他一些消息。你还可以在这里找到屏幕边缘和光标跟踪模式的名称。
+
+### /sys/accessibility/speakup/i18n/chartab
+**内核版本:** 2.6  
+**联系人:** speakup@linux-speakup.org  
+**描述:** 待办事项。
+
+### /sys/accessibility/speakup/i18n/ctl_keys
+**内核版本:** 2.6  
+**联系人:** speakup@linux-speakup.org  
+**描述:** 在这里你可以找到控制键的名称。这些名称与 Speakup 的 `say_control` 功能一起使用。
+
+### /sys/accessibility/speakup/i18n/function_names
+**内核版本:** 2.6  
+**联系人:** speakup@linux-speakup.org  
+**描述:** 在这里你可以找到 Speakup 功能的名称列表。这些名称被帮助系统所使用。例如，如果你激活了帮助模式并按下数字键盘上的 3 键，Speakup 会说：“数字键盘 3 是字符，说出下一个。”消息“字符，说出下一个”是 Speakup 功能的一个名称，它来自 `function_names` 文件。
+
+### /sys/accessibility/speakup/i18n/states
+**内核版本:** 2.6  
+**联系人:** speakup@linux-speakup.org  
+**描述:** 此文件包含按键状态的名称。这些名称也是帮助系统的一部分。例如，如果你按下了 speakup 键加上数字键盘上的 3 键，你会听到：“speakup 数字键盘 3 是移至底部边缘。”
+
+speakup 键处于按下状态，因此按键状态的名称为 speakup。
+这部分消息来源于状态集合。
+
+什么：		/sys/accessibility/speakup/i18n/characters
+内核版本：	2.6
+联系人：	speakup@linux-speakup.org
+描述：	通过这个系统条目，Speakup 提供了改变给定字符发音方式的能力。例如，你可以更改某些标点符号的读法。甚至可以更改 Speakup 如何发音特定字母。更多详情请参见《Speakup 用户指南》（文件 spkguide.txt 在源代码中）中的“12. 更改字符的发音”。
+
+什么：		/sys/accessibility/speakup/i18n/colors
+内核版本：	2.6
+联系人：	speakup@linux-speakup.org
+描述：	当你使用“说属性”功能时，Speakup 会说出前景色和背景色的名字。这些名字来自 i18n/colors 文件。
+
+什么：		/sys/accessibility/speakup/i18n/formatted
+内核版本：	2.6
+联系人：	speakup@linux-speakup.org
+描述：	这一组消息包含嵌入式格式化代码，用于指定显示数据的类型和宽度。如果你更改这些内容，必须保留所有格式化代码，并且它们必须按照默认消息使用的顺序出现。
+
+什么：		/sys/accessibility/speakup/i18n/key_names
+内核版本：	2.6
+联系人：	speakup@linux-speakup.org
+描述：	key_names 再次被 Speakup 的帮助系统所使用。在之前的示例中，Speakup 会说你按下了“小键盘 3”。这个名字来自于 key_names 文件。
+
+什么：		/sys/accessibility/speakup/<synth-name>/
+内核版本：	2.6
+联系人：	speakup@linux-speakup.org
+描述：	在 `/sys/accessibility/speakup` 中有一个目录对应当前正在使用的合成器驱动程序（例如，`soft` 对应软合成器）。这个目录包含控制语音合成器本身的文件，而不是控制 Speakup 屏幕阅读器。此目录中的参数对于所有支持的合成器具有相同的名字和功能。freq、pitch、rate 和 vol 的值范围对于所有支持的合成器都是相同的，该范围由驱动程序内部映射以适应各个合成器对给定参数支持的值范围。
+以下是软合成器的参数和值描述，这是目前最常用的合成器。
+
+什么：		/sys/accessibility/speakup/<synth-name>/caps_start
+内核版本：	2.6
+联系人：	speakup@linux-speakup.org
+描述：	这是发送给合成器的字符串，使它开始用大写字母发音。对于软合成器和其他大多数合成器来说，这会使声音的音高高于当前设置的音高。
+
+什么：		/sys/accessibility/speakup/<synth-name>/caps_stop
+内核版本：	2.6
+联系人：	speakup@linux-speakup.org
+描述：	这是发送给合成器的字符串，使其停止用大写字母发音。对于软合成器和其他大多数合成器，这会使声音的音高回到当前设置的音高。
+
+什么：		/sys/accessibility/speakup/<synth-name>/delay_time
+内核版本：	2.6
+联系人：	speakup@linux-speakup.org
+描述：	TODO：
+
+什么：		/sys/accessibility/speakup/<synth-name>/direct
+内核版本：	2.6
+联系人：	speakup@linux-speakup.org
+描述：	控制标点符号是由 Speakup 发音还是由合成器发音。
+例如，speakup 将 ">" 读作 "greater"（大于），而软驱动使用的 espeak 合成器则将其读作 "greater than"（大于）。设置为 0 时允许 speakup 来读出标点符号。设置为 1 时则让合成器本身来读出标点符号。
+
+- **路径:** /sys/accessibility/speakup/<synth-name>/freq  
+  **内核版本:** 2.6  
+  **联系人:** speakup@linux-speakup.org  
+  **描述:** 获取或设置语音合成器的频率。范围是 0-9。
+  
+- **路径:** /sys/accessibility/speakup/<synth-name>/flush_time  
+  **内核版本:** 5.12  
+  **联系人:** speakup@linux-speakup.org  
+  **描述:** 获取或设置等待合成器刷新完成的超时时间。当连接出现问题导致刷新通知丢失时可以使用此设置。
+  
+- **路径:** /sys/accessibility/speakup/<synth-name>/full_time  
+  **内核版本:** 2.6  
+  **联系人:** speakup@linux-speakup.org  
+  **描述:** [待补充]
+  
+- **路径:** /sys/accessibility/speakup/<synth-name>/jiffy_delta  
+  **内核版本:** 2.6  
+  **联系人:** speakup@linux-speakup.org  
+  **描述:** 控制内核给予合成器的时间量（以 jiffies 计）。设置过高可能会使系统变得不稳定，甚至崩溃。
+  
+- **路径:** /sys/accessibility/speakup/<synth-name>/pitch  
+  **内核版本:** 2.6  
+  **联系人:** speakup@linux-speakup.org  
+  **描述:** 获取或设置合成器的音高。范围是 0-9。
+  
+- **路径:** /sys/accessibility/speakup/<synth-name>/inflection  
+  **内核版本:** 5.8  
+  **联系人:** speakup@linux-speakup.org  
+  **描述:** 获取或设置合成器的抑扬顿挫，即音高范围。范围是 0-9。
+  
+- **路径:** /sys/accessibility/speakup/<synth-name>/punct  
+  **内核版本:** 2.6  
+  **联系人:** speakup@linux-speakup.org  
+  **描述:** 获取或设置合成器读出的标点符号数量。对于软驱动来说，范围似乎是 0-2。
+  **待解决:** 这个设置与 speakup 的 punc_level 或 reading_punc 设置有何关联？
+  
+- **路径:** /sys/accessibility/speakup/<synth-name>/rate  
+  **内核版本:** 2.6  
+  **联系人:** speakup@linux-speakup.org  
+  **描述:** 获取或设置合成器的语速。范围从零（最慢）到九（最快）。
+  
+- **路径:** /sys/accessibility/speakup/<synth-name>/tone  
+  **内核版本:** 2.6  
+  **联系人:** speakup@linux-speakup.org  
+  **描述:** 获取或设置语音合成器的音调。对于软驱动来说，范围似乎是 0-2。如果使用 espeak 和 espeakup 连接器，则这个设置似乎没有影响。
+待办：espeakup 是否支持不同的音调？
+
+- **路径**：/sys/accessibility/speakup/<synth-name>/trigger_time  
+- **内核版本**：2.6  
+- **联系人**：speakup@linux-speakup.org  
+- **描述**：待办  
+
+- **路径**：/sys/accessibility/speakup/<synth-name>/voice  
+- **内核版本**：2.6  
+- **联系人**：speakup@linux-speakup.org  
+- **描述**：获取或设置合成器使用的语音，如果合成器可以使用多种语音说话的话。软驱动的范围是 0-7。需要注意的是，虽然 espeak 支持多种语音，但当在 speakup 和 espeak 之间使用 espeakup 连接器时，这个参数不会设置语音。  
+
+- **路径**：/sys/accessibility/speakup/<synth-name>/vol  
+- **内核版本**：2.6  
+- **联系人**：speakup@linux-speakup.org  
+- **描述**：获取或设置语音合成器的音量。范围是 0-9，其中 0 是最轻柔的，9 是最响亮的。

@@ -1,0 +1,26 @@
+注释：
+  本文档补充说明了任何设备的额外属性，这些属性并未在《管理指南》（Documentation/admin-guide/sysfs-rules.rst）中进行记录。
+
+什么：		/sys/devices/*/of_node
+日期：		2015年2月
+联系人：	设备树邮件列表 <devicetree@vger.kernel.org>
+描述：
+		与设备树节点关联的任何设备都将具有一个名为of_path的符号链接，指向/sys/firmware/devicetree/中的相应设备节点。
+
+什么：		/sys/devices/*/devspec
+日期：		2016年10月
+联系人：	设备树邮件列表 <devicetree@vger.kernel.org>
+描述：
+		如果启用了CONFIG_OF，则此文件存在。读取时，它会返回设备节点的完整名称。
+
+什么：		/sys/devices/*/obppath
+日期：		2016年10月
+联系人：	设备树邮件列表 <devicetree@vger.kernel.org>
+描述：
+		如果启用了CONFIG_OF，则此文件存在。读取时，它会返回设备节点的完整名称。
+
+什么：		/sys/devices/*/dev
+日期：		2006年6月
+联系人：	Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+描述：
+		对应于该设备的字符设备的主要和次要编号（以<major>:<minor>格式给出）。

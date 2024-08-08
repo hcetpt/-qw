@@ -1,0 +1,17 @@
+### 说明:
+
+**What:** `/sys/bus/w1/devices/.../pio`  
+**日期:** 2012年5月  
+**联系人:** Markus Franke <franm@hrz.tu-chemnitz.de>  
+**描述:** 读取/写入DS28E04-100的两个PIO的内容。  
+    更详细的信息请参见 `Documentation/w1/slaves/w1_ds28e04.rst`  
+**用户:** 任何想要与DS28E04-100通信的用户空间应用程序  
+
+### 说明:
+
+**What:** `/sys/bus/w1/devices/.../eeprom`  
+**日期:** 2012年5月  
+**联系人:** Markus Franke <franm@hrz.tu-chemnitz.de>  
+**描述:** 读取/写入DS28E04-100的EEPROM内存的内容。  
+    更详细的信息请参见 `Documentation/w1/slaves/w1_ds28e04.rst`  
+**用户:** 任何想要与DS28E04-100通信的用户空间应用程序

@@ -1,0 +1,64 @@
+### /sys/fs/orangefs/perf_counters/*
+
+**日期：** 2015年6月  
+**联系人：** Mike Marshall <hubcap@omnibond.com>  
+**描述：**
+    各种缓存的计数器和设置。  
+**只读**
+
+### /sys/fs/orangefs/perf_counter_reset
+
+**日期：** 2015年6月  
+**联系人：** Mike Marshall <hubcap@omnibond.com>  
+**描述：**
+    将 `0` 或 `1` 写入 `perf_counter_reset` 可以重置 `/sys/fs/orangefs/perf_counters` 中的所有计数器，但不包括设置了 `PINT_PERF_PRESERVE` 的计数器。
+
+### /sys/fs/orangefs/perf_time_interval_secs
+
+**日期：** 2015年6月  
+**联系人：** Mike Marshall <hubcap@omnibond.com>  
+**描述：**
+    性能计数器间隔的长度（秒）。
+
+### /sys/fs/orangefs/perf_history_size
+
+**日期：** 2015年6月  
+**联系人：** Mike Marshall <hubcap@omnibond.com>  
+**描述：**
+    `perf_counters` 缓存统计信息包含 N（或 `perf_history_size`）个样本。默认值为 1。
+    每 `perf_time_interval_secs` 秒，第一个样本将被重置。
+    如果 N 大于 1，则“当前”样本集会被重置，而其他 N-1 个区间中的样本仍然可用。
+
+### /sys/fs/orangefs/op_timeout_secs
+
+**日期：** 2015年6月  
+**联系人：** Mike Marshall <hubcap@omnibond.com>  
+**描述：**
+    服务操作超时时间（秒）。
+
+### /sys/fs/orangefs/slot_timeout_secs
+
+**日期：** 2015年6月  
+**联系人：** Mike Marshall <hubcap@omnibond.com>  
+**描述：**
+    “槽”超时时间（秒）。一个“槽”是在共享内存段中用于内核模块与用户空间之间通信的索引缓冲区。
+    请求并等待槽位，等待时间在 `slot_timeout_secs` 后超时。
+### 属性缓存可配置设置
+- **路径:** /sys/fs/orangefs/acache/*
+- **日期:** 2015年6月
+- **联系人:** Mike Marshall <hubcap@omnibond.com>
+
+### 名称缓存可配置设置
+- **路径:** /sys/fs/orangefs/ncache/*
+- **日期:** 2015年6月
+- **联系人:** Mike Marshall <hubcap@omnibond.com>
+
+### 能力缓存可配置设置
+- **路径:** /sys/fs/orangefs/capcache/*
+- **日期:** 2015年6月
+- **联系人:** Mike Marshall <hubcap@omnibond.com>
+
+### 凭证缓存可配置设置
+- **路径:** /sys/fs/orangefs/ccache/*
+- **日期:** 2015年6月
+- **联系人:** Mike Marshall <hubcap@omnibond.com>

@@ -1,0 +1,122 @@
+### /sys/hypervisor/compilation/compile_date
+- **日期:** 三月 2009
+- **内核版本:** 2.6.30
+- **联系人:** xen-devel@lists.xenproject.org
+- **描述:** 如果在Xen下运行：
+    - 包含Xen虚拟机管理程序的构建时间戳。
+    - 在虚拟机管理程序有特殊安全设置的情况下，可能会返回“<denied>”。
+
+### /sys/hypervisor/compilation/compiled_by
+- **日期:** 三月 2009
+- **内核版本:** 2.6.30
+- **联系人:** xen-devel@lists.xenproject.org
+- **描述:** 如果在Xen下运行：
+    - 包含构建Xen虚拟机管理程序的信息。
+    - 在虚拟机管理程序有特殊安全设置的情况下，可能会返回“<denied>”。
+
+### /sys/hypervisor/compilation/compiler
+- **日期:** 三月 2009
+- **内核版本:** 2.6.30
+- **联系人:** xen-devel@lists.xenproject.org
+- **描述:** 如果在Xen下运行：
+    - 构建Xen虚拟机管理程序所使用的编译器。
+    - 在虚拟机管理程序有特殊安全设置的情况下，可能会返回“<denied>”。
+
+### /sys/hypervisor/properties/capabilities
+- **日期:** 三月 2009
+- **内核版本:** 2.6.30
+- **联系人:** xen-devel@lists.xenproject.org
+- **描述:** 如果在Xen下运行：
+    - 支持的客户系统类型以空格分隔的列表。每种类型格式为：<class>-<major>.<minor>-<arch>
+    - 其中：
+
+        | 类别   | 描述 |
+        |--------|------|
+        | "xen"  | x86: 半虚拟化，arm: 标准 |
+        | "hvm"  | 仅x86: 完全虚拟化 |
+        | <major>| 客户接口的主要版本 |
+        | <minor>| 客户接口的次要版本 |
+        | <arch> | 架构，例如： |
+        | "x86_32"| 无PAE的32位x86客户机 |
+        | "x86_32p"| 带PAE的32位x86客户机 |
+        | "x86_64"| 64位x86客户机 |
+        | "armv7l"| 32位ARM客户机 |
+        | "aarch64"| 64位ARM客户机 |
+
+### /sys/hypervisor/properties/changeset
+- **日期:** 三月 2009
+- **内核版本:** 2.6.30
+- **联系人:** xen-devel@lists.xenproject.org
+- **描述:** 如果在Xen下运行：
+    - 虚拟机管理程序的变更集（git提交）。
+    - 在虚拟机管理程序有特殊安全设置的情况下，可能会返回“<denied>”。
+
+### /sys/hypervisor/properties/features
+- **日期:** 三月 2009
+- **内核版本:** 2.6.30
+- **联系人:** xen-devel@lists.xenproject.org
+- **描述:** 如果在Xen下运行：
+    - Xen虚拟机管理程序为客户机支持的功能，定义于include/xen/interface/features.h，以十六进制值打印。
+
+### /sys/hypervisor/properties/pagesize
+- **日期:** 三月 2009
+- **内核版本:** 2.6.30
+- **联系人:** xen-devel@lists.xenproject.org
+- **描述:** 如果在Xen下运行：
+    - 虚拟机管理程序的默认页面大小，以十六进制值打印。
+    - 在虚拟机管理程序有特殊安全设置的情况下，可能会返回“0”。
+
+### /sys/hypervisor/properties/virtual_start
+- **日期:** 三月 2009
+- **内核版本:** 2.6.30
+- **联系人:** xen-devel@lists.xenproject.org
+- **描述:** 如果在Xen下运行：
+    - 虚拟机管理程序的虚拟地址，以十六进制值表示。
+
+### /sys/hypervisor/type
+- **日期:** 三月 2009
+- **内核版本:** 2.6.30
+- **联系人:** xen-devel@lists.xenproject.org
+- **描述:** 如果在Xen下运行：
+    - 虚拟机管理程序类型：“xen”表示Xen虚拟机管理程序。
+
+### /sys/hypervisor/uuid
+- **日期:** 三月 2009
+- **内核版本:** 2.6.30
+- **联系人:** xen-devel@lists.xenproject.org
+- **描述:** 如果在Xen下运行：
+    - 客户机在Xen虚拟机管理程序中的UUID。
+
+### /sys/hypervisor/version/extra
+- **日期:** 三月 2009
+- **内核版本:** 2.6.30
+- **联系人:** xen-devel@lists.xenproject.org
+- **描述:** 如果在Xen下运行：
+    - Xen版本格式为<major>.<minor><extra>，这是<extra>部分。
+在特殊安全设置的情况下，可能会返回`<denied>`。
+		在虚拟机监视器中：
+何为：		/sys/hypervisor/version/major
+日期：		2009年3月
+内核版本：	2.6.30
+联系人：	xen-devel@lists.xenproject.org
+描述：	如果在Xen下运行：
+		Xen的版本格式为<major>.<minor><extra>
+		这是其中的<major>部分
+何为：		/sys/hypervisor/version/minor
+日期：		2009年3月
+内核版本：	2.6.30
+联系人：	xen-devel@lists.xenproject.org
+描述：	如果在Xen下运行：
+		Xen的版本格式为<major>.<minor><extra>
+		这是其中的<minor>部分
+何为：		/sys/hypervisor/start_flags/*
+日期：		2023年3月
+内核版本：	6.3.0
+联系人：	xen-devel@lists.xenproject.org
+描述：	如果在Xen下运行：
+		Xen启动标志中的所有位都被表示为布尔文件，
+		如果设置则返回'1'，否则返回'0'
+这取代了已废弃的/proc/xen/capabilities，
+		该文件在dom0上会包含"control_d"，其他情况下为空。
+		现在这个标志以"initdomain"的形式暴露出来，此外还有"privileged"标志；
+		所有其他可能的标志都以"unknownXX"的形式提供访问。

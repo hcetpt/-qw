@@ -1,0 +1,446 @@
+### /sys/block/<disk>/alignment_offset
+**日期：** 四月 2009  
+**联系人：** Martin K. Petersen <martin.petersen@oracle.com>  
+**描述：**
+存储设备可能会报告一个比逻辑块大小更大的物理块大小（例如，具有4KB物理扇区的驱动器向操作系统暴露512字节的逻辑块）。此参数指示设备起始位置相对于磁盘自然对齐偏移了多少字节。
+
+### /sys/block/<disk>/discard_alignment
+**日期：** 五月 2011  
+**联系人：** Martin K. Petersen <martin.petersen@oracle.com>  
+**描述：**
+支持丢弃功能的设备可能内部以大于导出逻辑块大小的单位分配空间。`discard_alignment` 参数指示设备起始位置相对于内部分配单元自然对齐偏移了多少字节。
+
+### /sys/block/<disk>/atomic_write_max_bytes
+**日期：** 二月 2024  
+**联系人：** Himanshu Madhani <himanshu.madhani@oracle.com>  
+**描述：**
+[只读] 此参数指定了由设备报告的最大原子写入大小。此参数与写入合并相关，在这种情况下，合并的原子写入操作不得超过这个字节数。
+此参数可能大于 `atomic_write_unit_max_bytes` 的值，因为 `atomic_write_unit_max_bytes` 将被向下舍入为2的幂，并且 `atomic_write_unit_max_bytes` 可能还会受到其他队列限制（如 `max_segments`）的限制。
+此参数以及 `atomic_write_unit_min_bytes` 和 `atomic_write_unit_max_bytes` 不会大于 `max_hw_sectors_kb`，但可能会大于 `max_sectors_kb`。
+
+### /sys/block/<disk>/atomic_write_unit_min_bytes
+**日期：** 二月 2024  
+**联系人：** Himanshu Madhani <himanshu.madhani@oracle.com>  
+**描述：**
+[只读] 此参数指定了可以使用原子写入操作原子写入的最小块大小。所有原子写入操作必须从 `atomic_write_unit_min` 边界开始，并且必须是 `atomic_write_unit_min` 的倍数。此值必须是2的幂。
+
+### /sys/block/<disk>/atomic_write_unit_max_bytes
+**日期：** 二月 2024  
+**联系人：** Himanshu Madhani <himanshu.madhani@oracle.com>  
+**描述：**
+[只读] 此参数定义了可以使用原子写入操作原子写入的最大块大小。此值必须是 `atomic_write_unit_min` 的倍数，并且必须是2的幂。此值不会大于 `atomic_write_max_bytes`。
+
+### /sys/block/<disk>/atomic_write_boundary_bytes
+**日期：** 二月 2024  
+**联系人：** Himanshu Madhani <himanshu.madhani@oracle.com>  
+**描述：**
+[只读] 设备可能需要在跨越给定逻辑块地址边界时内部分割原子写I/O。此参数指定了如果由设备报告，则原子边界的大小（以字节为单位）。此值必须是2的幂，并且至少与 `atomic_write_unit_max_bytes` 中的大小相同。
+尝试合并原子写I/O不得导致合并后的I/O跨越此边界（如果有）。
+
+### /sys/block/<disk>/diskseq
+**日期：** 二月 2021  
+**联系人：** Matteo Croce <mcroce@microsoft.com>  
+**描述：**
+`/sys/block/<disk>/diskseq` 文件报告磁盘序列号，这是一个单调递增的数字，分配给每个驱动器。
+一些设备，如循环设备（loop device），每当后端文件发生变化时都会刷新此类数字。
+
+数值类型为 64 位无符号整数。
+
+**路径：** /sys/block/<磁盘>/inflight
+
+**日期：** 2009年10月
+
+**联系人：** Jens Axboe <axboe@kernel.dk>，Nikanth Karthikesan <knikanth@suse.de>
+
+**描述：**
+报告当前正在进行中的 I/O 请求数量（待处理/在途）。这个数字可能少于在块设备队列中排队的请求总数。
+报告包含两个字段：一个用于读取请求，另一个用于写入请求。
+数值类型为无符号整数。
+参考文档：Documentation/block/stat.rst 包含了一个单一值来表示在途请求。
+这与 /sys/block/<磁盘>/queue/nr_requests 相关，并且对于 SCSI 设备还包括其 queue_depth。
+
+**路径：** /sys/block/<磁盘>/integrity/device_is_integrity_capable
+
+**日期：** 2014年7月
+
+**联系人：** Martin K. Petersen <martin.petersen@oracle.com>
+
+**描述：**
+指示存储设备是否能够存储完整性元数据。如果设备支持 T10 PI，则设置此标志。
+
+**路径：** /sys/block/<磁盘>/integrity/format
+
+**日期：** 2008年6月
+
+**联系人：** Martin K. Petersen <martin.petersen@oracle.com>
+
+**描述：**
+为具有完整性的块设备定义的元数据格式，例如 T10-DIF-TYPE1-CRC。
+### /sys/block/<disk>/integrity/protection_interval_bytes
+**日期：** 七月 2015  
+**联系人：** Martin K. Petersen <martin.petersen@oracle.com>  
+**描述：** 描述了一个完整性元组保护的数据字节数量。通常为设备的逻辑块大小。
+
+### /sys/block/<disk>/integrity/read_verify
+**日期：** 六月 2008  
+**联系人：** Martin K. Petersen <martin.petersen@oracle.com>  
+**描述：** 指示块层是否应该验证由支持发送完整性元数据的设备服务的读请求的完整性。
+
+### /sys/block/<disk>/integrity/tag_size
+**日期：** 六月 2008  
+**联系人：** Martin K. Petersen <martin.petersen@oracle.com>  
+**描述：** 每512字节数据可用的完整性标签空间的字节数。
+
+### /sys/block/<disk>/integrity/write_generate
+**日期：** 六月 2008  
+**联系人：** Martin K. Petersen <martin.petersen@oracle.com>  
+**描述：** 指示块层是否应该自动为发往支持接收完整性元数据的设备的写请求生成校验和。
+
+### /sys/block/<disk>/partscan
+**日期：** 五月 2024  
+**联系人：** Christoph Hellwig <hch@lst.de>  
+**描述：** 文件 /sys/block/<disk>/partscan 报告磁盘的分区扫描是否启用。如果分区扫描已启用，返回“1”，否则返回“0”。值类型是一个32位无符号整数，但只有“0”和“1”是有效值。
+
+### /sys/block/<disk>/<partition>/alignment_offset
+**日期：** 四月 2009  
+**联系人：** Martin K. Petersen <martin.petersen@oracle.com>  
+**描述：** 存储设备可能报告的物理块大小大于逻辑块大小（例如，具有4KB物理扇区的驱动器向操作系统暴露512字节的逻辑块）。此参数指示分区起始位置相对于磁盘自然对齐的偏移字节数。
+
+### /sys/block/<disk>/<partition>/discard_alignment
+**日期：** 五月 2011  
+**联系人：** Martin K. Petersen <martin.petersen@oracle.com>  
+**描述：** 支持丢弃功能的设备可能内部以大于导出逻辑块大小的单位分配空间。discard_alignment 参数指示分区起始位置相对于内部分配单元自然对齐的偏移字节数。
+
+### /sys/block/<disk>/<partition>/stat
+**日期：** 二月 2008  
+**联系人：** Jerome Marchand <jmarchan@redhat.com>  
+**描述：** 文件 /sys/block/<disk>/<partition>/stat 显示分区 <partition> 的 I/O 统计信息。格式与 /sys/block/<disk>/stat 相同。
+
+### /sys/block/<disk>/queue/add_random
+**日期：** 六月 2010  
+**联系人：** linux-block@vger.kernel.org  
+**描述：** [读写] 此文件允许关闭磁盘熵贡献。该文件的默认值为 '1'（开启）。
+### /sys/block/<disk>/queue/chunk_sectors
+**日期：** 九月 2016  
+**联系人：** Hannes Reinecke <hare@suse.com>  
+**描述：**  
+*只读* `chunk_sectors` 的含义根据磁盘类型的不同而不同。对于 RAID 设备（dm-raid），`chunk_sectors` 表示 RAID 卷条纹段的大小，单位为 512 字节扇区。对于分区块设备，无论是主机感知还是主机管理的，`chunk_sectors` 表示设备区域的大小，单位为 512 字节扇区，除了最后一个可能较小的区域外。
+
+### /sys/block/<disk>/queue/crypto/
+**日期：** 二月 2022  
+**联系人：** linux-block@vger.kernel.org  
+**描述：**  
+该 `/sys/block/<disk>/queue/` 子目录的存在表明该设备支持内联加密。此子目录包含描述设备内联加密能力的文件。有关内联加密的更多信息，请参阅 `Documentation/block/inline-encryption.rst`。
+
+### /sys/block/<disk>/queue/crypto/max_dun_bits
+**日期：** 二月 2022  
+**联系人：** linux-block@vger.kernel.org  
+**描述：**  
+*只读* 此文件显示设备在内联加密请求中接受的数据单元编号的最大长度（以位为单位）。
+
+### /sys/block/<disk>/queue/crypto/modes/<mode>
+**日期：** 二月 2022  
+**联系人：** linux-block@vger.kernel.org  
+**描述：**  
+*只读* 对于设备支持的每个加密模式（即加密/解密算法），与内联加密一起使用时，将在此位置存在一个文件。它将包含一个十六进制数，表示该加密模式支持的数据单元大小的位掩码，单位为字节。
+目前支持的加密模式有：
+* AES-256-XTS
+* AES-128-CBC-ESSIV
+* Adiantum
+
+例如，如果设备支持数据单元大小为 512 和 4096 字节的 AES-256-XTS 内联加密，则文件 `/sys/block/<disk>/queue/crypto/modes/AES-256-XTS` 将存在并包含 "0x1200"。
+
+### /sys/block/<disk>/queue/crypto/num_keyslots
+**日期：** 二月 2022  
+**联系人：** linux-block@vger.kernel.org  
+**描述：**  
+*只读* 此文件显示设备用于内联加密的密钥槽的数量。
+
+### /sys/block/<disk>/queue/dax
+**日期：** 六月 2016  
+**联系人：** linux-block@vger.kernel.org  
+**描述：**  
+*只读* 此文件指示设备是否支持直接访问 (DAX)，由 CPU 可寻址存储使用以绕过页面缓存。如果支持则显示 '1'，否则显示 '0'。
+
+### /sys/block/<disk>/queue/discard_granularity
+**日期：** 五月 2011  
+**联系人：** Martin K. Petersen <martin.petersen@oracle.com>  
+**描述：**  
+*只读* 支持丢弃功能的设备可能使用比逻辑块大小更大的内部分配单位进行空间分配。`discard_granularity` 参数指示设备报告的内部分配单元的大小（以字节为单位）。否则，`discard_granularity` 将设置为匹配设备的物理块大小。`discard_granularity` 为 0 意味着设备不支持丢弃功能。
+
+### /sys/block/<disk>/queue/discard_max_bytes
+**日期：** 五月 2011  
+**联系人：** Martin K. Petersen <martin.petersen@oracle.com>  
+**描述：**  
+*可读写* 虽然 `discard_max_hw_bytes` 是设备的硬件限制，但此设置是软件限制。某些设备在发出大型丢弃操作时会表现出较大的延迟，将此值设置得较低会使 Linux 发出较小的丢弃操作，并有助于减少由大型丢弃操作引起的延迟。
+
+### /sys/block/<disk>/queue/discard_max_hw_bytes
+**日期：** 七月 2015  
+**联系人：** linux-block@vger.kernel.org  
+**描述：**  
+*只读* 支持丢弃功能的设备可能对单次操作中可以修剪或取消映射的字节数有限制。`discard_max_hw_bytes` 参数由设备驱动程序设置为单次操作中可以丢弃的最大字节数。向设备发出的丢弃请求不得超过此限制。`discard_max_hw_bytes` 值为 0 表示设备不支持丢弃功能。
+### /sys/block/<disk>/queue/discard_zeroes_data
+**日期:** 五月 2011  
+**联系人:** Martin K. Petersen <martin.petersen@oracle.com>  
+**描述:**  
+[只读] 总是返回 0。不要依赖于任何特定的行为对于丢弃操作，并且不要读取这个文件。
+
+### /sys/block/<disk>/queue/dma_alignment
+**日期:** 五月 2022  
+**联系人:** linux-block@vger.kernel.org  
+**描述:**  
+报告用户空间地址必须具有的对齐方式，以便用于带有 O_DIRECT 和其他驱动器特定的传递机制的原始块设备访问。
+
+### /sys/block/<disk>/queue/fua
+**日期:** 五月 2018  
+**联系人:** linux-block@vger.kernel.org  
+**描述:**  
+[只读] 表明块驱动程序是否支持写请求中的 FUA 标志。FUA 指的是 Force Unit Access（强制单元访问）。如果设置了 FUA 标志，则意味着写请求必须绕过存储设备的易失性缓存。
+
+### /sys/block/<disk>/queue/hw_sector_size
+**日期:** 一月 2008  
+**联系人:** linux-block@vger.kernel.org  
+**描述:**  
+[只读] 这是设备的硬件扇区大小（以字节为单位）。
+
+### /sys/block/<disk>/queue/independent_access_ranges/
+**日期:** 十月 2021  
+**联系人:** linux-block@vger.kernel.org  
+**描述:**  
+[只读] 此子目录的存在表示该设备能够并行执行针对不同扇区范围的请求。例如，单个逻辑单元号 (LUN) 多执行器硬盘将具有独立访问范围目录，如果设备正确地宣传了其执行器的扇区范围。独立访问范围目录中包含一个目录对应每个访问范围，每个范围使用扇区 (只读) 属性文件来指示范围的第一个扇区，以及 nr_sectors (只读) 属性文件来指示从范围的第一个扇区开始的总扇区数。例如，双执行器硬盘会有以下独立访问范围条目：
+
+```
+$ tree /sys/block/<disk>/queue/independent_access_ranges/
+/sys/block/<disk>/queue/independent_access_ranges/
+|-- 0
+|   |-- nr_sectors
+|   `-- sector
+`-- 1
+    |-- nr_sectors
+    `-- sector
+```
+
+扇区和 nr_sectors 属性使用 512 字节的扇区单位，无论设备的实际块大小是多少。独立访问范围不重叠，并包括设备容量内的所有扇区。访问范围按范围起始扇区递增顺序编号，即范围 0 的扇区属性始终具有值 0。
+
+### /sys/block/<disk>/queue/io_poll
+**日期:** 十一月 2015  
+**联系人:** linux-block@vger.kernel.org  
+**描述:**  
+[读写] 当读取时，此文件显示是否已启用轮询（1）或禁用（0）。写入 '0' 到此文件将禁用对此设备的轮询。写入任何非零值将启用此功能。
+
+### /sys/block/<disk>/queue/io_poll_delay
+**日期:** 十一月 2016  
+**联系人:** linux-block@vger.kernel.org  
+**描述:**  
+[读写] 用于控制将执行哪种类型的轮询。现在固定为 -1，这是经典轮询模式，在这种模式下，CPU 将反复询问完成情况而不放弃任何时间。
+**已废弃**
+
+### /sys/block/<disk>/queue/io_timeout
+**日期:** 十一月 2018  
+**联系人:** Weiping Zhang <zhangweiping@didiglobal.com>  
+**描述:**  
+[读写] io_timeout 是请求超时的时间（以毫秒为单位）。如果请求在规定时间内未完成，则调用块驱动程序超时处理程序。该超时处理程序可以决定重试请求、失败请求或启动设备恢复策略。
+### /sys/block/<disk>/queue/iostats
+**日期：** 一月 2009  
+**联系人：** linux-block@vger.kernel.org  
+**描述：**  
+[可读写] 此文件用于控制（开启/关闭）磁盘的iostats统计功能。
+
+### /sys/block/<disk>/queue/logical_block_size
+**日期：** 五月 2009  
+**联系人：** Martin K. Petersen <martin.petersen@oracle.com>  
+**描述：**  
+[只读] 这是存储设备可以寻址的最小单位。通常是512字节。
+
+### /sys/block/<disk>/queue/max_active_zones
+**日期：** 七月 2020  
+**联系人：** Niklas Cassel <niklas.cassel@wdc.com>  
+**描述：**  
+[只读] 对于分区块设备（分区属性指示“主机管理”或“主机感知”），属于任何以下分区状态的分区之和受此值限制：显式打开、隐式打开或关闭。如果此值为0，则没有限制。如果主机尝试超过此限制，驱动程序应使用BLK_STS_ZONE_ACTIVE_RESOURCE报告此错误，用户空间可能将其视为EOVERFLOW errno。
+
+### /sys/block/<disk>/queue/max_discard_segments
+**日期：** 二月 2017  
+**联系人：** linux-block@vger.kernel.org  
+**描述：**  
+[只读] 在丢弃请求中的最大DMA散列/聚集条目数。
+
+### /sys/block/<disk>/queue/max_hw_sectors_kb
+**日期：** 九月 2004  
+**联系人：** linux-block@vger.kernel.org  
+**描述：**  
+[只读] 这是在单次数据传输中支持的最大千字节数。
+
+### /sys/block/<disk>/queue/max_integrity_segments
+**日期：** 九月 2010  
+**联系人：** linux-block@vger.kernel.org  
+**描述：**  
+[只读] 块层核心提交给相关块驱动程序的带有完整性数据的DMA散列/聚集列表中的最大元素数量。
+
+### /sys/block/<disk>/queue/max_open_zones
+**日期：** 七月 2020  
+**联系人：** Niklas Cassel <niklas.cassel@wdc.com>  
+**描述：**  
+[只读] 对于分区块设备（分区属性指示“主机管理”或“主机感知”），属于任何以下分区状态的分区之和受此值限制：显式打开或隐式打开。如果此值为0，则没有限制。
+
+### /sys/block/<disk>/queue/max_sectors_kb
+**日期：** 九月 2004  
+**联系人：** linux-block@vger.kernel.org  
+**描述：**  
+[可读写] 这是块层允许的文件系统请求的最大千字节数。必须小于或等于硬件允许的最大大小。写入0以使用默认内核设置。
+### /sys/block/<disk>/queue/max_segment_size
+**日期：** 三月 2010  
+**联系人：** linux-block@vger.kernel.org  
+**描述：**  
+[只读] DMA 散列/收集列表中单个元素的最大字节大小。
+
+### /sys/block/<disk>/queue/max_segments
+**日期：** 三月 2010  
+**联系人：** linux-block@vger.kernel.org  
+**描述：**  
+[只读] 提交给关联块驱动程序的 DMA 散列/收集列表中的最大元素数量。
+
+### /sys/block/<disk>/queue/minimum_io_size
+**日期：** 四月 2009  
+**联系人：** Martin K. Petersen <martin.petersen@oracle.com>  
+**描述：**  
+[只读] 存储设备可能会报告一个粒度或首选最小I/O大小，这是设备可以执行而不遭受性能惩罚的最小请求。对于磁盘驱动器，这通常是物理块大小；对于 RAID 阵列，通常是条带块大小。在希望进行大量 I/O 操作的工作负载中，适当对齐的 `minimum_io_size` 的倍数是首选的请求大小。
+
+### /sys/block/<disk>/queue/nomerges
+**日期：** 一月 2010  
+**联系人：** linux-block@vger.kernel.org  
+**描述：**  
+[可读写] 标准 I/O 电梯操作包括尝试合并连续的 I/O。对于已知的随机 I/O 负载，这些尝试总会失败，并导致内核中额外的周期被消耗。此选项允许禁用这种行为：设置为 1 时，禁用复杂的合并检查，但启用与前一个 I/O 请求的一次性合并；设置为 2 时，所有合并尝试都被禁用。默认值是 0，即启用所有类型的合并尝试。
+
+### /sys/block/<disk>/queue/nr_requests
+**日期：** 七月 2003  
+**联系人：** linux-block@vger.kernel.org  
+**描述：**  
+[可读写] 这控制了块层中可用于读取或写入请求的请求数量。请注意，总分配的数量可能是该数量的两倍，因为它仅适用于读取或写入（而不是累积总和）。为了避免通过请求饥饿造成的优先级反转，在启用 CONFIG_BLK_CGROUP 时，每个请求队列为每个 cgroup 维护一个单独的请求池，而此参数适用于每个这样的每块-cgroup 请求池。换句话说，如果有 N 个块 cgroup，则每个请求队列可能有最多 N 个请求池，每个都独立受 nr_requests 控制。
+
+### /sys/block/<disk>/queue/nr_zones
+**日期：** 十一月 2018  
+**联系人：** Damien Le Moal <damien.lemoal@wdc.com>  
+**描述：**  
+[只读] `nr_zones` 表示分区块设备（“主机感知”或“主机管理”区域模型）的总区域数。对于常规块设备，该值始终为 0。
+
+### /sys/block/<disk>/queue/optimal_io_size
+**日期：** 四月 2009  
+**联系人：** Martin K. Petersen <martin.petersen@oracle.com>  
+**描述：**  
+[只读] 存储设备可能会报告一个最优 I/O 大小，这是设备用于持续 I/O 的首选单位。对于 RAID 阵列，这通常是条带宽度或内部轨道大小。适当对齐的 `optimal_io_size` 的倍数是在需要持续吞吐量的工作负载中的首选请求大小。如果没有报告最优 I/O 大小，此文件将包含 0。
+
+### /sys/block/<disk>/queue/physical_block_size
+**日期：** 五月 2009  
+**联系人：** Martin K. Petersen <martin.petersen@oracle.com>  
+**描述：**  
+[只读] 这是物理存储设备可以原子性写入的最小单元。它通常与逻辑块大小相同，但可能更大。一个例子是具有 4KB 扇区的 SATA 硬盘驱动器，它们向操作系统暴露 512 字节的逻辑块大小。对于堆叠的块设备，`physical_block_size` 变量包含组成设备的最大 `physical_block_size`。
+
+### /sys/block/<disk>/queue/read_ahead_kb
+**日期：** 五月 2004  
+**联系人：** linux-block@vger.kernel.org  
+**描述：**  
+[可读写] 此块设备上文件系统的最大预读千字节数。
+### /sys/block/<disk>/queue/rotational
+**日期：** 一月 2009  
+**联系人：** linux-block@vger.kernel.org  
+**描述：**  
+[读写] 此文件用于判断设备是旋转类型还是非旋转类型。
+
+### /sys/block/<disk>/queue/rq_affinity
+**日期：** 九月 2008  
+**联系人：** linux-block@vger.kernel.org  
+**描述：**  
+[读写] 如果此选项设置为 '1'，块层会将请求完成迁移至最初提交该请求的CPU“组”。对于某些工作负载，这可以显著减少由于缓存效应导致的CPU周期。对于需要最大化完成处理分布的存储配置，将此选项设置为 '2' 可强制完成在请求的CPU上运行（绕过“组”聚合逻辑）。
+
+### /sys/block/<disk>/queue/scheduler
+**日期：** 十月 2004  
+**联系人：** linux-block@vger.kernel.org  
+**描述：**  
+[读写] 当读取时，此文件将显示当前和可用的I/O调度器。当前活动的I/O调度器将被包含在[]括号中。向此文件写入一个I/O调度器名称将切换该块设备的控制到新的I/O调度器。需要注意的是，向此文件写入一个I/O调度器名称会尝试加载该I/O调度器模块（如果尚未存在于系统中）。
+
+### /sys/block/<disk>/queue/stable_writes
+**日期：** 九月 2020  
+**联系人：** linux-block@vger.kernel.org  
+**描述：**  
+[读写] 如果在向此设备发送写请求时内存不能被修改，则此文件将包含 '1'。在这种情况下，当内核正在回写一个页面时，内核会在允许再次修改该页面之前等待回写完成，而不是像通常情况那样允许立即修改。这种限制出现在设备多次访问同一内存的情况下，例如一次为了计算校验和，另一次为了实际写入数据。如果没有这样的限制，则此文件将包含 '0'。此文件可写以供测试使用。
+
+### /sys/block/<disk>/queue/virt_boundary_mask
+**日期：** 四月 2021  
+**联系人：** linux-block@vger.kernel.org  
+**描述：**  
+[只读] 此文件显示了块设备的I/O段内存对齐掩码。对该设备的I/O请求将在任意位置被分割为多个段，如果前一段的内存地址或当前段的起始内存地址没有与 `virt_boundary_mask + 1` 字节对齐。
+
+### /sys/block/<disk>/queue/wbt_lat_usec
+**日期：** 十一月 2016  
+**联系人：** linux-block@vger.kernel.org  
+**描述：**  
+[读写] 如果设备已注册用于回写节流，则此文件显示目标最小读延迟。如果在此窗口时间内（参见 `wb_window_usec`）超过此延迟，则回写节流开始减少写操作。向此文件写入值 '0' 禁用该功能。向此文件写入值 '-1' 将重置为默认设置。
+
+### /sys/block/<disk>/queue/write_cache
+**日期：** 四月 2016  
+**联系人：** linux-block@vger.kernel.org  
+**描述：**  
+[读写] 读取时，此文件将显示设备是否启用了回写缓存。如果是前者，它将返回 "write back"；如果是后者，将返回 "write through"。向此文件写入可以改变内核对设备的看法，但不会改变设备的状态。这意味着从 "write back" 切换到 "write through" 可能不安全，因为这也消除了内核发出的缓存刷新命令。
+
+### /sys/block/<disk>/queue/write_same_max_bytes
+**日期：** 一月 2012  
+**联系人：** Martin K. Petersen <martin.petersen@oracle.com>  
+**描述：**  
+[只读] 某些设备支持写相同操作，其中单个数据块可以写入存储上的多个连续块范围。这可用于擦除磁盘区域或将驱动器初始化为RAID配置。
+`write_same_max_bytes` 表示单个写相同命令中可以写入多少字节。如果 `write_same_max_bytes` 为 0，则表示设备不支持写相同操作。
+### /sys/block/<disk>/queue/write_zeroes_max_bytes
+日期：2016年11月  
+联系人：Chaitanya Kulkarni <chaitanya.kulkarni@wdc.com>  
+描述：  
+[只读] 支持写零操作的设备，其中可以通过单个请求将一段连续存储块置零，而无需在请求中携带任何有效负载。这可用于优化向设备写入零的操作。`write_zeroes_max_bytes` 指示单次写零命令可以写入的最大字节数。如果 `write_zeroes_max_bytes` 为0，则表示该设备不支持写零操作。
+
+### /sys/block/<disk>/queue/zone_append_max_bytes
+日期：2020年5月  
+联系人：linux-block@vger.kernel.org  
+描述：  
+[只读] 这是使用区域追加写操作 (REQ_OP_ZONE_APPEND) 可以写入到分区块设备的顺序区域中的最大字节数。对于常规块设备，此值始终为0。
+
+### /sys/block/<disk>/queue/zone_write_granularity
+日期：2021年1月  
+联系人：linux-block@vger.kernel.org  
+描述：  
+[只读] 这指示了分区块设备（具有报告为“主机管理”或“主机感知”的分区属性的设备）的顺序区域中写入操作的对齐约束（以字节为单位）。对于常规块设备，此值始终为0。
+
+### /sys/block/<disk>/queue/zoned
+日期：2016年9月  
+联系人：Damien Le Moal <damien.lemoal@wdc.com>  
+描述：  
+[只读] `zoned` 表示设备是否为分区块设备以及如果是，则其分区模型。`zoned` 可能的值包括：“none”表示常规块设备，“host-aware”或“host-managed”表示分区块设备。主机感知和主机管理分区块设备的特点在 ZBC（分区块命令）和 ZAC（分区设备ATA命令集）标准中进行了描述。这些标准还定义了“驱动器管理”分区模型。然而，由于驱动器管理的分区块设备不支持分区命令，它们将被视为常规块设备，并且 `zoned` 报告 “none”。
+
+### /sys/block/<disk>/hidden
+日期：2023年3月  
+联系人：linux-block@vger.kernel.org  
+描述：  
+[只读] 块设备被隐藏。它不会产生事件，也不能从用户空间或使用 `blkdev_get*` 打开。用于多路径设备的基础组件。
+内容：/sys/block/<disk>/stat  
+日期：2008年2月  
+联系人：Jerome Marchand <jmarchan@redhat.com>  
+描述：
+    文件 /sys/block/<disk>/stat 显示磁盘 <disk> 的 I/O 统计信息。它包含17个字段：
+
+    ==  ===========================================================
+     1  成功完成的读取操作次数
+     2  合并的读取操作次数
+     3  已读取的扇区数
+     4  用于读取的时间（毫秒）
+     5  完成的写入操作次数
+     6  合并的写入操作次数
+     7  已写入的扇区数
+     8  用于写入的时间（毫秒）
+     9  当前正在进行的 I/O 操作数
+    10  用于执行 I/O 操作的时间（毫秒）
+    11  执行 I/O 操作加权时间（毫秒）
+    12  完成的丢弃操作次数
+    13  合并的丢弃操作次数
+    14  已丢弃的扇区数
+    15  用于丢弃操作的时间（毫秒）
+    16  完成的刷新请求次数
+    17  用于刷新操作的时间（毫秒）
+    ==  ===========================================================
+
+    更多详细信息请参阅文档 admin-guide/iostats.rst

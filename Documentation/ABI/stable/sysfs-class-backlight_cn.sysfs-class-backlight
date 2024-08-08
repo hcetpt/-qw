@@ -1,0 +1,45 @@
+### /sys/class/backlight/<backlight>/bl_power
+**日期：** 2005年4月  
+**内核版本：** 2.6.12  
+**联系人：** Richard Purdie <rpurdie@rpsys.net>  
+**描述：**  
+控制背光电源，其值与fb.h中的FB_BLANK_*兼容。  
+- 0 (FB_BLANK_UNBLANK)：开启电源  
+- 4 (FB_BLANK_POWERDOWN)：关闭电源  
+**用户：** HAL  
+
+### /sys/class/backlight/<backlight>/brightness
+**日期：** 2005年4月  
+**内核版本：** 2.6.12  
+**联系人：** Richard Purdie <rpurdie@rpsys.net>  
+**描述：**  
+控制<backlight>的亮度。值介于0和最大亮度(max_brightness)之间。此文件还会显示驱动程序中存储的亮度级别，该级别可能并不等于实际亮度（参见actual_brightness）。  
+**用户：** HAL  
+
+### /sys/class/backlight/<backlight>/actual_brightness
+**日期：** 2006年3月  
+**内核版本：** 2.6.17  
+**联系人：** Richard Purdie <rpurdie@rpsys.net>  
+**描述：**  
+通过查询硬件来显示实际亮度。  
+**用户：** HAL  
+
+### /sys/class/backlight/<backlight>/max_brightness
+**日期：** 2005年4月  
+**内核版本：** 2.6.12  
+**联系人：** Richard Purdie <rpurdie@rpsys.net>  
+**描述：**  
+<backlight>的最大亮度。  
+**用户：** HAL  
+
+### /sys/class/backlight/<backlight>/type
+**日期：** 2010年9月  
+**内核版本：** 2.6.37  
+**联系人：** Matthew Garrett <mjg@redhat.com>  
+**描述：**  
+由<backlight>控制的接口类型。  
+- "firmware"：驱动程序使用标准固件接口  
+- "platform"：驱动程序使用特定平台的接口  
+- "raw"：驱动程序直接控制硬件寄存器  
+
+在大多数情况下，当单个设备有多个背光接口可用时，应优先选择固件控制，其次是平台控制，最后是原始控制。使用固件接口可以降低硬件和操作系统独立更新背光状态时产生混淆的可能性。特定平台的接口主要是为了应对在标准化固件接口之前的情况。
