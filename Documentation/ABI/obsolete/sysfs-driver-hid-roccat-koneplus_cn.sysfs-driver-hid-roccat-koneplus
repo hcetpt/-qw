@@ -1,0 +1,119 @@
+什么:		/sys/bus/usb/devices/<busnum>-<devnum>:<config num>.<interface num>/<hid-bus>:<vendor-id>:<product-id>.<num>/koneplus/roccatkoneplus<minor>/actual_profile
+日期:		2010年10月
+联系人:	Stefan Achatz <erazor_de@users.sourceforge.net>
+描述:	此属性的整数值范围从0到4
+读取时，此属性返回当前配置文件的编号。该值是持久性的，因此等同于下次鼠标通电时激活的配置文件
+写入时，此文件设置启动配置文件的编号，并且鼠标会立即激活该配置文件
+用户:		http://roccat.sourceforge.net
+
+什么:		/sys/bus/usb/devices/<busnum>-<devnum>:<config num>.<interface num>/<hid-bus>:<vendor-id>:<product-id>.<num>/koneplus/roccatkoneplus<minor>/startup_profile
+日期:		2010年10月
+联系人:	Stefan Achatz <erazor_de@users.sourceforge.net>
+描述:	此属性的整数值范围从0到4
+读取时，此属性返回当前配置文件的编号。该值是持久性的，因此等同于下次鼠标通电时激活的配置文件
+写入时，此文件设置启动配置文件的编号，并且鼠标会立即激活该配置文件
+请使用actual_profile，它执行相同的功能
+用户:		http://roccat.sourceforge.net
+
+什么:		/sys/bus/usb/devices/<busnum>-<devnum>:<config num>.<interface num>/<hid-bus>:<vendor-id>:<product-id>.<num>/koneplus/roccatkoneplus<minor>/firmware_version
+日期:		2010年10月
+联系人:	Stefan Achatz <erazor_de@users.sourceforge.net>
+描述:	读取时，此文件返回鼠标报告的固件版本的原始整数版本号。使用整数值便于在其他程序中进一步使用。为了获得真实的版本号，需要将小数点向左移动两位。例如，返回的值121意味着1.21
+此文件只读
+请阅读包含固件版本的信息二进制属性
+用户:		http://roccat.sourceforge.net
+
+什么:		/sys/bus/usb/devices/<busnum>-<devnum>:<config num>.<interface num>/<hid-bus>:<vendor-id>:<product-id>.<num>/koneplus/roccatkoneplus<minor>/info
+日期:		2012年11月
+联系人:	Stefan Achatz <erazor_de@users.sourceforge.net>
+描述:	读取时，此文件返回诸如固件版本等一般数据
+当写入时，可以重置设备。
+数据长度为8字节。
+用户：		http://roccat.sourceforge.net
+
+路径：		/sys/bus/usb/devices/<busnum>-<devnum>:<config num>.<interface num>/<hid-bus>:<vendor-id>:<product-id>.<num>/koneplus/roccatkoneplus<minor>/macro
+日期：		2010年10月
+联系人：	Stefan Achatz <erazor_de@users.sourceforge.net>
+描述：	鼠标可以内部存储最大500个按键/按钮动作的宏命令
+		当写入时，此文件允许设置特定按钮在特定配置文件下的序列。按钮和配置文件编号包含在写入的数据中。数据必须是2082字节长。
+此文件只可写入。
+用户：		http://roccat.sourceforge.net
+
+路径：		/sys/bus/usb/devices/<busnum>-<devnum>:<config num>.<interface num>/<hid-bus>:<vendor-id>:<product-id>.<num>/koneplus/roccatkoneplus<minor>/profile_buttons
+日期：		2010年8月
+联系人：	Stefan Achatz <erazor_de@users.sourceforge.net>
+描述：	鼠标可以存储5个配置文件，通过按钮按下即可切换。一个配置文件分为设置和按钮两部分。
+profile_buttons保存有关按钮布局的信息。
+当写入时，此文件允许将相应的配置文件按钮写回鼠标。数据必须是77字节长。
+鼠标会拒绝无效的数据。
+要写入哪个配置文件由数据中的配置文件编号决定。
+在阅读此文件之前，需要写入控制以选择要读取的配置文件。
+
+用户：	http://roccat.sourceforge.net
+
+路径：		/sys/bus/usb/devices/<busnum>-<devnum>:<config num>.<interface num>/<hid-bus>:<vendor-id>:<product-id>.<num>/koneplus/roccatkoneplus<minor>/profile[1-5]_buttons
+日期：		2010年8月
+联系人：	Stefan Achatz <erazor_de@users.sourceforge.net>
+描述：	鼠标可以存储5个配置文件，这些配置文件可以通过按按钮进行切换。一个配置文件分为设置和按钮两部分。
+profile_buttons包含有关按钮布局的信息。
+当读取时，这些文件会返回相应的配置文件按钮。
+返回的数据大小为77字节。
+此文件只读。
+请写入控制来选择配置文件并读取profile_buttons。
+
+用户：	http://roccat.sourceforge.net
+
+路径：		/sys/bus/usb/devices/<busnum>-<devnum>:<config num>.<interface num>/<hid-bus>:<vendor-id>:<product-id>.<num>/koneplus/roccatkoneplus<minor>/profile_settings
+日期：		2010年10月
+联系人：	Stefan Achatz <erazor_de@users.sourceforge.net>
+描述：	鼠标可以存储5个配置文件，这些配置文件可以通过按按钮进行切换。一个配置文件分为设置和按钮两部分。
+profile_settings包含诸如分辨率、灵敏度和灯光效果等信息。
+写入此文件时，可以将相应的配置文件设置写回到鼠标中。数据必须为43字节长。
+鼠标会拒绝无效的数据。
+
+要写入哪个配置文件由数据中包含的配置编号决定。
+在读取此文件之前，需要先写入控制信息以选择要读取的配置文件。
+
+用户: http://roccat.sourceforge.net
+
+路径: /sys/bus/usb/devices/<总线号>-<设备号>:<配置号>.<接口号>/<hid总线>:<供应商ID>:<产品ID>.<序号>/koneplus/roccatkoneplus<次要号>/profile[1-5]_settings
+日期: 2010年8月
+联系人: Stefan Achatz <erazor_de@users.sourceforge.net>
+描述: 鼠标可以存储5个配置文件，这些配置文件可以通过按键切换。一个配置文件分为设置和按钮两部分。
+profile_settings 包含诸如分辨率、灵敏度以及灯光效果等信息。
+当读取这些文件时，它们会返回相应的配置文件设置。
+返回的数据大小为43字节。
+此文件只读。
+写入控制以选择配置文件，并读取 profile_settings。
+
+用户: http://roccat.sourceforge.net
+
+路径: /sys/bus/usb/devices/<总线号>-<设备号>:<配置号>.<接口号>/<hid总线>:<供应商ID>:<产品ID>.<序号>/koneplus/roccatkoneplus<次要号>/sensor
+日期: 2010年10月
+联系人: Stefan Achatz <erazor_de@users.sourceforge.net>
+描述: 鼠标具有追踪单元和距离控制单元。这些单元可以被激活或禁用，并且可以设置抬离距离。数据长度必须为6字节。
+此文件仅可写入  
+用户：		http://roccat.sourceforge.net
+
+何为：		/sys/bus/usb/devices/<busnum>-<devnum>:<config num>.<interface num>/<hid-bus>:<vendor-id>:<product-id>.<num>/koneplus/roccatkoneplus<minor>/talk
+日期：		2011年5月
+联系人：	Stefan Achatz <erazor_de@users.sourceforge.net>
+描述：		用于从外部激活鼠标的一些简易功能
+数据必须是16字节长
+此文件仅可写入  
+用户：		http://roccat.sourceforge.net
+
+何为：		/sys/bus/usb/devices/<busnum>-<devnum>:<config num>.<interface num>/<hid-bus>:<vendor-id>:<product-id>.<num>/koneplus/roccatkoneplus<minor>/tcu
+日期：		2010年10月
+联系人：	Stefan Achatz <erazor_de@users.sourceforge.net>
+描述：		当写入时，可以启动/取消追踪控制单元的校准过程。同时也能读取/写入传感器寄存器
+数据必须是4字节长
+用户：		http://roccat.sourceforge.net
+
+何为：		/sys/bus/usb/devices/<busnum>-<devnum>:<config num>.<interface num>/<hid-bus>:<vendor-id>:<product-id>.<num>/koneplus/roccatkoneplus<minor>/tcu_image
+日期：		2010年10月
+联系人：	Stefan Achatz <erazor_de@users.sourceforge.net>
+描述：		当读取时，鼠标会返回一个30x30像素的采样底面图像。这仅在通过tcu启动的校准过程中有效
+返回的数据大小为1028字节
+此文件仅可读取  
+用户：		http://roccat.sourceforge.net

@@ -1,0 +1,5 @@
+内容：/sys/firmware/acpi/hotplug/force_remove  
+日期：2017年3月  
+联系人：Rafael J. Wysocki <rafael.j.wysocki@intel.com>  
+描述：  
+由于force_remove本质上存在缺陷且对于某些可热插拔资源（如内存）使用起来很危险（因为忽略离线失败可能会导致内存损坏和系统崩溃），启用此选项是不安全的，因此不受支持。

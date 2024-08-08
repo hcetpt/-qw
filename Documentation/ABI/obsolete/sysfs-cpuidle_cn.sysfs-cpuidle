@@ -1,0 +1,5 @@
+什么：/sys/devices/system/cpu/cpuidle/current_governor_ro  
+日期：2020年4月  
+联系人：linux-pm@vger.kernel.org  
+描述：  
+current_governor_ro 显示当前使用的 cpuidle 管理程序，但只读。随着默认情况下 cpuidle 管理程序可以在运行时更改的更新，默认情况下，在 /sys/devices/system/cpu/cpuidle/ 文件下同时存在 current_governor 和 current_governor_ro。它们是重复的，因此使 current_governor_ro 过时。

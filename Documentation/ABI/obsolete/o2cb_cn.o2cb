@@ -1,0 +1,7 @@
+什么：		/sys/o2cb
+日期：		2005年12月
+内核版本：	2.6.16
+联系人：	ocfs2-devel@lists.linux.dev
+描述：	Ocfs2-tools 通过查看 'interface-revision' 来获取版本信息。每个 logmask/ 文件控制一组调试打印，并可以使用字符串 "allow"（允许）、"deny"（拒绝）或 "off"（关闭）进行写入。读取文件将返回当前状态。
+已重命名为 /sys/fs/u2cb/
+用户：	ocfs2-tools。对于提议的更改，仅需发送邮件至 ocfs2-devel@lists.linux.dev 即可。

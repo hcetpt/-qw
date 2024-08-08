@@ -1,0 +1,149 @@
+什么：/sys/bus/usb/devices/<busnum>-<devnum>:<config num>.<interface num>/<hid-bus>:<vendor-id>:<product-id>.<num>/ryos/roccatryos<minor>/control  
+日期：2013年10月  
+联系人：Stefan Achatz <erazor_de@users.sourceforge.net>  
+描述：当写入此文件时，可以选择从哪个配置文件读取数据。数据必须是3字节长。  
+此文件仅可写入。  
+用户：http://roccat.sourceforge.net  
+
+什么：/sys/bus/usb/devices/<busnum>-<devnum>:<config num>.<interface num>/<hid-bus>:<vendor-id>:<product-id>.<num>/ryos/roccatryos<minor>/profile  
+日期：2013年10月  
+联系人：Stefan Achatz <erazor_de@users.sourceforge.net>  
+描述：鼠标可以存储5个配置文件，并可以通过按键进行切换。profile变量持有当前配置文件的索引值。  
+该值是持久化的，因此其值决定了设备下次启动时所激活的配置文件。  
+当写入此文件时，设备会立即激活设置的配置文件。  
+数据必须是3字节长。  
+设备会拒绝无效的数据。  
+用户：http://roccat.sourceforge.net  
+
+什么：/sys/bus/usb/devices/<busnum>-<devnum>:<config num>.<interface num>/<hid-bus>:<vendor-id>:<product-id>.<num>/ryos/roccatryos<minor>/keys_primary  
+日期：2013年10月  
+联系人：Stefan Achatz <erazor_de@users.sourceforge.net>  
+描述：当写入此文件时，可以为特定配置文件的所有按键设置默认值。配置文件索引包含在写入的数据中。  
+数据必须是125字节长。  
+在读取此文件之前，需要先写入control以选择要读取的配置文件。
+用户: http://roccat.sourceforge.net
+
+何:		/sys/bus/usb/devices/<busnum>-<devnum>:<config num>.<interface num>/<hid-bus>:<vendor-id>:<product-id>.<num>/ryos/roccatryos<minor>/keys_function
+日期:		2013年10月
+联系人:	Stefan Achatz <erazor_de@users.sourceforge.net>
+描述:		当写入此文件时，可以设置特定配置文件中功能键的功能。配置文件索引包含在写入的数据中。数据必须为95字节长。
+在读取此文件之前，需要先写入控制信息以选择要读取的配置文件。
+用户:	http://roccat.sourceforge.net
+
+何:		/sys/bus/usb/devices/<busnum>-<devnum>:<config num>.<interface num>/<hid-bus>:<vendor-id>:<product-id>.<num>/ryos/roccatryos<minor>/keys_macro
+日期:		2013年10月
+联系人:	Stefan Achatz <erazor_de@users.sourceforge.net>
+描述:		当写入此文件时，可以设置特定配置文件中宏键的功能。配置文件索引包含在写入的数据中。数据必须为35字节长。
+在读取此文件之前，需要先写入控制信息以选择要读取的配置文件。
+用户:	http://roccat.sourceforge.net
+
+何:		/sys/bus/usb/devices/<busnum>-<devnum>:<config num>.<interface num>/<hid-bus>:<vendor-id>:<product-id>.<num>/ryos/roccatryos<minor>/keys_thumbster
+日期:		2013年10月
+联系人:	Stefan Achatz <erazor_de@users.sourceforge.net>
+描述:		当写入此文件时，可以设置特定配置文件中拇指键的功能。配置文件索引包含在写入的数据中。数据必须为23字节长。
+在读取此文件之前，需要先写入控制信息以选择要读取的配置文件。
+用户:	http://roccat.sourceforge.net
+
+何:		/sys/bus/usb/devices/<busnum>-<devnum>:<config num>.<interface num>/<hid-bus>:<vendor-id>:<product-id>.<num>/ryos/roccatryos<minor>/keys_extra
+日期:		2013年10月
+联系人:	Stefan Achatz <erazor_de@users.sourceforge.net>
+描述:		当写入此文件时，可以设置特定配置文件中大写锁定键和功能键的功能。配置文件索引包含在写入的数据中。数据必须为8字节长。
+在读取此文件之前，需要先写入控制信息以选择要读取的配置文件。
+用户:	http://roccat.sourceforge.net
+
+何:		/sys/bus/usb/devices/<busnum>-<devnum>:<config num>.<interface num>/<hid-bus>:<vendor-id>:<product-id>.<num>/ryos/roccatryos<minor>/keys_easyzone
+日期:		2013年10月
+联系人:	Stefan Achatz <erazor_de@users.sourceforge.net>
+描述:		当写入此文件时，可以设置特定配置文件中easyzone键的功能。配置文件索引包含在写入的数据中。数据必须为294字节长。
+在读取此文件之前，需要先写入控制信息以选择要读取的配置文件。
+用户: http://roccat.sourceforge.net
+
+说明: /sys/bus/usb/devices/<busnum>-<devnum>:<config num>.<interface num>/<hid-bus>:<vendor-id>:<product-id>.<num>/ryos/roccatryos<minor>/key_mask
+日期: 2013年10月
+联系人: Stefan Achatz <erazor_de@users.sourceforge.net>
+描述: 当写入此文件时，可以停用某些键（如Windows和应用程序键），以防止意外按下。
+发生这些设置的配置文件索引包含在写入的数据中。数据必须为6字节长。
+在读取此文件之前，需要写入控制信息来选择要读取的配置文件。
+用户: http://roccat.sourceforge.net
+
+说明: /sys/bus/usb/devices/<busnum>-<devnum>:<config num>.<interface num>/<hid-bus>:<vendor-id>:<product-id>.<num>/ryos/roccatryos<minor>/light
+日期: 2013年10月
+联系人: Stefan Achatz <erazor_de@users.sourceforge.net>
+描述: 当写入此文件时，可以为特定配置文件设置背光强度。配置文件索引包含在写入的数据中。
+此属性仅适用于glow和pro变体。
+数据必须为16字节长。
+在读取此文件之前，需要写入控制信息来选择要读取的配置文件。
+用户: http://roccat.sourceforge.net
+
+说明: /sys/bus/usb/devices/<busnum>-<devnum>:<config num>.<interface num>/<hid-bus>:<vendor-id>:<product-id>.<num>/ryos/roccatryos<minor>/macro
+日期: 2013年10月
+联系人: Stefan Achatz <erazor_de@users.sourceforge.net>
+描述: 当写入此文件时，可以为特定按钮和特定配置文件存储最多480个按键击打的宏。
+按钮和配置文件索引包含在写入的数据中。
+数据必须为2002字节长。
+在阅读此文件之前，需要写入控制信息以选择要读取的配置文件和密钥。
+
+用户：	http://roccat.sourceforge.net
+
+路径：	/sys/bus/usb/devices/<总线号>-<设备号>:<配置号>.<接口号>/<hid-总线>:<供应商ID>:<产品ID>.<编号>/ryos/roccatryos<次要号>/info
+日期：	2013年10月
+联系人：	Stefan Achatz <erazor_de@users.sourceforge.net>
+描述：	当读取时，此文件返回诸如固件版本等基本信息。
+数据长度为8字节
+此文件只读
+用户：	http://roccat.sourceforge.net
+
+路径：	/sys/bus/usb/devices/<总线号>-<设备号>:<配置号>.<接口号>/<hid-总线>:<供应商ID>:<产品ID>.<编号>/ryos/roccatryos<次要号>/reset
+日期：	2013年10月
+联系人：	Stefan Achatz <erazor_de@users.sourceforge.net>
+描述：	当写入时，此文件允许重置设备。
+数据必须为3字节长
+此文件只写
+用户：	http://roccat.sourceforge.net
+
+路径：	/sys/bus/usb/devices/<总线号>-<设备号>:<配置号>.<接口号>/<hid-总线>:<供应商ID>:<产品ID>.<编号>/ryos/roccatryos<次要号>/talk
+日期：	2013年10月
+联系人：	Stefan Achatz <erazor_de@users.sourceforge.net>
+描述：	当写入时，此文件允许从主机触发easyshift功能。
+数据必须为16字节长
+此文件只写
+用户:		http://roccat.sourceforge.net
+
+内容:		/sys/bus/usb/devices/<busnum>-<devnum>:<config num>.<interface num>/<hid-bus>:<vendor-id>:<product-id>.<num>/ryos/roccatryos<minor>/light_control
+日期:		2013年10月
+联系人:	Stefan Achatz <erazor_de@users.sourceforge.net>
+描述:		当写入时，此文件允许在存储的和自定义的
+		灯光设置之间切换
+此属性仅适用于专业版
+数据必须为8字节长
+此文件只可写入
+用户:		http://roccat.sourceforge.net
+
+内容:		/sys/bus/usb/devices/<busnum>-<devnum>:<config num>.<interface num>/<hid-bus>:<vendor-id>:<product-id>.<num>/ryos/roccatryos<minor>/stored_lights
+日期:		2013年10月
+联系人:	Stefan Achatz <erazor_de@users.sourceforge.net>
+描述:		当写入时，此文件允许为不同的
+		层设置每个键的照明
+此属性仅适用于专业版
+数据必须为1382字节长
+在读取此文件之前，需要写入控制以选择
+		要读取哪个配置文件
+用户:		http://roccat.sourceforge.net
+
+内容:		/sys/bus/usb/devices/<busnum>-<devnum>:<config num>.<interface num>/<hid-bus>:<vendor-id>:<product-id>.<num>/ryos/roccatryos<minor>/custom_lights
+日期:		2013年10月
+联系人:	Stefan Achatz <erazor_de@users.sourceforge.net>
+描述:		当写入时，此文件允许设置实际的每个键的照明
+此属性仅适用于专业版
+数据必须是20字节长。
+此文件为只写。
+用户：		http://roccat.sourceforge.net
+
+路径：		/sys/bus/usb/devices/<busnum>-<devnum>:<config num>.<interface num>/<hid-bus>:<vendor-id>:<product-id>.<num>/ryos/roccatryos<minor>/light_macro
+日期：		2013年10月
+联系人：	Stefan Achatz <erazor_de@users.sourceforge.net>
+描述：	当写入时，此文件允许设置一个光效宏，在设备进入昏暗模式时循环播放。
+此属性仅适用于专业版。
+数据必须是2002字节长。
+在读取此文件之前，需要先写入控制信息来选择要读取的配置文件。
+用户：		http://roccat.sourceforge.net

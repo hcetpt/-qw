@@ -1,0 +1,7 @@
+此 ABI 已重命名并移动到新的位置 /sys/kernel/fadump/enabled  
+何为:    /sys/kernel/fadump_enabled  
+日期:    2012年2月  
+联系人:   linuxppc-dev@lists.ozlabs.org  
+描述:    只读  
+         主要用于识别内核中是否启用了 FADump  
+用户:    Kdump 服务

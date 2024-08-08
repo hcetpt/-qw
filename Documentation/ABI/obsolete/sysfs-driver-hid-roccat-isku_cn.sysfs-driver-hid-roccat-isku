@@ -1,0 +1,128 @@
+什么：/sys/bus/usb/devices/<busnum>-<devnum>:<config num>.<interface num>/<hid-bus>:<vendor-id>:<product-id>.<num>/isku/roccatisku<minor>/actual_profile  
+日期：2011年6月  
+联系人：Stefan Achatz <erazor_de@users.sourceforge.net>  
+描述：此属性的整数值范围为0-4  
+当读取时，此属性返回当前配置文件的编号。此值是持久化的，因此等同于设备下次启动时所激活的配置文件  
+当写入时，此文件设置启动配置文件的编号，并且设备会立即激活该配置文件  
+用户：http://roccat.sourceforge.net  
+
+什么：/sys/bus/usb/devices/<busnum>-<devnum>:<config num>.<interface num>/<hid-bus>:<vendor-id>:<product-id>.<num>/isku/roccatisku<minor>/info  
+日期：2011年6月  
+联系人：Stefan Achatz <erazor_de@users.sourceforge.net>  
+描述：当读取时，此文件返回诸如固件版本等一般数据  
+数据长度为6字节  
+此文件只读  
+用户：http://roccat.sourceforge.net  
+
+什么：/sys/bus/usb/devices/<busnum>-<devnum>:<config num>.<interface num>/<hid-bus>:<vendor-id>:<product-id>.<num>/isku/roccatisku<minor>/key_mask  
+日期：2011年6月  
+联系人：Stefan Achatz <erazor_de@users.sourceforge.net>  
+描述：当写入时，此文件允许禁用某些键，如Windows和应用程序键，以防止误按  
+发生这些设置的配置文件编号包含在写入的数据中。数据必须为6字节长  
+在读取此文件之前，需要写入控制信息来选择要读取哪个配置文件  
+用户：http://roccat.sourceforge.net  
+
+什么：/sys/bus/usb/devices/<busnum>-<devnum>:<config num>.<interface num>/<hid-bus>:<vendor-id>:<product-id>.<num>/isku/roccatisku<minor>/keys_capslock  
+日期：2011年6月  
+联系人：Stefan Achatz <erazor_de@users.sourceforge.net>  
+描述：当写入时，此文件允许设置特定配置文件中Caps Lock键的功能。配置文件编号包含在写入的数据中。数据必须为6字节长
+在阅读此文件之前，需要写入控制信息以选择要读取的配置文件。
+
+用户：	http://roccat.sourceforge.net
+
+路径：		/sys/bus/usb/devices/<busnum>-<devnum>:<config num>.<interface num>/<hid-bus>:<vendor-id>:<product-id>.<num>/isku/roccatisku<minor>/keys_easyzone
+日期：		六月 2011年
+联系人：	Stefan Achatz <erazor_de@users.sourceforge.net>
+描述：	当写入时，此文件允许设置特定配置文件中 easyzone 键的功能。配置文件编号包含在写入的数据中。数据必须为 65 字节长。
+在阅读此文件之前，需要写入控制信息以选择要读取的配置文件。
+
+用户：	http://roccat.sourceforge.net
+
+路径：		/sys/bus/usb/devices/<busnum>-<devnum>:<config num>.<interface num>/<hid-bus>:<vendor-id>:<product-id>.<num>/isku/roccatisku<minor>/keys_function
+日期：		六月 2011年
+联系人：	Stefan Achatz <erazor_de@users.sourceforge.net>
+描述：	当写入时，此文件允许设置特定配置文件中功能键的功能。配置文件编号包含在写入的数据中。数据必须为 41 字节长。
+在阅读此文件之前，需要写入控制信息以选择要读取的配置文件。
+
+用户：	http://roccat.sourceforge.net
+
+路径：		/sys/bus/usb/devices/<busnum>-<devnum>:<config num>.<interface num>/<hid-bus>:<vendor-id>:<product-id>.<num>/isku/roccatisku<minor>/keys_macro
+日期：		六月 2011年
+联系人：	Stefan Achatz <erazor_de@users.sourceforge.net>
+描述：	当写入时，此文件允许设置特定配置文件中宏键的功能。配置文件编号包含在写入的数据中。数据必须为 35 字节长。
+在阅读此文件之前，需要写入控制信息以选择要读取的配置文件。
+
+用户：	http://roccat.sourceforge.net
+
+路径：		/sys/bus/usb/devices/<busnum>-<devnum>:<config num>.<interface num>/<hid-bus>:<vendor-id>:<product-id>.<num>/isku/roccatisku<minor>/keys_media
+日期：		六月 2011年
+联系人：	Stefan Achatz <erazor_de@users.sourceforge.net>
+描述：	当写入时，此文件允许设置特定配置文件中多媒体键的功能。配置文件编号包含在写入的数据中。数据必须为 29 字节长。
+在阅读此文件之前，需要写入控制信息以选择要读取的配置文件。
+
+用户：	http://roccat.sourceforge.net
+
+路径：		/sys/bus/usb/devices/<busnum>-<devnum>:<config num>.<interface num>/<hid-bus>:<vendor-id>:<product-id>.<num>/isku/roccatisku<minor>/keys_thumbster
+日期：		六月 2011年
+联系人：	Stefan Achatz <erazor_de@users.sourceforge.net>
+描述：	当写入时，此文件允许设置特定配置文件中拇指区按键的功能。配置文件编号包含在写入的数据中。数据必须为 23 字节长。
+在阅读此文件之前，需要写入控制信息以选择要读取的配置文件。
+
+用户：	http://roccat.sourceforge.net
+
+内容：	`/sys/bus/usb/devices/<busnum>-<devnum>:<config num>.<interface num>/<hid-bus>:<vendor-id>:<product-id>.<num>/isku/roccatisku<minor>/last_set`
+日期：	2011年6月
+联系人：	Stefan Achatz <erazor_de@users.sourceforge.net>
+描述：	写入此文件时，可以设置最后一次配置发生以来的秒数（自纪元起）。
+数据必须为20字节长。
+用户：	http://roccat.sourceforge.net
+
+内容：	`/sys/bus/usb/devices/<busnum>-<devnum>:<config num>.<interface num>/<hid-bus>:<vendor-id>:<product-id>.<num>/isku/roccatisku<minor>/light`
+日期：	2011年6月
+联系人：	Stefan Achatz <erazor_de@users.sourceforge.net>
+描述：	写入此文件时，可以为特定配置文件设置背光强度。配置文件编号包含在写入的数据中。
+对于Isku，数据必须为10字节长；对于IskuFX，则需要16字节的数据。
+在阅读此文件之前，需要写入控制信息以选择要读取的配置文件。
+
+用户：	http://roccat.sourceforge.net
+
+内容：	`/sys/bus/usb/devices/<busnum>-<devnum>:<config num>.<interface num>/<hid-bus>:<vendor-id>:<product-id>.<num>/isku/roccatisku<minor>/macro`
+日期：	2011年6月
+联系人：	Stefan Achatz <erazor_de@users.sourceforge.net>
+描述：	写入此文件时，可以为特定按钮和特定配置文件存储最多500个按键击打次数的宏命令。
+按钮和配置文件编号包含在写入的数据中。
+数据必须为2083字节长。
+在阅读此文件之前，需要写入控制信息以选择要读取的配置文件和键位。
+用户: [http://roccat.sourceforge.net](http://roccat.sourceforge.net)
+
+说明: /sys/bus/usb/devices/<busnum>-<devnum>:<config num>.<interface num>/<hid-bus>:<vendor-id>:<product-id>.<num>/isku/roccatisku<minor>/reset  
+日期: 2012年11月  
+联系人: Stefan Achatz <erazor_de@users.sourceforge.net>  
+描述: 当写入时，此文件可让用户重置设备。  
+数据长度必须为3字节。  
+此文件仅支持写入操作。  
+用户: [http://roccat.sourceforge.net](http://roccat.sourceforge.net)
+
+说明: /sys/bus/usb/devices/<busnum>-<devnum>:<config num>.<interface num>/<hid-bus>:<vendor-id>:<product-id>.<num>/isku/roccatisku<minor>/control  
+日期: 2011年6月  
+联系人: Stefan Achatz <erazor_de@users.sourceforge.net>  
+描述: 当写入时，此文件可让用户选择将从哪个配置文件读取下一次的数据。  
+数据长度必须为3字节。  
+此文件仅支持写入操作。  
+用户: [http://roccat.sourceforge.net](http://roccat.sourceforge.net)
+
+说明: /sys/bus/usb/devices/<busnum>-<devnum>:<config num>.<interface num>/<hid-bus>:<vendor-id>:<product-id>.<num>/isku/roccatisku<minor>/talk  
+日期: 2011年6月  
+联系人: Stefan Achatz <erazor_de@users.sourceforge.net>  
+描述: 当写入时，此文件可让用户从主机触发easyshift功能。  
+数据长度必须为16字节。  
+此文件仅支持写入操作。  
+用户: [http://roccat.sourceforge.net](http://roccat.sourceforge.net)
+
+说明: /sys/bus/usb/devices/<busnum>-<devnum>:<config num>.<interface num>/<hid-bus>:<vendor-id>:<product-id>.<num>/isku/roccatisku<minor>/talkfx  
+日期: 2013年2月  
+联系人: Stefan Achatz <erazor_de@users.sourceforge.net>  
+描述: 当写入时，此文件可让用户从主机触发临时的颜色方案。  
+数据长度必须为16字节。
+此文件为写入专用。
+用户:		http://roccat.sourceforge.net

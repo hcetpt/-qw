@@ -1,0 +1,15 @@
+这些文件允许用户向PMC/SCU发送任意的IPC命令，这可能是危险的。这些功能最终将会被移除，不应该在任何新的应用中使用。
+
+- **路径:** /sys/bus/platform/devices/INT34D2:00/simplecmd
+- **日期:** 2015年6月
+- **内核版本:** 4.1
+- **联系人:** Mika Westerberg <mika.westerberg@linux.intel.com>
+- **描述:** 此接口允许用户空间向PMC/SCU发送任意的IPC命令。
+- **格式:** %d %d 其中第一个数字是命令，第二个数字是子命令。
+
+- **路径:** /sys/bus/platform/devices/INT34D2:00/northpeak
+- **日期:** 2015年6月
+- **内核版本:** 4.1
+- **联系人:** Mika Westerberg <mika.westerberg@linux.intel.com>
+- **描述:** 此接口允许用户空间通过PMC/SCU启用和禁用Northpeak。
+- **格式:** %u

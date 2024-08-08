@@ -1,0 +1,7 @@
+什么：/proc/i8k  
+日期：2001年11月  
+内核版本：2.4.14  
+联系人：Pali Rohár <pali@kernel.org>  
+描述：用于获取/设置戴尔笔记本电脑上的传感器信息（如风扇速度、温度、序列号、热键状态等）的传统接口。  
+由于驱动程序现在使用标准的hwmon sysfs接口，因此procfs接口已被弃用。  
+用户：https://github.com/vitorafsr/i8kutils

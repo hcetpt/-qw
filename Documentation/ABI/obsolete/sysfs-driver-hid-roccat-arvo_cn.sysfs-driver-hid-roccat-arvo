@@ -1,0 +1,44 @@
+什么：/sys/bus/usb/devices/<busnum>-<devnum>:<config num>.<interface num>/<hid-bus>:<vendor-id>:<product-id>.<num>/arvo/roccatarvo<minor>/actual_profile
+日期：一月 2011
+联系人：Stefan Achatz <erazor_de@users.sourceforge.net>
+描述：此属性的整数值范围从1到5
+读取时，此属性返回实际配置文件的编号，这也是设备启动时活动的配置文件
+写入时，此属性立即激活选定的配置文件
+用户：http://roccat.sourceforge.net
+
+什么：/sys/bus/usb/devices/<busnum>-<devnum>:<config num>.<interface num>/<hid-bus>:<vendor-id>:<product-id>.<num>/arvo/roccatarvo<minor>/button
+日期：一月 2011
+联系人：Stefan Achatz <erazor_de@users.sourceforge.net>
+描述：键盘可以内部存储由一个按钮和几个修饰键组成的简短宏
+写入时，此文件可设置特定配置文件中特定按钮的序列。按钮和配置文件编号包含在写入的数据中。数据必须为24字节长
+此文件仅可写入
+用户：http://roccat.sourceforge.net
+
+什么：/sys/bus/usb/devices/<busnum>-<devnum>:<config num>.<interface num>/<hid-bus>:<vendor-id>:<product-id>.<num>/arvo/roccatarvo<minor>/info
+日期：一月 2011
+联系人：Stefan Achatz <erazor_de@users.sourceforge.net>
+描述：读取时，此文件返回有关设备的一些信息，如已安装的固件版本
+数据大小为8字节
+此文件只读
+用户：http://roccat.sourceforge.net
+
+什么：/sys/bus/usb/devices/<busnum>-<devnum>:<config num>.<interface num>/<hid-bus>:<vendor-id>:<product-id>.<num>/arvo/roccatarvo<minor>/key_mask
+日期：一月 2011
+联系人：Stefan Achatz <erazor_de@users.sourceforge.net>
+描述：键盘允许用户停用五个特定的按键，例如Windows和应用程序键，以防止用户意外按下这些键造成的后果
+此属性的整数值根据对应按键的状态设置第0-4位。
+
+读取时，该文件返回按钮当前的状态。
+写入时，指定的按钮会被立即激活/停用。
+用户：[http://roccat.sourceforge.net](http://roccat.sourceforge.net)
+
+路径：`/sys/bus/usb/devices/<busnum>-<devnum>:<config num>.<interface num>/<hid-bus>:<vendor-id>:<product-id>.<num>/arvo/roccatarvo<minor>/mode_key`
+日期：一月 2011年
+联系人：Stefan Achatz <erazor_de@users.sourceforge.net>
+描述：该键盘采用紧凑布局，没有数字锁定键，
+而是使用模式键来激活游戏模式，在此模式下，
+数字区的分配会发生变化。
+此属性的整数值范围从0（关闭）到1（开启）。
+读取时，此文件返回按键的实际状态。
+写入时，按键会被立即激活/停用。
+用户：[http://roccat.sourceforge.net](http://roccat.sourceforge.net)
