@@ -1,0 +1,121 @@
+===========================
+mac80211 子系统（基础）
+===========================
+
+在实现 mac80211 驱动程序时，您应该阅读并理解本书这部分包含的信息。在某些章节中，提到了高级用法，如果不需要这些内容，则可以跳过。本书的这一部分仅涵盖工作站模式和监控模式的功能，实现其他模式所需的信息将在本书的第二部分中介绍。
+基本硬件处理
+=======================
+
+待定
+
+本章应包含有关如何分配和注册 hw 结构的信息，以及与 mac80211 的集成过程。由于在注册 hw 结构之前需要分配速率/模式，因此本章还应包含有关设置速率/模式结构的信息。此外，还应在此处讨论回调函数和一般编程模型，包括经常引用的 ieee80211_ops 的定义。最后，应参照书中的其他部分讨论硬件功能。
+.. kernel-doc:: include/net/mac80211.h
+   :functions:
+	ieee80211_hw
+	ieee80211_hw_flags
+	SET_IEEE80211_DEV
+	SET_IEEE80211_PERM_ADDR
+	ieee80211_ops
+	ieee80211_alloc_hw
+	ieee80211_register_hw
+	ieee80211_unregister_hw
+	ieee80211_free_hw
+
+物理层配置
+=================
+
+待定
+
+本章应描述物理层处理，包括启动/停止回调以及使用的各种结构。
+.. kernel-doc:: include/net/mac80211.h
+   :functions:
+	ieee80211_conf
+	ieee80211_conf_flags
+
+虚拟接口
+==================
+
+待定
+
+本章应描述与驱动程序相关的虚拟接口基础知识（例如 VLAN、MGMT 等不是重点）。它应解释 add_iface/remove_iface 回调函数以及接口配置回调函数的使用。与此相关的内容，如接入点（AP）模式，也应在本章中讨论。关于支持多个接口的相关信息应放在适当的章节中，但此处应该有一个显眼的提示，建议最初只允许在工作站模式下使用单个接口！
+
+.. kernel-doc:: include/net/mac80211.h
+   :functions: ieee80211_vif
+
+接收和发送处理
+===============================
+
+这里应该包含的内容
+-------------------
+
+待定
+
+本节应描述 mac80211 和驱动程序中的接收和发送路径，以及发送状态处理。
+帧格式
+------------
+
+.. kernel-doc:: include/net/mac80211.h
+   :doc: 帧格式
+
+数据包对齐
+----------------
+
+.. kernel-doc:: net/mac80211/rx.c
+   :doc: 数据包对齐
+
+从中断调用mac80211
+-------------------------------------
+
+.. kernel-doc:: include/net/mac80211.h
+   :doc: 从中断调用mac80211
+
+函数/定义
+---------------------
+
+.. kernel-doc:: include/net/mac80211.h
+   :functions:
+	ieee80211_rx_status
+	mac80211_rx_encoding_flags
+	mac80211_rx_flags
+	mac80211_tx_info_flags
+	mac80211_tx_control_flags
+	mac80211_rate_control_flags
+	ieee80211_tx_rate
+	ieee80211_tx_info
+	ieee80211_tx_info_clear_status
+	ieee80211_rx
+	ieee80211_rx_ni
+	ieee80211_rx_irqsafe
+	ieee80211_tx_status_skb
+	ieee80211_tx_status_ni
+	ieee80211_tx_status_irqsafe
+	ieee80211_rts_get
+	ieee80211_rts_duration
+	ieee80211_ctstoself_get
+	ieee80211_ctstoself_duration
+	ieee80211_generic_frame_duration
+	ieee80211_wake_queue
+	ieee80211_stop_queue
+	ieee80211_wake_queues
+	ieee80211_stop_queues
+	ieee80211_queue_stopped
+
+帧过滤
+===============
+
+.. kernel-doc:: include/net/mac80211.h
+   :doc: 帧过滤
+
+.. kernel-doc:: include/net/mac80211.h
+   :functions: ieee80211_filter_flags
+
+mac80211的工作队列
+======================
+
+.. kernel-doc:: include/net/mac80211.h
+   :doc: mac80211工作队列
+
+.. kernel-doc:: include/net/mac80211.h
+   :functions:
+	ieee80211_queue_work
+	ieee80211_queue_delayed_work
