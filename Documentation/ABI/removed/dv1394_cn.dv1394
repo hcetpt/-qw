@@ -1,8 +1,0 @@
-什么：dv1394（又称为FireWire的“OHCI-DV I/O支持”）
-日期：2010年5月（计划），最终在内核版本2.6.37中移除
-联系：linux1394-devel@lists.sourceforge.net
-描述：
-/dev/dv1394/* 是字符设备文件，每个FireWire控制器都有一个，分别对应NTSC和PAL，可以通过read()接收DV数据或通过write()传输。一些ioctl()提供了有限的控制功能。
-这个特殊用途的接口已经被libraw1394 + libiec61883取代，它们在功能上等同，支持HDV，并且透明地基于较新的FireWire内核驱动工作。
-用户：
-ffmpeg/libavformat（如果配置了DV1394支持）

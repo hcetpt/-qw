@@ -1,8 +1,0 @@
-此ABI已重命名并移至新位置 /sys/kernel/fadump/release_mem  
-何为:   /sys/kernel/fadump_release_mem  
-日期:   2012年2月  
-联系:   linuxppc-dev@lists.ozlabs.org  
-描述:   只写  
-这是一个特殊的sysfs文件，仅在系统启动以使用FADump捕获vmcore时可用。  
-它用于释放FADump预留的内存，以便  
-保存崩溃转储信息。

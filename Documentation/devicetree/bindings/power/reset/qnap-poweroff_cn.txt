@@ -1,9 +1,0 @@
-* QNAP 关机
-
-QNAP NAS 设备有一个微控制器来控制主电源供应。这个微控制器连接到了 Kirkwood 和 Orion5x 系统芯片（SoC）上的 UART1。发送字符 'A'，以 19200 波特率进行通信，会指示微控制器关闭电源。
-群晖（Synology）NAS 设备使用了类似的方案，但采用了不同的波特率，即 9600，以及不同的字符，即 '1'。
-必需的属性：
-- compatible（兼容性）: 应该是 "qnap,power-off" 或者 "synology,power-off"
-
-- reg（寄存器）: UART1 寄存器集的地址和长度
-- clocks（时钟）: tclk 时钟

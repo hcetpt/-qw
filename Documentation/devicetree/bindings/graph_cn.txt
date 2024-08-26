@@ -1,1 +1,0 @@
-此文件已移至 dt-schema 仓库中的 graph.yaml

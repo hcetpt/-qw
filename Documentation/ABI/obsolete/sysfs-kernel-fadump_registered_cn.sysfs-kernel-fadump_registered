@@ -1,8 +1,0 @@
-此 ABI 已重命名并移动到新位置 /sys/kernel/fadump/registered  
-何为:    /sys/kernel/fadump_registered  
-日期:    2012年2月  
-联系人:   linuxppc-dev@lists.ozlabs.org  
-描述:    可读写  
-         有助于从用户空间控制崩溃转储收集功能  
-将1设置为此文件可启用系统收集崩溃转储，而0则禁用它  
-用户:    Kdump 服务
