@@ -29,9 +29,9 @@ create_cn_version() {
 }
 
 
-# 检查是否提供了一个路径参数
+# 如果没有提供路径参数,就会获取input/question中内容
 if [ "$#" -ne 1 ]; then
-    echo "使用方法: $0 <路径>"
+    echo "传入默认文件input/question"
     python script/a.py input/question | jq -M -r '.choices[0].message.content'
     exit 1
 fi
