@@ -1,0 +1,31 @@
+```
+# 特性名称:          generic-idle-thread
+#       Kconfig:       GENERIC_SMP_IDLE_THREAD
+#       描述:   架构使用通用的SMP空闲线程功能
+
+    -----------------------
+    |         架构 | 状态  |
+    -----------------------
+    |       alpha: |  ok  |
+    |         arc: |  ok  |
+    |         arm: |  ok  |
+    |       arm64: |  ok  |
+    |        csky: |  ok  |
+    |     hexagon: |  ok  |
+    |   loongarch: |  ok  |
+    |        m68k: | TODO |
+    |  microblaze: | TODO |
+    |        mips: |  ok  |
+    |       nios2: | TODO |
+    |    openrisc: |  ok  |
+    |      parisc: |  ok  |
+    |     powerpc: |  ok  |
+    |       riscv: |  ok  |
+    |        s390: |  ok  |
+    |          sh: |  ok  |
+    |       sparc: |  ok  |
+    |          um: | TODO |
+    |         x86: |  ok  |
+    |      xtensa: |  ok  |
+    -----------------------
+```

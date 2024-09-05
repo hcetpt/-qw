@@ -1,0 +1,31 @@
+```
+# 特性名称:          thread-info-in-task
+#       Kconfig:       THREAD_INFO_IN_TASK
+#       描述:   架构利用核心内核功能将 thread_info 嵌入 task_struct
+
+    -----------------------
+    |         架构 |状态  |
+    -----------------------
+    |       alpha: | TODO |
+    |         arc: | TODO |
+    |         arm: |  ok  |
+    |       arm64: |  ok  |
+    |        csky: | TODO |
+    |     hexagon: | TODO |
+    |   loongarch: | TODO |
+    |        m68k: | TODO |
+    |  microblaze: | TODO |
+    |        mips: | TODO |
+    |       nios2: | TODO |
+    |    openrisc: | TODO |
+    |      parisc: |  ok  |
+    |     powerpc: |  ok  |
+    |       riscv: |  ok  |
+    |        s390: |  ok  |
+    |          sh: | TODO |
+    |       sparc: | TODO |
+    |          um: | TODO |
+    |         x86: |  ok  |
+    |      xtensa: | TODO |
+    -----------------------
+```

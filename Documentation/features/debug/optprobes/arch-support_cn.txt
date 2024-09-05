@@ -1,0 +1,31 @@
+```
+# 特性名称:          optprobes
+#         Kconfig:       HAVE_OPTPROBES
+#         描述:   架构支持实时打补丁的 optprobes
+#
+    -----------------------
+    |         架构 | 状态  |
+    -----------------------
+    |       alpha: | TODO |
+    |         arc: | TODO |
+    |         arm: |  ok  |
+    |       arm64: | TODO |
+    |        csky: | TODO |
+    |     hexagon: | TODO |
+    |   loongarch: | TODO |
+    |        m68k: | TODO |
+    |  microblaze: | TODO |
+    |        mips: | TODO |
+    |       nios2: | TODO |
+    |    openrisc: | TODO |
+    |      parisc: | TODO |
+    |     powerpc: |  ok  |
+    |       riscv: | TODO |
+    |        s390: | TODO |
+    |          sh: | TODO |
+    |       sparc: | TODO |
+    |          um: | TODO |
+    |         x86: |  ok  |
+    |      xtensa: | TODO |
+    -----------------------
+```

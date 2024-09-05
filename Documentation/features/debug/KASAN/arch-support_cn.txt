@@ -1,0 +1,31 @@
+```
+# 功能名称:          KASAN
+# Kconfig:           HAVE_ARCH_KASAN
+# 描述:              架构支持 KASAN 运行时内存检查器
+
+    -----------------------
+    |         架构 | 状态 |
+    -----------------------
+    |       alpha: | TODO |
+    |         arc: | TODO |
+    |         arm: |  ok  |
+    |       arm64: |  ok  |
+    |        csky: | TODO |
+    |     hexagon: | TODO |
+    |   loongarch: |  ok  |
+    |        m68k: | TODO |
+    |  microblaze: | TODO |
+    |        mips: | TODO |
+    |       nios2: | TODO |
+    |    openrisc: | TODO |
+    |      parisc: | TODO |
+    |     powerpc: |  ok  |
+    |       riscv: |  ok  |
+    |        s390: |  ok  |
+    |          sh: | TODO |
+    |       sparc: | TODO |
+    |          um: |  ok  |
+    |         x86: |  ok  |
+    |      xtensa: |  ok  |
+    -----------------------
+```

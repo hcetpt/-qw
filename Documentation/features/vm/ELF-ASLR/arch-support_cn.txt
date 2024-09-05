@@ -1,0 +1,32 @@
+```
+# 特性名称:          ELF-ASLR
+#         Kconfig:       ARCH_HAS_ELF_RANDOMIZE
+#         Kconfig:       ARCH_WANT_DEFAULT_TOPDOWN_MMAP_LAYOUT
+#         描述:   架构随机化 ELF 二进制文件的栈、堆和二进制映像
+
+    -----------------------
+    |         架构 |状态  |
+    -----------------------
+    |       alpha: | TODO |
+    |         arc: | TODO |
+    |         arm: |  ok  |
+    |       arm64: |  ok  |
+    |        csky: |  ok  |
+    |     hexagon: | TODO |
+    |   loongarch: |  ok  |
+    |        m68k: | TODO |
+    |  microblaze: | TODO |
+    |        mips: |  ok  |
+    |       nios2: | TODO |
+    |    openrisc: | TODO |
+    |      parisc: |  ok  |
+    |     powerpc: |  ok  |
+    |       riscv: |  ok  |
+    |        s390: |  ok  |
+    |          sh: | TODO |
+    |       sparc: | TODO |
+    |          um: | TODO |
+    |         x86: |  ok  |
+    |      xtensa: | TODO |
+    -----------------------
+```

@@ -1,0 +1,31 @@
+```
+# 特性名称:          kgdb
+# Kconfig:           HAVE_ARCH_KGDB
+# 描述:              架构支持 kGDB 内核调试器
+#
+    -----------------------
+    |         架构 | 状态 |
+    -----------------------
+    |       alpha: | TODO |
+    |         arc: |  ok  |
+    |         arm: |  ok  |
+    |       arm64: |  ok  |
+    |        csky: | TODO |
+    |     hexagon: |  ok  |
+    |   loongarch: |  ok  |
+    |        m68k: | TODO |
+    |  microblaze: |  ok  |
+    |        mips: |  ok  |
+    |       nios2: |  ok  |
+    |    openrisc: | TODO |
+    |      parisc: |  ok  |
+    |     powerpc: |  ok  |
+    |       riscv: |  ok  |
+    |        s390: | TODO |
+    |          sh: |  ok  |
+    |       sparc: |  ok  |
+    |          um: | TODO |
+    |         x86: |  ok  |
+    |      xtensa: | TODO |
+    -----------------------
+```

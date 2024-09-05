@@ -1,0 +1,31 @@
+```
+# 特性名称:          irq-time-acct
+#         Kconfig:       HAVE_IRQ_TIME_ACCOUNTING
+#         描述:   架构支持精确的中断时间统计
+
+    -----------------------
+    |         架构 | 状态 |
+    -----------------------
+    |       alpha: |  ..  |
+    |         arc: | TODO |
+    |         arm: |  ok  |
+    |       arm64: |  ok  |
+    |        csky: | TODO |
+    |     hexagon: | TODO |
+    |   loongarch: |  ok  |
+    |        m68k: | TODO |
+    |  microblaze: | TODO |
+    |        mips: |  ok  |
+    |       nios2: | TODO |
+    |    openrisc: | TODO |
+    |      parisc: |  ..  |
+    |     powerpc: |  ok  |
+    |       riscv: |  ok  |
+    |        s390: |  ..  |
+    |          sh: | TODO |
+    |       sparc: |  ..  |
+    |          um: | TODO |
+    |         x86: |  ok  |
+    |      xtensa: |  ok  |
+    -----------------------
+```

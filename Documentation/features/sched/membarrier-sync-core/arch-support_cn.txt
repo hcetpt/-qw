@@ -1,0 +1,61 @@
+```
+# 特性名称:          membarrier-sync-core
+#         Kconfig:       ARCH_HAS_MEMBARRIER_SYNC_CORE
+#         描述:   架构支持核心序列化内存屏障
+
+# 架构要求
+
+# * arm/arm64/powerpc/s390
+
+# 在从IPI处理器返回以及返回用户空间时，依赖于异常返回导致的隐式上下文同步
+
+# * riscv
+
+# riscv 使用 xRET 作为中断返回和返回用户空间的操作
+
+# 由于 xRET 不提供核心序列化，我们依赖 FENCE.I 来提供核心序列化：
+#
+#  - 在中断返回时通过调用 sync_core_before_usermode()（参见 ipi_sync_core()）
+#
+#  - 在返回用户空间之前，通过 switch_mm() 和 sync_core_before_usermode()（分别用于 uthread->uthread 和 kthread->uthread 转换）
+#
+#  在 switch_mm() 中的序列化由 prepare_sync_core_cmd() 激活
+
+# * x86
+
+# x86-32 使用 IRET 作为中断返回，这处理了 IPI
+# 然而，它使用 IRET 和 SYSEXIT 返回用户空间。IRET 指令是核心序列化的，但 SYSEXIT 不是
+
+# x86-64 使用 IRET 作为中断返回，这也处理了 IPI
+# 然而，它可以使用 SYSRETL（兼容代码）、SYSRETQ 或 IRET 返回用户空间
+
+# 由于 SYSRET{L,Q} 和 SYSEXIT 都不是核心序列化的，我们依赖 switch_mm() 执行的 write_cr3() 来在更改当前 mm 后提供核心序列化
+# 并通过在特定情况下发出 sync_core_before_usermode() 来处理 kthread -> uthread 的特殊情况（暂时保持当前 mm 在 active_mm 中）
+```
+```
+-----------------------
+|         架构 | 状态  |
+-----------------------
+|       alpha: | TODO |
+|         arc: | TODO |
+|         arm: |  ok  |
+|       arm64: |  ok  |
+|        csky: | TODO |
+|     hexagon: | TODO |
+|   loongarch: | TODO |
+|        m68k: | TODO |
+|  microblaze: | TODO |
+|        mips: | TODO |
+|       nios2: | TODO |
+|    openrisc: | TODO |
+|      parisc: | TODO |
+|     powerpc: |  ok  |
+|       riscv: |  ok  |
+|        s390: |  ok  |
+|          sh: | TODO |
+|       sparc: | TODO |
+|          um: | TODO |
+|         x86: |  ok  |
+|      xtensa: | TODO |
+-----------------------
+```

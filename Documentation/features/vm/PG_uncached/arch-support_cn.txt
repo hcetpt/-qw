@@ -1,0 +1,31 @@
+```
+# 特性名称:          PG_uncached
+# Kconfig:           ARCH_USES_PG_UNCACHED
+# 描述:              架构支持 PG_uncached 页面标志
+
+    -----------------------
+    |         架构 | 状态 |
+    -----------------------
+    |       alpha: | TODO |
+    |         arc: | TODO |
+    |         arm: | TODO |
+    |       arm64: | TODO |
+    |        csky: | TODO |
+    |     hexagon: | TODO |
+    |   loongarch: | TODO |
+    |        m68k: | TODO |
+    |  microblaze: | TODO |
+    |        mips: | TODO |
+    |       nios2: | TODO |
+    |    openrisc: | TODO |
+    |      parisc: | TODO |
+    |     powerpc: | TODO |
+    |       riscv: | TODO |
+    |        s390: | TODO |
+    |          sh: | TODO |
+    |       sparc: | TODO |
+    |          um: | TODO |
+    |         x86: |  ok  |
+    |      xtensa: | TODO |
+    -----------------------
+```

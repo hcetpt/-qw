@@ -1,0 +1,31 @@
+```
+# 特性名称:          numa-balancing
+# Kconfig:           ARCH_SUPPORTS_NUMA_BALANCING
+# 描述:              架构支持 NUMA 平衡
+
+-----------------------
+|         架构 | 状态 |
+-----------------------
+|       alpha: | TODO |
+|         arc: |  ..  |
+|         arm: |  ..  |
+|       arm64: |  ok  |
+|        csky: |  ..  |
+|     hexagon: |  ..  |
+|   loongarch: |  ok  |
+|        m68k: |  ..  |
+|  microblaze: |  ..  |
+|        mips: | TODO |
+|       nios2: |  ..  |
+|    openrisc: |  ..  |
+|      parisc: |  ..  |
+|     powerpc: |  ok  |
+|       riscv: |  ok  |
+|        s390: |  ok  |
+|          sh: |  ..  |
+|       sparc: | TODO |
+|          um: |  ..  |
+|         x86: |  ok  |
+|      xtensa: |  ..  |
+-----------------------
+```

@@ -1,0 +1,31 @@
+```
+# 特性名称:          jump-labels
+# Kconfig:           HAVE_ARCH_JUMP_LABEL
+# 描述:              架构支持实时修补的高效分支
+
+-----------------------
+|         架构 | 状态 |
+-----------------------
+|       alpha: | TODO |
+|         arc: |  ok  |
+|         arm: |  ok  |
+|       arm64: |  ok  |
+|        csky: |  ok  |
+|     hexagon: | TODO |
+|   loongarch: |  ok  |
+|        m68k: | TODO |
+|  microblaze: | TODO |
+|        mips: |  ok  |
+|       nios2: | TODO |
+|    openrisc: | TODO |
+|      parisc: |  ok  |
+|     powerpc: |  ok  |
+|       riscv: |  ok  |
+|        s390: |  ok  |
+|          sh: | TODO |
+|       sparc: |  ok  |
+|          um: | TODO |
+|         x86: |  ok  |
+|      xtensa: |  ok  |
+-----------------------
+```

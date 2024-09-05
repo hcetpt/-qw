@@ -1,0 +1,31 @@
+```
+# 特性名称:          queued-spinlocks
+#         Kconfig:       ARCH_USE_QUEUED_SPINLOCKS
+#         描述:   架构支持排队自旋锁
+
+    -----------------------
+    |         架构 | 状态  |
+    -----------------------
+    |       alpha: | TODO |
+    |         arc: | TODO |
+    |         arm: | TODO |
+    |       arm64: |  好  |
+    |        csky: |  好  |
+    |     hexagon: | TODO |
+    |   loongarch: |  好  |
+    |        m68k: | TODO |
+    |  microblaze: | TODO |
+    |        mips: |  好  |
+    |       nios2: | TODO |
+    |    openrisc: |  好  |
+    |      parisc: | TODO |
+    |     powerpc: |  好  |
+    |       riscv: | TODO |
+    |        s390: | TODO |
+    |          sh: | TODO |
+    |       sparc: |  好  |
+    |          um: | TODO |
+    |         x86: |  好  |
+    |      xtensa: |  好  |
+    -----------------------
+```

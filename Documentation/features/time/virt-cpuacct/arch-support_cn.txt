@@ -1,0 +1,31 @@
+```
+# 特性名称:          virt-cpuacct
+# Kconfig:           HAVE_VIRT_CPU_ACCOUNTING
+# 描述:              架构支持精确的虚拟CPU时间统计
+
+    -----------------------
+    |         架构 | 状态 |
+    -----------------------
+    |       alpha: |  ok  |
+    |         arc: | TODO |
+    |         arm: |  ok  |
+    |       arm64: |  ok  |
+    |        csky: |  ok  |
+    |     hexagon: | TODO |
+    |   loongarch: |  ok  |
+    |        m68k: | TODO |
+    |  microblaze: | TODO |
+    |        mips: |  ok  |
+    |       nios2: | TODO |
+    |    openrisc: | TODO |
+    |      parisc: |  ok  |
+    |     powerpc: |  ok  |
+    |       riscv: | TODO |
+    |        s390: |  ok  |
+    |          sh: | TODO |
+    |       sparc: |  ok  |
+    |          um: | TODO |
+    |         x86: |  ok  |
+    |      xtensa: |  ok  |
+    -----------------------
+```
