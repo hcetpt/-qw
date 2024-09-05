@@ -27,7 +27,7 @@ create_cn_version() {
     fi
 
     # 构建完整的新文件路径
-    local new_file_path=$(dirname "$original_file")"/"$new_file_name
+    new_file_path=$(dirname "$original_file")"/"$new_file_name
 
     # 创建新文件（这里只是touch创建空文件，根据需要可以写入内容）
     touch "$new_file_path"
@@ -49,14 +49,14 @@ fi
 
 # 存储输入的路径
 path="$1"
-
+new_file_path=""
 # 使用find命令查找所有文件（包括子目录中的），并将结果保存到数组中
 mapfile -t files < <(find "$path" -type f | sort)
 
 # 遍历打印
-for file in "${files[@]}"; do
-    echo "$file"
-done
+#for file in "${files[@]}"; do
+#    echo "$file"
+#done
 
 #exit 0
 
@@ -68,7 +68,7 @@ else
     for file in "${files[@]}"; do
         #./qw "$file"
 	create_cn_version "$file"
-	#python script/ta.py "$file" | jq -M -r '.choices[0].message.content' > "$new_file_path"
+	python script/ta.py "$file" | jq -M -r '.choices[0].message.content' > "$new_file_path"
     done
 fi
 
