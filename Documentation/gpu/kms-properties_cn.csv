@@ -1,0 +1,104 @@
+以下是您提供的内容的中文翻译：
+
+| 模块/驱动程序 | 组 | 属性名称 | 类型 | 属性值 | 对象绑定 | 描述/限制 |
+|----------------|-----|------------|------|----------|-------------|--------------|
+|                  | DVI-I | "subconnector" | ENUM | { "Unknown", "DVI-D", "DVI-A" } | Connector | 待定 |
+|                  |     | "select subconnector" | ENUM | { "Automatic", "DVI-D", "DVI-A" } | Connector | 待定 |
+|                  | TV  | "subconnector" | ENUM | { "Unknown", "Composite", "SVIDEO", "Component", "SCART" } | Connector | 待定 |
+|                  |     | "select subconnector" | ENUM | { "Automatic", "Composite", "SVIDEO", "Component", "SCART" } | Connector | 待定 |
+|                  |     | "mode" | ENUM | { "NTSC_M", "NTSC_J", "NTSC_443", "PAL_B" } 等 | Connector | 待定 |
+|                  |     | "left margin" | RANGE | Min=0, Max=100 | Connector | 待定 |
+|                  |     | "right margin" | RANGE | Min=0, Max=100 | Connector | 待定 |
+|                  |     | "top margin" | RANGE | Min=0, Max=100 | Connector | 待定 |
+|                  |     | "bottom margin" | RANGE | Min=0, Max=100 | Connector | 待定 |
+|                  |     | "brightness" | RANGE | Min=0, Max=100 | Connector | 待定 |
+|                  |     | "contrast" | RANGE | Min=0, Max=100 | Connector | 待定 |
+|                  |     | "flicker reduction" | RANGE | Min=0, Max=100 | Connector | 待定 |
+|                  |     | "overscan" | RANGE | Min=0, Max=100 | Connector | 待定 |
+|                  |     | "saturation" | RANGE | Min=0, Max=100 | Connector | 待定 |
+|                  |     | "hue" | RANGE | Min=0, Max=100 | Connector | 待定 |
+|                  | Virtual GPU | "suggested X" | RANGE | Min=0, Max=0xffffffff | Connector | 连接器的建议X偏移量属性 |
+|                  |      | "suggested Y" | RANGE | Min=0, Max=0xffffffff | Connector | 连接器的建议Y偏移量属性 |
+|                  | Optional | "aspect ratio" | ENUM | { "None", "4:3", "16:9" } | Connector | 待定 |
+|                  |       | "audio" | ENUM | { "force-dvi", "off", "auto", "on" } | Connector | 待定 |
+|                  | SDVO-TV | "mode" | ENUM | { "NTSC_M", "NTSC_J", "NTSC_443", "PAL_B" } 等 | Connector | 待定 |
+|                  |      | "left_margin" | RANGE | Min=0, Max=SDVO依赖 | Connector | 待定 |
+|                  |      | "right_margin" | RANGE | Min=0, Max=SDVO依赖 | Connector | 待定 |
+|                  |      | "top_margin" | RANGE | Min=0, Max=SDVO依赖 | Connector | 待定 |
+|                  |      | "bottom_margin" | RANGE | Min=0, Max=SDVO依赖 | Connector | 待定 |
+|                  |      | "hpos" | RANGE | Min=0, Max=SDVO依赖 | Connector | 待定 |
+|                  |      | "vpos" | RANGE | Min=0, Max=SDVO依赖 | Connector | 待定 |
+|                  |      | "contrast" | RANGE | Min=0, Max=SDVO依赖 | Connector | 待定 |
+|                  |      | "saturation" | RANGE | Min=0, Max=SDVO依赖 | Connector | 待定 |
+|                  |      | "hue" | RANGE | Min=0, Max=SDVO依赖 | Connector | 待定 |
+|                  |      | "sharpness" | RANGE | Min=0, Max=SDVO依赖 | Connector | 待定 |
+|                  |      | "flicker_filter" | RANGE | Min=0, Max=SDVO依赖 | Connector | 待定 |
+|                  |      | "flicker_filter_adaptive" | RANGE | Min=0, Max=SDVO依赖 | Connector | 待定 |
+|                  |      | "flicker_filter_2d" | RANGE | Min=0, Max=SDVO依赖 | Connector | 待定 |
+|                  |      | "tv_chroma_filter" | RANGE | Min=0, Max=SDVO依赖 | Connector | 待定 |
+|                  |      | "tv_luma_filter" | RANGE | Min=0, Max=SDVO依赖 | Connector | 待定 |
+|                  |      | "dot_crawl" | RANGE | Min=0, Max=1 | Connector | 待定 |
+|                  | SDVO-TV/LVDS | "brightness" | RANGE | Min=0, Max=SDVO依赖 | Connector | 待定 |
+| CDV gma-500 | Generic | "Broadcast RGB" | ENUM | { "Full", "Limited 16:235" } | Connector | 待定 |
+| Poulsbo | Generic | "backlight" | RANGE | Min=0, Max=100 | Connector | 待定 |
+|                  | SDVO-TV | "mode" | ENUM | { "NTSC_M", "NTSC_J", "NTSC_443", "PAL_B" } 等 | Connector | 待定 |
+|                  |      | "left_margin" | RANGE | Min=0, Max=SDVO依赖 | Connector | 待定 |
+|                  |      | "right_margin" | RANGE | Min=0, Max=SDVO依赖 | Connector | 待定 |
+|                  |      | "top_margin" | RANGE | Min=0, Max=SDVO依赖 | Connector | 待定 |
+|                  |      | "bottom_margin" | RANGE | Min=0, Max=SDVO依赖 | Connector | 待定 |
+|                  |      | "hpos" | RANGE | Min=0, Max=SDVO依赖 | Connector | 待定 |
+|                  |      | "vpos" | RANGE | Min=0, Max=SDVO依赖 | Connector | 待定 |
+|                  |      | "contrast" | RANGE | Min=0, Max=SDVO依赖 | Connector | 待定 |
+|                  |      | "saturation" | RANGE | Min=0, Max=SDVO依赖 | Connector | 待定 |
+|                  |      | "hue" | RANGE | Min=0, Max=SDVO依赖 | Connector | 待定 |
+|                  |      | "sharpness" | RANGE | Min=0, Max=SDVO依赖 | Connector | 待定 |
+|                  |      | "flicker_filter" | RANGE | Min=0, Max=SDVO依赖 | Connector | 待定 |
+|                  |      | "flicker_filter_adaptive" | RANGE | Min=0, Max=SDVO依赖 | Connector | 待定 |
+|                  |      | "flicker_filter_2d" | RANGE | Min=0, Max=SDVO依赖 | Connector | 待定 |
+|                  |      | "tv_chroma_filter" | RANGE | Min=0, Max=SDVO依赖 | Connector | 待定 |
+|                  |      | "tv_luma_filter" | RANGE | Min=0, Max=SDVO依赖 | Connector | 待定 |
+|                  |      | "dot_crawl" | RANGE | Min=0, Max=1 | Connector | 待定 |
+|                  | SDVO-TV/LVDS | "brightness" | RANGE | Min=0, Max=SDVO依赖 | Connector | 待定 |
+| armada | CRTC | "CSC_YUV" | ENUM | { "Auto", "CCIR601", "CCIR709" } | CRTC | 待定 |
+|        |         | "CSC_RGB" | ENUM | { "Auto", "Computer system", "Studio" } | CRTC | 待定 |
+|        | Overlay | "colorkey" | RANGE | Min=0, Max=0xffffff | Plane | 待定 |
+|        |          | "colorkey_min" | RANGE | Min=0, Max=0xffffff | Plane | 待定 |
+|        |          | "colorkey_max" | RANGE | Min=0, Max=0xffffff | Plane | 待定 |
+|        |          | "colorkey_val" | RANGE | Min=0, Max=0xffffff | Plane | 待定 |
+|        |          | "colorkey_alpha" | RANGE | Min=0, Max=0xffffff | Plane | 待定 |
+|        |          | "colorkey_mode" | ENUM | { "disabled", "Y component", "U component", "V component", "RGB", "R component", "G component", "B component" } | Plane | 待定 |
+|        |          | "brightness" | RANGE | Min=0, Max=256 + 255 | Plane | 待定 |
+|        |          | "contrast" | RANGE | Min=0, Max=0x7fff | Plane | 待定 |
+|        |          | "saturation" | RANGE | Min=0, Max=0x7fff | Plane | 待定 |
+| exynos | CRTC | "mode" | ENUM | { "normal", "blank" } | CRTC | 待定 |
+| i2c/ch7006_drv | Generic | "scale" | RANGE | Min=0, Max=2 | Connector | 待定 |
+|                  | TV | "mode" | ENUM | { "PAL", "PAL-M", "PAL-N", "PAL-Nc", "PAL-60", "NTSC-M", "NTSC-J" } | Connector | 待定 |
+| nouveau | NV10 Overlay | "colorkey" | RANGE | Min=0, Max=0x01ffffff | Plane | 待定 |
+|        |          | "contrast" | RANGE | Min=0, Max=8192-1 | Plane | 待定 |
+|        |          | "brightness" | RANGE | Min=0, Max=1024 | Plane | 待定 |
+|        |          | "hue" | RANGE | Min=0, Max=359 | Plane | 待定 |
+|        |          | "saturation" | RANGE | Min=0, Max=8192-1 | Plane | 待定 |
+|        |          | "iturbt_709" | RANGE | Min=0, Max=1 | Plane | 待定 |
+|        | Nv04 Overlay | "colorkey" | RANGE | Min=0, Max=0x01ffffff | Plane | 待定 |
+|        |          | "brightness" | RANGE | Min=0, Max=1024 | Plane | 待定 |
+| Display |  | "dithering mode" | ENUM | { "auto", "off", "on" } | Connector | 待定 |
+|        |          | "dithering depth" | ENUM | { "auto", "off", "on", "static 2x2", "dynamic 2x2", "temporal" } | Connector | 待定 |
+|        |          | "underscan" | ENUM | { "auto", "6 bpc", "8 bpc" } | Connector | 待定 |
+|        |          | "underscan hborder" | RANGE | Min=0, Max=128 | Connector | 待定 |
+|        |          | "underscan vborder" | RANGE | Min=0, Max=128 | Connector | 待定 |
+|        |          | "vibrant hue" | RANGE | Min=0, Max=180 | Connector | 待定 |
+|        |          | "color vibrance" | RANGE | Min=0, Max=200 | Connector | 待定 |
+| omap | Generic | "zorder" | RANGE | Min=0, Max=3 | CRTC, Plane | 待定 |
+| qxl | Generic | "hotplug_mode_update" | RANGE | Min=0, Max=1 | Connector | 待定 |
+| radeon | DVI-I | "coherent" | RANGE | Min=0, Max=1 | Connector | 待定 |
+|        | DAC enable load detect | "load detection" | RANGE | Min=0, Max=1 | Connector | 待定 |
+|        | TV Standard | "tv standard" | ENUM | { "ntsc", "pal", "pal-m", "pal-60", "ntsc-j", "scart-pal", "pal-cn", "secam" } | Connector | 待定 |
+|        | legacy TMDS PLL detect | "tmds_pll" | ENUM | { "driver", "bios" } | - | 待定 |
+|        | Underscan | "underscan" | ENUM | { "off", "on", "auto" } | Connector | 待定 |
+|        |          | "underscan hborder" | RANGE | Min=0, Max=128 | Connector | 待定 |
+|        |          | "underscan vborder" | RANGE | Min=0, Max=128 | Connector | 待定 |
+| Audio |  | "audio" | ENUM | { "off", "on", "auto" } | Connector | 待定 |
+| FMT Dithering |  | "dither" | ENUM | { "off", "on" } | Connector | 待定 |
+|        |          | "colorkey" | RANGE | Min=0, Max=0x01ffffff | Plane | 待定 |
+
+希望这对你有帮助！如果有其他问题或需要进一步修改，请告诉我。

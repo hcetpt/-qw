@@ -32,7 +32,8 @@ create_cn_version() {
     # 创建新文件（这里只是touch创建空文件，根据需要可以写入内容）
     touch "$new_file_path"
     if [ $? -eq 0 ]; then
-        echo "新文件已创建: $new_file_path"
+        #echo "新文件已创建: $new_file_path"
+	sleep 0.1
     else
         echo "创建文件时发生错误。"
         return 1
@@ -41,8 +42,8 @@ create_cn_version() {
 
 #检查是否提供了一个路径参数
 if [ "$#" -ne 1 ]; then
-    echo "翻译默认路径文件/input/translate"
-    echo "--------------------------------"
+    #echo "翻译默认路径文件/input/translate"
+    #echo "--------------------------------"
     python script/ta.py input/translate | jq -M -r '.choices[0].message.content'
     exit 1
 fi
@@ -72,6 +73,7 @@ else
     done
 fi
 
+echo "$path 已经翻译完毕"
 
 # 示例使用
 # 假设你要基于一个示例文件创建中文版

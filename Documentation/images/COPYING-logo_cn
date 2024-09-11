@@ -1,0 +1,11 @@
+这是目前非官方的 Linux 标志的全彩版本（“目前非官方”只是意味着还没有正式文件，而且我还没有真正宣布它）。它由 Larry Ewing 创建，并且只要你承认 Larry 是原作者，就可以自由使用。
+
+请注意，还有黑白版本可供选择，这些版本可以缩放到更小的尺寸，更适合用于信头或其他用途：要查看完整的标志系列，请访问 Larry 的网页：
+
+https://www.isc.tamu.edu/~lewing/linux/
+
+SVG 版本由 Garrett LeSage 用矢量图形重新绘制，并由 IFo Hancroft 进行了优化和清理。只要你承认 Larry、Garrett 和 IFo 的贡献，也可以自由使用 SVG 版本。
+
+在 Garrett 的仓库中还有黑白和反色的矢量版本：
+
+https://github.com/garrett/Tux
