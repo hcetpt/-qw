@@ -1,5 +1,0 @@
-* 重启并关闭电源
-
-Buffalo Linkstation LS-XHL 和 LS-CHLv2 以及其他设备通过重启并让 u-boot 持续控制设备直至用户按下按钮的方式实现关机。
-所需属性：
-- 兼容性：应当为 "restart-poweroff"

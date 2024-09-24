@@ -1,7 +1,0 @@
-什么：		/sys/bus/usb/devices/<busnum>-<devnum>:<config num>.<interface num>/control
-日期：		十月 2012
-联系人：	Stefan Achatz <erazor_de@users.sourceforge.net>
-描述：	当写入时，可以配置 cpi、按钮和灯光设置
-当读取时，返回实际的 cpi 设置和传感器数据
-数据必须为 8 字节长
-用户：		http://roccat.sourceforge.net

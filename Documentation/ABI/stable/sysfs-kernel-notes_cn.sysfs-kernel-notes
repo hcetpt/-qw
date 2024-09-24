@@ -1,4 +1,0 @@
-什么：/sys/kernel/notes  
-日期：2009年7月  
-联系人：<linux-kernel@vger.kernel.org>  
-描述：/sys/kernel/notes 文件包含正在运行的 vmlinux 的 .notes 部分的二进制表示。

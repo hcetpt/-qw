@@ -1,5 +1,0 @@
-内容：/sys/bus/pci/drivers/qla2xxx/.../devices/*
-日期：2009年9月
-联系人：QLogic Linux 驱动团队 <linux-driver@qlogic.com>
-描述：qla2xxx-udev.sh 目前会查找 uevent 的 CHANGE 事件，以指示驱动程序已生成固件转储并准备就绪供检索。
-用户：qla2xxx-udev.sh。建议的更改应发送邮件至 linux-driver@qlogic.com

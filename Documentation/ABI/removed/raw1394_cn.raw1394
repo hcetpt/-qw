@@ -1,8 +1,0 @@
-内容：raw1394（又称为“原始IEEE1394 I/O支持”用于FireWire）
-日期：2010年5月（计划中），最终在内核版本v2.6.37中移除
-联系：linux1394-devel@lists.sourceforge.net
-描述：
-    /dev/raw1394是一个字符设备文件，它允许对FireWire总线进行低级别的访问。它的主要缺点是无法实施合理的设备安全策略，以及抽象级别较低，导致用户空间客户端需要复制内核的ieee1394核心功能的大部分工作。
-被替换为/dev/fw*，即firewire-core的<linux/firewire-cdev.h> ABI
-用户：
-    libraw1394（与firewire-cdev兼容，对库ABI用户透明）

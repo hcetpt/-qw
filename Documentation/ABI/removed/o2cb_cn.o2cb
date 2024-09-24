@@ -1,6 +1,0 @@
-什么：/sys/o2cb 符号链接  
-日期：2011年5月  
-内核版本：3.0  
-联系人：ocfs2-devel@lists.linux.dev  
-描述：这是一个符号链接：从/sys/o2cb 到 /sys/fs/o2cb。当新版本的 ocfs2-tools 足够普及并知道查找/sys/fs/o2cb时，此符号链接将被移除。不要在新软件中编写代码来查找此处，而应该尝试/sys/fs/o2cb。  
-用户：ocfs2-tools。对于提议的更改，给 ocfs2-devel@lists.linux.dev 发送邮件就足够了。

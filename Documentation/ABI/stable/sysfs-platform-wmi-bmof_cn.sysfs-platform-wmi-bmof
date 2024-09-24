@@ -1,6 +1,0 @@
-内容：/sys/bus/wmi/devices/05901221-D566-11D1-B2F0-00A0C9062910[-X]/bmof
-日期：2017年6月
-内核版本：4.13
-描述：
-    用于描述可用ACPI WMI接口详细信息的二进制MOF元数据。
-请参阅Documentation/wmi/devices/wmi-bmof.rst以获取详细信息。

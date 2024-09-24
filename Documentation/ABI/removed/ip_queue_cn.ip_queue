@@ -1,6 +1,0 @@
-什么：   ip_queue  
-日期：   最终在内核版本 v3.5.0 中移除  
-联系人： Pablo Neira Ayuso <pablo@netfilter.org>  
-描述：
-ip_queue 已被 nfnetlink_queue 替代，后者向用户空间提供了更高级的队列机制。ip_queue 模块多年前就已经宣布过时。
-用户：
