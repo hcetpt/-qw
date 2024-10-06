@@ -1,0 +1,51 @@
+============
+LITMUS 测试
+============
+
+每个子目录包含典型的 litmus 测试，用于描述各自内核 API 的语义。
+有关如何“运行”litmus 测试或如何根据 litmus 测试生成内核测试模块的更多信息，请参阅 tools/memory-model/README。
+
+原子操作 (/atomic 目录)
+--------------------------
+
+Atomic-RMW+mb__after_atomic-is-stronger-than-acquire.litmus
+    测试一个原子的 RMW（读改写）操作后跟一个 smp_mb__after_atomic() 是否比普通的 acquire 强：RMW 的读写部分都排在后续内存访问之前。
+Atomic-RMW-ops-are-atomic-WRT-atomic_set.litmus
+    测试 atomic_set() 不会破坏原子 RMW 的原子性。
+注意：需要 herd7 7.56 或更高版本，该版本支持 "(void)expr"。
+cmpxchg-fail-ordered-1.litmus
+    展示失败的 cmpxchg() 操作在后跟 smp_mb__after_atomic() 时作为完整的屏障。
+cmpxchg-fail-ordered-2.litmus
+    展示失败的 cmpxchg() 操作在后跟 smp_mb__after_atomic() 时作为 acquire 操作。
+cmpxchg-fail-unordered-1.litmus
+    展示失败的 cmpxchg() 操作不作为完整的屏障。
+cmpxchg-fail-unordered-2.litmus
+    展示失败的 cmpxchg() 操作不作为 acquire 操作。
+
+互斥锁 (/locking 目录)
+----------------------------
+
+DCL-broken.litmus
+    展示双重检查锁定（Double-Checked Locking）不仅仅需要显而易见的锁获取和释放。
+DCL-fixed.litmus  
+展示了使用`smp_store_release()`和`smp_load_acquire()`进行修正的双重检查锁定，除了显式的锁获取和释放之外。
+
+RM-broken.litmus  
+展示了“roach motel”锁定的问题，其中代码可以自由地进入基于锁的关键区域。这个例子还展示了如何使用“filter”子句来丢弃其他未在测试中建模的代码会排除的执行。
+
+请注意，“roach motel”优化是通过物理移动P1()中的两次对x的读取到锁之下实现的。
+
+什么是roach motel？这是源自一个古老的蟑螂诱捕器广告，在后来的《黑衣人》电影中也有所展示。“蟑螂们入住，但不离开。”
+
+RM-fixed.litmus  
+作为RM-broken.litmus的对照，展示了P0()中的两次从x加载数据安全地在关键区之外的情况。
+
+RCU (/rcu目录)
+--------------------
+
+MP+onceassign+derefonce.litmus（位于tools/memory-model/litmus-tests/下）  
+展示了使用`rcu_assign_pointer()`和`rcu_dereference()`来确保RCU读取者不会看到初始化前的垃圾数据。
+
+RCU+sync+read.litmus  
+RCU+sync+free.litmus  
+上述两个litmus测试展示了RCU优雅期保证，即RCU读取侧的关键区永远不会跨越一个优雅期。

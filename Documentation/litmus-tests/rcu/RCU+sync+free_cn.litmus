@@ -1,0 +1,37 @@
+```c
+/*
+ * 结果：永远不会发生
+ *
+ * 这个测试用例展示了RCU读取者永远不可能看到一个在优雅周期之后的写操作，如果它没有看到在该优雅周期之前的写操作。
+ *
+ * 这是RCU使用的一个典型模式，其中在优雅周期之前的写操作赋值一个指针，而在优雅周期之后的写操作销毁该指针所指向的对象。
+ *
+ * 这是RCU优雅周期保证的一个含义，该保证指出（除其他事项外）RCU读端临界区不能跨越一个优雅周期。
+*/
+
+{
+    int x = 1;
+    int *y = &x;
+    int z = 1;
+}
+
+P0(int *x, int *z, int **y)
+{
+    int *r0;
+    int r1;
+
+    rcu_read_lock();
+    r0 = rcu_dereference(*y);
+    r1 = READ_ONCE(*r0);
+    rcu_read_unlock();
+}
+
+P1(int *x, int *z, int **y)
+{
+    rcu_assign_pointer(*y, z);
+    synchronize_rcu();
+    WRITE_ONCE(*x, 0);
+}
+
+exists (0:r0=x /\ 0:r1=0)
+```

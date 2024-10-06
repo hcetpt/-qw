@@ -1,0 +1,25 @@
+```
+(*
+ * 结果：永不
+ *
+ * 测试 atomic_set() 不会破坏 atomic RMW 操作的原子性
+ * 注意：这需要 herd7 7.56 或更高版本，支持 "(void)expr"
+*)
+
+{
+    atomic_t v = ATOMIC_INIT(1);
+}
+
+P0(atomic_t *v)
+{
+    (void)atomic_add_unless(v, 1, 0);
+}
+
+P1(atomic_t *v)
+{
+    atomic_set(v, 0);
+}
+
+存在
+(v=2)
+```

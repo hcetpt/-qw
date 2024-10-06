@@ -1,0 +1,34 @@
+C RCU+sync+read
+
+(*
+ * 结果：永远不会发生
+ *
+ * 这个测验展示了在经过一个宽限期之后，RCU更新者总是能看到之前RCU读端临界区中完成的所有写操作。这样的读端临界区会在宽限期结束前结束。
+ *
+ * 这是RCU宽限期保证的一个推论，该保证说明（以及其他内容）RCU读端临界区不能跨越一个宽限期。
+*)
+
+{
+int x = 0;
+int y = 0;
+}
+
+P0(int *x, int *y)
+{
+	rcu_read_lock();
+	WRITE_ONCE(*x, 1);
+	WRITE_ONCE(*y, 1);
+	rcu_read_unlock();
+}
+
+P1(int *x, int *y)
+{
+	int r0;
+	int r1;
+
+	r0 = READ_ONCE(*x);
+	synchronize_rcu();
+	r1 = READ_ONCE(*y);
+}
+
+存在 (1:r0=1 且 1:r1=0)

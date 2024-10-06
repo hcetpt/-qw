@@ -1,0 +1,73 @@
+提供一致的用户空间接口非常重要。LED 设备在这方面有一个问题，即 `/sys/class/leds` 目录中的命名。如果用户空间能够知道给定 LED 功能的正确“名称”会很好，但情况变得更复杂了。
+
+无论如何，如果不考虑向后兼容性问题，新代码应该使用以下列表中的一个“好”名称，并在适用时扩展该列表。为了兼容性，旧名称也列在这里；如果你正在编写需要特定功能的应用程序，你应该首先探测好的名称，然后尝试旧名称。
+
+请注意，在 `include/dt-bindings/leds/common.h` 中有一份功能列表。
+
+* 游戏手柄和操纵杆
+
+游戏控制器可能具有指示玩家编号的 LED。这在游戏机中很常见，可以连接多个控制器到系统上。“玩家 LED”可以通过模式编程来指示特定玩家。例如，具有 4 个 LED 的游戏控制器可以通过编程 “x---” 来表示玩家 1，“-x--” 来表示玩家 2 等等，其中 “x” 表示开启。输入驱动程序可以利用 LED 类来暴露游戏控制器的各个玩家 LED，使用函数 “player”。
+
+注意：玩家 ID 的跟踪和管理是用户空间的责任，尽管驱动程序可能会选择一个默认值。
+
+好的名称：“input*:*:player-{1,2,3,4,5}”
+
+* 键盘
+
+好的名称：“input*:*:capslock”
+好的名称：“input*:*:scrolllock”
+好的名称：“input*:*:numlock”
+旧名称：“shift-key-light”（适用于 Motorola Droid 4，capslock）
+
+一组常见的键盘 LED，追溯到 PC AT 时代。
+旧名称：“tpacpi::thinklight”（适用于 IBM/Lenovo Thinkpads）
+旧名称：“lp5523:kb{1,2,3,4,5,6}”（适用于 Nokia N900）
+
+主键盘的前置灯/背光
+### 遗留项: "button-backlight"（Motorola Droid 4）
+
+一些手机在屏幕下方有触摸按钮；这与主键盘不同。这是它们的背光。
+
+* 声音子系统
+
+  - 良好: "platform:*:mute"
+  - 良好: "platform:*:micmute"
+
+笔记本电脑上的指示灯，表示声音输入/输出被静音。
+
+* 系统通知
+
+  - 良好: "rgb:status"
+  - 遗留项: "status-led:{red,green,blue}"（Motorola Droid 4）
+  - 遗留项: "lp5523:{r,g,b}"（Nokia N900）
+
+手机通常有多色状态指示灯。
+
+* 电源管理
+
+  - 良好: "platform:*:charging"（allwinner sun50i, leds-cht-wcove）
+
+* 屏幕
+
+  - 良好: ":backlight"（Motorola Droid 4）
+
+* 以太网指示灯
+
+目前支持两种类型的网络指示灯：由PHY控制的和由MAC控制的。理论上，对于一个Linux网卡设备（netdev），这两种指示灯可以同时存在，因此MAC和PHY之间的名称需要有所不同。
+不要使用网卡设备名，例如eth0、enp1s0。这些名称不稳定且不唯一，也不能区分MAC和PHY。
+
+** MAC指示灯**
+
+  - 良好: f1070000.ethernet:white:WAN
+  - 良好: mdio_mux-0.1:00:green:left
+  - 良好: 0000:02:00.0:yellow:top
+
+第一部分必须唯一命名MAC控制器。然后是颜色。对于单个指示灯，应使用WAN/LAN。如果有多个指示灯，则使用left/right或top/bottom来表示它们在RJ45插孔上的位置。
+
+** PHY指示灯**
+
+  - 良好: f1072004.mdio-mii:00: white:WAN
+  - 良好: !mdio-mux!mdio@2!switch@0!mdio:01:green:right
+  - 良好: r8169-0-200:00:yellow:bottom
+
+第一部分必须唯一命名PHY。这通常意味着要唯一标识MDIO总线控制器及其地址。

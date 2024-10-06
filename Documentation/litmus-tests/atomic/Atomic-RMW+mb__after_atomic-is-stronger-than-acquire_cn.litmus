@@ -1,0 +1,36 @@
+```c
+/*
+ * 结果：永远不会发生
+ *
+ * 测试一个原子的RMW（读改写）操作后跟一个smp_mb__after_atomic()是否比普通的acquire强：
+ * RMW的读和写部分都发生在后续内存访问之前。
+ */
+
+{
+}
+
+P0(int *x, atomic_t *y)
+{
+    int r0;
+    int r1;
+
+    r0 = READ_ONCE(*x);
+    smp_rmb();
+    r1 = atomic_read(y);
+}
+
+P1(int *x, atomic_t *y)
+{
+    atomic_inc(y);
+    smp_mb__after_atomic();
+    WRITE_ONCE(*x, 1);
+}
+
+存在
+(0:r0=1 且 0:r1=0)
+```
+
+解释：
+这段代码描述了一个测试场景，其中`P0`和`P1`是两个并发执行的过程。`P1`先对`y`进行原子递增，然后调用`smp_mb__after_atomic()`屏障，最后将`x`设置为1。`P0`则读取`x`的值，并在读取内存屏障之后读取`y`的值。
+
+通过这个测试，验证了原子RMW操作后跟`smp_mb__after_atomic()`是否保证了读和写操作在后续内存访问之前的顺序性。结果表明这种情况下永远不会出现`r0=1`且`r1=0`的情况。

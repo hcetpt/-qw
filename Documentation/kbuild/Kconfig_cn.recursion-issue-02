@@ -1,0 +1,37 @@
+# 累积 Kconfig 递归问题
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#
+# 测试方法：
+#
+# make KBUILD_KCONFIG=Documentation/kbuild/Kconfig.recursion-issue-02 allnoconfig
+#
+# Kconfig 的递归限制对 Kconfig 语义有一些非直观的影响，这些影响在这里有详细记录。一个已知的实际影响是，如果驱动程序共享一个核心需求并且使用不同的语义来注释这些需求（例如，一些驱动程序使用“depends on”，而另一些使用“select”），那么它们不能相互否定对方的功能。例如，如果驱动程序 A 和驱动程序 B 共享相同的核心需求，并且其中一个使用“select”，另一个使用“depends on”来注释这一点，则驱动程序 A 所选择的所有功能现在不能被驱动程序 B 否定。
+#
+# 这个问题的一个不太明显的含义是，如果不对这些核心需求上的语义进行仔细同步，随着驱动程序的发展，它们所选择或依赖的功能最终会变成共享的需求，而其他驱动程序无法否定这些需求。
+#
+# 文档 `Documentation/kbuild/Kconfig.recursion-issue-02` 中提供的示例描述了一个内核可能具有的简单驱动核心布局。假设我们有一些 CORE 功能，然后内核有一系列它希望实现的附加功能，但由于其不够先进，目前只支持铃铛：CORE_BELL_A 和 CORE_BELL_B。如果 CORE_BELL_A 有一个高级功能 CORE_BELL_A_ADVANCED，该功能选择了 CORE_BELL_A，则 CORE_BELL_A 最终成为一个共享的铃铛功能，系统中的其他铃铛无法否定它。这个问题的原因是由于在表达每个铃铛与 CORE 的关系时使用了不同的语义，一个使用“depends on”，另一个使用“select”。另一个更重要的原因是 Kconfig 不会在符号被选中时检查‘select’下的依赖项，而是将这些符号视为强制所需的符号。有关“select”的重手法，请参阅 `Documentation/kbuild/Kconfig.select-break`。
+#
+# 要解决此问题，“depends on CORE”必须改为“select CORE”，或者“select CORE”必须改为“depends on CORE”。
+#
+# 对于一个现实世界的问题实例，请参考尝试移除“select FW_LOADER”[0]，最终简单的替代解决方案是使新引入的功能匹配语义。
+#
+# [0] https://lore.kernel.org/r/1432241149-8762-1-git-send-email-mcgrof@do-not-panic.com
+
+mainmenu "简单的示例以演示累积 Kconfig 递归依赖的影响"
+
+config CORE
+    tristate
+
+config CORE_BELL_A
+    tristate
+    depends on CORE
+
+config CORE_BELL_A_ADVANCED
+    tristate
+    select CORE_BELL_A
+
+config CORE_BELL_B
+    tristate
+    depends on !CORE_BELL_A
+    select CORE

@@ -1,0 +1,40 @@
+C RM-broken
+
+(*
+ * 结果：死锁
+ *
+ * 此测试展示了旧的“roach motel”锁定方法，即可以随意将代码移入临界区，
+ * 在Linux内核中无法使用
+*)
+
+{
+    int x;
+    atomic_t y;
+}
+
+P0(int *x, atomic_t *y, spinlock_t *lck)
+{
+    int r2;
+
+    spin_lock(lck);
+    r2 = atomic_inc_return(y);
+    WRITE_ONCE(*x, 1);
+    spin_unlock(lck);
+}
+
+P1(int *x, atomic_t *y, spinlock_t *lck)
+{
+    int r0;
+    int r1;
+    int r2;
+
+    spin_lock(lck);
+    r0 = READ_ONCE(*x);
+    r1 = READ_ONCE(*x);
+    r2 = atomic_inc_return(y);
+    spin_unlock(lck);
+}
+
+位置 [x;0:r2;1:r0;1:r1;1:r2]
+过滤条件 (1:r0=0 /\ 1:r1=1)
+存在条件 (1:r2=1)

@@ -1,0 +1,39 @@
+# 简单的 Kconfig 递归问题
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#
+# 测试方法：
+#
+# make KBUILD_KCONFIG=Documentation/kbuild/Kconfig.recursion-issue-01 allnoconfig
+#
+# 这个 Kconfig 文件存在一个简单的递归依赖问题。为了理解这个递归依赖问题的原因，我们来看一下 Kconfig 需要解决的问题。通过逐步分析它需要解决的问题来理解：
+#
+#  * CORE 可能有哪些值？
+#
+# CORE_BELL_A_ADVANCED 选择 CORE，这意味着它影响了 CORE 的可能值。例如，如果 CORE_BELL_A_ADVANCED 是 'y'，那么 CORE 也必须是 'y'。
+#
+#  * 什么影响了 CORE_BELL_A_ADVANCED？
+#
+# 顾名思义，CORE_BELL_A_ADVANCED 是 CORE_BELL_A 的高级特性，因此自然依赖于 CORE_BELL_A。如果 CORE_BELL_A 是 'y'，我们知道 CORE_BELL_A_ADVANCED 也可以是 'y'。
+#
+#  * 什么影响了 CORE_BELL_A？
+#
+# CORE_BELL_A 依赖于 CORE，因此 CORE 影响了 CORE_BELL_A。
+#
+# 但这是一个问题，因为这意味着为了确定 CORE 的可能值，我们最终又需要回答关于 CORE 自身可能值的问题。回答最初的问题（CORE 的可能值）会导致 Kconfig 工具陷入循环。当这种情况发生时，Kconfig 会退出并报告“检测到递归依赖”错误。
+#
+# 阅读 Documentation/kbuild/Kconfig.recursion-issue-01 文件可能会发现，解决这个问题的一个简单方法就是从 CORE_BELL_A_ADVANCED 中移除 “select CORE”，因为这是隐含的，因为 CORE_BELL_A 依赖于 CORE。递归依赖问题并不总是这么容易解决，下面提供了一个实际例子来展示这种递归问题的实际影响，解决方案可能不是那么容易理解。请注意，依赖 CORE 的匹配语义也是解决此递归问题的方法之一。
+
+主菜单 "简单的示例以演示 Kconfig 递归依赖问题"
+
+配置 CORE
+    三态
+
+配置 CORE_BELL_A
+    三态
+    依赖于 CORE
+
+配置 CORE_BELL_A_ADVANCED
+    三态
+    依赖于 CORE_BELL_A
+    选择 CORE

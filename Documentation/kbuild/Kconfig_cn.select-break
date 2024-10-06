@@ -1,0 +1,26 @@
+```plaintext
+# 选择有依赖问题的配置选项
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+# 测试方法：
+#
+# make KBUILD_KCONFIG=Documentation/kbuild/Kconfig.select-break menuconfig
+#
+# kconfig 不会报错并启用此配置。目前这是 kconfig 的一个特性，因为 select 设计初衷是强制性的。当前 kconfig 并不检查符号的 “select” 列表中列出的符号，这样做是为了帮助加载一组已知所需的符号。正因为如此，使用 select 时应谨慎。下面是一个示例：
+#
+# 选项 B 和 C 明显与 A 相矛盾。
+# 然而，当设置 A 时，C 也可以被设置，因为 kconfig 不会访问 select 目标的依赖项（在这个例子中是 B）。由于 kconfig 不访问依赖项，因此破坏了 B 的依赖项（!A）。
+mainmenu "简单的示例以演示 kconfig select 的依赖问题"
+
+config A
+	bool "CONFIG A"
+
+config B
+	bool "CONFIG B"
+	depends on !A
+
+config C
+	bool "CONFIG C"
+	depends on A
+	select B
+```

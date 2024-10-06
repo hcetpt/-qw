@@ -1,0 +1,40 @@
+```c
+// 结果：永远不会发生
+
+// 展示一个失败的 cmpxchg() 操作在后面跟随 smp_mb__after_atomic() 时会充当一个完整的内存屏障
+
+{}
+
+P0(int *x, int *y, int *z)
+{
+    int r0;
+    int r1;
+
+    WRITE_ONCE(*x, 1);
+    r1 = cmpxchg(z, 1, 0);
+    smp_mb__after_atomic();
+    r0 = READ_ONCE(*y);
+}
+
+P1(int *x, int *y, int *z)
+{
+    int r0;
+    int r1;
+
+    WRITE_ONCE(*y, 1);
+    r1 = cmpxchg(z, 1, 0);
+    smp_mb__after_atomic();
+    r0 = READ_ONCE(*x);
+}
+
+locations[0:r1;1:r1]
+exists (0:r0=0 /\ 1:r0=0)
+```
+
+解释：
+- 这段代码展示了当 `cmpxchg()` 操作失败后，紧跟其后的 `smp_mb__after_atomic()` 会充当一个完整的内存屏障。
+- `P0` 和 `P1` 是两个并发执行的进程。
+- 在 `P0` 中，首先将 `*x` 设置为 `1`，然后尝试使用 `cmpxchg()` 更新 `z` 的值。如果失败，则执行 `smp_mb__after_atomic()` 再读取 `*y` 的值。
+- 在 `P1` 中，首先将 `*y` 设置为 `1`，然后尝试使用 `cmpxchg()` 更新 `z` 的值。如果失败，则执行 `smp_mb__after_atomic()` 再读取 `*x` 的值。
+- `locations[0:r1;1:r1]` 表示两个位置的变量 `r1` 的值。
+- `exists (0:r0=0 /\ 1:r0=0)` 表示存在一种情况使得 `r0` 在两个位置都为 `0`。

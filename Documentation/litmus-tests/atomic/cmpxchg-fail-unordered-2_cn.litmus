@@ -1,0 +1,35 @@
+### 翻译成中文
+
+#### C cmpxchg-fail-unordered-2
+
+(*
+ * 结果：有时
+ *
+ * 展示失败的 `cmpxchg()` 操作不会作为获取（acquire）或释放（release）操作。相反，成功的 `cmpxchg()` 操作会同时作为获取和释放操作。
+ *)
+
+{}
+
+```c
+P0(int *x, int *y)
+{
+    int r1;
+
+    WRITE_ONCE(*x, 1);
+    r1 = cmpxchg(y, 0, 1);
+}
+```
+
+```c
+P1(int *x, int *y)
+{
+    int r1;
+    int r2;
+
+    r1 = cmpxchg(y, 0, 1);
+    r2 = READ_ONCE(*x);
+}
+```
+
+exists (0:r1=0 /\ 1:r1=1 /\ 1:r2=0)
+```
