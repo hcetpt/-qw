@@ -1,0 +1,98 @@
+**************************************************************************
+** 历史记录
+**
+**   版本号         日期             姓名         描述
+** 1.00.00.00    2004年3月31日      Erich Chen     初始发布
+** 1.10.00.04    2004年7月28日      Erich Chen     修改以支持ioctl
+** 1.10.00.06    2004年8月28日      Erich Chen     修改以支持2.6.x
+** 1.10.00.08    2004年9月28日      Erich Chen     修改以支持x86_64
+** 1.10.00.10    2004年10月10日     Erich Chen     修复SMP和ioctl的bug
+** 1.20.00.00    2004年11月29日     Erich Chen     在PHY错误时修复arcmsr_bus_reset的问题
+** 1.20.00.02    2004年12月9日      Erich Chen     修复超过2TB RAID卷的问题
+** 1.20.00.04    2005年1月9日       Erich Chen     适应Debian Linux内核版本2.2.xx
+** 1.20.00.05    2005年2月20日      Erich Chen     使驱动看起来像2.6.x版本的Linux驱动
+**                                                   感谢以下人员的友好评论：
+**                                                   Kornel Wieliczek
+**                                                   Christoph Hellwig
+**                                                   Adrian Bunk
+**                                                   Andrew Morton
+**                                                   Christoph Hellwig
+**                                                   James Bottomley
+**                                                   Arjan van de Ven
+** 1.20.00.06    2005年3月12日      Erich Chen     修复arcmsr_pci_unmap_dma中的“unsigned long”类型转换问题，
+**                                                   修改PCCB池由“dma_alloc_coherent”分配
+**                                                   （Kornel Wieliczek的评论）
+** 1.20.00.07    2005年3月23日      Erich Chen     修复arcmsr_scsi_host_template_init导致的段错误，
+**                                                   如果RAID适配器不在PCI插槽上并且两次加载/卸载此驱动
+**                                                   修复大量栈使用（Adrian Bunk的评论）
+** 1.20.00.08    2005年6月23日      Erich Chen     修复在低质量连接下SATA电缆重载情况下的命令中止问题
+** 1.20.00.09    2005年9月12日      Erich Chen     修复命令中止处理、固件版本检查以及硬件bug修复的通知功能
+** 1.20.00.10    2005年9月23日      Erich Chen     增强sysfs功能以更改驱动的最大标签Q数量
+**                                                   添加DMA_64BIT_MASK以与所有2.6.x版本向后兼容
+**                                                   添加一些有用的命令中止消息
+**                                                   添加ioctl代码'ARCMSR_IOCTL_FLUSH_ADAPTER_CACHE'
+**                                                   客户可以发送此命令同步RAID卷数据
+** 1.20.00.11    2005年9月29日      Erich Chen     根据Arjan van de Ven的评论修复不正确的msleep重新定义
+**                                                   移除64位pci_set_dma_mask中的sizeof(dma_addr_t)条件
+** 1.20.00.12    2005年9月30日      Erich Chen     修复64位平台上的ccbs使用问题，如果系统内存超过4GB
+**                                                   将64位pci_set_consistent_dma_mask改为32位
+**                                                   在适配器初始化失败时增加适配器计数
+**                                                   修正arcmsr_build_ccb中的错误
+**                                                   psge += sizeof(struct _SG64ENTRY *) =>
+**                                                   psge += sizeof(struct _SG64ENTRY)
+**                                                   64位sg条目计算错误
+**                                                   感谢Kornel Wieliczek的友好通知和详细描述
+** 1.20.00.13    2005年11月15日     Erich Chen     使用FIFO调度待处理的ccb
+**                                                   修改arcmsr命令队列列表架构为Linux标准列表
+**                                                   启用PCI消息信号中断的使用
+**                                                   按照Randy Danlup的建议清理代码
+** 1.20.00.14    2007年5月2日       Erich Chen & Nick Cheng
+**                                                   1. 实现PCI-Express错误恢复功能和AER能力
+**                                                   2. 实现选择ARCMSR_MAX_XFER_SECTORS_B=4096的功能
+**                                                   如果固件版本大于1.42
+**                                                   3. 修改arcmsr_iop_reset以提高能力
+**                                                   4. 修改ISR，arcmsr_interrupt例程，防止与sg_mod驱动的不一致
+**                                                   如果应用程序直接调用arcmsr驱动而不通过scsi中间层
+**                                                   特别感谢Yanmin Zhang关于AER的帮助
+** 1.20.00.15    2007年8月30日      Erich Chen & Nick Cheng
+**                                                   1. 支持ARC1200/1201/1202 SATA RAID适配器，命名为ACB_ADAPTER_TYPE_B
+**                                                   2. 修改arcmsr_pci_slot_reset函数
+**                                                   3. 修改arcmsr_pci_ers_disconnect_forepart函数
+**                                                   4. 修改arcmsr_pci_ers_need_reset_forepart函数
+** 1.20.00.15    2007年9月27日      Erich Chen & Nick Cheng
+**                                                   1. 在Type B适配器上添加arcmsr_enable_eoi_mode()
+**                                                   2. 在arcmsr_handle_hbb_isr()中添加readl(reg->iop2drv_doorbell_reg)
+**                                                   以防门铃中断清除被缓存
+** 1.20.00.15    2007年10月1日      Erich Chen & Nick Cheng
+**                                                   1. 修改acb->devstate[i][j]为ARECA_RAID_GOOD而不是ARECA_RAID_GONE
+**                                                   在arcmsr_alloc_ccb_pool中
+** 1.20.00.15    2007年11月6日      Erich Chen & Nick Cheng
+**                                                   1. 添加arcmsr_pci_error_detected()和arcmsr_pci_slot_reset的条件声明
+** 1.20.00.15    2007年11月23日     Erich Chen & Nick Cheng
+**                                                   1. 检查sg列表成员数量是否超过arcmsr默认限制
+**                                                   在arcmsr_build_ccb()中
+**                                                   2. 修改arcmsr_build_ccb()返回值类型从"void"到"int"
+**                                                   3. 添加arcmsr_build_ccb()返回FAILED的条件检查
+** 1.20.00.15    2007年12月4日      Erich Chen & Nick Cheng
+**                                                   1. 修改arcmsr_drain_donequeue()忽略未知命令并让内核处理命令超时
+**                                                   这可以处理Linux XFS通过DM-CRYPT时违反最大分段的IO请求
+**                                                   感谢Milan Broz的评论 <mbroz@redhat.com>
+** 1.20.00.15    2007年12月24日     Erich Chen & Nick Cheng
+**                                                   1. 修复可移植性问题
+**                                                   2. 修复Type B，我们不应iounmap() acb->pmu；它不是ioremapped
+**                                                   3. 添加ioremap()失败时返回-ENOMEM
+**                                                   4. 在arcmsr_build_ccb中使用cpu_to_le32()传输IS_SG64_ADDR
+**                                                   5. 修改acb->devstate[i][j]为ARECA_RAID_GONE而不是ARECA_RAID_GOOD
+**                                                   在arcmsr_alloc_ccb_pool()中
+**                                                   6. 修复arcmsr_cdb->Context为(unsigned long)arcmsr_cdb
+**                                                   7. 添加(outbound_intstatus & ARCMSR_MU_OUTBOUND_HANDLE_INT) == 0的状态检查
+**                                                   在arcmsr_handle_hba_isr中
+**                                                   8. 在arcmsr_iop_message_xfer()中替换pci_alloc_consistent()/pci_free_consistent()为kmalloc()/kfree()
+**                                                   9. 修复Type B在arcmsr_free_ccb_pool()中的dma内存释放问题
+**                                                   10. 修复arcmsr_polling_hbb_ccbdone()
+** 1.20.00.15    2008年2月27日      Erich Chen & Nick Cheng
+**                                                   1. arcmsr_iop_message_xfer()在queuecommand scsi_host_template处理器下的原子上下文中调用。
+**                                                      James Bottomley指出当前GFP_KERNEL|GFP_DMA标志是错误的：首先我们在原子上下文中，
+**                                                      其次此内存不用于DMA。还移除了一些不必要的类型转换。
+**                                                      感谢Daniel Drake <dsd@gentoo.org>
+**************************************************************************

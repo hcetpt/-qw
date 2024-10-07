@@ -1,0 +1,15 @@
+<!-- SPDX 许可证标识符：GPL-2.0 -->
+<!-- 版权所有 © 2023，Oracle 和/或其关联公司。 -->
+
+{# 创建一个语言菜单用于翻译 #}
+{% if languages|length > 0: %}
+<div class="language-selection">
+{{ current_language }}
+
+<ul>
+{% for ref in languages: %}
+<li><a href="{{ ref.refuri }}">{{ ref.astext() }}</a></li>
+{% endfor %}
+</ul>
+</div>
+{% endif %}

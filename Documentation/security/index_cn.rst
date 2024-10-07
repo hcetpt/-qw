@@ -5,8 +5,8 @@
    :maxdepth: 1
 
    凭据
-   SNP-tdx-威胁模型
-   IMA-模板
+   SNP-TPM威胁模型
+   IMA模板
    密钥索引
    安全模块
    安全模块开发

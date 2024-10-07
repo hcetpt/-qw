@@ -1,0 +1,137 @@
+```css
+/* SPDX 许可声明标识符: GPL-2.0 */
+/*
+ * 针对 Alabaster 主题的 CSS 调整
+ */
+
+/* 缩小标题的大小 */
+div.body h1 { font-size: 180%; }
+div.body h2 { font-size: 150%; }
+div.body h3 { font-size: 130%; }
+div.body h4 { font-size: 110%; }
+
+/* 目录标题样式类似于 h2 */
+div.toctree-wrapper p.caption[role=heading] { font-size: 150%; }
+
+/* 略微收紧布局 */
+div.body { padding: 0 15px 0 10px; }
+div.sphinxsidebarwrapper { padding: 1em 0.4em; }
+div.sphinxsidebar { font-size: inherit;
+                    max-height: 100%;
+                    overflow-y: auto; }
+/* 调整文档边距，不强制宽度 */
+div.document {
+    margin: 20px 10px 0 10px; 
+    width: auto;
+}
+
+/* 适当调整 logo 的大小 */
+img.logo {
+    width: 104px;
+    margin-bottom: 20px;
+}
+
+/*
+ * 来自 C 源文件中的函数原型等显示参数
+*/
+dl.function, dl.struct, dl.enum { margin-top: 2em; background-color: #ecf0f3; }
+/* 多行函数原型的第二行及以后行缩进 */
+dl.function dt { margin-left: 10em; text-indent: -10em; }
+dt.sig-object { font-size: larger; }
+div.kernelindent { margin-left: 2em; margin-right: 4em; }
+
+/*
+ * 本地目录的调整
+ */
+div.kerneltoc li.toctree-l1 { font-size: smaller;
+                              text-indent: -1em;
+                              margin-left: 1em; }
+div.kerneltoc li.current > a {font-weight: bold; }
+div.kerneltoc li.toctree-l2,li.toctree-l3 { font-size: small;
+                                            text-indent: -1em;
+                                            margin-left: 1em;
+                                            list-style-type: none; }
+div.kerneltoc li.current ul { margin-left: 0; }
+div.kerneltoc { background-color: #eeeeee; }
+div.kerneltoc li.current ul { background-color: white; }
+
+/*
+ * 在小屏幕上切换内容的 CSS 魔术
+*/
+label.kernel-toc-title { display: none; }
+label.kernel-toc-title:after {
+    content: "[隐藏]";
+}
+input[type=checkbox]:checked ~ label.kernel-toc-title:after {
+    content: "[显示]";
+}
+/* 在大屏幕上隐藏切换按钮 */
+input.kernel-toc-toggle { display: none; }
+
+/*
+ * 在小屏幕上显示并实现切换功能
+ * 宽度 875px 似乎与 Alabaster 主题硬编码
+*/
+@media screen and (max-width: 875px) {
+    label.kernel-toc-title { display: inline;
+                             font-weight: bold;
+                             font-size: larger; }
+    input[type=checkbox]:checked ~ div.kerneltoc {
+        display: none;
+    }
+    h3.kernel-toc-contents { display: inline; }
+    div.kerneltoc a { color: black; }
+}
+
+/* 语言选择菜单 */
+
+div.admonition {
+    /*
+     * 确保我们在文档顶部不重叠提示和警告
+    */
+    clear: both;
+}
+
+div.language-selection {
+    background: #eeeeee;
+    border: 1px solid #cccccc;
+    margin-bottom: 1em;
+    padding: .5em;
+
+    position: relative;
+    float: right;
+}
+
+div.language-selection a {
+    display: block;
+    padding: 0.5em;
+    color: #333333;
+    text-decoration: none;
+}
+
+div.language-selection ul {
+    display: none;
+    position: absolute;
+
+    /* 与父 div 对齐 */
+    top: 100%;
+    right: 0;
+    margin: 0;
+
+    list-style: none;
+
+    background: #fafafa;
+    border: 1px solid #cccccc;
+
+    /* 不换行 */
+    white-space: nowrap;
+}
+
+div.language-selection:hover ul {
+    display: block;
+}
+
+div.language-selection ul li:hover {
+    background: #dddddd;
+}
+```

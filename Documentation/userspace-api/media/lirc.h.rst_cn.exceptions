@@ -1,0 +1,91 @@
+```plaintext
+# SPDX 许可证标识符: GPL-2.0
+
+# 忽略头文件名称
+忽略 定义 _LINUX_LIRC_H
+
+# 忽略辅助宏定义
+
+忽略 定义 lirc_t
+
+忽略 定义 LIRC_SPACE
+忽略 定义 LIRC_PULSE
+忽略 定义 LIRC_FREQUENCY
+忽略 定义 LIRC_TIMEOUT
+忽略 定义 LIRC_OVERFLOW
+忽略 定义 LIRC_VALUE
+忽略 定义 LIRC_MODE2
+忽略 定义 LIRC_IS_SPACE
+忽略 定义 LIRC_IS_PULSE
+忽略 定义 LIRC_IS_FREQUENCY
+忽略 定义 LIRC_IS_TIMEOUT
+忽略 定义 LIRC_IS_OVERFLOW
+
+忽略 定义 LIRC_MODE2SEND
+忽略 定义 LIRC_SEND2MODE
+忽略 定义 LIRC_MODE2REC
+忽略 定义 LIRC_REC2MODE
+
+忽略 定义 LIRC_CAN_SEND
+忽略 定义 LIRC_CAN_REC
+
+忽略 定义 LIRC_CAN_SEND_MASK
+忽略 定义 LIRC_CAN_REC_MASK
+忽略 定义 LIRC_CAN_SET_REC_FILTER
+忽略 定义 LIRC_CAN_NOTIFY_DECODE
+
+# 过时的 ioctl 命令
+
+忽略 ioctl LIRC_GET_LENGTH
+忽略 ioctl LIRC_SET_REC_TIMEOUT_REPORTS
+
+# 遥控协议
+
+忽略 符号 RC_PROTO_UNKNOWN
+忽略 符号 RC_PROTO_OTHER
+忽略 符号 RC_PROTO_RC5
+忽略 符号 RC_PROTO_RC5X_20
+忽略 符号 RC_PROTO_RC5_SZ
+忽略 符号 RC_PROTO_JVC
+忽略 符号 RC_PROTO_SONY12
+忽略 符号 RC_PROTO_SONY15
+忽略 符号 RC_PROTO_SONY20
+忽略 符号 RC_PROTO_NEC
+忽略 符号 RC_PROTO_NECX
+忽略 符号 RC_PROTO_NEC32
+忽略 符号 RC_PROTO_SANYO
+忽略 符号 RC_PROTO_MCIR2_KBD
+忽略 符号 RC_PROTO_MCIR2_MSE
+忽略 符号 RC_PROTO_RC6_0
+忽略 符号 RC_PROTO_RC6_6A_20
+忽略 符号 RC_PROTO_RC6_6A_24
+忽略 符号 RC_PROTO_RC6_6A_32
+忽略 符号 RC_PROTO_RC6_MCE
+忽略 符号 RC_PROTO_SHARP
+忽略 符号 RC_PROTO_XMP
+忽略 符号 RC_PROTO_CEC
+忽略 符号 RC_PROTO_IMON
+忽略 符号 RC_PROTO_RCMM12
+忽略 符号 RC_PROTO_RCMM24
+忽略 符号 RC_PROTO_RCMM32
+忽略 符号 RC_PROTO_XBOX_DVD
+忽略 符号 RC_PROTO_MAX
+
+# 未文档化的宏定义
+
+忽略 定义 PULSE_BIT
+忽略 定义 PULSE_MASK
+
+忽略 定义 LIRC_MODE2_SPACE
+忽略 定义 LIRC_MODE2_PULSE
+忽略 定义 LIRC_MODE2_TIMEOUT
+忽略 定义 LIRC_MODE2_OVERFLOW
+
+忽略 定义 LIRC_VALUE_MASK
+忽略 定义 LIRC_MODE2_MASK
+
+忽略 定义 LIRC_MODE_RAW
+忽略 定义 LIRC_MODE_LIRCCODE
+```
+
+请注意，这里的“忽略”是指在代码审查或分析过程中忽略这些宏和符号。这并不是一个实际的编程指令，而是一种注释或指南。

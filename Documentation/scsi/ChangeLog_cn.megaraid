@@ -1,0 +1,455 @@
+发布日期：2006年11月16日星期四 15:32:35 EST - Sumant Patro <sumant.patro@lsi.com>
+当前版本：2.20.5.1（scsi模块），2.20.2.6（cmm模块）
+旧版本：2.20.4.9（scsi模块），2.20.2.6（cmm模块）
+
+1. 初始化更改以修复kdump失败问题
+在加载时发送SYNC命令
+此命令清除适配器中的待处理命令并重新初始化其内部RAID结构
+没有这个更改，在kdump的第二个内核启动过程中，如果有待处理命令或其他设备共享相同的IRQ，则megaraid驱动程序可能会崩溃或无法初始化适配器
+2. 作者的电子邮件地址域名从lsil.com更改为lsi.com
+同时将MODULE_AUTHOR修改为megaraidlinux@lsi.com
+
+发布日期：2006年5月19日星期五 09:31:45 EST - Seokmann Ju <sju@lsil.com>
+当前版本：2.20.4.9（scsi模块），2.20.2.6（cmm模块）
+旧版本：2.20.4.8（scsi模块），2.20.2.6（cmm模块）
+
+1. 修复了megaraid_init_mbox()中的一个bug
+客户报告“x86_64平台上的文件中出现垃圾数据”
+根本原因：驱动程序错误地将不支持64位DMA的控制器注册为64位DMA支持
+修复：在函数中添加了识别机制来识别支持64位DMA的控制器
+> -----原始消息-----
+> 发件人: Vasily Averin [mailto:vvs@sw.ru]
+> 发送时间: 2006年5月4日星期四 2:49 PM
+> 收件人: linux-scsi@vger.kernel.org；Kolli, Neela；Mukker, Atul；
+> Ju, Seokmann；Bagalkote, Sreenivas；
+> James.Bottomley@SteelEye.com；devel@openvz.org
+> 主题: megaraid_mbox: 文件中的垃圾数据
+>
+> 大家好，
+>
+> 我调查了客户关于节点工作不稳定的问题，并发现了一个奇怪的现象：读取某些文件时会导致“尝试访问设备末尾之外”的错误信息
+我已经检查了节点上的文件系统、内存、主板BIOS版本，但这些都没有帮助，问题仍然通过简单的文件读取被复现。
+
+复现步骤如下：
+
+```
+echo 0xffffffff >/proc/sys/dev/scsi/logging_level ;
+cat /vz/private/101/root/etc/ld.so.cache >/tmp/ttt ;
+echo 0 >/proc/sys/dev/scsi/logging
+```
+
+这会导致以下 `dmesg` 消息：
+
+```
+sd_init_command: disk=sda, block=871769260, count=26
+sda : block=871769260
+sda : reading 26/26 512 byte blocks
+scsi_add_timer: scmd: f79ed980, time: 7500, (c02b1420)
+sd 0:1:0:0: send 0xf79ed980
+sd 0:1:0:0: command: Read (10): 28 00 33 f6 24 ac 00 00 1a 00
+buffer = 0xf7cfb540, bufflen = 13312, done = 0xc0366b40,
+queuecommand 0xc0344010
+leaving scsi_dispatch_cmnd()
+scsi_delete_timer: scmd: f79ed980, rtn: 1
+sd 0:1:0:0: done 0xf79ed980 SUCCESS        0 sd 0:1:0:0:
+command: Read (10): 28 00 33 f6 24 ac 00 00 1a 00
+scsi host busy 1 failed 0
+sd 0:1:0:0: Notifying upper driver of completion (result 0)
+sd_rw_intr: sda: res=0x0
+26 sectors total, 13312 bytes done
+use_sg is 4
+attempt to access beyond end of device
+sda6: rw=0, want=1044134458, limit=951401367
+Buffer I/O error on device sda6, logical block 522067228
+attempt to access beyond end of device
+```
+
+1. 当向MegaRAID控制器发出带有EVPD位的INQUIRY命令时，系统内存会被破坏。
+根本原因：MegaRAID固件错误处理带有EVPD位的INQUIRY命令。
+修复：MegaRAID固件已经修复了该问题，并且即将发布。在此期间，驱动程序将过滤掉该请求。
+
+2. 驱动程序数据结构中的一个成员导致64位平台上的未对齐问题。
+客户报告在应用程序与MegaRAID HBA驱动程序通信时出现了“内核未对齐访问地址”问题。
+根本原因：在uioc_t结构中，其中一个成员未对齐，导致系统显示错误消息。
+修复：已向社区提交了一个补丁。
+-----原始邮件-----
+发件人: linux-scsi-owner@vger.kernel.org
+代表: Sakurai Hiroomi
+发送时间: 2006年7月12日 星期三 上午4:20
+收件人: linux-scsi@vger.kernel.org；linux-kernel@vger.kernel.org
+主题: Re: Help: 在IA64平台上内核出现奇怪的信息
+
+您好，
+
+我看到了同样的信息。
+
+当GAM（Global Array Manager）启动时，出现了以下信息：
+内核：内核对地址0xe0000001fe1080d4的未对齐访问，ip=0xa000000200053371
+
+用于ioctl的uioc结构被定义为打包形式，各成员的对齐方式被打乱。
+在64位结构中，成员的对齐不符合64位边界，这导致了这些信息的出现。
+在32位结构中，我们没有看到这些信息，因为即使指定了打包形式，成员的对齐仍然符合32位边界。
+
+补丁：
+我在结构体中添加了一个32位的虚拟成员以满足64位边界的要求。我们通过IA64服务器确认了此补丁修复了问题。
+
+```
+***************************************************************
+********************
+--- linux-2.6.9/drivers/scsi/megaraid/megaraid_ioctl.h.orig  2006-04-03 17:13:03.000000000 +0900
++++ linux-2.6.9/drivers/scsi/megaraid/megaraid_ioctl.h  2006-04-03 17:14:09.000000000 +0900
+@@ -132,6 +132,10 @@
+/* 驱动数据：*/
+    void __user *           user_data;
+    uint32_t                user_data_len;
+
++
++       /* 64位对齐 */
++       uint32_t                pad_0xBC;
++
+
+    mraid_passthru_t        __user *user_pthru;
+
+    mraid_passthru_t        *pthru32;
+***************************************************************
+********************
+```
+
+发布日期: 2006年4月11日 12:27:22 EST - Seokmann Ju <sju@lsil.com>
+当前版本: 2.20.4.8（scsi模块），2.20.2.6（cmm模块）
+旧版本: 2.20.4.7（scsi模块），2.20.2.6（cmm模块）
+
+1. 修复了megaraid_reset_handler()中的一个bug
+客户报告说，在系统重置条件下偶尔会出现“无法处理内核NULL指针引用”的情况。
+根本原因：在megaraid_reset_handler()中，如果存在多个待处理的数据包，则有可能不会返回pend_list中的待处理数据包。
+修复：在驱动程序中进行了更改，使其能够返回 pend_list 中的所有数据包。
+
+1. 添加了变更请求
+
+根据以下 URL 中的信息，仅使用 rmb() 无法解决问题。我不得不将循环计数器增加到 0xFFFFFF（六个 F）。  
+链接：http://marc.theaimsgroup.com/?l=linux-scsi&m=110971060502497&w=2
+
+我还附上了一个补丁供您参考。
+请检查并将其修复应用到您的驱动程序中。
+
+此致，
+Jun'ichi Nomura
+
+发布日期：2005年11月11日 12:27:22 EST - Seokmann Ju <sju@lsil.com>
+当前版本：2.20.4.7（scsi 模块），2.20.2.6（cmm 模块）
+旧版本：2.20.4.6（scsi 模块），2.20.2.6（cmm 模块）
+
+1. 整理 PCI ID 以消除 megaraid 支持重叠
+根据 Daniel 的补丁，整理了 PCI ID，并将字符节点名称从 'megadev' 更改为 'megadev_legacy' 以避免冲突。
+---
+希望我们能更快地解决构建限制问题，但我们也应该考虑完全移除 megaraid 驱动程序中的硬件支持重叠。
+此补丁计划在 2006 年 2 月进行这些更改，并通过 printk 调试信息希望现有用户能够注意到这一变化。
+签署者：Daniel Drake <dsd@gentoo.org>
+---
+
+2. 修复了一个问题：megaraid 总是无法重置处理程序
+---
+我发现当适配器 BIOS 中的“集群模式”启用时，megaraid 驱动程序总是无法重置适配器，并显示以下消息：
+megaraid: 正在重置主机..
+megaraid mbox: 重置序列完成成功
+megaraid: 快速同步命令超时
+megaraid: 预留重置失败
+所以，每当重置发生时，适配器会进入离线状态并变得不可用。
+
+Jun'ichi Nomura [mailto:jnomura@mtc.biglobe.ne.jp]
+
+---
+
+发布日期：2005年3月7日 周一 12:27:22 EST - Seokmann Ju <sju@lsil.com>
+当前版本：2.20.4.6（SCSI模块），2.20.2.6（CMM模块）
+旧版本：2.20.4.5（SCSI模块），2.20.2.5（CMM模块）
+
+1. 添加了IOCTL向后兼容性
+将megaraid_mm驱动程序转换为新的compat_ioctl入口点
+我没有方便访问硬件的条件，因此仅进行了编译测试
+- 签名确认：Andi Kleen <ak@muc.de>
+
+2. megaraid_mbox修复：memset()中的参数顺序错误
+这显示了交叉编译的有用性——唯一的问题指示是在alpha构建中sparse输出中出现的新警告（超过256的数量被截断）
+- 签名确认：Al Viro <viro@parcelfarce.linux.theplanet.co.uk>
+
+3. 将pci_module_init转换为pci_register_driver
+从pci_module_init转换为pci_register_driver
+（来源：http://kernelnewbies.org/KernelJanitors/TODO）
+- 签名确认：Domen Puncer <domen@coderock.org>
+
+4. 使用dma-mapping.h中预定义的DMA掩码常量
+在调用pci_set_dma_mask()或pci_set_consistent_dma_mask()时使用dma-mapping.h中的DMA_{64,32}BIT_MASK常量。更多详细信息请参阅
+http://marc.theaimsgroup.com/?t=108001993000001&r=1&w=2
+签名确认：Tobias Klauser <tklauser@nuerscht.ch>
+- 签名确认：Domen Puncer <domen@coderock.org>
+
+5. 移除基于Dobson、Lindsay和Verde产品的SSID检查
+对于具有Dobson、Lindsay和Verde控制器的产品，检查SSVID/SSID是没有必要的，因为LSI已经为设备ID分配了唯一值。因此，所有具有这些IOP的控制器都应由驱动程序支持，无论SSVID/SSID如何。
+
+6. 日期：2005年1月27日 04:31:09 +0100
+发件人：Herbert Poetzl <>
+主题：RFC：2.6中的assert_spin_locked()
+
+问候！
+
+过于谨慎的编程会杀死你的内核；)
+你有没有想过检查一个自旋锁甚至断言它必须被持有（也许只是为了自旋锁调试）...
+内核中有几个地方存在以下类似检查：
+
+    BUG_ON(!spin_is_locked(&some_lock));
+
+这样做有什么问题吗？没有，除非你在没有启用CONFIG_SMP的情况下编译代码但启用了CONFIG_DEBUG_SPINLOCK... 在这种情况下，BUG()会导致你的内核崩溃。
+也许不建议做出这样的断言，但这里有一个对我有效的解决方案。（已在sh、x86_64和x86上编译测试，在x86上启动/运行测试）
+
+致以问候，
+Herbert
+
+		- Herbert Poetzl <herbert@13thfloor.at>，2005年1月27日星期四
+
+发布日期：2005年2月3日星期四12:27:22 EST - Seokmann Ju <sju@lsil.com>
+当前版本：2.20.4.5（SCSI模块），2.20.2.5（CMM模块）
+旧版本：2.20.4.4（SCSI模块），2.20.2.4（CMM模块）
+
+1. 修改了SCSI主机模板中的两个属性名称
+在2005年2月2日星期三10:56 -0500时，Ju, Seokmann写道：
+	> + .sdev_attrs = megaraid_device_attrs，
+	> + .shost_attrs = megaraid_class_device_attrs，
+
+	这些名称可能有些令人困惑。
+在通用设备模型中，“device”和“class_device”都有明确的定义，但这里并不是这个意思。
+为什么不简单地使用megaraid_sdev_attrs和megaraid_shost_attrs？
+
+除此之外，看起来也很好。
+发布日期：2005年1月27日星期四00:01:03 EST - Atul Mukker <atulm@lsil.com>
+当前版本：2.20.4.4（SCSI模块），2.20.2.5（CMM模块）
+旧版本：2.20.4.3（SCSI模块），2.20.2.4（CMM模块）
+
+1. 由于冲突提升了SCSI模块的版本
+发布日期：2005年1月21日星期四00:01:03 EST - Atul Mukker <atulm@lsil.com>
+当前版本：2.20.4.3（SCSI模块），2.20.2.5（CMM模块）
+旧版本：2.20.4.2（SCSI模块），2.20.2.4（CMM模块）
+
+1. 移除逻辑驱动器到SCSI地址转换的驱动ioctl，并替换为sysfs属性。为了移除驱动器或更改容量，应用程序现在应使用设备属性来获取SCSI设备的逻辑驱动器编号。对于新创建的逻辑驱动器，需要使用类设备属性来唯一标识每个控制器。
+- Atul Mukker <atulm@lsil.com>
+
+	“James，我对此考虑了一下，你可能有道理。让每个驱动程序这样添加文件：”
+
+		- Matt Domsch <Matt_Domsch@dell.com>，2004年12月15日
+		 linux-scsi邮件列表
+
+
+	“那么，如果你只是将你的逻辑驱动器号作为设备的一个额外参数发布，你可以通过/sys找到它。”
+
+		- James Bottomley <James.Bottomley@SteelEye.com>，2005年1月3日
+		 linux-scsi邮件列表
+
+
+	“我不明白为什么不行……这是你的驱动程序，你可以将你需要的任何额外信息作为SCSI设备属性发布；这就是可扩展属性系统的设计之一。”
+
+		- James Bottomley <James.Bottomley@SteelEye.com>，2005年1月6日
+		 linux-scsi邮件列表
+
+2. 添加AMI MegaRAID支持 - Brian King <brking@charter.net>
+		PCI_VENDOR_ID_AMI, PCI_DEVICE_ID_AMI_MEGARAID3,
+		PCI_VENDOR_ID_AMI, PCI_SUBSYS_ID_PERC3_DC,
+
+3. 将一些代码设为静态 - Adrian Bunk <bunk@stusta.de>
+日期：2004年11月15日03:14:57 +0100
+
+下面的补丁将一些不必要的全局代码设为静态
+-wait_queue_head_t wait_q;
+	+static wait_queue_head_t wait_q;
+
+已签名：Adrian Bunk <bunk@stusta.de>
+
+4. 添加NEC ROMB支持 - NEC MegaRAID PCI Express ROMB控制器
+		PCI_VENDOR_ID_LSI_LOGIC, PCI_DEVICE_ID_MEGARAID_NEC_ROMB_2E,
+		PCI_SUBSYS_ID_NEC, PCI_SUBSYS_ID_MEGARAID_NEC_ROMB_2E,
+
+5. 修复磁带驱动问题：对于任何直接CDB命令到物理设备（包括磁带），驱动程序设置的超时值为10分钟。使用此值，大多数命令将在超时前返回。然而，对于像ERASE或FORMAT这样的命令，根据设备的容量，可能需要一个多小时，命令可能会在完成之前被终止
+为了解决这个问题，在DCDB命令中的“超时”字段将设置为无超时（即4）作为其超时值。
+发布日期：2004年12月9日 19:10:23 EST - Sreenivas Bagalkote <sreenib@lsil.com>
+
+当前版本：2.20.4.2（SCSI模块），2.20.2.4（CMM模块）
+旧版本：2.20.4.1（SCSI模块），2.20.2.3（CMM模块）
+
+i. 引入了一个驱动ioctl，用于根据给定的逻辑盘返回SCSI地址。
+“为什么不能使用现有的sysfs接口来做这件事？”
+- Brian King (brking@us.ibm.com)
+
+“我已经尝试了其他方法来解决这个问题，但看不到如何在不将类似这种代码放入驱动的情况下实现逻辑盘号到HCTL的私有映射。”
+
+“……通过向用户空间提供一个映射函数，如果将来有必要的话，驱动可以自由地更改其映射算法……”
+- Matt Domsch (Matt_Domsch@dell.com)
+
+发布日期：2004年12月9日 19:02:14 EST - Sreenivas Bagalkote <sreenib@lsil.com>
+
+当前版本：2.20.4.1（SCSI模块），2.20.2.3（CMM模块）
+旧版本：2.20.4.1（SCSI模块），2.20.2.2（CMM模块）
+
+i. 修复了kioc中DMA缓冲区释放的一个bug。
+
+发布日期：2004年11月4日 18:24:56 EST - Sreenivas Bagalkote <sreenib@lsil.com>
+
+当前版本：2.20.4.1（SCSI模块），2.20.2.2（CMM模块）
+旧版本：2.20.4.0（SCSI模块），2.20.2.1（CMM模块）
+
+i. 更恰当地处理IOCTL命令超时问题。
+ii. 在megaraid_mbox中错误地引入了pci_dma_sync_{sg,single}_for_cpu（而不是_for_device）。已更改为适当的pci_dma_sync_{sg,single}_for_device。
+
+发布日期：2004年10月6日 11:15:29 EDT - Sreenivas Bagalkote <sreenib@lsil.com>
+
+当前版本：2.20.4.0（SCSI模块），2.20.2.1（CMM模块）
+旧版本：2.20.4.0（SCSI模块），2.20.2.0（CMM模块）
+
+i. 移除CONFIG_COMPAT周围的register_ioctl32_conversion。
+
+发布日期：2004年9月27日 22:15:07 EDT - Atul Mukker <atulm@lsil.com>
+
+当前版本：2.20.4.0（SCSI模块），2.20.2.0（CMM模块）
+旧版本：2.20.3.1（SCSI模块），2.20.2.0（CMM模块）
+
+i. 修复数据损坏。由于驱动中的一个拼写错误，IO包被ioctl路径错误地共享。这会导致整个IO命令被传入的ioctl命令替换。
+
+发布日期：2004年8月24日 09:43:35 EDT - Atul Mukker <atulm@lsil.com>
+
+当前版本：2.20.3.1（SCSI模块），2.20.2.0（CMM模块）
+旧版本：2.20.3.0（SCSI模块），2.20.2.0（CMM模块）
+
+i. 函数重新排序，以便内联函数在其实际使用前定义。这是GCC 3.4.1（当前稳定版）的要求。
+
+声明一些重量级函数为非内联：
+megaraid_mbox_build_cmd, megaraid_mbox_runpendq,
+megaraid_mbox_prepare_pthru, megaraid_mbox_prepare_epthru,
+megaraid_busywait_mbox
+
+- Andrew Morton, 08.19.2004
+linux-scsi邮件列表
+
+“需要清理的地方：每个内联函数的实际调用实际上都被渲染为一个完整的函数调用，因为该函数总是在定义之前被使用。Atul，请重新安排代码以消除大多数（所有）函数原型的需要，并在首次使用前定义（而不仅仅是声明原型）每个内联函数。”
+
+- Matt Domsch <Matt_Domsch@dell.com>, 07.27.2004
+linux-scsi邮件列表
+
+ii. 显示等待固件启动时的经过时间（倒计时）。
+iii. 重排Makefile中的模块编译顺序，以避免在非模块化编译时出现未解析符号的问题。
+Patrick J. LoPresti <patl@users.sourceforge.net>, 8.22.2004
+linux-scsi邮件列表
+
+发布日期：2004年8月19日 09:58:33 EDT - Atul Mukker <atulm@lsil.com>
+
+当前版本：2.20.3.0（SCSI模块），2.20.2.0（CMM模块）
+旧版本：2.20.2.0（SCSI模块），2.20.1.0（CMM模块）
+
+i. 当复制邮箱包时，仅复制前14字节（对于32位邮箱）和前22字节（对于64位邮箱）。这是为了避免获取忙标志位的陈旧值。我们希望在发送命令前立即设置忙标志位。
+ii. 在重置处理中，如果重置命令不由驱动拥有，则不要（错误地）打印“附加”驱动包的信息。
+iii. 在同步模式下发送命令时进行扩展等待。这是为了满足禁用选项ROM且没有BIOS启动控制器的情况。固件在接收到驱动的第一个命令后开始启动。当前驱动对同步命令的超时时间为1秒，远小于实际所需的时间。我们现在等待最多MBOX_RESET_TIME（180秒）以完成固件启动过程。
+iv. 在megaraid_mbox_product_info中，在准备查询命令之前完全清除邮箱内容。这是为了确保固件不会在命令中获取垃圾值。
+v. 删除 CONFIG_COMPAT 的冗余 LSI_CONFIG_COMPAT 重定义。将 `<asm/ioctl32.h>` 替换为 `<linux/ioctl32.h>`。
+
+- James Bottomley <James.Bottomley@SteelEye.com>，2004年8月17日
+  Linux SCSI 邮件列表
+
+vi. 增加对 64 位应用程序的支持。当前驱动程序假设只有 32 位应用程序，即使在 64 位平台上也是如此。使用 `mimd_t` 结构中的 "data" 和 "buffer" 字段，而不是嵌入在应用程序邮箱和传递结构中的 32 位地址。
+   
+vii. 将管理模块的功能声明从 `megaraid_mm.h` 移动到 `megaraid_mm.c`。
+
+- Andrew Morton，2004年8月19日
+  Linux SCSI 邮件列表
+
+viii. 在 `Kconfig.megaraid` 中将 MEGARAID_NEWGEN、MEGARAID_MM 和 MEGARAID_MAILBOX 的默认值更改为 'n'。
+
+- Andrew Morton，2004年8月19日
+  Linux SCSI 邮件列表
+
+ix. 将 `udelay` 替换为 `msleep`。
+
+x. 修正了注释中的拼写错误，并调整了空格，显式分组表达式。
+
+发布日期：2004年7月23日 15:22:07 EDT - Atul Mukker <atulm@lsil.com>
+当前版本：2.20.2.0（SCSI 模块），2.20.1.0（CMM 模块）
+旧版本：2.20.1.0（SCSI 模块），2.20.0.0（CMM 模块）
+
+i. 添加 Acer ROMB 2E 解决方案的 PCI ID。
+
+ii. 添加 I4 的 PCI ID。
+
+iii. 纠正了 megaraid SATA 300-4x 子系统 ID 的拼写错误。
+
+iv. 在同步命令中执行邮箱握手时移除 `yield()`。
+
+"My other main gripe is things like this:
+
++ // 最多等待 1 秒以获取状态
++ for (i = 0; i < 40000; i++) {
++   if (mbox->numstatus != 0xFF) break;
++   udelay(25); yield();
++ }
+
+这种代码在驱动程序中到处都是。在驱动程序中使用 `yield()` 是不推荐的做法。"
+
+- James Bottomley <James.Bottomley@SteelEye.com>，2004年7月14日
+  Linux SCSI 邮件列表
+
+v. 移除冗余的 `__megaraid_busywait_mbox` 函数。
+
+vi. 修复管理模块中的一个导致系统锁定的错误，当 IO 模块加载后再卸载，然后执行任何管理工具时会出现此问题。当前版本的管理模块没有正确处理适配器注销，具体来说，它仍然保留对未注册控制器的引用。为了避免这种情况，静态数组 `adapters` 已被动态列表替换，该列表在每次添加或移除适配器时都会更新。此外，在卸载 IO 模块时，资源现在按照与分配顺序完全相反的顺序释放。
+
+发布日期：2004年6月25日 18:58:43 EDT - Atul Mukker <atulm@lsil.com>
+当前版本：2.20.1.0
+旧版本：megaraid 2.20.0.1
+
+i. 适配器中的陈旧列表指针在卸载 `megaraid_mbox` 模块时导致内核恐慌。
+
+发布日期：2004年6月24日 20:37:11 EDT - Atul Mukker <atulm@lsil.com>
+当前版本：2.20.0.1
+旧版本：megaraid 2.20.0.00
+
+i. 模块默认不是 'y'，而是依赖于当前的 SCSI 和 PCI 定义。
+ii. 移除了冗余的 `mraid_driver_t` 结构。
+iii. 进行了一些缩进和 `goto/label` 修复。
+- Christoph Hellwig <hch@infradead.org>，2004年6月24日 Linux SCSI
+
+iv. 在完成 HBA 关闭之前调用 `scsi_host_put()`。
+
+发布日期：2004年6月21日 19:53:54 EDT - Atul Mukker <atulm@lsil.com>
+当前版本：2.20.0.0
+旧版本：megaraid 2.20.0.rc2 和 2.00.3
+
+i. 独立模块用于与用户空间应用程序交互并复用命令到低级别的 RAID 模块。
+### 翻译：
+
+#### 第一部分：
+“共享代码位于第三个模块，即‘库模块’，是一种可接受的解决方案。modprobe 会自动加载依赖模块，因此用户运行 ‘modprobe driver1’ 或 ‘modprobe driver2’ 时会自动加载共享库模块。”
+
+— Jeff Garzik <jgarzik@pobox.com> 2004年2月25日 LKML
+
+“正如 Jeff 所暗示的，如果你的新 MPT 基础 RAID 控制器和现有的 megaraid 驱动之间的用户空间 <-> 驱动 API 是一致的，那么你可能需要一个单一的小型辅助模块（比如 lsiioctl 或者更好的名字），由 mptraid 和 megaraid 自动加载，该模块处理动态注册 /dev/megaraid 节点。在这种情况下，mptraid 和 megaraid 会在发现每个适配器时向 lsiioctl 注册，而 lsiioctl 实质上是一个开关，将用户空间工具的 ioctl 操作重定向到适当的驱动。”
+
+— Matt Domsch <Matt_Domsch@dell.com> 2004年2月25日 LKML
+
+#### 第二部分：
+“ii. 移除 pci_device 中的 C99 初始化
+`pci_id_table_g` 如果不使用 C99 初始化会更易于阅读。
+PCI 表不会改变，有许多用户更喜欢这种更易读的形式。而且没有 C99 初始化的代码更容易理解。”
+
+— Christoph Hellwig <hch@infradead.org>, 2004年5月28日 linux-scsi
+
+“iii. 根据 Christoph Hellwig <hch@infradead.org> 在 2004年5月28日 linux-scsi 上的建议进行了许多修复”
+
+“iv. 现在支持最多32个并行 ioctl 命令，而不是当前的1个。
+有意让 ioctl 命令的内存分配不会失败。”
+
+“v. 废除内部内存管理。使用 `pci_pool_(create|alloc)` 替代。”
+
+“vi. 卸载驱动时终止 tasklet。”
+
+“vii. 不再使用 ‘host_lock’，驱动现在有细粒度锁来保护所有数据结构。”
+
+“viii. 优化构建 scatter-gather 列表的例程。调用者已经知道数据传输地址和长度。”
+
+“ix. 更好的错误处理和恢复实现。驱动现在对像 SCSI 电缆拔出等实例执行扩展错误恢复。”
+
+“x. 将管理命令与覆盖的 SCSI 命令分离。”
+驱动程序现在将管理数据包作为特殊数据包处理，并有一个专用的回调例程。

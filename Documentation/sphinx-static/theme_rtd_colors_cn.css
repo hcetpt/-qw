@@ -1,0 +1,37 @@
+/* -*- coding: utf-8; mode: css -*-
+ *
+ * 自定义 Sphinx HTML 主题：为 RTD（非深色）主题设置颜色
+ *
+ */
+
+/* 提高对比度并增大字体以方便阅读。 */
+
+body {
+	color: black;
+}
+
+.wy-menu-vertical li.current a {
+	color: #505050;
+}
+
+.wy-menu-vertical li.on a, .wy-menu-vertical li.current > a {
+	color: #303030;
+}
+
+div[class^="highlight"] pre {
+	color: black;
+}
+
+@media screen {
+
+    /* 菜单选择和按键 */
+
+    span.menuselection {
+	color: blue;
+    }
+
+    code.kbd, code.kbd span {
+	color: white;
+	background-color: darkblue;
+    }
+}

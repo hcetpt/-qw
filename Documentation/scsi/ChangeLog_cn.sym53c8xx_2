@@ -1,0 +1,119 @@
+2000年12月30日 周六 21:30
+Gerard Roudier
+* 版本 sym-2.1.0-20001230
+- SYM-2 的初始发布
+
+2001年1月8日 周一 21:30
+Gerard Roudier
+* 版本 sym-2.1.1-20010108
+- 将包含 ncr 或 NCR 的一些定义替换为包含 sym 或 SYM 的等效定义
+
+2001年1月14日 周日 22:30
+Gerard Roudier
+* 版本 sym-2.1.2-20010114
+- 修复几个 printf：
+  * 在传输参数的显示中添加目标编号
+- 使 TCQ 和队列深度的显示更清晰
+
+2001年1月17日 周三 23:30
+Gerard Roudier
+* 版本 sym-2.1.3-20010117
+- 在某些情况下返回了错误的剩余值
+这导致在使用 linux-2.4.0 时，cdrecord 出现问题
+
+2001年1月20日 周六 18:00
+Gerard Roudier
+* 版本 sym-2.1.4-20010120
+- 添加2001年的版权信息
+- 修复了 DMA 内存释放路径中的一个小错误
+（驱动卸载时因地址引用错误而失败）
+
+2001年1月24日 周三 21:00
+Gerard Roudier
+* 版本 sym-2.1.5-20010124
+- 使驱动程序在静态链接到内核的情况下能在 Linux-2.4.x 上工作
+- 检查 SCRIPTZ 的内存分配失败，并在实例分离时释放未释放的内存
+- 检查 HVD 控制器的 GPIO3 是否被拉低（驱动程序原先的操作相反）
+模块重新加载时触发了 BUS 模式误检测，因为首次加载时信任的是 BIOS 设置
+
+2001年2月7日 星期三 21:00 Gerard Roudier
+- 版本 sym-2.1.6-20010207
+- 根据内核维护者的建议调用 pci_enable_device()
+- 更改 sym_queue_scsiio() 接口
+这旨在简化可移植性
+- 将处理 SCRIPTS 下载的代码从 SCRIPTS 方法中移到补丁方法中（原先错误地放在了 SCRIPTS 设置方法中）
+- 添加一个缺失的 cpu_to_scr() （np->abort_tbl.addr）
+- 移除一个错误的 cpu_to_scr() （np->targtbl_ba）
+- 清理一下 PPR 故障恢复代码
+
+2001年3月3日 星期六 21:00 Gerard Roudier
+- 添加选项 SYM_OPT_ANNOUNCE_TRANSFER_RATE 并将相应的代码移至文件 sym_misc.c
+还将嗅探 INQUIRY 的代码移至 sym_misc.c
+这允许与NetBSD共享相应的代码，而不污染核心驱动程序源代码（sym_hipd.c）。
+- 添加可选的代码以处理来自驱动程序的IO超时（在Linux下未使用，但在NetBSD中是必需的）
+- 不再假定PAGE_SHIFT和PAGE_SIZE是在编译时定义的，因为至少NetBSD使用内存中的变量来定义这些值
+- 改进针对C1010-33的变通方法，该方法涉及禁用内部LOAD/STORE。此改进之前应用于修订版1，现在仅应用于修订版0
+- 由于文件间代码移动导致的一些代码重组
+2001年4月10日星期二，Gerard Roudier
+  * 版本 sym-2.1.9-20010412
+  - 根据手册重置53C896和53C1010芯片（即：如果SCRIPTS正在运行，则设置ISTAT中的ABRT位）
+  - 如果SCSI版本<=2且#LUN<=7，则在请求感觉中设置#LUN
+- 如果LCB已分配并且有活动的SCSI命令，则将LCB中的busy_itl设置为1。这是一种简化
+- 在sym_hcb_free()中，如果没有分配CCB，则不扫描free_ccbq。这修复了如果连接失败时会导致panic的问题
+- 在传输协商公告中添加DT/ST（双/单过渡）
+- 强制每个LUN的最大任务数至少为64
+- 对于Linux 2.4.3及更高版本，使用pci_set_dma_mask()
+- 进行一些注释修正
+2001年5月22日 20:00 Gerard Roudier 
+    * 版本 sym-2.1.10-20010509
+    - 将GPCNTL掩码设置为0x1c（原为0xfc），以便读取NVRAM
+这确保LEDC位在896及以后的芯片上不会被设置
+修复由Chip Salzenberg <chip@perlsupport.com> 提供
+- 定义支持的PQS总线数量
+修复由Stig Telfer <stig@api-networks.com> 提供
+    - 由于NetBSD加速ioctl支持，对通用代码进行了重新排列，对Linux没有影响（希望如此）
+2001年7月2日 12:00 Gerard Roudier 
+    * 版本 sym-2.1.11-20010702
+    - 添加Tekram 390 U2B/U2W SCSI LED处理
+提交者：Chip Salzenberg <chip@valinux.com>
+- 对于内核版本 >= 2.4.4，添加对 scsi_set_pci_device() 的调用
+- 检查 PCI DMA 映射失败，并在映射失败时以某种错误完成 I/O 操作
+- 对于内核版本 > 2.4.0，填充 instance->max_cmd_len
+- 进行了一些小的修复
+
+2001年9月9日 周日 18:00 Gerard Roudier
+* 版本 sym-2.1.12-20010909
+- 更改我的电子邮件地址
+- 添加即将到来的 64 位 DMA 地址支持基础设施（基于 David S. Miller 的 PCI 64 位补丁）
+- 不再使用 vm_offset_t 类型
+
+2001年9月15日 周六 20:00 Gerard Roudier
+* 版本 sym-2.1.13-20010916
+- 添加使用段寄存器支持 64 位 DMA 地址
+16 个寄存器，每个最多 4 GB * 16 -> 64 GB
+
+2001年9月22日 周六 12:00 Gerard Roudier
+* 版本 sym-2.1.14-20010922
+- 完全重写了 eh 处理。驱动程序现在使用一个信号量以便按照 eh 线程的要求同步操作。还使用了一个定时器以防止无限等待
+以下是翻译内容：
+
+2001年9月30日 周日 17:00 2001 Gerard Roudier  
+* 版本 sym-2.1.15-20010930  
+- 无条件包含 <linux/module.h>，以满足最新内核的期望  
+- 对于较新的内核使用 del_timer_sync() 来在模块卸载时停止驱动定时器  
+
+2001年10月28日 周日 15:00 2001 Gerard Roudier  
+* 版本 sym-2.1.16-20011028  
+- 略微简化驱动配置  
+- 准备针对 linux-2.4.13 的新补丁  
+
+2001年11月17日 周六 10:00 2001 Gerard Roudier  
+* 版本 sym-2.1.17  
+- 修复几个 gcc/gcc3 警告  
+- 单独从 HCB 分配通过 DSA 散列的 CCB 数组  
+所有驱动内存分配现在都不会超过 1 个页面大小，即使是在 PPC64 / 4KB 页面的意外设置下  
+
+2001年12月1日 周六 18:00 2001 Gerard Roudier  
+* 版本 sym-2.1.17a  
+- 使用 u_long 而不是 U32 作为 IO 基地址的 cookie。这与架构期望更加一致  
+- 对于 PowerPC，默认使用 MMIO 而不是假的普通 IO，因为 Paul Mackerras 表示 MMIO 在这种架构上现在工作得很好

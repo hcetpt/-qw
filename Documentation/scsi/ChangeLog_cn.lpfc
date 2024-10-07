@@ -1,0 +1,1094 @@
+已知问题：
+* 请阅读附带的 RELEASE-NOTES 文件！！！
+* 此源代码发布仅适用于上游内核版本！
+
+从 20050323 到 20050413 的更改：
+
+* 版本号更改为 8.0.28
+* 修复了 2.6.12-rc2 内核构建警告：mempool_alloc 现在需要一个接受无符号整数作为 gfp_flags 的函数
+* 移除了对一致的 PCI 内存的 PCI DMA 同步调用
+* 合并了来自 Christoph Hellwig <hch@lst.de> 的补丁：将结构化登录和 NPort 登录的帮助程序从 lpfc_cmpl_els_flogi 中分离出来
+* 移除了用于转储各种发现列表的 sysfs 属性
+* 修复了无法看到所有 LUN 的问题。在 lpfc_find_target() 中搜索除 unmapped 列表之外的所有列表。否则，向 NPR 或其他相关状态（如 PLOGI、PRLI...）节点上的 LUN 发送 INQUIRY 时会返回错误并终止扫描
+* 移除了 FC_TRANSPORT_PATCHESxxx 定义。它们已经在 2.6.12-rc1 中
+* 将 lpfc_scsi_tgt_reset 的返回值与 SCSI 中间层代码 SUCCESS/FAILED 进行比较，而不是使用 SLI 返回码
+* 移除了多余的 lpfc_sli_next_iotag 调用，该函数应仅在 lpfc_sli_submit_iocb 中调用。同时将 lpfc_sli_next_iotag 设置为静态函数
+* 添加了 LP10000-S 的 PCI ID
+* 在 lpfc_abort_handler() 中的更改：如果在发送中止命令后没有找到命令，则返回 SUCCESS；如果在发送中止命令后等待命令完成超时，则返回 ERROR
+* 在 `lpfc_scsi_prep_cmnd` 中将响应感知长度清零，以防止命令完成时解析过时的感知长度 —— 这曾导致了错误的 0710 消息
+* 将 `host_scribble` 的清除操作移到 IO 完成路径中的 `host_lock` 内部
+* 修复了一堆混合使用制表符和空格的缩进问题
+* 允许在 sysfs 属性设置中使用十六进制格式的数字。修复在 sysfs 设置中使用无效数字时应用程序挂起的问题
+* 移除 `lpfc_abort_handler` 中多余的 iotag 分配
+* 在 `queuecommand` 失败时清除 `scsi_cmnd` 结构中的 `host_scribble`
+* 修改 `lpfc_abort_handler` 顶部的逻辑，如果命令的 `host_scribble` 字段为 NULL，则返回 SUCCESS，因为驱动程序已经将命令返回到中间层
+
+从 20050308 到 20050323 的更改：
+
+* 版本号改为 8.0.27
+* 修改了由 Christoph Hellwig 提交的补丁中的一些行（3/19）。将 `MAILBOX_WSIZE * (uint32_t)` 替换为等效的 `MAILBOX_CMDSIZE` 宏
+* 合并了 Christoph Hellwig 提交的补丁（3/19）：对最新驱动程序的一些杂项补丁：
+  - 停止使用 `volatile`。如果需要特殊的内存排序，请使用内存屏障，但这里似乎不需要
+  - 将 `lpfc_sli_pcimem_bcopy` 改为接受 `void *` 参数
+  - 移除常量类型转换 —— 在 C 中，一个 `U` 后缀表示它们是无符号整数
+  - 添加一个 `MAILBOX_CMD_SIZE` 宏，因为大多数 `MAILBOX_CMD_WSIZE` 的用户实际上并不需要字计数
+  - 删除 `struct lpfc_scsi_dma_buf` 并将其两个成员直接嵌入到 `struct lpfc_scsi_buf` 中
+  - 不要在从 `pci_pool_alloc` 分配的内存上调用 `dma_sync` 函数 —— 它仅用于流式映射 (`pci_map_*`)
+* 合并了 Christoph Hellwig 提交的补丁（3/19）—— `nlp_failMask` 从未被驱动程序使用，只是报告给用户空间（并且是在一个多值文件中，这违反了 sysfs 指南）
+* 将 pci_module_init 更改为 pci_register_module()，并添加适当的 #ifdef
+* 添加了 <linux/dma-mapping.h>，这是某些架构上 DMA 32 位和 64 位定义所需的
+* 合并了 Christoph Hellwig 的补丁（03/19）- 修复初始化顺序 - 从 SCSI 视角来看，scsi_add_host 必须最后执行。同时进行了一些风格和注释的微小修正
+* 将 TRANSPORT_PATCHES_V2 的使用更改为 FC_TRANSPORT_PATCHES_V2
+从 20050223 到 20050308 的更改
+
+  * 版本号更改为 8.0.26
+  * 修订 TRANSPORT_PATCHES_V2，移除 lpfc_target 并改用 rport 数据。移除了 device_queue_hash[]
+  * 将 scan_down、max_luns 和 fcp_bind_method 的 RW 属性更改为只读（R）
+  * 修复了初始链路初始化期间的 RSCN 处理问题
+  * 修复了节点在 NPR 列表中且标记为 ADISC 时接收 PLOGI 处理的问题
+  * 修复了 RSCN 超时问题
+  * 将“SCSI 层发出设备中止”消息的严重性降低到 KERN_WARNING
+* 来自Christoph Hellwig的反馈（2月5日） - 在LPFC_EVT_SCAN情况下，调用者已经持有目标ID，因此将该ID传递给evt_arg1
+
+* 修复lpfc_register_remote_port()中的编译警告/导致的panic
+
+从2005年2月15日至2005年2月23日的变更：
+
+* 将版本号更改为8.0.25
+* 在lpfc_sli.c中添加适当的注释
+* 使用DMA_64BIT_MASK和DMA_32BIT_MASK定义，而不是分别使用0xffffffffffffffffULL & 0xffffffffULL。使用PCI等效函数代替dma_set_mask，并修改条件语句以在错误条件下实际退出
+* 只有在txcmplq_cnt时才重启els超时处理程序。在提交时，使用mod_timer调度els_tmofunc。这可以防止工作线程在没有必要的情况下唤醒els_tmo处理程序。即使没有待处理的ELS命令，线程也会被唤醒
+* 添加了新的类型定义用于中止和重置函数
+* 将lpfc_sli_abort_iocb_xxx合并为一个单一函数
+* 将lpfc_sli_sum_iocb_xxx合并为一个单一函数
+* 从所有中止和重置处理程序中移除了TXQ，因为它从未被使用
+* 修复了8.0.23版本中的Oops panic（在SourceForge上报告）。驱动程序在fast_ring_event中未正确处理LPFC_IO_POLL情况，并且在lpfc_reset_bus_handler中将tgt_reset超时设置为0。这个0超时不允许固件在不良目标上超时ABTS，并允许驱动程序将iocb放在两个列表上。同时将lpfc_sli_ringtxcmpl_get函数拆分为两个例程，以匹配快速和慢速完成语义 - ELS完成由于错误的原因而工作。还提供了新的日志消息编号 - 有两个0326条目
+* 移除未使用的 `#define LPFC_SCSI_INITIAL_BPL_SIZE`
+* 移除未使用的 `struct lpfc_node_farp_pend` 定义
+* 移除未使用的 `#define LPFC_SLIM2_PAGE_AREA`
+* 将用作指针的零值改为 `NULL`
+* 移除 `lpfc_do_work` 中单行周围的多余括号
+* 修复 `lpfc_sli.c` 中的巨大内存泄漏问题 - 驱动程序每次 LIP 操作会丢失 13 个 iocbq 结构
+* 移除最后的 GFP_ATOMIC 分配
+* 锁不在 nportdisc、hbadisc、els 以及大部分 init、sli、mbox 和 ct 函数组之外获取
+* 修正 `lpfc_sli_iocb_cmd_type` 的注释，使其不超过 80 列
+* 将 `wait_event()` 替换为 `wait_event_interruptible()`
+`wait_event()` 会使工作线程处于不可中断状态，导致其被计入负载平均计算中。同时在 `wait_event_interruptible()` 的返回代码中添加一个 `BUG_ON`，因为该工作的前提是工作线程是信号免疫的。
+从 20050208 到 20050215 的更改：
+
+* 将版本号更改为 8.0.24
+* 修复了 iocbq 结构的内存泄漏问题。对于 ELS 请求的 iocbs，sli 层现在在处理后释放响应 iocbs
+* 解决了大量内存泄漏问题 —— 每个 LIP 都会丢失 13 个 iocbq 结构
+* 将 EIO 和 ENOMEM 更改为 -EIO 和 -ENOMEM
+* 清理了 lpfc_sli_iocb_cmd_type 数组并对 iocb 类型进行了类型检查
+* 实现了 Christoph Hellwig 在 02/05 提出的反馈：移除宏 putLunHigh 和 putLunLow。改用内联函数 lpfc_put_lun()
+* 整合了 Christoph Hellwig 在 02/05 提出的反馈：不再使用 cpu_to_be32()，而是使用 swab16((uint16_t)lun)。这等同于“在小端模式下使用 swab16()”和“在大端模式下左移 16 位”
+* 添加了修订后的 FC 远程端口补丁更新（将 dev_loss_tmo 移动到 rport，将 hostdata 重命名为 dd_data，并在关闭时添加 fc_remote_host()）
+* 删除了不必要的函数原型
+* 添加代码以防止在工作线程退出后唤醒工作线程。修复了使用 70 个磁盘进行 insmod/rmmod 测试时出现的 panic 问题
+* 整合了 Christoph Hellwig 在 1/30 提出的补丁：将一些变量/代码设置为静态（即 lpfcAlpaArray 和 process_nodev_timeout()）
+* 整合了Christoph Hellwig在1月30日提交的补丁：在解码JDEC ID时使用switch...case代替if...else if...else if
+* 从20050201到20050208的更改：
+
+  * 版本号改为8.0.23
+  * 将lpfc_work_done、lpfc_get_scsi_buf、lpfc_mbx_process_link_up、lpfc_mbx_issue_link_down和lpfc_sli_chipset_init设为静态函数
+  * 清理了驱动程序中对list_head->next字段的引用
+  * 用lpfc_workq_post_event替换了lpfc_discq_post_event
+  * 实现了Christoph Hellwig在2月5日的审查建议：检查kmalloc的返回值
+  * 整合了Christoph Hellwig在1月30日提交的补丁：在!FC_TRANSPORT_PATCHES_V2 && !USE_SCAN_TARGET条件下保护scan_tmo及其相关变量
+  * 整合了Christoph Hellwig在1月30日提交的补丁：在事件处理区域进行了一些修复
+  * 整合了Christoph Hellwig在1月30日提交的补丁：移除intr_inited变量的使用。操作系统侧的中断初始化现在在lpfc_probe_one()中完成
+  * 整合了Christoph Hellwig在1月30日提交的补丁：移除lpfc_alloc_transport_attr、lpfc_alloc_shost_attrs和lpfc_scsi_host_init的外壳函数；在scsi的hostdata中重新调整phba内存分配代码，以确保释放后不再使用（在scsi_host_put之后不使用）；使lpfc_alloc_sysfs_attr返回错误
+  * 修复了lpfc_probe_one()中的panic问题。不要在一个不安全的列表迭代器中删除元素
+  * 在中止iocbs时清理fcp_ring的快速查找数组
+* 将以下超时处理程序移至 lpfc 工作线程：
+	  lpfc_disc_timeout, lpfc_els_timeout, lpfc_mbox, lpfc_fdmi_tmo,
+	  lpfc_nodev_timeout, lpfc_els_retry_delay
+* 移除未使用的 NLP_NS_NODE #define
+* 整合了 Christoph Hellwig 在 1 月 30 日的补丁：移除未使用的 lpfc_hba_list；移除未使用的 lpfc_rdrev_wd30；移除 lpfc_get_brd_no 并使用 Linux 提供的 IDR
+* 更改了板卡重置过程，使得 lpfc_sli_send_reset() 写入 INITFF 位，并让 lpfc_sli_brdreset() 清除该位
+* 移除了 outfcpio sysfs 设备属性
+* VPD 变更：1）修改驱动程序以在存在时使用 VPD 数据中的型号名称和描述 2）重新设计 DUMP 邮箱命令的使用以支持具有 256 字节 SLIM 的 HBA
+* 修复了隐式定义 struct scsi_target 时的编译错误
+
+从 20050124 到 20050201 的变更
+
+* 将版本号更改为 8.0.22
+* 将发现超时处理程序移至工作线程。此函数中有无法在硬件中断上下文中安全调用的函数调用
+* 从 HBA 初始化的错误路径中移除了 free_irq
+这将修复当 config_port 失败时未初始化的 IRQ 被释放的问题
+* 确保处理 ELS 环上未请求的 IOCB 的函数在持有锁的情况下仍然被调用
+* 当不需要处理 LA 时，清除 work_ha 中的 LA 位
+* 修复 lpfc_mbx_cmpl_read_la 错误处理部分中的双重锁定错误
+* 实现了 FCP 环的快速 IOCB 处理
+* 由于现在 mboxes 已经在锁之外无条件分配，因此在未使用的情况下释放它们
+* 将 lpfc_disc_timeout 中的几个 GFP_ATOMIC 移到锁之前，以便可以使用 GFP_KERNEL。同时清理了代码
+* 将中断处理代码合并为一个函数
+* 移除请求和非请求 IOCB 的事件发布和处理
+* 从 lpfc_sli_inter() 中移除 ELS 环处理残留部分
+* 将 ELS 环（任何慢速环）从 lpfc_sli_inter() 移动到工作线程中。链路注意、邮箱注意和错误注意，以及慢速环的注意通过工作线程副本的主机注意寄存器传递给工作线程。相应的事件从事件队列处理中移除
+* 在 HBA 结构中添加条目，将 lpfc_sli_inter() 中的部分功能委托给工作线程
+* 减少使用GFP_ATOMIC进行内存分配
+* 将锁移动到更深的位置，以便将GFP_ATOMIC更改为GFP_KERNEL
+* 修复Raw IO的IOCB初始化问题
+* 移除lpfc_target和驱动程序中的qcmdcnt、iodonecnt和errcnt
+* 在lpfc_free_node中添加对lpfc_els_abort的调用。修改lpfc_els_abort以在iocb_cmpl调用后重置txq和txcmplq迭代器
+* 修复lpfc_init.c中的use after free问题
+* 定义默认的邮箱完成例程，并移除sli层中检查mbox_cmpl == 0以释放邮箱资源的代码
+* 在lpfc_workq_post_event中清理注释格式并移除kmalloc返回值的不必要的类型转换
+* 移除针对每个目标调用fc_remote_port_unblock和fc_remote_port_delete的循环，因为scsi_remove_host调用已经实现了相同的效果
+* 对头文件进行小幅度清理。停止头文件包含其他头文件。移除隐藏多重包含的哨兵。移除不必要的#include指令
+* 修复了邮箱错误路径中的内存泄漏
+* 将锁从 lpfc_work_done 周围移到 lpfc_work_done 本身上
+* 删除了 LPFC_WORK_EVT_t 的类型定义，仅保留 struct lpfc_work_evt，以符合 linux_scsi 代码审查规范
+* 修复了一些尾随空白、用于缩进的空格和格式不正确的多行注释
+* 修复了 Raw IO 错误。现在重用 IOCB 需要设置 ulpPU 和 fcpi_parm，以避免写 IO 的错误读检查和错误读长度
+* 从 20050110 到 20050124 的更改：
+  * 版本号更改为 8.0.21
+  * 移除了 lpfc_disc_action 函数指针数组定义和使用中的不愉快的类型转换
+* 清理 Makefile。使用 ?= 运算符来设置默认的 KERNELVERSION 和 BASEINCLUDE 值。一致地使用 $(PWD)
+* 移除了 lpfc_config_port_post 中对 lpfc_sli_intr 的调用。所有 Linux 系统在启动驱动程序时都会处理硬件中断
+* 根据 Christoph Hellwig 的变更请求：重新组织 lpfc_hbadisc.c、lpfc_scsi.h、lpfc_init.c、lpfc_sli.c、lpfc_attr.c 和 lpfc_scsi.c 的内容
+* 将发现线程重命名为 lpfc_worker 线程。将错误关注和链路关注以及邮箱事件处理器的处理移到 lpfc_worker 线程中
+* 从驱动程序模板及其相关代码中移除了 `.proc_info` 和 `.proc_name`
+* 移除了 `lpfc_queuecommand` 中用于确定返回结果的 `FC_UNLOADING` 标志检查
+* 将 `FC_UNLOADING` 标志的修改移到 `host_lock` 下进行
+* 修复了 CT 和 ELS 子系统中对 `IOERR_RCV_BUFFER_WAITING` 的处理问题
+* 为 ELS 环上的 `IOERR_RCV_BUFFER_WAITING` 提供了固件 bug 的规避方案
+* 修复了 `lpfc_init.c` 中的几个 `lpfc_post_buffer` 问题
+* 在 `lpfc_cr_delay`, `lpfc_cr_count` 和 `lpfc_discovery_threads` 参数描述中添加缺失的空格
+* 在调用 `lpfc_sli_hba_down()` 之前加锁
+* 修复了 `remove_one()` 路径中的错误路径中 “host” 的内存泄漏问题
+* 修正了 `lpfc_cr_count` 的注释。默认值为 1
+* 修复了从 `lpfc_linkdown()` 中递归调用 `lpfc_disc_done()` 的问题，但 `list_for_each_entry_safe()` 在这种情况下并不安全
+* 将 `lpfc_discovery_threads`（发现过程中未完成的ELS命令数量）增加到32
+* 如果 SCSI 中间层尝试在 LUN 对应的目标处于NPR状态时恢复错误，`lpfc` 驱动程序将拒绝所有重置操作。这会导致目标进入离线状态并阻止所有 I/O 操作。修复方法是延迟对未处于MAPPED状态的目标的LUN重置，直到目标重新发现或节点超时触发
+从 20041229 到 20050110 的更改：
+
+* 版本号更改为 8.0.20
+* rport 修复：使用新的 `fc_remote_port_rolechg()` 函数而不是直接修改结构
+* rport 修复：最后一个空指针检查
+* 第二阶段的 GFP_ATOMIC 工作。将 `iocb_mem_pool` 和 `scsibuf_mem_pool` 替换为 `kmalloc` 和链表。插入内存池分配调用的列表操作。代码清理。所有中止和重置例程已转换。`Handle_ring_event` 转换
+* 如果 `mbox_cmpl == lpfc_sli_wake_mbox_wait` 在 `lpfc_sli_handle_mb_event` 中，`pmb->context1` 指向一个等待队列。不要释放该结构
+* rport 修复：修复卸载模块时的崩溃问题
+* rport 修复：接收 PRLI 时设置节点/端口角色值
+* rport 修复：修复卸载及交换机端口删除的问题
+* VPD 信息修复
+* `lpfc_linkdown()` 应该能够通过调用 `lpfc_disc_done()` 处理所有未完成事件，即使它从 `lpfc_disc_done()` 被调用。将所有事件从 `phba->dpc_disc` 移动到本地 `local_dpc_disc` 会阻止这些事件被处理。移除该队列。从此以后不应再看到“非法状态转换”消息
+* 在调用 `del_timer_sync()` 时释放主机锁并启用中断
+* 所有与 rport 相关的问题：清理 rport 删除问题。转换为使用链表的阻塞/非阻塞操作（之前是删除/添加）。将 rport 删除移动到 `freenode` —— 因此 rport 跟踪节点
+* rport 修复：对于 fport，获取最大帧和类支持信息
+* 添加 `wait_event` 以与 kthread 接口配合工作
+* 确保 `scsi_transport_fc.h` 始终由 `lpfc_scsiport.c` 引入
+* 在远程端口更改中：不再在从映射列表中移除时将 `target->pnode` 设置为空。节点被释放后（在节点超时后），`pnode` 会被设置为空。此 bug 导致设备被阻塞的小窗口期间接收到的 I/O 被标记为 `did_no_connect`。修复后，返回 `host_busy`（与远程端口更改前一致）
+* 合并对 FC 运输远程端口使用的支持。这移除了驱动程序内的任何一致性绑定。所有扫描现在都由发现引擎按每个目标进行。
+从 20041220 到 20041229 的更改：
+
+* 版本号改为 8.0.19
+* 修复了处理类型 3 的 RSCN 的错误。在完成 ADISC 处理后正确终止 RSCN 模式
+* 添加 `list_remove_head` 宏。宏清理了内存分配列表的处理。同时清理 `lpfc_reset_bus_handler` — 该例程不需要分配自己的 `scsi_cmnd` 和 `scsi_device` 结构
+* 修复了潜在的发现错误，修复了 NLP 列表损坏和潜在的内存泄漏
+* 第一部分：根据 linux-scsi 请求重新设计内存分配。此工作将每个 `scsi_buf` 的 `bde` 数量固定为 64，使分散/聚集计数成为一个模块参数，构建 `scsi_buf` 的链表，并删除所有对 `lpfc_mem.h` 的依赖
+* 将 `lpfc_do_dpc`、`probe_one` 和 `remove_one` 回退到原始实现。问题太多（驱动程序无法完成初始发现，且 IO 无法开始写入磁盘）。撤销 kthread 补丁
+* 修复 `lpfc_do_dpc` 中的竞争条件。如果唤醒中断发生在 `lpfc_do_dpc` 正在运行 `disc_done` 且 dpc 列表为空时，最新的插入会被遗漏，`schedule_timeout` 不会唤醒。睡眠间隔是定义为 `~0UL >> 1` 的非常大的数字。暂时将其改为 5*HZ
+* 修复了将发现线程实现迁移到 kthread 时引入的错误。`kthread_stop()` 无法唤醒等待信号量的线程，且使用 `modprobe -r lpfc` 无法总是（大多数时候）完成卸载。修复方法是在不使用信号量的情况下进行可中断睡眠
+* Makefile 小幅清理 — 移除 2.4 版本与 2.6 版本判定的残留代码
+从 20041213 到 20041220 的更改：
+
+* 版本号改为 8.0.18
+* 在移除 `sliinit` 和 `ringinit[]` 环统计信息后进行清理。环统计信息由环自身拥有，SLI 统计信息位于 SLI 结构中
+* 整合了来自 Christoph Hellwig <hch@lst.de> 的补丁：消除 64 位平台上的编译警告：对于 `%llx` 格式规范符，其变量必须转换为 `long long`，因为 64 位平台上 `(u)int64_t` 只能是 `long`
+* 整合了来自 Christoph Hellwig <hch@lst.de> 的补丁：移除死代码
+* 整合了来自 Christoph Hellwig <hch@lst.de> 的补丁：使用 kthread 接口
+* 在模块初始化例程中打印 LPFC_MODULE_DESC 标志
+* 移除了 sliinit 结构和 ringinit[] 数组
+* 将 lpfc_sli.c 中的日志消息编号从 324 更改为 326
+* 在 lpfc_reset_bus_handler 中延长命令完成的等待时间，并用 schedule_timeout() 替换 msleep()，在 lpfc_abort_handler() 中添加错误信息
+* 当在 dev_loss 设置例程中设置 lpfc_nodev_tmo 时，确保最小值为 1 秒
+* 调用了假设已加锁但实际未加锁的函数，内核抱怨解锁未锁定的锁
+* 在 linkdown 中增加了代码以取消注册，如果我们知道登录会话将终止
+* 移除了 automap 配置参数，并修复了 use_adisc 逻辑以包含 FCP2 设备
+从20041207到20041213的更改：
+
+* 将版本号更改为8.0.17
+* 通过在lpfc_compat.h中添加__iomem标记来修复稀疏警告
+* 修复一些稀疏警告 —— 使用0作为NULL指针
+* 确保每个if与其(之间有一个空格
+* 修复一些过长的行，并确保使用硬制表符进行缩进
+* 删除所有尾随空白
+* 集成Christoph Hellwig为8.0.14提供的补丁：如果pci_module_init失败，则需要释放传输模板（同时，在启动时不打印驱动程序名称，因为Linux驱动程序可以在没有硬件的情况下加载，此时日志中的噪音被认为是不礼貌的，最好只对实际找到的硬件打印消息）
+* 集成Christoph Hellwig为8.0.14提供的补丁：添加缺失的__iomem注释，移除无效的类型转换，将函数标记为static
+主要更改是将某些偏移量从基于字节改为基于字节，以便我们可以简单地进行void指针算术（GCC扩展），而不是将其转换为uint32_t
+* 集成Christoph Hellwig为8.0.14提供的补丁：标志始终为LPFC_SLI_ABORT_IMED，即0 —— 移除死代码
+* 修改预处理器 #ifdef、#if、#ifndef 以反映上游内核提交。使用 `make clean;make` 和 `make clean;make ADVANCED=1` 在 SMP x86 上进行干净编译，测试环境为 RHEL 4 Beta 下的 2.6.10-rc2。带有多个 LIP 和长电缆拔插的情况下表现正常。
+* 实现完整的 VPD 支持。
+* 中断处理程序会在返回前等待中断完成。修复了 iocb 完成代码路径中的一些 panic 问题。
+从 20041130 到 20041207 的更改：
+    * 版本号更改为 8.0.16。
+    * 修复了挂起的 dt 会话问题。当中间层调用中断 SCSI 命令时，确保驱动程序不执行中断后的处理程序。将 iocb_cmpl 回调处理器设置为 NULL，并让 SLI 接管。
+    * 添加读取检查功能，使用 SLI 选项验证所有接收到的读取数据。
+
+从 20041123 到 20041130 的更改：
+    * 版本号更改为 8.0.15。
+    * 使用 `#ifdef` 将未使用的 “binary” 属性（由 DFC_DEBUG 定义）编译为干净版本。
+    * 阻止 DID_ERROR 在 Clarion 数组设置 QUEUE_FULL 时出现（SCSI 错误返回值 0x70028）。无需在目标设备已失败的情况下使驱动程序硬性失败。
+    * 修复了在 SourceForge 上报告的 SCSI 设备扫描错误。驱动程序在 lpfc_handle_fcp_error 中返回 DID_ERROR，导致中间层标记报告的 LUN 即使成功也会被标记为失败。
+    * 不要在发生数据不足的情况下忽略 SCSI 状态（如查询、测试单元准备等），这会导致我们丢失预留冲突等问题。
+
+从 20041018 到 20041123 的更改：
+    * 版本号更改为 8.0.14。
+    * 新增函数 lpfc_sli_next_iocb_slot()，如果队列未满，则返回 cmdidx 处 iocb 条目的指针。同时更新 next_cmdidx 和 local_getidx（但不更新 cmdidx）。
+    * lpfc_sli_submit_iocb() 将 next_cmdidx 复制到 cmdidx。现在这是唯一更新 cmdidx 的地方。
+    * 将 lpfc_sli_update_ring() 分解为两个函数：lpfc_sli_update_ring() 和 lpfc_sli_update_full_ring()。
+* `lpfc_sli_update_ring()` 未能正确读回 `cmdidx` 的值
+* 简化了 `lpfc_sli_resume_iocb()` 及其使用
+* 新增静态函数 `lpfc_sli_next_iocb(phba, pring, &piocb)` 用于遍历 TX 队列中的命令及新命令（位于队列末尾）
+* 将 `max_lun` 减少到 256（由于某些阵列报告的问题）
+修正了注释和宏值，使默认值为 256，最小值为 1，最大值为 32768
+* 修复了一个明显的拼写错误/漏洞：在 `lpfc_scsiport.c` 中使用 `kfree` 释放 `lpfc_scsi_buf` 而不是 `mempool_free`
+* 抑制对 FABRIC 节点的 `nodev_tmo` 消息
+* 修复了一些将普通整数用作 NULL 指针的情况
+* 修复了 FLOGI 完成时的错误路径代码，并清理了 `lpfc_els_chk_latt` 的错误处理路径
+* 修复 `lpfc_els_chk_latt()` 以使 Fabric NPorts 也能通过发现状态机
+* 对 lpfc_els_chk_latt() 的修复
+* 使用 DID 而非 SCSI 目标 ID 作为端口 ID，并在 lpfc_fcp.c 中添加一些缺失的锁
+* 更改 eh_abort_handler，如果未在驱动程序中找到命令则返回 FAILED
+* 修复崩溃：在虚拟地址 0000000000100108 处进行分页请求 —— 这是由于从 txcmpl 列表中移除已移除项所导致（100100 是下一个指针中的 LIST_POISON1 值，8 是“prev”的偏移量）。驱动程序耗尽了 iotags 并且没有很好地处理这种情况。问题的根本在于 lpfc_sli.c 中的初始化代码
+* 为支持热插拔而对拟议的 Linux 内核补丁所做的更改
+* 在 prep_io 失败路径中将 seg_cnt 清零以防止双 sg 取消映射调用
+* 如果处于 SLIM 模式，则修复设置主机组环形指针的高 32 位。旧代码不恰当地屏蔽了低位
+* 使用 scsi_tcq.h 中提供的 scsi_[activate|deactivate]_tcq 调用
+* 整合来自 Christoph Hellwig (hch@lst.de) 的补丁：不要对一致内存调用 pci_dma_sync_*。pci_dma_sync_* 是必需的，但仅应与流式 DMA 映射 pci_map_* 一起使用，而不是一致映射。注意：还有更多一致映射使用了 pci_dma_sync 调用。可能这些也应该被移除
+* 修改 lpfc_free_scsi_buf 以适应所有三种 scsi_buf 释放类型，以缓解电缆拔出测试时的各种恐慌
+* 将 hotplug 设置为默认值 0，并将 lpfc_target_remove 设置为除非启用 hotplug 否则不移除设备
+* 修复发现漏洞：plogi cmpl 在释放后使用了 ndlp
+* 修复发现漏洞：rnid acc cmpl，在释放后可能会使用 ndlp
+* 在 lpfc_target_remove() 中对代码路径进行模块化
+* 对支持 SCSI 热插拔的更改（由于需要内核支持，这些更改被 ifdef 注释掉了。USE_SCAN_TARGET 需要内核支持来导出 scsi_scan_target 接口，并将 SCAN_WILD_CARD 定义移到通用的 scsi 头文件中。USE_RESCAN_HOST 需要内核支持来导出 scan_scsi_host() 接口，并开启 rescan 标志）
+* 移除了 lpfc_linkdown_tmo 的冗余变量声明
+* 修复大规模端口移除测试的问题
+* 在使用 BAR1 寄存器编程配置端口邮箱命令之前，增加检查 BAR1 寄存器是否有效的功能
+* 添加 lpfc_scsi_hotplug 以启用或禁用驱动程序对 SCSI 热插拔的支持
+* 将 lpfc_disc_neverdev() 改为 lpfc_disc_illegal()，并将 lpfc_disc_nodev() 改为 lpfc_disc_noop()。调整相应的事件以使用这些例程
+* 增加对 SCSI 设备热插拔的支持
+* 在 `lpfc_slave_destroy()` 中考虑虚拟 `lpfc_target`
+* 修复存储 WWPN / WWNN 到 NameServer / FDMI `lpfc_nodelist` 条目中的问题
+* 为诊断目的在 `lpfc_target` 中增加了 `slavecnt`
+* 添加了 `lpfc_hba` 加载/卸载标志以处理添加/移除设备的特殊情况
+* 在扫描前增加目标添加/移除延迟
+* 在调用 `scsi_remove_host` 前阻塞 `rmmod` 路径清理设备
+* 为 2.6.5 内核添加了一个 `#define` 定义用于 `msleep`
+* 在重置总线处理器中，如果内存分配失败，返回 `FAILED` 而不是 `SUCCESS`
+* 让 `lpfc` 错误处理程序 `bus_reset` 和 `lun_reset` 等待所有相关 I/O 操作完成后再返回
+* 修正 `lpfc_hba_init` 中的 `memset` 字节计数，以便 `LP1050` 能正确初始化
+* 将背景节点超时处理移至延迟过程调用（DPC）。这使我们能够在适当的时候解除阻塞（停止 dev_loss_tmo）。
+* 修复具有多个 LUN 的阵列发现问题。在初始化主机结构时，max_luns 被设置为 0。之后，lpfc_cfg_params 将 max_luns 设置为正确的值。
+* 删除未使用的定义 LPFC_MAX_LUN，并将 lpfc_max_lun 参数的默认值设置为 512。
+* 减少 lpfc_hba_init 的栈使用量。
+* 清理了由 scripts/checkincludes.pl 生成的以下警告：lpfc_fcp.c 中包含 scsi/scsi_cmnd.h 多次。
+* 将 "set_current_state(TASK_UNINTERRUPTIBLE); schedule_timeout(timeout)" 替换为 "msleep(timeout)"。
+* 在重新发现节点时，Fixnode 会丢失 starget。我们看到类似的消息：lpfc 0000:04:02.0: 0:0263 无法阻止 SCSI 目标。将 starget 字段移到由节点引用的 struct lpfc_target 中。
+* 在 lpfc_sli.c 中增加额外的 SLI 层日志记录。
+* 忽略 lpfc_nportdisc.c 中更多意外完成的情况。
+* 不能从软中断上下文调用 lpfc_target_unblock。似乎没有必要从节点超时中解除目标的阻塞。
+* 引入并使用非致命事件处理器来处理 lpfc_nportdisc.c 中的意外事件
+* 在 lpfc_scsiport.c 中，不能在中断禁用的情况下调用 fc_target_(un)block() 函数
+* 新增了一个配置参数 lpfc_max_luns，范围为 1-32768，默认值为 32768
+* 允许 lpfc_fcp.c 调用 lpfc_get_hba_sym_node_name()
+* 将 nodev 超时时间从 20 秒增加到 30 秒
+* 将一些 kfree((void*)ptr) 替换为 kfree(ptr)
+* 将三个函数设为静态：lpfc_get_hba_sym_node_name、lpfc_intr_prep 和 lpfc_setup_slim_access。将 lpfc_intr_prep 和 lpfc_setup_slim_access 的定义移至其使用之前
+* 删除 lpfc_hbadisc.c 中一个不必要的 list_del()
+* 在调用 lpfc_nlp_list() 之前设置 nlp_state，因为这可能会调用 fc_target_unblock，从而可能导致在 queuecommand 中释放 host_lock 时产生竞争
+* 由于 lpfc_nodev_tmo < dev_loss_tmo，暂时移除 queuecommand 中的 DID_BAD_TARGET 返回值
+* 修复与rcv标志相关的问题
+* 删除未使用的portstatistics_t结构
+* 删除lpfc_fcp.c中的#if 0和不必要的检查
+* 简化lpfc_issue_lip：移除额外的保护层
+* 在调用lpfc_sli_issue_mbox(phba, pmb, MBX_NOWAIT)之前获取锁，在lpfc_sli_issue_mbox_wait()中
+从2004年9月20日到2004年10月18日的变化：
+
+* 将版本号更改为8.0.13
+* 使用#ifndef DFC_DEBUG ... #endif隐藏一些属性
+* 修改Makefile以实现(1)使BUILD_NO_DEBUG=1将隐藏一些（二进制）属性；(2)使BUILD_FC_TRANS=0将为带有block/unblock补丁的2.6.5内核构建驱动程序
+* 修改了#ifdef名称
+* 增加对提议的FC传输主机属性的支持（这取代了我们驱动程序中的一些本地属性）
+* 删除了二进制统计信息sysfs属性
+* 增加了额外的ELS详细日志记录以记录ELS响应
+* 在Makefile中增加了对BUILD_FC_TRANS=2的识别，以定义FC_TRANS_VER2
+* 添加了一个指针用于链路状态分配
+* 导出了lpfc_get_hba_sym_node_name供FC_TRANS_VER2 sysfs例程使用
+* 修复了LIP测试中的发现问题：如果设备在我们的FLOGI完成之前发送了一个ELS命令（例如LOGO），则应将其标记为LS_RJT
+* 调整了`#define`的位置，仅向上游内核交付物提供target_add/remove，而不是SLES9。提供了条件编译包含target_block/unblock，仅当FC_TRANS_VER1时生效
+* 在lpfc_nlp_list移动过程中添加了合理性检查，并将nlp_Target设置移出`#ifdef`
+* 在lpfc_target结构中增加了一个blocked成员用于阻塞/解除阻塞。这个成员使驱动程序能够知道何时在pci_remove_one或pci_add_one时解除阻塞。进一步`#ifdef`了一些阻塞/解除阻塞相关的代码，并从target_block/unblock中移除了一些防御性检查
+* 将+5秒窗口调整到dev_loss_tmo设置，并更新了注释
+* 从target_block/unblock中移除了NULL目标检查，并修正了一些注释
+* 在 2.6.5 内核上启用 sysfs 属性并移除额外的兼容性代码
+* 移除所有尾随空格
+* 添加消息 0718，并在 dma_map_single 失败时返回错误
+* 将 fcpCntl2 命令改为包含 FCP_ 前缀，以消除在后续 2.6.9-rc 内核上的编译警告。由于这些模块没有依赖于 scsi.h，从 hbadisc.c、sli.c 和 fcp.c 中移除对 scsi/scsi.h 的包含
+* 修复了与 RSCN 处理相关的一个 bug。在一个设备上接收到的 RSCN 不应影响未被 RSCN 引用的其他设备
+* 将 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,6) 移动到包含 lpfc_jedec_to_ascii 位置，以防止在 SLES 9 中产生警告
+* 更新 Makefile 以考虑 SLES 9 和上游 scsi-target 内核
+* 此次提交为上游 scsi 目标内核和 SLES9 SP1 上的 2.6.5 内核提供了 block/unblock 钩子，并附带了 block/unblock 补丁
+* 关于设置 targetp->pnode 和 ndlp->nlp_Target 的发现更改。确保从发现过程中正确调用 fc_target_* 函数。从 lpfc_cleanup() 中移除 list_del。确保所有 lpfc_consistent_bind_* 函数不设置任何驱动结构对象
+* 修复 READ_LA 或 READ_SPARAM 邮箱命令超时导致系统崩溃的问题
+* 清理 Discovery ndlp 列表中的 list_del() 调用
+* 修复一些 insmod/rmmod 崩溃、链路断开崩溃和设备丢失崩溃的问题
+* 移除了 NLP_SEARCH_DEQUE
+* 只有在 targetp 非空并且持有 host_lock 的情况下才调用 lpfc_target_unblock
+* 在进行发现时重新添加了 qcmdcnt 并进行了若干错误修复
+* 将 tgt_io 更改为 outfcpio lpfc_fcp.c
+* 修复了由于 LIP 和拔线（无论是否应用了 block/unblock 补丁）导致的错误
+* 目前我们必须在中断启用的情况下调用 fc_target_unblock 和 fc_target_block
+* 从 dma_map_sg 中保存 seg_cnt。保存 scatter-gather 的起始地址，并在出错时将 seg_cnt 传递给 dma_unmap_sg
+* 通过 ifdefs 将 block/unblock 调用集成到驱动中。此更改得到了 scsi-target-2.6 内核及其后续版本的支持
+* 合并了一些发现漏洞修复，并添加了 tgt io 计数器
+* 添加了 sysfs 属性/接口：只读属性 "management_version" 和写入专用属性 "issue_lip"
+* 在大端字节序机器上修复编译问题：当使用 #if 检查 __BIG_ENDIAN（定义为 4321）时没有问题，但需要使用 #ifdef 检查 __BIG_ENDIAN_BITFIELD，因为它没有值，只是被定义或未定义
+* 添加 fabric_name 和 port_type 属性
+* 将 mdelay 更改为 msleep。mdelay 能工作，但在没有锁的情况下会浪费 CPU 资源。改回 msleep。已在 sg_reset 对总线和三个连接的目标进行测试
+* 在 lpfc_version.h 中添加了标准的 #ifndef...#define...#endif
+* 整合了 Christoph Hellwig 的补丁：在 lpfc_sli_resume_iocb 和 lpfc_sli_issue_iocb 中添加了两个新的辅助函数 —— 清理了这两个函数中的冗余代码 —— 去除了未使用的 SLI_IOCB_USE_TXQ —— lpfc_sli_issue_iocb_wait 完全移除了 flags 参数
+* 修复了 lpfc_sli.c 中的问题：不能将一个 5 位值存储到一个 4 位字段中
+* 将一些函数从 lpfc_fcp.c 移动到更合适的文件中
+* 空白清理：删除所有尾随空白字符
+* 将 lpfc_disc_ndlp_show 设置为 lpfc_fcp.c 中的静态函数
+* 移除多余的 printk，并将部分替换为 printk(KERN_WARNING)
+* 修复几行长行并调整软制表符
+* 移除由 Sparse 对驱动程序生成的警告（设置 C=1）。这些主要是“整数用作指针”的警告，即使用 NULL 而不是 0
+* 整合了来自 Christoph Hellwig 的补丁：进行了大量更改，最显著的是移除了 phba->slim2p lpfc_dmabuf，取而代之的是类型化的指针和 dma_addr_t。由于使用了类型化指针，许多类型转换混乱可以消除；同时，也将复杂的 SLI2_SLIM_t 替换为简单的结构体 lpfc2_sli2_slim，该结构体仅包含我们在使用 SLI2_SLIM_SIZE 进行所有大小计算时关心的部分
+* 整合了来自 Christoph Hellwig 的补丁：简化了 I/O 完成路径，特别是对非错误情况的快速处理。同时从 lpfc_scsi.h 中移除了大量无用成员和定义——例如，lpfc_target 现在只剩下 lpfc_nodelist 指针
+* 添加用于发出 mbox 命令的二进制 sysfs 文件
+* 将 #if __BIG_ENDIAN 替换为 #if __BIG_ENDIAN_BITFIELD，以兼容用户空间应用程序
+* 减少 proc_info 中的数据量
+* 压缩 nodelist 标志成员
+* 扩展 discovery sysfs shost 条目的 INFO 信息
+* 如果信息超过 4k sysfs 限制，则通知用户
+* 删除了一组未使用的 #define
+* 添加了初始的 sysfs 发现 shost 属性
+* 删除了 lpfc_disc.h 中未使用的 #define
+* 修复了 nodelist 的 failMask 设置
+* 清理了一些旧注释和未使用的变量
+* 将 LP101 添加到已识别适配器列表中
+从 2004-09-08 到 2004-09-20 的更改：
+
+* 版本号更改为 8.0.12
+* 从 lpfc_hw.h 中删除了使用的 #define：DEFAULT_PCI_LATENCY_CLOCKS 和 PCI_LATENCY_VALUE
+* 进行了适应 rnid 的更改
+* 修复了 RSCN 处理，使 RSCN NS 查询仅影响 RSCN 数据中发现的 NPort
+* 如果我们收到一个排队用于发现的 NPort 的 plogi，清除 NLP_NPR_2B_DISC 标志，因为接收 plogi 逻辑会强制 NPort 通过发现流程
+* 确保在 lpfc_cleanup() 中也清理 lpfc_target
+* 针对正在进行中的 block/unblock 内核 API 扩展的初步更改，已在 linux-scsi 列表中讨论。这些更改仅涉及名称和原型更改
+* 在 lpfc_els_abort 中添加了 send_abts 标志。当发送 ADISC 时接收到 LOGO，则接收到的 LOGO 的 XRI 与发送的 ADISC 相同。因此，在发送 LOGO ACC 之前我们不能 ABTS ADISC
+* 清除一些未使用的 fc_flags，并添加 FC_DISC_TMO
+* 添加了 board_online sysfs 属性以支持 libdfc 函数 InitDiagEnv 和 SetBrdEnv
+* 简化 lpfc_els_timeout_handler() 中 lpfc_els_retry 修复情况下的处理逻辑
+* 当我们关闭 SLI 层时，清除发现/ELS 事件
+* 添加了 ctlreg 和 slimem 二进制属性以支持 libdfc 的读写 mem/ctl 功能
+* 整合了 Christoph Hellwig 的补丁：清理 lpfc_sli_ringpostbuf_get
+* 修改了 lpfc_slave_alloc 和 lpfc_slave_destroy 以分配和释放一个虚拟目标指针。这允许 queuecommand 跳过对 NULL 目标指针的检查，并避免在 slave_alloc 失败时产生的控制台垃圾信息
+* 修复 cfg_scan_down 逻辑，之前的逻辑是反的
+* 初始化列表头 ctrspbuflist
+* 将 lpfc_driver_abort 改名为 lpfc_els_abort，因为它仅适用于 ELS 环
+* 移除 lpfc_consistent_bind_get() 中未使用的第三个参数
+* 修正 lpfc_prep_els_iocb() 中的 iotag 字段
+* 移除由 lpfc_els_abort() 触发的代码路径中的日志消息
+* 在 lpfc_fcp.c 中设置 host->unique_id
+* 移除冗余代码：lpfc_target.pHba 不再需要
+* 整合 Christoph Hellwig 的补丁：移除无效的 SLI_IOCB_POLL 处理
+* 整合 Christoph Hellwig 的补丁：简化 I/O 提交和完成路径
+* 移除不必要的 lpfc_brd_no。确保 brd_no 的分配是唯一的
+* 删除未使用的 MAX_FCP_LUN
+* 在 lpfc_ct.c 中使用 mod_timer 替换 add_timer 处理 FDMI
+* 修复各种发现问题
+* 将停止计时器的操作移到 lpfc_mem_free() 调用之前
+* 修复 NameServer 注册登录错误路径
+* 在卸载模块时清理可能存在的未完成发现计时器
+* 修复 NPort 到 NPort 点对点发现问题
+* 移除 ip_tmofunc 和 scsi_tmofunc
+* 集成了 Christoph Hellwig 的补丁：
+    * lpfc_disc_done/lpfc_do_dpc 清理 - lpfc_disc_done 可以返回 void - 将 lpfc_do_dpc 和 lpfc_disc_done 移动到 lpfc_hbadisc.c - 移除在调用 lpfc_disc_done 前检查列表是否为空的操作，因为它能够很好地处理空列表情况，并且额外的指令成本低于忙等待自旋锁操作的成本
+* 整合了 Christoph Hellwig 的补丁：此补丁添加了一个新的 64 位计数器，不再重用 brd_no。此外，还对周围代码进行了少量的空白清理。
+* 重新排列 lpfc_els.c 中的函数顺序以移除原型声明的需求。
+* 从 lpfc_crtn.h 中移除了未使用的原型声明：lpfc_ip_timeout_handler、lpfc_read_pci 和 lpfc_revoke。
+* 从 lpfc_crtn.h 中移除了一些未使用的原型声明：lpfc_scsi_hba_reset、lpfc_scsi_issue_inqsn、lpfc_scsi_issue_inqp0 和 lpfc_scsi_timeout_handler。
+* 整合了 Christoph Hellwig 的补丁：移除 TRUE/FALSE 的使用。
+* 整合了 Christoph Hellwig 的补丁：移除未使用的函数原型声明 lpfc_set_pkt_len 和 lpfc_get_pkt_data（位于 lpfc_crtn.h 中）——修复了编译警告。
+* 从 lpfc_mem.h 中移除了未使用的结构体 lpfc_dmabufip 定义。
+* 从 lpfc_compat.h 中移除了 2.6.5 之前的 MODULE_VERSION 宏。
+* 修正了缺少的 static 修饰符并移除了无效代码。
+* 添加了 shost 属性 nodewwn、portwwn 和 portfcid。
+* 初始支持通过 sysfs 实现的 CT。支持请求负载大小小于 PAGE_SIZE 和响应负载大小为 PAGE_SIZE 的情况
+驱动程序维护一个响应列表，并将与调用进程的 PID 相对应的响应返回
+* 支持 RefreshInformation、GetAdapterAttributes 和 GetPortStatistics
+* 将 nodev-tmo 默认值设为 20 秒
+* 修复一些 DSM 错误情况，并在必要时进行 unreg_login rpi 操作
+* 修正关于 fc_target_block 和 fc_target_unblock 的注释
+* 修正 scsi_block_requests 和 scsi_unblock_requests 的代码
+* 添加 NLP_FCP_TARGET 以支持 nodeinfo
+* 在 lpfc_nlp_list 中移动 suspend 和 resume 到适当的位置 — 使用 host_lock 进行 DPC 以避免竞争（移除 dpc_lock）
+* 修复 PLOGI 接收的一些边缘情况 — 简化 cmpl_reglogin_reglogin_issue 的错误处理
+* 修复 ppc64 EEH MMIO 引发的恐慌 — 在写入 HBA 寄存器后始终执行读取操作以强制刷新
+* 删除 lpfc_hbadisc.c 和 lpfc_els.c 中的初始静态例程声明
+* 更新发现处理
+从 20040823 到 20040908 的更改
+
+* 将版本号更改为 8.0.11
+* 移除持久绑定代码
+* 显示 ASC 和 ASCQ 信息
+* 修复链接从关闭到开启的转换问题，当 linkdown 超时到期时。修复在 queuecommand 开始处的防御性错误检查中
+* 移除 lpfc_scsi_timeout_handler，因为不再需要这个定时器。中间层将耗尽重试次数，然后调用 lpfc_abort_handler、lpfc_reset_lun_handler 和 lpfc_reset_target_handler
+* 对 SCSI 平坦空间寻址/卷集寻址提供最低限度的支持。使用 16 位的 LUN 地址以使平坦寻址/VSA 能够工作
+* 将两处 if(1 != f(x)) 更改为 if(f(x) != 1)
+* 删除对 lpfc_cfgparm.h 的包含
+* 减少 lpfc_fdmi_cmd 在 lpfc_ct.c 中的栈使用量
+* 在 /sys 写入/存储函数中添加最小范围检查属性
+* 通过FC传输属性修复了node_name和port_name的显示
+* 移除了biosparam代码
+* 移除了范围检查。phba->config[]数组元素现在嵌入到了hba结构中。lpfc_config_setup()已被移除
+* 将lpfc_scsi_cmd_start合并到lpfc_queuecommand中，并清理了组合后的例程
+* 移除了未使用的原型myprint和lpfc_sched_service_high_priority_queue
+* 移除了未使用的函数lpfc_nodev
+* 移除了对scsi_cmnd->timeout_per_command的取消。SCSI中层现在会对所有命令进行超时处理——固件被指示不进行超时
+* 从lpfc_scsi_cmd_start中移除了轮询代码。重新组织了queuecommand和cmd_start的部分内容
+从2004年8月10日到2004年8月23日的变更：
+
+* 版本号更改为8.0.10
+* 根据Arjan和Christoph的评论进行了额外的定时器更改
+* 在适当的地方使用mod_timer()代替del_timer_sync()
+* 修复了一个使用后释放（use after free）的情况（在 2.6.8.1 版本内核中启用 CONFIG_DEBUG_SLAB 时会导致 panic）
+* 修复了 lpfc_fcp.c 中的编译警告
+* 对日志消息进行了小修正，打印未分配的 brdno 值为零
+* 将 scsi_host_alloc() 移动到 probe_one() 的开始位置。这确保了 host_lock 在后续阶段可用，并且如果 host_alloc() 失败可以避免大量不必要的初始化
+* 移除了 lpfc_slave_configure 中设置 sdev->queue_depth 的 else 子句。驱动程序在模板中告知中间层其设置，并且仅在启用了队列标记时进行覆盖
+* 添加了对 PCI_DEVICE_ID_ZEPHYR 和 PCI_DEVICE_ID_ZFLY（Junior Zephyr）的支持
+
+从 20040730 到 20040810 的更改：
+
+* 版本号更改为 8.0.9
+* 移除了每个 HBA 驱动锁。现在驱动程序使用 host->host_lock
+* 恢复了对 2.6.5 内核的支持，以便那些使用 2.6.5 内核的 Linux 发行版
+* 应用了来自 Christoph Hellwig（hch@infradead.org）的补丁如下：
+  - “[PATCH] 在 ->proc_info 中使用 SCSI 主机私有数据”
+* 应用了来自 Christoph Hellwig（hch@infradead.org）的补丁如下：
+  - “Re: [Emulex] 准备下一轮。此补丁清理了一些内存分配例程并修复了缺少的 mempool_destroy 和一些缺失的错误处理。”
+* 将指针赋值从 0 更改为 NULL
+* 对 lpfc_reset_lun_handler 和 lpfc_reset_bus_handler 入口点进行了修正，这些入口点曾导致内核出现 Oops 或挂起
+* 对无目标主机进行了修正，这些主机曾导致 modprobe 和 insmod 挂起
+* 对多个文件正在进行清理
+
+从 20040723 到 20040730 的更改：
+
+* 版本号更改为 8.0.8
+* 移除了未使用的 LPFN_DRIVER_VERSION #define
+* 将 `lpfc_findnode_scsiid` 合并到其唯一的调用者 `lpfc_find_target`
+* 移除了 `lpfc_find_target` 的两个不需要的参数（`lun` 和 `create_flag`）
+* 设置 `lpfc_sli_reset_on_init = 1`
+    * 进行了一些小的清理以减少 `sparse` 的警告
+* 移除了 `lpfc_els.c` 中定时器管理例程中的缺失函数定义
+* 将其他绑定参数移到了 `lpfc_defaults.c` 中：`lpfc_automap` / `lpfc_fcp_bind_method`
+    * 在适用的地方使用 `msecs_to_jiffies()` 函数
+* 只在完成 SLI HBA 设置后使用队列深度属性
+* 在 PPC 上添加内存屏障
+    * 添加了对 `PCI_DEVICE_ID_HELIOS` 和 `PCI_DEVICE_ID_JFLY`（Junior Helios）的支持
+    * 在用户选项 `link_speed` 中增加了 4Gbps 和 10Gbps 的选择
+    * 更新了定时器逻辑：在 `init_timer` 使用之后设置定时器数据，并使用 `timer_pending()` 替代 `expires`
+* 从 `Kconfig` 和 `Makefile` 中移除了 IP over FC 支持的一些残留代码
+* 移除了 `lpfc_handle_eratt`、`lpfc_handle_latt` 和 `lpfc_read_pci` 的冗余原型声明
+* 持续清理 `lpfc_init.c` 中的代码
+* 将 LPFC_CFG_DFT_HBA_Q_DEPTH 更改为 LPFC_CFG_HBA_Q_DEPTH
+* 对 lpfc_ct.c 进行了进一步的清理。移除类型转换，合理重构代码结构，删除冗余代码，并重新组织代码以便函数在定义之后调用
+从 2004-07-16 到 2004-07-23 的更改：
+
+    * 版本号更改为 8.0.7
+    * 清理 lpfc_ct.c。移除多个类型转换，删除大量无效或冗余代码，清理编写糟糕的代码，并整理返回值
+* 修复了持久绑定实现
+    * 移除了所有对 lpfc_scsi_req_tmo 的引用
+    * 移除了对 lun_skip 配置参数的最后引用
+* 移除了 LPFC_DEV_RPTLUN 节点故障位，因为我们不再从驱动程序中发出 REPORT_LUNS
+* 移除了驱动程序中的 LUN 跟踪。移除了 lpfc_lun 结构，并将我们需要的功能转移到 lpfc_target
+* 添加了新的 lpfc_jedec_to_ascii() 调用，并用此函数替换两处重复代码
+* 移除了 LUN ID 上的卷集寻址处理
+* 应用了 Christoph Hellwig（hch@infradead.org）提供的补丁，该补丁移除了与 lpfc_build_scsi_cmnd() 及其调用路径相关的无效代码。这与最近移除的 report_lun 代码相关
+从 2004-07-09 到 2004-07-16 的更改：
+
+    * 版本号更改为 8.0.6
+    * 移除了内部 REPORT LUN 的使用。移除了以下函数：lpfc_disc_issue_rptlun、lpfc_disc_cmpl_rptlun 和 lpfc_disc_retry_rptlun 及其使用
+* 移除了 lpfc_crtn.h 中未使用的调度器原型
+* 将 lpfc_geportname() 替换为通用的 memcmp()
+* 重新安排了 lpfc_rcv_plogi_plogi_issue() 中的代码，使其更易读
+* 移除了条件判断中冗余的 port_cmp != 2 检查（if (!port_cmp) { .... if (port_cmp != 2).... }）
+* 时钟更改：移除了 struct clk_data 和 timerList
+* 时钟更改：将 nodev_tmo 和 els_retry_delay 分离为两个独立的定时器，并将其转换为单参数形式
+    * 将 LPFC_NODE_FARP_PEND_t 转换为 struct lpfc_node_farp_pend
+    * 将 ipfarp_tmo 转换为单参数形式
+    * 将目标结构中的 tmofunc 和 rtplunfunc 转换为单参数形式
+* cr_count、cr_delay 和 discovery_threads 只需要作为模块参数，不需要通过 sysfs 显示
+从 2004-06-14 到 2004-07-09 的更改：
+* 将版本号改为 8.0.5
+* 将 lpfc_info 设为静态
+* 将 lpfc_get_scsi_buf 设为静态
+* 如果 pci_set_mwi 返回错误，则打印警告
+* 将 SERV_PARM 改为 struct serv_parm
+* 将 LS_RJT 改为 struct ls_rjt
+* 将 CSP 改为 struct csp
+* 将 CLASS_PARMS 更改为 struct class_parms
+* 对 lpfc_fcp.c 进行了一些代码样式的美化清理
+* 提供了一个 sysfs 接口，用于转储最近的 32 次 LINK_[UP|DOWN] 和 RSCN 事件
+* 移除 delay_iodone 定时器
+* 删除 qfull 定时器和 qfull 逻辑
+* 将 mbox_tmo、nlp_xri_tmo 转换为单参数时钟处理器
+* 删除了绑定变量的重复 extern 定义
+* 简化了 CLASS2 和 CLASS3 的使用，并移除了对 config[LPFC_CFG_FCP_CLASS] 的不必要的检查
+* 将持久绑定变量移动到新文件 lpfc_defaults.c 中
+* 将 probe_one() 中与配置相关的代码移到 config_setup() 中。从 bind_setup() 中删除了对 scandown 值的冗余检查，因为这已经在 config_setup() 中完成
+* 将 LPFC_SLI_t 更改为 struct lpfc_sli
+* 将 LPFC_SCSI_BUF_t 更改为 struct lpfc_scsi_buf（此项应在之前列出，以保持逻辑顺序）
+
+这样翻译更符合中文习惯，并且保持了技术文档的准确性。
+* 将 FCP_CMND 更改为 struct fcp_cmnd
+* 将 FCP_RSP 更改为 struct fcp_rsp
+* 移除对 buf_tmo 的需求
+* 将 ULP_BDE64 更改为 struct ulp_bde64
+* 将 ULP_BDE 更改为 struct ulp_bde
+* 清理 lpfc_os_return_scsi_cmd() 及其调用路径
+* 移除 lpfc_no_device_delay
+* 将 lpfc_hba_put_event() 整合到 lpfc_put_event() 中
+* 移除以下属性及其功能：
+    * lpfc_extra_io_tmo
+    * lpfc_nodev_holdio
+    * lpfc_delay_rsp_err
+    * lpfc_tgt_queue_depth
+    * lpfc_check_cond_err
+* 时钟更改：在 struct lpfc_hba 中整合定时器，以移除 clkData 并仅向超时例程传递一个参数。同时，移除需要的活动时钟链表以在卸载模块时停止这些定时器
+* 将 lpfc.conf 的内容移至 lpfc_fcp.c。移除每个适配器的属性，改为使用全局属性。
+* 修复 lpfc_ct.c 中 pmbuf 可能的空指针引用问题。
+* 在重置逻辑单元时，发出 LUN_RESET 指令而非 ABORT_TASK_SET。
+* 移除与 SCSI_REQ_TMO 相关的代码。
+* 引入两个新的宏定义 LPFC_ATTR_R 和 LPFC_ATTR_RW，它们实现了 module_param、MODULE_PARM_DESC、lpfc_param_show 以及 [lpfc_param_store] 和 CLASS_DEVICE_ATTRIBUTE。
+* 当在 SCSI 队列命令路径中分配链接的 BDE 失败时，正确清理。
+* 如果 dma_map_sg 调用失败，则使 SCSI 命令失败。
+* 移除未使用的宏 SWAP_ALWAYS 和 SWAP_ALWAYS16。
+* 在退出 lpfc_sli_issue_iocb_wait_high_priority() 和 lpfc_sli_issue_iocb_wait() 时将 context2 重置为 0。
+* 对 lpfc_scsiport.c 进行调整，使其遵循定义后的使用风格。这消除了对前置声明的需求，并移除了冗余的 #define ScsiResult，因为该定义在其他地方已有提供。
+* 应用 Christoph Hellwig (hch@infradead.org) 提交的 "Streamline lpfc error handling" 补丁，并进行了以下修改：修复内存泄漏、删除一些不需要的代码、退出时打印一条消息（旧代码在入口和出口处各打印一条）、使返回值一致（要么是 1/0，要么是 SUCCESS/FAILURE），将所有 EH 例程保留在一个文件中（lpfc_scsiport.c）
+* 将 lpfc_module_param.h 中的内容移到 lpfc_fcp.c
+* 将 sysfs 属性更改为 CLASS_DEVICE_ATTRIBUTES（之前为 DEVICE_ATTRIBUTES）。它们现在出现在 /sys/class/scsi_host/hostx（之前在 /sys/bus/pci/drivers/lpfc/devx）
+* 删除了 lpfc_syfs.h 和 lpfc_sysfs.c
+* 清理配置参数。移除了节流参数，移除了 max_lun，用 #define 替换了 max_target，移除了 lun_skip，移除 ipfc 配置参数及相关代码
+* 将 DMABUF_t 的使用改为 struct lpfc_dmabuf
+* 缩小 iCfgParam 结构体，仅包含 a_string、a_low、a_hi 和 a_default 值
+* 在关闭时释放 SCSI buf 安全内存池以消除内存泄漏
+* 将 lpfc_printf_log 更改为 #define。同时在打印字符串中包含 phba->brd_no 和换行符，而不是在 #define 中
+* 移除在主机内存SLIM中可选定位Host Group Pointers的代码，因为一旦CONFIG_PORT使用HBA对其BAR0的视图后，这不再对PPC64平台需要
+* 删除了sli函数的前置声明，并重新安排lpfc_sli.c中的代码
+* 从日志记录中移除了前导功能
+* 在出错时让lpfc_sli_hba_setup()返回负错误码，并修正lpfc_fcp.c中遗留的注释
+* 移除了lpfc_loadtime变量
+* 在所有if语句和它们的左括号'('之间加一个空格
+* 将Studly_Caps风格的LPFC_SCSI_BUF_t改为struct lpfc_scsi_buf
+* 修复了硬件错误后的insmod挂起问题
+* 将SCSI主机分配移到我们启用中断处理器之前
+* 在Makefile的clean目标中添加.tmp_versions目录。该目录是在2.6.5及更高版本的构建过程中创建的（至少对于Red Hat内核是这样）
+* 改变phba->config为kmalloc分配的lpfc_icfgparam，而不是*phba->config。这在pci_release_region()中表现为panic
+* 修复了固件下载/板卡重置问题
+* 整合了来自 Christoph Hellwig（hch@infradead.org）的补丁，对 lpfc_fcp.c 进行重组和清理
+* 在发生 RSCN 事件时不要立即中止命令，以给驱动程序时间重新发现目标，然后再由中间层重试 SCSI 命令
+从 20040604 到 20040614 的更改：
+
+* 将版本号更改为 8.0.4
+* 删除了 lpfc_valid_lun 函数
+* 添加了 scsi_buf 安全池，以解决在内存不足条件下 queuecommand 中的 scsi_buf 失败问题。分配现在最初来自 kmalloc，但如果 kmalloc 失败，则分配来自安全池
+* 修改了 lpfc_slave_alloc，仅在驱动程序发现目标时设置 scsi_device->hostdata 指针。此例程现在始终返回成功，因为分配例程中永远不会出现错误
+* 仅屏蔽信息和警告消息。无论屏蔽与否，打印所有错误消息
+* 移除了 lpfc_log_chk_msg_disabled()
+* 更改了 lpfc_printf_log，使其直接接受 struct lpfc_hba * 而不是“板号”
+* 将 dma_sync_single 转换为 pci_dma_sync_single_for_{device/cpu}
+* 实现了新的日志消息格式。消息字符串现在嵌入到 lpfc_printf_log 的调用中
+* 将 FLOGI 发现超时时间减少到 20 秒
+* 在 lpfc_pci_probe_one() 中出错时返回 -1 而不是 1
+* 允许非连续的板卡编号，为热插拔支持铺平道路
+* scsi_add_host() 可能会失败，因此在 if 语句中调用它。并在附加 sysfs 属性后启动 scsi_scan_host()
+* lpfc_release_version 仅在 lpfc_ct.c 中使用，因此将其移至该文件并标记为 static
+* 删除了 lpfc_sleep_ms，并直接替换成 mdelay 或 schedule 调用
+* 从 clkData 相关的 list 处理中的 list_add 和 list_del 宏中移除了所有 (struct list_head *) 类型转换
+* 移除了 EXPORT_SYMBOLs
+* 移除了 LPFC_MIN_QFULL 和 lpfc_qthrottle_up
+* 将 LPFCSCSITARGET_t 替换为 struct lpfc_target
+* 将 LPFCSCSILUN_t 替换为 struct lpfc_lun
+* 从 lpfc_scsi.h 中移除了未使用的结构声明（fcPathId 和 fcRouteId）
+* 重写了对 FC 传输属性的使用
+* 修复链接丢失时的崩溃问题。这是由于 `lpfc_delay_iodone` 在一个从未添加到列表的对象上调用 `list_del` 所导致的。
+* 移除所有行末尾的多余空格。
+* 将 `MAX_FCP_TARGET` 从 0xff 设置为 256。将 `MAX_FCP_LUN` 和 `MAX_FCP_CMDS` 设置为其十进制等效值，并更新了文档。
+* 从 2004-05-26 到 2004-06-04 的更改：
+
+    * 版本号改为 8.0.3。
+    * 完成 sysfs FC 传输支持。
+
+* 移除 SCSI LUN 和 SCSI Target 结构中未使用的字段：`void *pTargetProto; void *pTargetOSEnv; void *pLunOSEnv;`
+* 修改 `list_for_each` 为 `list_for_each_entry`。修改 `list_for_each_safe` 为 `list_for_each_entry_safe`。
+* 移除 lpfc_dfc.h 文件。
+* 改变变量命名：`pHba->phba`, `pCommand->pcmd`。
+    * 改变 `plogi_ndlp -> plogindlp`, `pos_tmp->postmp`, `pRsp->prsp`, `pCmd->pcmd`。
+    * 改变 `pText -> ptext`。
+    * 改变 `p_tmp_buff -> ptmpbuff`。
+    * 改变 `pBufList -> pbuflist`, `pRsp -> prsp`, `pCmd -> pcmd`。
+    * 改变 `*pos_tmp -> *postmp`, `*p_mbuf -> *pmbuf`。
+    * 对 SCSI 快速路径进行以下更改：在 `lpfc_scsi_buf_t` 中添加 `DMA_BUF_t` 成员。这将减少在 SCSI 快速路径中的内存分配。在 SCSI 快速路径中添加对 `targetp == NULL` 的检查。将 `lpfc_scsi_dma_ext` 中的 scatter-gather 条目数从 3 增加到 4，并将 `lpfc_scsi_dma_ext` 的大小改为 264。
+    * 修复 `lpfc_nportdisc.c` 中缺少的静态声明。
+* 重新排列 `#include` 行，使得 `lpfc.h` 不需要包含其他头文件。
+* 移除 `lpfc_get_hba_sym_node_name()` 作为全局导出，并将其改为静态函数。
+* 将 `struct clk_data` 的定义从 `lpfc_hw.h` 移动到 `lpfc_sli.h`。
+* 将 LPFC_IOCBQ_t 更改为 struct lpfc_iocbq
+* 将 LPFC_SLI_RING_t 更改为 struct lpfc_sli_ring
+* 将 LPFC_NODELIST_t 更改为 struct lpfc_nodelist
+* 重新安排了 lpfc_nportdisc.c，将状态机数组（lpfc_disc_action）及其唯一使用的函数 lpfc_disc_state_machine 移动到文件末尾，消除了在顶部需要大量原型声明的需求
+* 将 LPFC_BINDLIST_t 更改为 struct lpfc_bindlist
+* 删除了 lpfc_issue_ct_rsp()、lpfc_sleep()、lpfc_add_bind()、lpfc_del_bind()、lpfc_sli_wake_mbox_wait() 和 lpfc_sli_issue_mbox_wait()
+* 修复了大量的过长行问题
+* 修复了一些发现中的问题：引入了在 DSM 中延迟移除 ndlp，以避免在嵌套的 DMS 中出现崩溃；修正了对 NportId fffc01 的处理，在 LOGO 后不再重新登录；修正了在发出 PLOGI 请求时处理 LOGO 的问题
+* 将 SLI_CT_REQUEST 更改为 lpfc_sli_ct_request
+* 将 NAME_TYPE 更改为 struct lpfc_name
+* 将 lpfcCfgParam_t 更改为 struct lpfc_cfgparam
+* 将 LPFC_STAT_t 更改为 struct lpfc_stats
+* 将 HBAEVT_t 更改为 struct lpfc_hba_event
+* 将 Studly_Caps lpfcHBA_t 更改为 struct lpfc_hba
+* 移除了不再使用的 tasklet_running 标志
+* 移除 *PSOME_VAR 的类型定义，并直接使用 SOME_VAR*
+* 将 .use_clustering 改为 ENABLE_CLUSTERING
+* 修改 lpfc_queuecommand，在无法排队 SCSI 命令时返回 SCSI_MLQUEUE_HOST_BUSY。同时，对于 2.6 内核版本，移除 struct lpfcHBA 中的 cmnds_in_flight 成员，因为该成员仅用于确定 queuecommand 函数的返回值
+* 将 lpfc_evt_iocb_free 的返回类型更改为 void，因为它不返回任何内容
+* 移除 struct 中未使用的 cmnd_retry_list 和 in_retry 成员
+* 移除 `lpfc_scsiport.c` 中某些不需要的 `kmalloc` 返回值类型转换实例
+* 移除 `lpfc_linux_attach()` 和 `lpfc_linux_detach()`。将它们分别整合到 `lpfc_probe_one()` 和 `lpfc_release_one()` 中
+* 移除模块参数 `lpfc_num_iocbs` 和 `lpfc_num_bufs`
+* 移除 `NUM_NODES`、`NUM_BUFS` 和 `NUM_IOCBS` 的宏定义
+
+从 2004-05-15 到 2004-05-26 的更改：
+
+* 将版本号更改为 8.0.2
+* 包含 `dma-mapping.h` 作为其中一个头文件。同时重新排列 `#include` 的顺序
+* 根据需要将函数声明为静态
+* `queuecommand()` 现在将返回 `SCSI_MLQUEUE_HOST_BUSY` 而不是 1，以缓解中间层的压力
+* 移除 `lpfc_start_timer()` 和 `lpfc_stop_timer()` 的函数原型
+* 将定时器支持改为内联。`clk_data` 现在直接声明在其对应的 `timer_list` 条目旁边，因此我们不必动态分配这些 `clk_data`
+* 在写入 PCI 空间后添加读取操作以刷新写入
+* 修正函数名称中拼写错误的单词 "safety"
+* 更新 `lpfc.conf` 中关于每个 HBA 参数的注释，以反映新的实现
+* 更改 `lpfc_proc_info` 处理程序，从 `fc_nodename` 而不是 `fc_portname` 获取节点名
+* 修复 `lpfc_fcp.c` 中的部分注释和空格
+* 格式调整：删除代码中的前置空格
+    * 将发现处理从任务调度器移至内核线程
+* 如果 ADISC 成功完成，则将 ndlp 节点从 unmap 列表移至 map 列表
+* 当发生链路事件时，刷新所有 ELS IOCBs
+* LP9802 的 qdepth 是 LP9802DC 的两倍。在 READ_CONFIG 后延迟 elx_sched_init 以从固件获取 max_xri。READ_CONFIG 后将 ELX_CFG_DFT_HBA_Q_DEPTH 重置为 max_xri
+    * 优化 `fc_get_cfg_parm()` 函数，使其更健壮并支持嵌入的十六进制值。`lpfc_param` 现定义如下：
+      `lpfc_log_verbose="lpfc:0,lpfc0:0x10,lpfc1:4,lpfc100:0xffff"` 分隔符 `,` 不重要，可以是任何字符或不存在。例如 `param = "lpfc:0lpfc0:0x10.lpfc1:4txtlpfc100:0xffff"` 也能工作。此外，该字符串被视为不区分大小写
+* 将所有 `lpfc_find_lun_device()` 的使用改为 `lpfc_find_lun()`
+* 删除不必要的包装函数 `lpfc_find_lun_device()` 和 `lpfc_tran_find_lun()`
+* 从使用内部 bus/id/lun 切换到使用类似数据的 `scsi_device` 结构
+* 消除单行函数 `lpfc_find_target()`
+    * 添加 `slave_alloc` 和 `slave_destroy`
+    * `lpfc_scsi_cmd_start` 现在可以从 `scsi_device->hostdata` 获取 LUN 指针，该指针在 `slave_alloc` 中设置
+* 消除每次命令中不必要的检查，以判断是否首次访问设备
+* 移除在调用 lpfc_reset_lun_handler 时对 lpfc_scsi_buf 在 linux 的 scsi_cmnd->host_scribble 上有效这一假设
+从 20040507 到 20040515 的更改：
+
+* 将版本更改为 8.0.1
+* 修复了错误注入测试和 lpfc_tasklet 死锁后卸载驱动程序时的崩溃问题
+* 修改 lpfc.conf 以移除支持主机数量的限制
+* 移除 HBAAPI
+* 移除在 lpfc_fcp.h 中已包含于 scsi/scsi.h 中的重复 SCSI 操作码
+* 重构 module_param 的使用
+* 为各种 module_params 添加 MODULE_PARAM_DESC
+* 移除 #define EXPORT_SYMTAB
+* 移除对 if_arp.h 和 rtnetlink.h 的 #include
+* 移除 MODULE_DESC 中的 “Open Source” 字符串
+* 清理 MODULE_DESC 使用的重复字符串定义
+* 将 lpfc_pci_[detect|release] 重命名为 lpfc_pci_[probe|remove]_one
+* 修正 lpfc_driver 的格式
+* 移除对 lpfcDRVR 的不必要的 memset 0 操作
+* 总是附加驱动属性，除非 pci_module_init 失败
+* 从 lpfc_mem 中移除所有单行包装器
+* 移除不再需要的 lpfc_sysfs_set_[show|store]
+* 重新设计 lpfc_sysfs_params_[show|store]，使其遵循每个属性一个值的规则
+* 将 lpfc_sysfs_info_show 分解为更小的、每个属性一个值的形式
+* 在适当的情况下使用设备属性而不是驱动属性
+* 移除不再需要的 EXPORT_SYMBOL
+* 移除一些未使用的代码（与 1600 条消息相关）
+
+从 20040429 到 20040507 的更改：
+
+* 将版本更改为 8.0.0
+* 修正 lpfc_fcp.c 中 cmd/rsp 环条目的数量，以匹配 lpfc_hw.h 中设置的划分
+* 移除 phba->iflag 引用
+* 进行了多项锁定改进
+* 移除函数 lpfc_drvr_init_lock, lpfc_drvr_lock, lpfc_drvr_unlock 和 lpfc_hipri_*
+* 移除 LPFC_DRVR_LOCK 和 LPFC_DRVR_UNLOCK 宏
+* 使 lpfc_info() 使用 lpfc_get_hba_model_desc() 而不是重写几乎相同的代码
+* 修正 lpfc_cfgparm.h, lpfc_ftp.c 和 lpfc_sli.c 中每行过长的问题
+* 通过在 Red Hat 2.6.3 内核中仅当尚未定义时通过 `#define MODULE_VERSION` 来修复构建问题
+* 更改 `elx_sli_issue_mbox_wait` 函数，使其返回正确的错误代码给调用者
+* 在某些 `els` 完成例程中，在调用 `lpfc_elx_chk_latt` 后，驱动程序忽略了 `lpfc_elx_chk_latt` 的返回代码。这将阻止在发现状态机运行过程中发生链路事件时正确重启发现状态机。修复此问题的方法是在 `lpfc_els_chk_latt` 返回非零值时退出发现状态机
+* 从 `lpfc_diag.h` 中移除 `MAX_LPFC_BRDS`
+* 移除未使用的 `first_check`
+* 移除一些未使用的字段和宏定义
+* 将 `lpfc-param` 名称更改为 `lpfc_param`
+* 为 2.6 内核添加使用 `MODULE_VERSION` 宏
+* 缩短一些注释行的长度以提高可读性
+* 将 `FCP_*` 定义移动到其自身的头文件 `lpfc_fcp.h`
+* 从 `lpfc_crtn.h` 中移除未使用的原型：`fcptst`, `iptst`, `lpfc_DELAYMS`
+* 从 lpfc_crtn.h 中移除重复的原型声明：
+    * lpfc_config_port_prep, lpfc_config_port_post, lpfc_hba_down_prep
+* 移除了一些未使用的 export_symbols
+* 将驱动程序文件安装到 */drivers/scsi/lpfc 而不是 */drivers/scsi
+从 20040426 到 20040429 的变更：
+
+* 声明了 export 符号 lpfc_page_alloc 和 lpfc_page_free
+* 将 lpfc 版本号更改为 6.98.3
+* 将 MAX_LPFC_BRDS 的定义移到唯一使用它的头文件（lpfc_diag.h）
+* 更改 lpfc_sli_wake_iocb_wait，使其执行常规的 wake_up，因为 lpfc_sli_issue_iocb_wait 现在会进入不可中断的睡眠状态
+* 当列表元素可能被删除时，将 list_for_each() 替换为 list_for_each_safe()
+* 修复 IOCB 内存泄漏
+从 20040416 到 20040426 的变更：
+
+* 更改 lpfc_config_port_prep() 以将 DUMP 邮箱响应的第 4 字解释为字节计数
+* 在 sysfs 中添加 info 属性
+* 在 lpfc_sched.h 中进行格式化清理（空格改为制表符）
+* 移除未使用的日志消息编号 732
+* 完成 MODULE_PARM 到 module_param 的更改
+* 移除未使用的 targetenable 模块参数
+* 移除 lpfc_sli_issue_mbox_wait 例程中的锁
+* 移除重试 29,00 检查条件的代码
+* 移除操作 rspSnsLen 的代码
+* 修复 lun-q-depth 配置参数的使用
+* 修复与日志消息 249 的严重性不一致的问题
+* 从 lpfc_linux_attach 中移除 lpfc_max_target
+* 将对 lpfcDRVR.pHba[] 的引用替换为 lpfc_get_phba_by_inst()
+* 将 lpfc_param 改为 lpfc-param
+* 部分移除了驱动程序内 32 个 HBA 的限制。将 lpfc_instcnt、lpfc_instance[] 和 pHba[] 整合到 lpfcDRVR 结构中，并添加了以下例程：
+    * lpfc_get_phba_by_inst()
+    * lpfc_get_inst_by_phba()
+    * lpfc_check_valid_phba()
+* 默认启用属性 "set" 和 "params"
+* 对以下文件进一步进行格式化、空白和行长度清理：lpfc_ct.c、lpfc_els.c、lpfc_fcp.c、lpfc_hbadisc.c、lpfc_init.c、lpfc_ipport.c、lpfc_mbox.c、lpfc_nportdisc.c、lpfc_sched.c、lpfc_sched.h、lpfc_scsi.h、lpfc_scsiport.c、lpfc_sli.c 和 lpfc_sli.h
+* 添加日志消息 249 以记录任何遇到的不受支持的设备寻址模式
+* 添加对 256 个目标和 256 个 LUN 的支持
+* 修复了 lpfc_linkdown 中的 panic 问题
+* 移除在多个调用 `list_del` 中的 `(struct list_head*)` 类型转换
+* 当通过 Ctrl-C 终止 `insmod` 或 `modprobe` 时，释放 IRQ 预留并停止运行中的定时器
+* 从包含路径中移除 `drivers/scsi`
+* 将日志消息 311 的使用封装在宏中
+* 在 `lpfc_os_prep_io` 中检测 `pci_map_sg` 调用的失败返回值
+* 修复 `lpfc_sli_process_sol_iocb` 中 IOCB 使用后释放的问题，该问题导致在 2.6.5 内核上出现 Oops 错误
+* 清理未用于错误退出的多个 goto 语句
+* 用字节序相关的 `lpfc_memcpy_to_slim()` 和 `lpfc_memcpy_from_slim()` 替换 `memcpy_toio()` 和 `memcpy_fromio()`，以便对于像 PPC64 这样的大端字节序主机，SLIM 可以每次访问 4 字节而不是作为字节流访问
+从 20040409 到 20040416 的变更：
+
+* `scsi_register` 和 `scsi_alloc_host` 系统调用可能会失败并返回一个零值的主机指针。在 2.6 内核加载驱动期间按 Ctrl-C 会导致此情况和驱动程序崩溃。已修复此错误。同时发现 `lpfc_sli_hba_down` 中的 `error_x` 处理存在问题——它位于错误的位置，并且驱动锁没有被持有（需要在 `lpfc_linux_attach` 中持有）。已修复这两个问题，并进行了少量注释清理
+* 移除不必要的 `(void *)` 类型转换
+* 用内核 2.6.5 的 `dma_mapping_error()` 替换 `INVALID_PHYS` 的定义，并为早期内核添加一个内联函数。移除 `lpfc_bad_scatterlist()`
+* 清理 `hbaapi.h`, `lpfc.h`, `lpfc_cfgparm.h`, `lpfc_crtn.h`, `lpfc_ct.c`, `lpfc_diag.h`, `lpfc_disc.h`, `lpfc_els.c`, `lpfc_fcp.c`, `lpfc_hbadisc.c`, `lpfc_hw.h`, `lpfc_init.c`, `lpfc_ipport.c`, `lpfc_logmsg.c`, `lpfc_logmsg.h` 和 `lpfc_scsiport.c` 中的格式 — 主要是将每组 8 个空格替换为硬制表符，并保持行不超过 80 列
+* 从 2.4 内核的 `lpfc_unblock_requests` 中移除 `LPFC_DRVR_LOCK` 调用。由于 `lpfc_scsi_done` 函数已经解锁了驱动锁，因此不需要再次解锁
+* 从驱动锁例程中移除全局锁功能
+* 移除 `request_irq` 中的 `SA_INTERRUPT` 标志
+* 将 `dma_addr_t` 类型转换放入 `getPaddr` 宏内部，因为 `getPaddr` 在所有使用的地方都会被转换为 `dma_addr_t` 类型
+* 清理 lpfc_sli.c 和 lpfc_sysfs.c 中的格式 - 主要是将 8 个空格的组替换为硬制表符，并保持每行最多 80 列
+* 通过始终在 lpfc.h 中 #include interrupt.h，修复 RHEL 2.1 BOOT 内核的编译问题
+* 通过 #define EXPORT_SYMTAB 修复 RHEL 3 的编译问题
+* 在 lpfc_proc_info 中将 sprintf 替换为 snprintf
+* 修复 2.6 内核上的编译警告 - 移除不再使用的字符设备初始化调用
+* 添加任务转换中发现功能的初始支持代码
+* 移除字符接口和 ioctl 代码
+* 将所有 elx 前缀更改为 lpfc
+    * 将 lpfc_write_slim() 和 lpfc_read_slim() 替换为 memcpy_toio()、memcpy_fromio()、writel() 和 readl()
+从 20040402 到 20040409 的更改：
+
+    * 将 lpfc_read_hbaregs_plus_offset 和 lpfc_write_hbaregs_plus_offset 函数替换为 readl 和 writel
+* 移除 insmod 路径中的长 mdelay
+    * 更改了 pci_device_id 结构体的初始化方式
+    * 将 lpfc_read/write_CA/HA/HC/HS 替换为直接调用 readl() 和 writel()
+* 将 SLI2_SLIM 增加到 16K，并相应地增加 cmd / rsp IOCBs
+* 从 lpfc_config_post 函数中移除 lpfc_els_chk_latt
+lpfc_els_chk_latt 会在 flogi 挂起时启用链路事件中断，这会导致两个发现状态机并行运行
+* 在卸载路径中添加 pci_disable_device
+* 将 lpfc_sleep_event 从 lpfc_fcp.c 移动到 lpfc_util_ioctl.c
+* 直接调用 dma_map_single() 和 pci_map_single() 而不是通过宏 lpfc_pci_map()。允许 PPC64 上的地址为 0
+* 在 lpfc_sli_issue_icob_wait 中将 sleep 改为不可中断模式，因为此函数不处理信号
+* 将 lpfc_wakeup_event 从 lpfc_fcp.c 移动到 lpfc_ioctl.c
+* 移除不必要的 #include <linux/netdevice.h>
+* 移除未使用的时钟变量 lpfc_clkCnt 和 lpfc_sec_clk
+* 删除函数名中的大写字母
+* 移除 lpfc_addr_sprintf
+* 在 lpfc_linux_attach 中实现错误情况下的 goto 语句
+* 将 mlist->dma.list = dmp->dma.list; 替换为 mlist = dmp
+* 移除函数 lpfc_get_OsNameVersion 和 elx_wakeup。将 elx_wakeup 更改为 wake_up_interruptible。
+* 添加函数 lpfc_get_os_nameversion 并将 lpfc_get_OsNameVersion 更改为 lpfc_get_os_nameversion。
+* 移除 lpfc_get_OsNameVersion。
+* 将驱动名称在所有可见的地方统一为 lpfc。
+* 修复编译警告：移除未使用的变量 ret 在 lpfc_fdmi_tmo 中。
+* 移除 lpfc_utsname_nodename_check 函数。
+* 移除函数 lpfc_register_intr 和 lpfc_unregister_intr。
+* 填充 lpfc_ops 文件操作结构中的 owner 字段，并移除现在不必要的 open 和 close 入口点。
+* 将函数名前缀从 elx_ 更改为 lpfc_。
+* 移除 elx_os_prep_io() 中的 TUR 特殊情况检查。
+* 将 elx_scsi.h 重命名为 lpfc_scsi.h。
+* 将 elx_sched.h 重命名为 lpfc_sched.h。
+* 将 elx_mem.h 重命名为 lpfc_mem.h。
+* 将 elx_sli.h 重命名为 lpfc_sli.h。
+* 将 elx_logmsg.h 重命名为 lpfc_logmsg.h。
+* 将 elx.h 重命名为 lpfc.h。
+* 将 elx_sli.c 重命名为 lpfc_sli.c。
+* 将 elx_sched.c 重命名为 lpfc_sched.c。
+* 将 elx_mem.c 重命名为 lpfc_mem.c。
+* 将 elx_logmsg.c 重命名为 lpfc_logmsg.c。
+* 将 lpfcLINUXfcp.c 重命名为 lpfc_fcp.c。
+* 将 elx_clock.c 重命名为 lpfc_clock.c。
+* 减少 lpfc_info() 中的栈使用量。
+* 将 lpip_stats 结构从 lpfc_hba.h 移动到 lpfc_ip.h。
+* 将 lpfc_stats 和 HBAEVT_t 结构从 lpfc_hba.h 移动到 lpfc.h。
+* 移除 lpfc_hba.h。
+* 移除重复的 rc 定义。
+* 移除使用 next 指针存储 mbox 结构的代码。
+* 清理列表迭代。
+* 移除非列表操作的 next 指针。
+* 将 list_del()/INIT_LIST_HEAD 序列更改为 list_del_init()。
+* 在 ELX_IOCBQ_t 中：将 hipri_trigger 字段移动到 iocb_flag。将 hipri_wait_queue 和 rsp_iocb 合并在 union 中。
+* 使用 list_entry 宏替换 list_head 的类型转换。
+* 在 ELX_IOCBQ_t 中添加了 ct_ndlp_context 字段
+* 不使用 DMABUf_t 列表来存储 ndlp 上下文
+    * 当 ELX_INITBRDS 成功时，从 lpfc_process_iotcl_util() 返回 0
+* 删除 elx_os_scsiport.h
+    * 不使用 DMABUf_t 列表来保存 rpi 上下文
+    * 将 elx_cfg_* 名称替换为 lpfc_cfg-*
+    * 将 FCP 活动移至环 0。将 ELS/CT 活动移至环 2
+* 清理 elx_sli.h 的格式（使用制表符缩进，每行 80 列）
+* 删除 elx_sli.h 中未使用的 elxclock 声明
+* 由于在所有使用 IOCB_ENTRY 的地方都会进行类型转换，因此将类型转换放入宏中
+* 将 ioctl 分离到单独的文件中
+
+从 20040326 到 20040402 的更改
+
+    * 更新 20040402 SourceForge 发布的 ChangeLog
+* 使用安全列表迭代器处理 ndlp 列表
+    * 添加代码以在节点从函数中释放时从发现状态机函数返回 NLP_STE_FREED_NODE
+* 对 DMABUF_t 处理的修复
+    * 修复发现过程中的加载错误
+    * 从 lpfc_rcv_plogi_unused_node 中删除 loop_cnt 变量
+* 删除 nle. 引用
+* 移除构建2.4驱动的支持
+* 移除elx_util.h，并用lpfc_disc.h替换elx_disc.h
+* 在发现代码中实现了Linux列表宏
+同样将elx_disc.h的内容移到了lpfc_disc.h中
+* 清理未使用的变量
+* 对DMABUF_t使用Linux列表宏
+* 将ioctl命令分为三部分：dfc、util和hbaapi
+重新组织代码，以便以后可以轻松地将其分离为不同的模块。目前所有三个部分都在lpfc_ioctl.c中的定义LPFC_DFC_IOCTL、LPFC_UTIL_IOCTL、LPFC_HBAAPI_IOCTL下启用
+* 杂项清理：一些goto语句；添加注释；澄清函数参数
+* 添加代码以使用列表宏处理ELXSCSITARGET_t
+* 新的ELX_MBOXQ_t列表实现
+* 清理了一些列表头的类型转换
+* 在struct lpfc_nodelist的两个成员周围加上IPFC ifdef
+* 使用列表宏和list_head数据结构清理iocb列表
+* lpfc_online()缺少由lpfc_linux_attach()启动的一些定时器例程。现在这些例程也由lpfc_online()启动。lpfc_offline()只停止了els_timeout例程。现在它停止与该hba相关的所有定时器例程
+* 在struct lpfc_bindlist中用list_head类型替换单独的next和prev指针。在elxHBA_t中，用fc_nlpbind_list替换fc_nlpbind_start和_end，并使用list_head宏访问它
+* 修复ulpStatus对于终止I/O的情况与较新固件的ulpStatus值重叠的问题
+* 重新调整params_show/store以与其他例程保持一致。移除通用性并依赖于设置属性
+* 移除未使用的日志消息
+* 将elx_crtn.h和prod_crtn.h合并到lpfc_crtn.h中
+* ifdef特定调度程序的例程
+* 移除以下未使用的ioctl命令：ELX_READ_IOCB、ELX_READ_MEMSEG、ELX_READ_BINFO、ELX_READ_EINVAL、ELX_READ_LHBA、ELX_READ_LXHBA、ELX_SET、ELX_DBG、LPFC_TRACE
+* 移除变量fc_dbg_flg
+* 修复了一个bug，在该bug中，对于三位数的HBA，HBA_Q_DEPTH设置不正确。同时更改can_queue，使中间层仅发送(HBA_Q_DEPTH - 10)个命令
+* 清理错误路径中的代码，检查条件。移除 LUN 结构中未使用的与感知相关的字段。
+* 添加了以下对象的安全池代码：mbuf/bpl、mbox、iocb、ndlp、bind。
+* 将 `#include <elx_sched.h>` 包含在 `#ifdef USE_SCHEDULER` 中。
+* 修复了 `make clean` 目标。
+* 构建现在忽略 elx_sched.o，并包含 lpfc_sysfs.o。
+* 将 lpfndd.o 目标包含在 `BUILD_IPFC` 的 `#ifdef` 中。
+* 移除了实现文件中的 elx_os.h 包含。
+* 移除了 ELX_OS_IO_t 数据结构，并将数据方向和非分散/聚集物理地址直接放入 SCSI 缓冲结构中。将 DRVR_LOCK、putPaddr、getPaddr 宏及部分定义移到 elx.h，因为整个驱动程序都需要它们。
+* 迁移了以下 ioctl（调试）：ELX_DISPLAY_PCI_ALL、ELX_DEVP、ELX_READ_BPLIST、ELX_RESET_QDEPTH、ELX_STAT。
+* 尝试将所有调试 ioctl 移动到 sysfs 的第一步。
+实现了以下 ioctl 到 sysfs：ELX_WRITE_HC、ELX_WRITE_HS、ELX_WRITE_HA、ELX_WRITE_CA、ELX_READ_HC、ELX_READ_HS、ELX_READ_HA、ELX_READ_CA、ELX_READ_MB、ELX_RESET、ELX_READ_HBA、ELX_INSTANCE、ELX_LIP。还引入了属性 "set" 以配合上述属性使用。
+* 移除了DLINK，现在时钟不再使用enqueue和dequeue声明
+* 分离了安装规则，以便在调用make时必须设置BUILD_IPFC，才能使安装规则尝试复制lpfndd.o驱动程序。此更改修复了一个由于默认的安装规则试图安装lpfndd.o而引发的错误，而默认的make规则并不会默认构建lpfndd.o
+* 跟踪hbaapi索引号是否需要刷新
+* 从包含列表中移除prod_os.h
+* 移除LPFC_LOCK和LPFC_UNLOCK宏。将OS调用添加到elx_os_scsiport.c。此文件现在为空
+* 将spin_lock_irqsave和spin_unlock_irqrestore调用直接加入代码，并移除LPFC_LOCK_和_UNLOCK_宏
+* 移除对"elx_clock.h"的引用
+* 将utsname.h添加到包含列表中。之前的elx_os.h提交移除了其对utsname.h的包含，因为该文件内容很少。然而，lpfcLINUXfcp.c需要它，现在已将其包含
+* 移除了一些注释掉的代码
+* 移除elx_lck_t数据结构、多余的elxDRVR_t类型及其包含。不再使用
+* 移除两个PCI同步定义。移除包含——不再需要。清理了宏行
+* 从elxLINUXfcp.c添加了两个函数。这些函数是IPFC特定的
+* 移除hipri锁抽象并添加OS调用到代码中。移除elx_lck_t并直接添加spinlock_t。将两个IPFC函数移到lpfc_ipport.c中
+* 将IP特定的结构移到lpfc_ip.h文件中
+* `lpfc_ipfarp_timeout()` 使用系统定时器。移除所有旧内部时钟支持的用法。
+* 对默认构建不带 IPFC 支持进行编译的更改。为所有 `lpfc_ip.h` 的包含添加了 `#ifdef IPFC`。
+* 修复 `elx_free_scsi_buf`
+    * 从 2.6 依赖中移除了 `elx_sched.o`
+    * 重构 `lpfc_pcimap`
+* 使用 Linux 交换宏替换 ELX 交换宏（`SWAP_SHORT`, `SWAP_LONG`, `SWAP_DATA`, `SWAP_DATA16`, `PCIMEM_SHORT`, `PCIMEM_LONG`, `PCIMEM_DATA`）
+* 将 `in_interrupt()` 检查移到 `elx_sleep_ms()` 内部
+    * 移动了 `pci.h` 包含的位置
+* 恢复 `elxHBA_t` 中的 `elx_lck_t` 类型
+* 移除了 `elx_pci_dma_sync` 调用。同时从 `elx_hw.h` 中移除了一些 PCI 定义，并移除了 `elx.h` 中不再使用的自旋锁。
+    * `elx_iodone()` 现在使用系统定时器
+* `elx_qfull_retry()` 现在使用系统定时器
+* `lpfc_put_buf()`, `lpfc_ip_xri_timeout()` 和 `lpfc_ip_timeout_handler()` 现在使用系统定时器
+* `lpfc_fdmi_tmo()` 和 `lpfc_qthrottle_up()` 现在使用系统定时器
+* 移除了 num_bufs 和 num_iocbs 配置参数
+* 修复了一个内存损坏的 bug。这个 bug 是由 lpfc_cmpl_els_acc 函数对 ndlp 结构进行内存写操作引起的，而该 ndlp 结构在 lpfc_els_unsol_event 中被释放了
+* lpfc_disc_timeout() 和 lpfc_establish_link_tmo() 现在使用系统定时器。同时更新 lpfc_els_retry_delay() 以在最后释放一个锁
+* 移除对 PAN（伪适配器编号）的使用
+* 重新引入交叉编译器用于 ppc64 构建，以消除使用标准 gcc 编译器时出现的构建错误
+* 修复 lpfc_els_retry_delay 中的 no-unlock-before return 问题，该问题在某些环境下会导致 insmod 死锁
+* 对注释进行了轻微格式修改
+* 创建了实用时钟函数 elx_start_timer() 和 elx_stop_timer()。所有超时例程现在都使用这些通用例程
+* 对注释进行了轻微格式修改
+* 对注释进行了轻微格式修改，移除了用于语法检查的故障转移定义
+* 对注释进行了轻微格式修改，移除了 ISCSI 定义
+* 修复了 2.4 内核安装目标中的拼写错误
+* 移除未使用的 elx_scsi_add_timer 外部函数声明
+* 清理与 DMA 面具相关的类型转换
+* 注释掉 lpfndd.o 的 modules_install 部分，因为如果未设置 CONFIG_NET_LPFC，则不会生成 lpfndd.o。同时仅在构建内核外部源模块时引用 BASEINCLUDE，否则 BASEINCLUDE 不存在
+* 移除 lpfcLINUXfcp.c 中未使用的 malloc 计数器
+* 移除 lpfcLINUXfcp.c 中一些不必要的 #include 指令
+    * 移除 elxLINUXfcp.c 中一些不必要的 #include 指令
+    * 对 Makefile 进行轻微的格式清理以避免某些换行问题
+* 移除未使用的 elx_mem_pool 数据结构
+* 移除多个不必要的 #include 指令
+* 将 ioctl lip 区域中的内存泄漏修复移动到 sysfs 的 lip
+* 移除未使用的 elx_dma_handle_t, elx_acc_handle_t, FC_MAX_SEGSZ 和 FC_MAX_POOL
+* 重写 Makefile。修复了在编译内核时使用 make -j4 导致的问题。不在每次构建时重新编译所有文件。使用内核构建中定义的 CFLAGS、MODFLAGS 等。移除了 "make rpm" 选项
+* 删除了未使用的宏定义 CLOSED、DEAD、OPENED、NORMAL_OPEN，以及在 elx.h 中不必要的 elx_sched.h 包含
+* 更新了多个日志消息
+    * 添加 PCI_DEVICE_ID_FIREFLY 用于 LP6000
+    * 修复了已知问题：20040326 版本中，在 2.4 和 2.6 内核下卸载驱动时出现崩溃
+
+从 20040319 到 20040326 的更改：
+
+* 更新了 20040326 SourceForge 发布的 ChangeLog
+* 移除 lpfc_isr / lpfc_tmr 逻辑，并将之前的提交中的制表符替换为 8 个空格
+* 将 elx_in_intr() 替换为 in_interrupt()
+* 删除未使用的消息 1602 和 1603
+* 修复日志消息中的以下问题：删除未使用的消息 406、407、409、927、928、1201、1202、1204、1205、1206 和 1207。创建新的消息 738 来修复重复的 736 消息实例
+* 从 elxLINUXfcp.c 中移除了剩余的 PCI 接口抽象
+* 在所有剩余文件中直接实现了操作系统调用并清理了模块。同时移除了原型
+* 删除了以下函数和结构：
+    * elx_mem_dmapool
+    * elx_idx_dmapool
+    * elx_size_dmapool
+    * elx_kmem_lock
+    * dfc_data_alloc
+    * dfc_data_free
+    * dfc_mem
+    * struct mbuf_info
+    * elx_acc_handle_t
+    * data_handle
+    * elx_dma_handle_t
+    * dma_handle
+    * struct elx_memseg
+    * MEMSEG_t
+* lpfc_els_timeout_handler() 现在使用系统定时器
+* 进一步清理 #ifdef powerpc
+* lpfc_scsi_timeout_handler() 现在使用系统定时器
+* 使用 Linux 的 __BIG_ENDIAN 等定义替换驱动程序自己的端序定义
+* 为所有 IPFC 特定代码添加了 #ifdef IPFC
+* `lpfc_disc_retry_rptlun()` 现在使用系统定时器
+* `lpfc_npr_timeout()` 现在使用系统定时器
+* 修改了检测代码，在加载模块时，如果链路建立且没有设备，则最多等待2秒
+* 将剩余的消息记录功能移至 `elx_logmsg.c` 和 `elx_logmsg.h`
+* 添加了代码，在有待处理的链路事件且读取链路注意（read_la）邮箱命令的内存分配失败时清除链路注意位
+* 移除了映射 BAR 寄存器和分配内核虚拟内存映射到映射 BAR 的函数调用，并移除原型 `lpfc_driver_cache_line` 及将 `pci_bar1_map` 重命名为 `pci_bar2_map`
+* 仅当 HBA 状态为准备好状态时才分配邮箱（mbox）
+* 通过 sysfs 完成 LIP 支持。要执行 LIP，可以通过回显 `brdnum > /sys/bus/pci/drivers/lpfc/lip` 来实现
+* 将 sysfs 显示和存储实现移到 `lpfc_sysfs.c` 中，并添加对 LIP 的支持
+* 新增文件：`lpfc_sysfs.c`、`lpfc_sysfs.h`
+  * 将 `LPFC_DRIVER_NAME` 和 `LPFC_MODULE_DESC` 从 `lpfcLINUXfcp.c` 移到 `lpfc_version.h`，因为现在在 `lpfc_sysfs.c` 中也需要它们
+  * `elx_mbox_timeout` 现在使用系统定时器
+  * 更改 `lpfc_nodev_timeout`、`lpfc_els_retry_delay` 和 `lpfc_linkdown_timeout` 使用系统定时器而不是内部时钟支持
+* 将 elx_util.c 中剩余的消息记录功能移到 elx_logmsg.c
+* 删除一些不必要的类型转换
+* 删除不再使用日志消息（曾被 elx_str_atox 使用）
+* 用标准 Linux list_head 替换 DLINK_t 和 SLINK_t
+    * 删除 deque 宏
+    * 用 Linux struct list_head 替换 ELX_DLINK_t 和 ELX_SLINK_t（时钟除外）
+    * 从代码中删除以下函数：linux_kmalloc、linux_kfree、elx_alloc_bigbuf、elx_free_bigbuf
+    * 从代码中删除以下抽象函数：elx_malloc、elx_free、elx_ip_get_rcv_buf、elx_ip_free_rcv_buf、elx_mem_alloc_dmabuf、elx_mem_alloc_dmabufext、elx_mem_alloc_dma、elx_mem_alloc_buf、lpfc_bufmap
+    * 删除自定义的 PCI 配置宏定义，并替换为操作系统提供的宏定义。同时在 *.c 文件中添加 linux/pci.h
+* 删除 elx_str_ctox，用 sscanf 替换 elx_str_atox
+* 许多缩进和空格修正
+* 在仅用于检查字符值的情况下，用 isxdigit 替换 elx_str_ctox
+* 从代码中删除以下函数：elx_kmem_free、elx_kmem_alloc、elx_kmem_zalloc
+    * 将 2.4 版本 SCSI 的 typedef Scsi_Host_Template 改为 2.6 内核中的 struct scsi_host_template
+* 将 2.4 版本 SCSI 的 typedefs（Scsi_Device、Scsi_Cmnd、Scsi_Request）改为实际的 struct 名称
+* 将 2.6 兼容性 irqreturn 定义移至 lpfc_compat.h
+保护这些定义，防止其与后续2.4内核中的类似定义发生冲突  
+* 删除未使用的定义：LINUX_TGT_t、LINUX_LUN_t、LINUX_BUF_t、elx_lun_t、SET_ADAPTER_STATUS  
+* 将pci_调用转换为Linux 2.6中对应的dma_调用  
+* 删除未使用的类型：struct buf、struct sc_buf、T_SCSIBUF类型定义  
+* 修复Makefile，使2.4驱动程序不会总是重新编译所有文件  
+* 删除未使用的_static_和fc_lun_t定义  
+* 清理了一些内存池实现代码  
+* 修复与字符设备更改相关的panic问题。结果发现2.6.4代码在内核空间中以2.4接口风格的定义方式做了相同的事情。因此完全移除新的字符设备代码  
+* 从fc_get_cfg_param中移除类型转换，并将参数切换的多个实例合并为一个实例  
+* 使用lpfc_is_LC_HBA()宏直接测试pcidev->device，而不是保存一个私有副本并对其进行各种位移和类型转换
+* 移除了所有内存池的使用
+从 20040312 到 20040319 的更改：
+
+    * 对于 2.6 内核，使用 dev_warn 替换 printk
+    * 修正 2.6 内核情况下的 Iocbq 完成例程
+    * 将 void *pOSCmd 改为 Scsi_Smnd *pCmd
+    * 将 void *pOScmd 改为 struct sk_buff *pCmd
+    * 移除数据方向代码
+
+* 移除了 buf/bpl 缓冲区的内存池，并使用 kmalloc/kfree 直接调用 pci_pool_alloc/free
+* 将 DMA 地址 0 在 scatter-gather 列表中的 PPC 检查移到 lpfc_compat.h 中
+    * 始终使用 pci_unmap_single() 而不是 pci_unmap_page()
+    * 清理 2.6 和 2.4 的 #if 代码块
+* 条件化调度器
+    * 添加注释解释 Makefile 第一部分的作用
+* 移除了 lpfc_intr_post
+    * Sysfs 新显示格式。还添加了写入功能。您可以使用命令 [ echo "0 log_verbose 3" > /sys/bus/pci/drivers/lpfc/params]。十六进制支持尚未添加
+* 移除了若干 #ifdef powerpc，包括 lpfc_ValidLun() 中的一个发现问题
+    * 将 elx_printf_log 改为使用 vsprintf
+* 添加了 lpfc_compat.h，提供宏以帮助在不同平台架构上的 Linux 2.4 内核编译。最初支持映射到 DMA 地址
+* 移除了 nlp/bind 缓冲区的内存池，并直接使用 kmalloc/kfree
+* 移除了 iocb 缓冲区的内存池，并直接使用 kmalloc/kfree
+* 移除邮箱缓冲区的内存池，并直接使用 `kmalloc` 和 `kfree`
+* 清理了来回转换
+* 添加了对 2.6 内核的 sysfs 初始支持
+* 将 `elx_dma_addr_t` 更改为 `dma_addr_t`
+    * 修复了 2.6 内核检查，使其从 `>` 改为 `>=`（之前遗漏了 2.6.0）
+* 移除 `elx_printf` 和 `elx_str_sprintf`。将 `elx_print` 替换为 `printk`
+* 将 `elx_printf` 替换为 `printk`
+* 将 `elx_str_sprintf` 替换为 `sprintf`
+* 移除了 `mem_lock`、其原型、函数、宏和 `iflags`
+* 对 `ELX_SCSI_BUF_t` 使用 `kmalloc` 和 `kfree`
+    * 对 `SCSI_DMA_EXT` 使用 Linux 的 `pci_pools`
+    * 对 BPLs 使用 Linux 的 `pci_pools`
+* 对 PPC64 的 DFC 参数进行了轻微清理
+* 进行了多个小的缩进清理
+* 新的 Linux 2.6 风格的字符设备注册方式
+* 将 LPFCHBA_t 和 LINUX_HBA_t 结构体中的成员迁移到 elxHBA_t 中
+    * 使用 strcpy、strncmp、isdigit 和 strlen 而不是抽象方法
+    * 清理 driver_template
+* 支持在编译时开启或关闭 lpfc_network_on
+* 将大型源文件拆分成较小且命名更好的文件
+从 2.10a 到 20040312 的更改
+
+    * 修复 2.4 内核的构建问题
+    * 将驱动版本宏移动到 lpfc_version.h 文件中
+* 修正了 LIP 中的数据比较错误
+* 移除了 elx_sli、elx_ioc、elx_disc 和 elx_sch 函数及其原型和引用点
+* 纠正了硬制表符插入的空格问题
+    * 移除 ELX_SLI_INIT_t 结构体中的函数指针
+* 移除了除 drvr、mem 和 clock 之外的模块锁
+* 从源码库中移除未使用的模块锁。保留了 drvr_lock、mem_lock 和 clock_lock
+将 NULL 改为 0

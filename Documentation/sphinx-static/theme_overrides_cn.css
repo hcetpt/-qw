@@ -1,0 +1,122 @@
+```css
+/* -*- coding: utf-8; mode: css -*-
+ *
+ * Sphinx HTML主题自定义：阅读文档
+ * 请不要在此处添加任何颜色定义，因为该主题应同时适用于正常模式和深色模式
+*/
+
+/* 提高对比度并增加字体大小以方便阅读。 */
+
+body {
+    font-family: 宋体;
+    font-size: 100%;
+}
+
+h1, h2, .rst-content .toctree-wrapper p.caption, h3, h4, h5, h6, legend {
+    font-family: 无衬线字体;
+}
+
+div[class^="highlight"] pre {
+    font-family: 等宽字体;
+    font-size: 100%;
+}
+
+.wy-menu-vertical {
+    font-family: 无衬线字体;
+}
+
+.c {
+    font-style: 正常;
+}
+
+p {
+    font-size: 100%;
+}
+
+/* 过渡：带有行号的代码块 - 行和行号不对齐
+* 参见：https://github.com/rtfd/sphinx_rtd_theme/issues/419
+ */
+
+div[class^="highlight"] pre {
+    line-height: 正常;
+}
+.rst-content .highlight > pre {
+    line-height: 正常;
+}
+
+/* 防止字段因继承的表格CSS而奇怪地相距甚远。 */
+.rst-content table.field-list th.field-name {
+    padding-top: 1px;
+    padding-bottom: 1px;
+}
+.rst-content table.field-list td.field-body {
+    padding-top: 1px;
+    padding-bottom: 1px;
+}
+
+@media screen {
+
+    /* 内容列
+     *
+     * RTD主题默认内容的最大宽度为800px，但我们的表格有很多列，需要占据整个视口的宽度
+*/
+
+    .wy-nav-content { max-width: 无限制; }
+
+    /* 表格：
+     *
+     *   - 多个空白字符应折叠成一个空白字符
+     *   - 设置溢出自动（需要时显示滚动条）
+     *   - 将标题对齐方式设为“左”（对于大表格，“居中”不合适）
+     */
+
+    .wy-table-responsive table td { white-space: 正常; }
+    .wy-table-responsive { overflow: 自动; }
+    .rst-content table.docutils caption { text-align: 左; font-size: 100%; }
+
+    /* 标题：
+     *
+     *   - 标题应具有100%（而不是85%）的字体大小
+     *   - 在链接未悬停时隐藏永久链接符号
+     */
+
+    caption, .wy-table caption, .rst-content table.field-list caption {
+        font-size: 100%;
+    }
+    caption a.headerlink { opacity: 0; }
+    caption a.headerlink:hover { opacity: 1; }
+
+    /* 菜单选择和键盘操作 */
+
+    span.menuselection {
+        font-family: "Courier New", Courier, 等宽字体;
+    }
+
+    code.kbd, code.kbd span {
+        font-weight: 加粗;
+        font-family: "Courier New", Courier, 等宽字体;
+    }
+
+    /* 修复列表项底部边距 */
+
+    .rst-content .section ul li:last-child, .rst-content .section ul li p:last-child {
+        margin-bottom: 12px;
+    }
+
+    /* 内联字面量：去掉边框、内边距和红色 */
+    
+    code, .rst-content tt, .rst-content code {
+        color: 继承;
+        border: 无;
+        padding: 无;
+        background: 继承;
+        font-size: 85%;
+    }
+
+    .rst-content tt.literal, .rst-content code.literal {
+        color: 继承;
+    }
+}
+```
+
+注释已翻译成中文，并且代码中的英文单词也进行了相应的翻译。如果某些术语有特定的中文表达，请告诉我以便进一步调整。

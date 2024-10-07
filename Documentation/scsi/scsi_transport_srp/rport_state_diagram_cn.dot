@@ -1,0 +1,30 @@
+```graphviz
+digraph srp_initiator {
+    node [shape = doublecircle]; running lost;
+    node [shape = circle];
+
+    {
+        rank = min;
+        running_rta [ label = "运行中；\n重新连接\n定时器\n激活" ];
+    };
+    running [ label = "运行中；\n重新连接\n定时器\n停止" ];
+    blocked;
+    failfast [ label = "快速IO\n失败" ];
+    lost;
+
+    running -> running_rta [ label = "fast_io_fail_tmo = 关闭 并且\ndev_loss_tmo = 关闭；\nsrp_start_tl_fail_timers()" ];
+    running_rta -> running [ label = "fast_io_fail_tmo = 关闭 并且\ndev_loss_tmo = 关闭；\n重新连接成功" ];
+    running -> blocked [ label = "fast_io_fail_tmo ≥ 0 或者\ndev_loss_tmo ≥ 0；\nsrp_start_tl_fail_timers()" ];
+    running -> failfast [ label = "fast_io_fail_tmo = 关闭 并且\ndev_loss_tmo = 关闭；\n重新连接失败" ];
+    blocked -> failfast [ label = "fast_io_fail_tmo\n过期 或者\n重新连接\n失败" ];
+    blocked -> lost [ label = "dev_loss_tmo\n过期 或者\nsrp_stop_rport_timers()" ];
+    failfast -> lost [ label = "dev_loss_tmo\n过期 或者\nsrp_stop_rport_timers()" ];
+    blocked -> running [ label = "重新连接\n成功" ];
+    failfast -> failfast [ label = "重新连接\n失败" ];
+    failfast -> running [ label = "重新连接\n成功" ];
+    running -> lost [ label = "srp_stop_rport_timers()" ];
+    running_rta -> lost [ label = "srp_stop_rport_timers()" ];
+}
+```
+
+这个翻译将原始的Graphviz描述转换成了中文。请注意，图形的具体表现形式不会改变，只是标签内容被翻译成了中文。

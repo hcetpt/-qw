@@ -1,0 +1,223 @@
+```latex
+% -*- coding: utf-8 -*-
+% SPDX-License-Identifier: GPL-2.0
+%
+% LaTeX 前置部分用于 "make latexdocs" 或 "make pdfdocs"，包括：
+%   - 目录宽度设置
+%   - 设置 tabulary (\tymin)
+%   - 为 fancyhdr 设置 headheight
+%   - 为中日韩（CJK）语言版本设置字体
+%
+% 关于 .sty 后缀的说明：
+%   这不是作为一个 LaTeX 风格文件实现的，而是作为一个包含纯 LaTeX 代码的文件来包含到前置部分
+%   选择 ".sty" 是因为 ".tex" 会导致构建脚本将此文件误认为是 LaTeX 主文件
+%
+% 版权所有 (C) 2022 Akira Yokosawa
+
+% 自定义目录宽度参数
+%  - 重新定义 report.cls 中定义的低级命令
+%  - 保留两个字符的缩进以便于比较
+% 默认参数的更改摘要：
+%   页码宽度 (\@pnumwidth)：1.55em -> 2.7em
+%   章节编号宽度：1.5em -> 2.4em
+%   节编号缩进：1.5em -> 2.4em
+%   节编号宽度：2.6em -> 3.2em
+%   子节编号缩进：4.1em -> 5.6em
+%   子节编号宽度：3.5em -> 4.3em
+%
+% 这些参数可以支持四位数的页码，三位数的章节数，
+% 四位数加一个句点的节数（例如，18.10），以及五位数加两个句点的子节数（例如，18.7.13）
+\makeatletter
+%% 重新定义 \@pnumwidth（页码宽度）
+\renewcommand*\@pnumwidth{2.7em}
+%% 重新定义 \l@chapter（章节列表条目）
+\renewcommand*\l@chapter[2]{%
+  \ifnum \c@tocdepth >\m@ne
+    \addpenalty{-\@highpenalty}%
+    \vskip 1.0em \@plus\p@
+    \setlength\@tempdima{2.4em}%
+    \begingroup
+      \parindent \z@ \rightskip \@pnumwidth
+      \parfillskip -\@pnumwidth
+      \leavevmode \bfseries
+      \advance\leftskip\@tempdima
+      \hskip -\leftskip
+      #1\nobreak\hfil
+      \nobreak\hb@xt@\@pnumwidth{\hss #2%
+                                 \kern-\p@\kern\p@}\par
+      \penalty\@highpenalty
+    \endgroup
+  \fi}
+%% 重新定义 \l@section 和 \l@subsection
+\renewcommand*\l@section{\@dottedtocline{1}{2.4em}{3.2em}}
+\renewcommand*\l@subsection{\@dottedtocline{2}{5.6em}{4.3em}}
+\makeatother
+%% 防止默认的 \sphinxtableofcontentshook 覆盖上述调整
+\renewcommand{\sphinxtableofcontentshook}{} % 清空钩子
+
+% 防止 tabulary 的列挤压。 \tymin 由 Sphinx 设置为：
+%   \setlength{\tymin}{3\fontcharwd\font`0 }
+% ，这太短了
+\setlength{\tymin}{20em}
+
+% 为 fancyhdr 调整 \headheight
+\addtolength{\headheight}{1.6pt}
+\addtolength{\topmargin}{-1.6pt}
+
+% 翻译包含亚洲（CJK）字符，这些字符只有在使用 xeCJK 时才会显示
+\usepackage{ifthen}
+\newboolean{enablecjk}
+\setboolean{enablecjk}{false}
+\IfFontExistsTF{Noto Sans CJK SC}{
+    \IfFileExists{xeCJK.sty}{
+	\setboolean{enablecjk}{true}
+    }{}
+}{}
+\ifthenelse{\boolean{enablecjk}}{
+    % 当 Noto Sans CJK 字体和 xeCJK.sty 都可用时加载 xeCJK
+\usepackage{xeCJK}
+    % Noto CJK 字体不提供斜体形状。[AutoFakeSlant] 允许模拟
+% 在每个文档开始时选择 KR 变体，以便在拉丁文档的目录中使用半宽引号和撇号符号
+}
+```
+
+以上是将原文翻译成中文后的结果。
+```latex
+\IfFontExistsTF{Noto Serif CJK KR}{
+    \setCJKmainfont{Noto Serif CJK KR}[AutoFakeSlant]
+}{
+    \setCJKmainfont{Noto Sans CJK KR}[AutoFakeSlant]
+}
+\setCJKsansfont{Noto Sans CJK KR}[AutoFakeSlant]
+\setCJKmonofont{Noto Sans Mono CJK KR}[AutoFakeSlant]
+% 教授 xeCJK 半角符号
+\xeCJKDeclareCharClass{HalfLeft}{`“,`‘}
+\xeCJKDeclareCharClass{HalfRight}{`”,`’}
+% CJK 语言特定的字体选择
+%% 对于简体中文
+\IfFontExistsTF{Noto Serif CJK SC}{
+    \newCJKfontfamily[SCmain]\scmain{Noto Serif CJK SC}[AutoFakeSlant]
+    \newCJKfontfamily[SCserif]\scserif{Noto Serif CJK SC}[AutoFakeSlant]
+}{
+    \newCJKfontfamily[SCmain]\scmain{Noto Sans CJK SC}[AutoFakeSlant]
+    \newCJKfontfamily[SCserif]\scserif{Noto Sans CJK SC}[AutoFakeSlant]
+}
+\newCJKfontfamily[SCsans]\scsans{Noto Sans CJK SC}[AutoFakeSlant]
+\newCJKfontfamily[SCmono]\scmono{Noto Sans Mono CJK SC}[AutoFakeSlant]
+%% 对于繁体中文
+\IfFontExistsTF{Noto Serif CJK TC}{
+    \newCJKfontfamily[TCmain]\tcmain{Noto Serif CJK TC}[AutoFakeSlant]
+    \newCJKfontfamily[TCserif]\tcserif{Noto Serif CJK TC}[AutoFakeSlant]
+}{
+    \newCJKfontfamily[TCmain]\tcmain{Noto Sans CJK TC}[AutoFakeSlant]
+    \newCJKfontfamily[TCserif]\tcserif{Noto Sans CJK TC}[AutoFakeSlant]
+}
+\newCJKfontfamily[TCsans]\tcsans{Noto Sans CJK TC}[AutoFakeSlant]
+\newCJKfontfamily[TCmono]\tcmono{Noto Sans Mono CJK TC}[AutoFakeSlant]
+%% 对于韩文
+\IfFontExistsTF{Noto Serif CJK KR}{
+    \newCJKfontfamily[KRmain]\krmain{Noto Serif CJK KR}[AutoFakeSlant]
+    \newCJKfontfamily[KRserif]\krserif{Noto Serif CJK KR}[AutoFakeSlant]
+}{
+    \newCJKfontfamily[KRmain]\krmain{Noto Sans CJK KR}[AutoFakeSlant]
+    \newCJKfontfamily[KRserif]\krserif{Noto Sans CJK KR}[AutoFakeSlant]
+}
+\newCJKfontfamily[KRsans]\krsans{Noto Sans CJK KR}[AutoFakeSlant]
+\newCJKfontfamily[KRmono]\krmono{Noto Sans Mono CJK KR}[AutoFakeSlant]
+%% 对于日文
+\IfFontExistsTF{Noto Serif CJK JP}{
+    \newCJKfontfamily[JPmain]\jpmain{Noto Serif CJK JP}[AutoFakeSlant]
+    \newCJKfontfamily[JPserif]\jpserif{Noto Serif CJK JP}[AutoFakeSlant]
+}{
+    \newCJKfontfamily[JPmain]\jpmain{Noto Sans CJK JP}[AutoFakeSlant]
+    \newCJKfontfamily[JPserif]\jpserif{Noto Sans CJK JP}[AutoFakeSlant]
+}
+\newCJKfontfamily[JPsans]\jpsans{Noto Sans CJK JP}[AutoFakeSlant]
+\newCJKfontfamily[JPmono]\jpmono{Noto Sans Mono CJK JP}[AutoFakeSlant]
+% 定义自定义宏以启用/禁用 CJK
+%% 一个半间距用于 CJK 内容
+\newcommand{\kerneldocCJKon}{\makexeCJKactive\onehalfspacing}
+\newcommand{\kerneldocCJKoff}{\makexeCJKinactive\singlespacing}
+% 定义自定义宏以切换 CJK 字体设置
+%% 对于简体中文
+\newcommand{\kerneldocBeginSC}{%
+    \begingroup%
+    \scmain%
+    \xeCJKDeclareCharClass{FullLeft}{`“,`‘}% 全角在简体中文中
+    \xeCJKDeclareCharClass{FullRight}{`”,`’}% 全角在简体中文中
+    \renewcommand{\CJKrmdefault}{SCserif}%
+    \renewcommand{\CJKsfdefault}{SCsans}%
+    \renewcommand{\CJKttdefault}{SCmono}%
+    \xeCJKsetup{CJKspace = false}% 忽略空格
+    % 为了 CJK ASCII 艺术对齐
+    \setmonofont{Noto Sans Mono CJK SC}[AutoFakeSlant]%
+}
+\newcommand{\kerneldocEndSC}{\endgroup}
+%% 对于繁体中文
+\newcommand{\kerneldocBeginTC}{%
+    \begingroup%
+    \tcmain%
+    \xeCJKDeclareCharClass{FullLeft}{`“,`‘}% 全角在繁体中文中
+    \xeCJKDeclareCharClass{FullRight}{`”,`’}% 全角在繁体中文中
+    \renewcommand{\CJKrmdefault}{TCserif}%
+    \renewcommand{\CJKsfdefault}{TCsans}%
+    \renewcommand{\CJKttdefault}{TCmono}%
+    \xeCJKsetup{CJKspace = false}% 忽略空格
+    % 为了 CJK ASCII 艺术对齐
+    \setmonofont{Noto Sans Mono CJK TC}[AutoFakeSlant]%
+}
+\newcommand{\kerneldocEndTC}{\endgroup}
+%% 对于韩文
+\newcommand{\kerneldocBeginKR}{%
+    \begingroup%
+    \krmain%
+    \renewcommand{\CJKrmdefault}{KRserif}%
+    \renewcommand{\CJKsfdefault}{KRsans}%
+    \renewcommand{\CJKttdefault}{KRmono}%
+    % \xeCJKsetup{CJKspace = true} % 默认为 true
+    % 为了 CJK ASCII 艺术对齐（仍然对韩文不对齐）
+    \setmonofont{Noto Sans Mono CJK KR}[AutoFakeSlant]%
+}
+\newcommand{\kerneldocEndKR}{\endgroup}
+%% 对于日文
+\newcommand{\kerneldocBeginJP}{%
+    \begingroup%
+    \jpmain%
+    \renewcommand{\CJKrmdefault}{JPserif}%
+    \renewcommand{\CJKsfdefault}{JPsans}%
+    \renewcommand{\CJKttdefault}{JPmono}%
+    \xeCJKsetup{CJKspace = false}% 忽略空格
+    % 为了 CJK ASCII 艺术对齐
+    \setmonofont{Noto Sans Mono CJK JP}[AutoFakeSlant]%
+}
+\newcommand{\kerneldocEndJP}{\endgroup}
+
+% 在字面块中的单间距
+\fvset{baselinestretch=1}
+% 自定义 \sphinxtableofcontents
+\usepackage{etoolbox}
+% 目录后禁用 CJK
+\apptocmd{\sphinxtableofcontents}{\kerneldocCJKoff}{}{}
+\xeCJKsetup{CJKspace = true}% 用于韩文目录的短语间隔
+}{ % 不启用 CJK
+    % 自定义宏以启用/禁用 CJK 和切换 CJK 字体（虚拟）
+    \newcommand{\kerneldocCJKon}{}
+    \newcommand{\kerneldocCJKoff}{}
+    %% 通过将 \kerneldocBegin(SC|TC|KR|JP) 定义为带参数的命令
+    %% 并在它们的定义中忽略参数 (#1)，可以忽略整个 CJK 章节的内容
+\newcommand{\kerneldocBeginSC}[1]{%
+    %% 在缺少 CJK 字体或 xecjk 包的地方放置一个说明
+    \begin{sphinxadmonition}{note}{关于缺少字体和包的说明:}
+        由于缺少合适的字体系列和/或 texlive-xecjk 包，简体中文 (zh_CN)、繁体中文 (zh_TW)、韩文 (ko_KR) 和日文 (ja_JP) 的翻译被跳过。
+        如果需要它们，请按照 \sphinxcode{./scripts/sphinx-pre-install} 中的指示安装非可变的 “Noto Sans CJK” 字体系列以及 texlive-xecjk 包。
+        拥有可选的非可变 “Noto Serif CJK” 字体系列将改善这些翻译的外观。
+    \end{sphinxadmonition}}
+    \newcommand{\kerneldocEndSC}{}
+    \newcommand{\kerneldocBeginTC}[1]{}
+    \newcommand{\kerneldocEndTC}{}
+    \newcommand{\kerneldocBeginKR}[1]{}
+    \newcommand{\kerneldocEndKR}{}
+    \newcommand{\kerneldocBeginJP}[1]{}
+    \newcommand{\kerneldocEndJP}{}
+}
+```

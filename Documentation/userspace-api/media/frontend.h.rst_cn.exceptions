@@ -1,0 +1,248 @@
+```plaintext
+# SPDX 许可证标识符: GPL-2.0
+
+# 忽略头文件名称
+忽略定义 _DVBFRONTEND_H_
+
+# 将层 A-C 的符号组合在一起
+替换定义 DTV_ISDBT_LAYERA_FEC 为 dtv-isdbt-layer-fec
+替换定义 DTV_ISDBT_LAYERB_FEC 为 dtv-isdbt-layer-fec
+替换定义 DTV_ISDBT_LAYERC_FEC 为 dtv-isdbt-layer-fec
+替换定义 DTV_ISDBT_LAYERA_MODULATION 为 dtv-isdbt-layer-modulation
+替换定义 DTV_ISDBT_LAYERB_MODULATION 为 dtv-isdbt-layer-modulation
+替换定义 DTV_ISDBT_LAYERC_MODULATION 为 dtv-isdbt-layer-modulation
+替换定义 DTV_ISDBT_LAYERA_SEGMENT_COUNT 为 dtv-isdbt-layer-segment-count
+替换定义 DTV_ISDBT_LAYERB_SEGMENT_COUNT 为 dtv-isdbt-layer-segment-count
+替换定义 DTV_ISDBT_LAYERC_SEGMENT_COUNT 为 dtv-isdbt-layer-segment-count
+替换定义 DTV_ISDBT_LAYERA_TIME_INTERLEAVING 为 dtv-isdbt-layer-time-interleaving
+替换定义 DTV_ISDBT_LAYERB_TIME_INTERLEAVING 为 dtv-isdbt-layer-time-interleaving
+替换定义 DTV_ISDBT_LAYERC_TIME_INTERLEAVING 为 dtv-isdbt-layer-time-interleaving
+
+# 忽略旧的定义
+忽略定义 DTV_ISDBS_TS_ID_LEGACY
+忽略定义 SYS_DVBC_ANNEX_AC
+忽略定义 SYS_DMBTH
+
+# 忽略限制
+忽略定义 DTV_MAX_COMMAND
+忽略定义 MAX_DTV_STATS
+忽略定义 DTV_IOCTL_MAX_MSGS
+
+# 对于获取和设置 ioctl 均使用相同的引用
+替换 ioctl FE_SET_PROPERTY 为 :c:type:`FE_GET_PROPERTY`
+
+# 使用枚举引用的类型定义
+替换 typedef fe_sec_voltage_t 为 :c:type:`fe_sec_voltage`
+
+# 替换标志常量
+替换定义 FE_TUNE_MODE_ONESHOT 为 :c:func:`FE_SET_FRONTEND_TUNE_MODE`
+替换定义 LNA_AUTO 为 dtv-lna
+替换定义 NO_STREAM_ID_FILTER 为 dtv-stream-id
+
+# 这些枚举在 frontend.h 中定义，而不是外部定义
+
+忽略符号 FE_IS_STUPID
+忽略符号 FE_CAN_INVERSION_AUTO
+忽略符号 FE_CAN_FEC_1_2
+忽略符号 FE_CAN_FEC_2_3
+忽略符号 FE_CAN_FEC_3_4
+忽略符号 FE_CAN_FEC_4_5
+忽略符号 FE_CAN_FEC_5_6
+忽略符号 FE_CAN_FEC_6_7
+忽略符号 FE_CAN_FEC_7_8
+忽略符号 FE_CAN_FEC_8_9
+忽略符号 FE_CAN_FEC_AUTO
+忽略符号 FE_CAN_QPSK
+忽略符号 FE_CAN_QAM_16
+忽略符号 FE_CAN_QAM_32
+忽略符号 FE_CAN_QAM_64
+忽略符号 FE_CAN_QAM_128
+忽略符号 FE_CAN_QAM_256
+忽略符号 FE_CAN_QAM_AUTO
+忽略符号 FE_CAN_TRANSMISSION_MODE_AUTO
+忽略符号 FE_CAN_BANDWIDTH_AUTO
+忽略符号 FE_CAN_GUARD_INTERVAL_AUTO
+忽略符号 FE_CAN_HIERARCHY_AUTO
+忽略符号 FE_CAN_8VSB
+忽略符号 FE_CAN_16VSB
+忽略符号 FE_HAS_EXTENDED_CAPS
+忽略符号 FE_CAN_MULTISTREAM
+忽略符号 FE_CAN_TURBO_FEC
+忽略符号 FE_CAN_2G_MODULATION
+忽略符号 FE_NEEDS_BENDING
+忽略符号 FE_CAN_RECOVER
+忽略符号 FE_CAN_MUTE_TS
+
+忽略符号 QPSK
+忽略符号 QAM_16
+忽略符号 QAM_32
+忽略符号 QAM_64
+忽略符号 QAM_128
+忽略符号 QAM_256
+忽略符号 QAM_AUTO
+忽略符号 VSB_8
+忽略符号 VSB_16
+忽略符号 PSK_8
+忽略符号 APSK_16
+忽略符号 APSK_32
+忽略符号 DQPSK
+忽略符号 QAM_4_NR
+忽略符号 QAM_1024
+忽略符号 QAM_4096
+忽略符号 APSK_8_L
+忽略符号 APSK_16_L
+忽略符号 APSK_32_L
+忽略符号 APSK_64
+忽略符号 APSK_64_L
+
+忽略符号 SEC_VOLTAGE_13
+忽略符号 SEC_VOLTAGE_18
+忽略符号 SEC_VOLTAGE_OFF
+
+忽略符号 SEC_TONE_ON
+忽略符号 SEC_TONE_OFF
+
+忽略符号 SEC_MINI_A
+忽略符号 SEC_MINI_B
+
+忽略符号 FE_NONE
+忽略符号 FE_HAS_SIGNAL
+忽略符号 FE_HAS_CARRIER
+忽略符号 FE_HAS_VITERBI
+忽略符号 FE_HAS_SYNC
+忽略符号 FE_HAS_LOCK
+忽略符号 FE_REINIT
+忽略符号 FE_TIMEDOUT
+
+忽略符号 FEC_NONE
+忽略符号 FEC_1_2
+忽略符号 FEC_2_3
+忽略符号 FEC_3_4
+忽略符号 FEC_4_5
+忽略符号 FEC_5_6
+忽略符号 FEC_6_7
+忽略符号 FEC_7_8
+忽略符号 FEC_8_9
+忽略符号 FEC_AUTO
+忽略符号 FEC_3_5
+忽略符号 FEC_9_10
+忽略符号 FEC_2_5
+忽略符号 FEC_1_3
+忽略符号 FEC_1_4
+忽略符号 FEC_5_9
+忽略符号 FEC_7_9
+忽略符号 FEC_8_15
+忽略符号 FEC_11_15
+忽略符号 FEC_13_18
+忽略符号 FEC_9_20
+忽略符号 FEC_11_20
+忽略符号 FEC_23_36
+忽略符号 FEC_25_36
+忽略符号 FEC_13_45
+忽略符号 FEC_26_45
+忽略符号 FEC_28_45
+忽略符号 FEC_32_45
+忽略符号 FEC_77_90
+忽略符号 FEC_11_45
+忽略符号 FEC_4_15
+忽略符号 FEC_14_45
+忽略符号 FEC_7_15
+
+忽略符号 TRANSMISSION_MODE_AUTO
+忽略符号 TRANSMISSION_MODE_1K
+忽略符号 TRANSMISSION_MODE_2K
+忽略符号 TRANSMISSION_MODE_8K
+忽略符号 TRANSMISSION_MODE_4K
+忽略符号 TRANSMISSION_MODE_16K
+忽略符号 TRANSMISSION_MODE_32K
+忽略符号 TRANSMISSION_MODE_C1
+忽略符号 TRANSMISSION_MODE_C3780
+忽略符号 TRANSMISSION_MODE_2K
+忽略符号 TRANSMISSION_MODE_8K
+
+忽略符号 GUARD_INTERVAL_AUTO
+忽略符号 GUARD_INTERVAL_1_128
+忽略符号 GUARD_INTERVAL_1_32
+忽略符号 GUARD_INTERVAL_1_16
+忽略符号 GUARD_INTERVAL_1_8
+忽略符号 GUARD_INTERVAL_1_4
+忽略符号 GUARD_INTERVAL_19_128
+忽略符号 GUARD_INTERVAL_19_256
+忽略符号 GUARD_INTERVAL_PN420
+忽略符号 GUARD_INTERVAL_PN595
+忽略符号 GUARD_INTERVAL_PN945
+忽略符号 GUARD_INTERVAL_1_64
+
+忽略符号 HIERARCHY_NONE
+忽略符号 HIERARCHY_AUTO
+忽略符号 HIERARCHY_1
+忽略符号 HIERARCHY_2
+忽略符号 HIERARCHY_4
+
+忽略符号 INTERLEAVING_NONE
+忽略符号 INTERLEAVING_AUTO
+忽略符号 INTERLEAVING_240
+忽略符号 INTERLEAVING_720
+
+忽略符号 PILOT_ON
+忽略符号 PILOT_OFF
+忽略符号 PILOT_AUTO
+
+忽略符号 ROLLOFF_35
+忽略符号 ROLLOFF_20
+忽略符号 ROLLOFF_25
+忽略符号 ROLLOFF_AUTO
+忽略符号 ROLLOFF_15
+忽略符号 ROLLOFF_10
+忽略符号 ROLLOFF_5
+
+忽略符号 INVERSION_ON
+忽略符号 INVERSION_OFF
+忽略符号 INVERSION_AUTO
+
+忽略符号 SYS_UNDEFINED
+忽略符号 SYS_DVBC_ANNEX_A
+忽略符号 SYS_DVBC_ANNEX_B
+忽略符号 SYS_DVBC_ANNEX_C
+忽略符号 SYS_ISDBC
+忽略符号 SYS_DVBT
+忽略符号 SYS_DVBT2
+忽略符号 SYS_ISDBT
+忽略符号 SYS_ATSC
+忽略符号 SYS_ATSCMH
+忽略符号 SYS_DTMB
+忽略符号 SYS_DVBS
+忽略符号 SYS_DVBS2
+忽略符号 SYS_TURBO
+忽略符号 SYS_ISDBS
+忽略符号 SYS_DAB
+忽略符号 SYS_DSS
+忽略符号 SYS_CMMB
+忽略符号 SYS_DVBH
+忽略符号 SYS_DVBC2
+
+忽略符号 ATSCMH_SCCC_BLK_SEP
+忽略符号 ATSCMH_SCCC_BLK_COMB
+忽略符号 ATSCMH_SCCC_BLK_RES
+
+忽略符号 ATSCMH_SCCC_CODE_HLF
+忽略符号 ATSCMH_SCCC_CODE_QTR
+忽略符号 ATSCMH_SCCC_CODE_RES
+
+忽略符号 ATSCMH_RSFRAME_ENS_PRI
+忽略符号 ATSCMH_RSFRAME_ENS_SEC
+
+忽略符号 ATSCMH_RSFRAME_PRI_ONLY
+忽略符号 ATSCMH_RSFRAME_PRI_SEC
+忽略符号 ATSCMH_RSFRAME_RES
+
+忽略符号 ATSCMH_RSCODE_211_187
+忽略符号 ATSCMH_RSCODE_223_187
+忽略符号 ATSCMH_RSCODE_235_187
+忽略符号 ATSCMH_RSCODE_RES
+
+忽略符号 FE_SCALE_NOT_AVAILABLE
+忽略符号 FE_SCALE_DECIBEL
+忽略符号 FE_SCALE_RELATIVE
+忽略符号 FE_SCALE_COUNTER
+```

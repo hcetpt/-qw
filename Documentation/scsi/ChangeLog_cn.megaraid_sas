@@ -1,0 +1,528 @@
+发布日期：2014年6月19日星期四 17:00:00 PST 2014 -
+			(emaild-id:megaraidlinux@lsi.com)
+			Adam Radford
+			Kashyap Desai
+			Sumit Saxena
+			Uday Lingala
+当前版本：06.803.02.00-rc1
+旧版本：06.803.01.00-rc1
+1. 修复megasas_reset_fusion()中的reset_mutex泄漏问题
+2. 删除megasas_instance中未使用的变量
+3. 修复LD/VF关联解析问题
+4. 添加缺失的初始调用megasas_get_ld_vf_affiliation()
+5. 版本和更新日志更新
+
+---------------------------------------------------------------------------------------------
+发布日期：2014年3月10日星期一 17:00:00 PST 2014 -
+			(emaild-id:megaraidlinux@lsi.com)
+			Adam Radford
+			Kashyap Desai
+			Sumit Saxena
+当前版本：06.803.01.00-rc1
+旧版本：06.700.06.00-rc1
+1. 加载正确的RAID上下文超时值以支持多路径和集群
+2. 修复megasas_ioc_init_fusion使用本地栈变量的问题
+3. 将泄漏的MPT帧返回到MPT命令池
+4. 添加Dell PowerEdge VRTX SR-IOV VF设备支持
+5. 版本和更新日志更新
+```-------------------------------------------------------------------------------
+发布日期    : 2013年8月31日，星期六，17:00:00 PST 2013 -
+			(emaild-id:megaraidlinux@lsi.com)
+			Adam Radford
+			Kashyap Desai
+			Sumit Saxena
+当前版本 : 06.700.06.00-rc1
+旧版本     : 06.600.18.00-rc1
+    1. 添加使用共享逻辑磁盘的高可用性集群支持
+2. 版本和更新日志更新
+-------------------------------------------------------------------------------
+发布日期    : 2013年5月15日，星期三，17:00:00 PST 2013 -
+			(emaild-id:megaraidlinux@lsi.com)
+			Adam Radford
+			Kashyap Desai
+			Sumit Saxena
+当前版本 : 06.600.18.00-rc1
+旧版本     : 06.506.00.00-rc1
+    1. 当控制器处于严重硬件错误时，返回DID_ERROR以处理SCSI I/O
+2. 修复Gen2控制器的中断掩码
+3. 更新驱动程序中的平衡计数以与固件同步
+4. 在不检查设备ID的情况下释放事件详细信息内存
+5. 设置由操作系统超时提供的磁带设备的I/O请求超时值
+6. 添加对MegaRAID Fury（设备ID-0x005f）12Gb/s控制器的支持
+7. 添加在syslog中显示客户品牌详情的支持
+8. 设置IoFlags以启用Invader/Fury（12 Gb/s）控制器的JBOD快速路径
+```
+9. 为Invader和Fury（12Gb/s HBA）添加对扩展MSI-x向量的支持
+10. 添加对不均匀Span PRL11的支持
+11. 添加区分iMR和MR固件的支持
+12. 版本和更新日志更新
+-------------------------------------------------------------------------------
+发布日期：2013年2月9日星期六 17:00:00 PST 2013 -
+（电子邮件地址：megaraidlinux@lsi.com）
+Adam Radford
+当前版本：06.506.00.00-rc1
+旧版本：06.504.01.00-rc1
+1. 添加4k FastPath DIF支持
+2. 如果未启用FastPath，则不加载DevHandle
+3. 版本和更新日志更新
+-------------------------------------------------------------------------------
+发布日期：2012年10月1日星期一 17:00:00 PST 2012 -
+（电子邮件地址：megaraidlinux@lsi.com）
+Adam Radford
+当前版本：06.504.01.00-rc1
+旧版本：00.00.06.18-rc1
+1. 移除不必要的completion_lock自旋锁调用
+2. 添加用于配置MSI-X向量数量的模块参数
+3. 以字节形式加载io_request数据长度
+4. 为 SystemPD 添加数组边界检查
+5. 添加 SystemPD 快速路径支持
+6. 删除重复代码
+7. 版本、更新日志、版权更新
+
+--------------------------------------------------------------------------------------------
+发布日期：2012年6月17日星期二 17:00:00 PST 2012 -
+（电子邮件地址：megaraidlinux@lsi.com）
+Adam Radford/Kashyap Desai
+当前版本：00.00.06.18-rc1
+旧版本：00.00.06.15-rc1
+1. 修复版权日期
+2. 添加模块参数 throttlequeuedepth
+3. 添加模块参数 resetwaittime
+4. 移动 poll_aen_lock 初始化器
+--------------------------------------------------------------------------------------------
+发布日期：2012年3月19日星期一 17:00:00 PST 2012 -
+（电子邮件地址：megaraidlinux@lsi.com）
+Adam Radford
+当前版本：00.00.06.15-rc1
+旧版本：00.00.06.14-rc1
+1. 优化 HostMSIxVectors 设置
+2. 添加 fpRead/WriteCapable 和 fpRead/WriteAcrossStripe 检查
+```
+发布日期    ：2012年1月6日星期五 17:00:00 PST 2010 -
+			（电子邮件地址：megaraidlinux@lsi.com）
+			Adam Radford
+当前版本   ：00.00.06.14-rc1
+旧版本     ：00.00.06.12-rc1
+1. 修复降级的RAID 5/6的reglockFlags，适用于MR 9360/9380
+2. 在ioctl路径中屏蔽标志，以防止使用较旧版本MegaCLI时内存乱写
+3. 移除poll_mode_io模块参数、sysfs节点及相关代码
+
+发布日期    ：2011年10月5日星期三 17:00:00 PST 2010 -
+			（电子邮件地址：megaraidlinux@lsi.com）
+			Adam Radford
+当前版本   ：00.00.06.12-rc1
+旧版本     ：00.00.05.40-rc1
+1. 如果在驱动加载时固件处于故障状态，则立即继续引导
+2. 将默认每LUN命令数增加到256
+3. 修复megasas_reset_fusion()中的互斥锁解锁不匹配问题
+4. 移除一些不必要的代码
+5. 清除Fusion/Invader的状态变更中断
+6. 在启用中断之前清除FUSION_IN_RESET标志
+7. 添加对MegaRAID 9360/9380 12GB/s控制器的支持
+```
+8. 添加对多个MSI-X向量/多个回复队列的支持
+9. 添加针对PERC5/1068 kdump内核恐慌的驱动程序修复
+
+发布日期：2010年7月26日星期二 17:00:00 PST - 
+（电子邮件地址：megaraidlinux@lsi.com）
+Adam Radford
+当前版本：00.00.05.40-rc1
+旧版本：00.00.05.38-rc1
+1. 修复FastPath I/O以支持降级的RAID 1
+2. 添加.change_queue_depth支持
+
+发布日期：2010年5月11日星期三 17:00:00 PST -
+（电子邮件地址：megaraidlinux@lsi.com）
+Adam Radford
+当前版本：00.00.05.38-rc1
+旧版本：00.00.05.34-rc1
+1. 移除MSI-X黑名单，使用MFI_REG_STATE.ready.msiEnable
+2. 移除未使用的函数megasas_return_cmd_for_smid()
+3. 在megasas_reset_fusion()中检查MFI_REG_STATE.fault.resetAdapter
+4. 在megasas_shutdown()中禁用中断/free_irq()
+5. 修复在probe()和resume()中AEN可能丢失的问题
+6. 将6、10、12字节的CDB转换为16字节的CDB以支持大LBA的FastPath I/O
+7. 添加1078 OCR支持
+---------------------------------------------------------------------------------------------
+发布日期：2011年2月24日星期四 17:00:00 PST - （电子邮件地址：megaraidlinux@lsi.com） - Adam Radford
+当前版本：00.00.05.34-rc1
+旧版本：00.00.05.29-rc1
+1. 修复megasas_probe_one()等函数中的一些失败跳转
+2. 在complete_cmd_fusion()中添加缺失的check_and_restore_queue_depth()调用
+3. 在调用megasas_init_fw()之前启用MSI-X
+4. 对于MSI-X模式下的MFI基板，即使outbound_intr_status == 0也要调用tasklet_schedule()
+5. 修复megasas_probe_one()以在kdump内核中清除msi控制寄存器中的PCI_MSIX_FLAGS_ENABLE标志
+6. 修复megasas_get_cmd()，仅在设置了megasas_dbg_lvl时才打印“Command pool empty”
+7. 修复megasas_build_dcdb_fusion()，使其不按TYPE_DISK过滤
+8. 修复megasas_build_dcdb_fusion()，使用io_request->LUN[1]字段
+9. 在megasas_aen_polling()中添加MR_EVT_CFG_CLEARED事件
+### 修复内容
+10. 在 `megasas_init_fw()` 中修复 `tasklet_init()`，使用 `instancetype->tasklet`
+11. 在 `megasas_transition_to_ready()` 中修复故障状态处理
+12. 修复 IEEE SGL 的最大扇区设置
+13. 修复 iMR OCR 支持以正确工作
+
+---
+
+### 发布日期：2010年12月14日星期二 17:00:00 PST
+- 邮件地址：megaraidlinux@lsi.com
+- 负责人：Adam Radford
+
+### 当前版本：00.00.05.29-rc1
+### 旧版本：00.00.04.31-rc1
+
+1. 将 `megaraid_sas.c` 重命名为 `megaraid_sas_base.c`
+2. 更新 GPL 头文件
+3. 添加 MSI-X 支持和 `msix_disable` 模块参数
+4. 使用最低内存条（用于 SR-IOV VF 支持）
+5. 添加 `struct megasas_instance_template` 变更，并将所有代码改为使用新的实例条目：
+
+    ```c
+    irqreturn_t (*service_isr)(int irq, void *devp);
+    void (*tasklet)(unsigned long);
+    u32 (*init_adapter)(struct megasas_instance *);
+    u32 (*build_and_issue_cmd)(struct megasas_instance *, struct scsi_cmnd *);
+    void (*issue_dcmd)(struct megasas_instance *instance, struct megasas_cmd *cmd);
+    ```
+
+6. 添加支持 MegaRAID 9265/9285 控制器设备 ID（0x5b）的代码
+
+---
+
+### 发布日期：2010年5月3日星期四 09:12:45 PST
+- 邮件地址：megaraidlinux@lsi.com
+- 负责人：Bo Yang
+
+### 当前版本：00.00.04.31-rc1
+### 更早版本：00.00.04.17.1-rc1
+
+1. 在驱动中添加在线控制器重置（OCR）功能
+OCR 是 megaraid_sas 驱动程序的新功能，它允许固件执行芯片重置而不影响操作系统的行为。
+
+为了添加 OCR 支持，驱动程序需要做以下几点：
+
+a) 重置控制器芯片——Xscale 和 Gen2，这将改变函数调用并添加与这两个芯片相关的重置功能。
+b) 在重置期间，驱动程序会存储未由固件返回给驱动程序的待处理命令，并在 OCR 完成后重新提交这些待处理命令给固件。
+c) 在驱动程序的超时例程中，驱动程序会向操作系统报告重置。同时，在 OCR 完成之前，驱动程序的队列例程会阻止命令。
+d) 在驱动程序的中断服务例程（ISR）中，如果驱动程序检测到固件状态发生变化、固件处于故障状态并且支持在线控制器重置（OCR），则驱动程序将开始执行控制器重置。
+e) 在驱动程序的 IOCTL 例程中，应用程序命令会等待 OCR 完成后再提交给固件。
+f) 在驱动程序卸载适配器之前，驱动程序会尝试最后一次 OCR，以查看是否能够恢复固件。
+
+2. 添加支持更新标志到驱动程序，以便告知 LSI megaraid_sas 应用程序该驱动程序支持设备更新。这样应用程序在添加或删除系统中的设备之后，就不需要再进行设备更新了。
+
+3. 在驱动程序的超时例程中，如果固件处于故障状态，则驱动程序将执行三次重置。如果三次重置后仍然无法恢复固件，驱动程序将卸载适配器。
+
+4. 添加输入参数 `max_sectors` 以支持我们的 Gen2 控制器达到 1MB。
+客户可以使用输入参数 `max_sectors` 为 GEN2 控制器添加 1MB 支持。
+
+1. 发布日期：2009年10月29日星期四 09:12:45 PST 2009 - 
+   （电子邮件地址：megaraidlinux@lsi.com）
+   Bo Yang
+
+2. 当前版本：00.00.04.17.1-rc1
+3. 旧版本：00.00.04.12
+
+1. 在 MFI 帧结构中将 `pad_0` 设置为 0，以解决上下文值大于 32 位的问题。
+2. 将逻辑驱动器列表添加到驱动程序中。加载驱动程序后，驱动程序会内部维护逻辑驱动器列表。
+3. 驱动程序修复了从固件获取 AEN PD 删除/添加、LD 添加/删除后的设备更新问题。
+
+1. 发布日期：2009年7月28日星期二 10:12:45 PST 2009 -
+   （电子邮件地址：megaraidlinux@lsi.com）
+   Bo Yang
+
+2. 当前版本：00.00.04.12
+3. 旧版本：00.00.04.10
+
+1. 将 AEN 系统 PD 更新从 scsi_scan 更改为 scsi_add_device 和 scsi_remove_device。
+2. 移除 aen_polling 例程中的调试输出。
+
+1. 发布日期：2009年7月2日星期四 10:12:45 PST 2009 -
+   （电子邮件地址：megaraidlinux@lsi.com）
+   Bo Yang
+
+2. 当前版本：00.00.04.10
+3. 旧版本：00.00.04.08
+
+1. 在控制器初始化期间增加 3 分钟超时。
+2. 修复 64 位错误感应日期问题。
+
+1. 发布日期：2009年5月5日星期二 10:12:45 PST 2009 -
+   （电子邮件地址：megaraidlinux@lsi.com）
+   Bo Yang
+
+2. 当前版本：00.00.04.08
+3. 旧版本：00.00.04.06
+
+1. 修复删除逻辑驱动器后固件中的待处理问题。
+2. 修复获取 pdlist 后释放内存的问题。
+1. 发布日期：2009年3月26日星期二 10:12:45 PST 2009 - 
+			(电子邮件地址：megaraidlinux@lsi.com)
+			Bo Yang
+
+2. 当前版本：00.00.04.06
+3. 旧版本：00.00.04.04
+
+1. 添加驱动程序命令为空的修复
+2. 添加修复驱动程序 MSM AEN CMD 导致系统变慢的问题
+
+1. 发布日期：2009年3月3日星期二 10:12:45 PST 2009 -
+			(电子邮件地址：megaraidlinux@lsi.com)
+			Bo Yang
+
+2. 当前版本：00.00.04.04
+3. 旧版本：00.00.04.01
+
+1. 添加磁带驱动程序修复：如果命令是针对磁带设备，则将 pthru 超时设置为操作系统层超时值
+2. 添加 Gen-2 Linux 驱动程序中的 Poll_wait 机制
+在 AEN 处理程序中，驱动程序需要像发送 SIGIO 一样唤醒轮询处理程序
+3. 添加新的控制器支持（新 SAS2 支持）
+4. 向操作系统报告未配置的物理磁盘（系统物理磁盘）
+5. 添加 IEEE SGL 支持到驱动程序
+
+6. 将应用程序命令重新分配给 SAS2 控制器
+
+1. 发布日期：2008年7月24日星期四 11:41:51 PST 2008 -
+                       (电子邮件地址：megaraidlinux@lsi.com)
+                       Sumant Patro
+                       Bo Yang
+
+2. 当前版本：00.00.04.01
+3. 旧版本：00.00.03.22
+
+1. 添加新控制器（0078, 0079）的支持
+这些控制器是 LSI 的下一代（Gen2）SAS 控制器
+
+1. 发布日期：2008年6月23日星期一 10:12:45 PST 2008 -
+                       (电子邮件地址：megaraidlinux@lsi.com)
+                       Sumant Patro
+                       Bo Yang
+
+2. 当前版本：00.00.03.22
+3. 旧版本：00.00.03.20
+
+1. 添加关闭 DCMD 命令到关闭例程以正确关闭固件
+2. 在 HWR Linux 驱动程序中出现意外中断，添加 dummy 读取 PCI 刷新可解决此问题
+1. 发布日期：2008年3月10日星期一 11:02:31 PDT - 
+		(emaild-id: megaraidlinux@lsi.com)
+		Sumant Patro
+		Bo Yang
+
+2. 当前版本：00.00.03.20-RC1
+3. 旧版本：00.00.03.16
+
+1. 回滚sense信息实现
+	在ioctl路径中，sense缓冲区指针的数据类型被回滚为u32 *，与驱动程序的早期版本一致。
+2. 修复了驱动程序帧计数问题
+	当驱动程序向固件发送错误的帧计数时，由于该特定命令发送给磁盘，固件会看到连续的芯片重置，因此命令将超时。
+3. 向驱动程序添加对新控制器（1078DE）的支持，并将控制器操作状态中的max_wait从10增加到60。通过增加max_wait，驱动程序确保固件在KDUMP情况下完成待处理的命令。
+
+1. 发布日期：2007年11月7日星期四 16:30:43 PST - 
+		(emaild-id: megaraidlinux@lsi.com)
+		Sumant Patro
+		Bo Yang
+
+2. 当前版本：00.00.03.16
+3. 旧版本：00.00.03.15
+
+1. 将MFI_POLL_TIMEOUT_SECS从10秒增加到60秒。固件可能需要最多60秒来响应INIT命令。
+
+1. 发布日期：2007年9月7日星期五 16:30:43 PST - 
+		(emaild-id: megaraidlinux@lsi.com)
+		Sumant Patro
+		Bo Yang
+
+2. 当前版本：00.00.03.15
+3. 旧版本：00.00.03.14
+
+1. 添加模块参数“poll_mode_io”以支持“轮询”（减少中断操作）。在此模式下，IO完成中断会被延迟。在发起IO后，如果存在待完成的命令，驱动程序会调度命令完成。还添加了一个基于定时器的中断，以防在没有新IO的情况下无限期地延迟IO完成处理。
+
+1. 发布日期：2007年9月7日星期五 16:30:43 PST - 
+		(emaild-id: megaraidlinux@lsi.com)
+		Sumant Patro
+		Bo Yang
+
+2. 当前版本：00.00.03.14
+3. 旧版本：00.00.03.13
+
+1. 根据固件支持的最大SGL设置max_sectors_per_req。早期版本根据控制器信息（max_sectors_1，max_sectors_2）计算这个值。对于某些控制器/固件，这导致一个大于固件支持的最大SGL的值。此问题首先由使用LUKS+XFS和megaraid_sas的用户报告。感谢RB提供日志和复现步骤，帮助找到问题的根本原因。2. 将MFI_POLL_TIMEOUT_SECS从10秒增加到60秒。固件可能需要最多60秒来响应INIT命令。
+
+1. 发布日期：2007年6月15日星期五 16:30:43 PST - 
+		(emaild-id: megaraidlinux@lsi.com)
+		Sumant Patro
+		Bo Yang
+
+2. 当前版本：00.00.03.13
+3. 旧版本：00.00.03.12
+
+1. 添加megasas_reset_timer例程以拦截命令超时并限制IO。2007年3月16日星期五16:44 -0600，James Bottomley写道：
+	megaraid_sas至少需要这个例程来在命令开始超时时限制其命令。
+	代码保留了现有的传输模板使用的eh_timed_out（并允许传输层覆盖主机层，如果两者都有这个回调）。
+	— James
+
+1. 发布日期：2007年5月12日星期六 16:30:43 PST - 
+		(emaild-id: megaraidlinux@lsi.com)
+		Sumant Patro
+		Bo Yang
+
+2. 当前版本：00.00.03.12
+3. 旧版本：00.00.03.11
+
+1. 当MegaSAS驱动程序从操作系统接收重置调用时，驱动程序会在重置例程中等待最多3分钟以完成所有待处理的命令。现在，驱动程序将在重置例程中每隔5秒调用一次完成例程，而不是依赖于ISR路径中的命令完成。
+1. 发布日期：2007年4月30日星期一 10:25:52 PST -
+			(emaild-id:megaraidlinux@lsi.com)
+			Sumant Patro
+			Bo Yang
+
+2. 当前版本：00.00.03.11
+3. 旧版本：00.00.03.09
+
+- 内存管理器针对IOCTL在2.6内核中移除，pci_alloc_consistent替换为dma_alloc_coherent。通过这个更改，驱动程序代码中不再需要内存管理器。
+
+2007年2月7日星期三13:30 -0800，Andrew Morton写道：
+> 我怀疑所有这些问题都是由于DMA API中的愚蠢行为。
+>
+> pci_alloc_consistent() 假设使用GFP_ATOMIC，而调用者（megasas_mgmt_fw_ioctl）完全可以用GFP_KERNEL。
+>
+> 我敢打赌这样可以修复问题。
+
+确实可以，但DMA API已经扩展以应对这种情况，因此直接在megaraid代码中使用dma_alloc_coherent()。dev就是&pci_dev->dev。
+James <James.Bottomley@SteelEye.com>
+
+- SYNCHRONIZE_CACHE不受FW支持，因此被驱动程序阻止。
+- 添加了休眠支持。
+- 在RHEL 4运行IO时执行磁盘转储会失败。已修复。
+
+1. 发布日期：2007年2月9日星期五 14:36:28 PST -
+			(emaild-id:megaraidlinux@lsi.com)
+			Sumant Patro
+			Bo Yang
+
+2. 当前版本：00.00.03.09
+3. 旧版本：00.00.03.08
+
+- 在高IO负载下，中间层打印“DRIVER_TIMEOUT”错误
+
+现在驱动程序等待10秒而不是之前版本的5秒来恢复IO。
+
+1. 发布日期：2007年2月5日星期一 11:35:24 PST -
+			(emaild-id:megaraidlinux@lsi.com)
+			Sumant Patro
+			Bo Yang
+
+2. 当前版本：00.00.03.08
+3. 旧版本：00.00.03.07
+
+- 在高IO负载下，中间层打印“DRIVER_TIMEOUT”错误
+
+修复：现在驱动程序对IO进行节流。
+在megasas_queue_command中添加了检查，以确定FW是否能在超时期间处理命令。如果重试次数达到2次或更多，驱动程序将暂时停止向FW发送命令。如果待处理命令的数量减少到16个或从上次向FW发送命令起5秒后，IO将恢复。
+- FW在Mode Sense命令中为配置为WriteBack的驱动器启用WCE位。当逻辑磁盘暴露时带有WCE=1时，操作系统可能会发送“SYNCHRONIZE_CACHE”命令。建议仅在控制器有电池备份时启用写回模式。目前，同步缓存不被FW支持。驱动程序将快速循环该命令并返回成功，而不将其发送到FW。
+1. 发布日期：2007年1月14日，星期日，11:21:32 PDT - Sumant Patro <Sumant.Patro@lsil.com>/Bo Yang  
+   2. 当前版本：00.00.03.07  
+   3. 旧版本：00.00.03.06  
+
+   i. 在 `scsi_host_template` 中添加了 `bios_param` 条目以返回磁盘几何信息  
+
+1. 发布日期：2006年10月20日，星期五，11:21:32 PDT - Sumant Patro <Sumant.Patro@lsil.com>/Bo Yang  
+   2. 当前版本：00.00.03.06  
+   3. 旧版本：00.00.03.05  
+
+   1. 添加了一个新的内存管理模块以支持 IOCTL 内存分配。对于 IOCTL，我们尝试从驱动程序初始化期间创建的内存池中分配。如果内存池为空，则在运行时进行分配。  
+   2. 在 `megasas_queue_command` 和 DPC/ISR 例程中添加了检查，以查看是否已经声明适配器已失效 (hw_crit_error=1)。如果 hw_crit_error==1，则不再接受任何待处理命令或来自操作系统的命令。
+
+1. 发布日期：2006年10月2日，星期一，11:21:32 PDT - Sumant Patro <Sumant.Patro@lsil.com>  
+   2. 当前版本：00.00.03.05  
+   3. 旧版本：00.00.03.04  
+
+   i. 使用 `PCI_DEVICE` 宏  
+      将 `megaraid_sas` 驱动程序的 `pci_device_id` 表转换为 `PCI_DEVICE` 宏，以节省一些代码行 - Henrik Kretzschmar <henne@nachtwindheim.de>  
+   ii. 移除所有编译器警告  
+   iii. 将 `megasas_ctrl_info` 结构恢复到 3.02 版本  
+   iv. 将 `megasas_dbg_lvl` 的默认值设置为 0  
+   v. 移除 `megasas_exit` 中为 `megasas_dbg_lvl` 创建的 sysfs 入口  
+   vi. 在 `megasas_teardown_frame_pool()` 中，传递 `cmd->frame` 而不是 `cmd->sense` 到 `pci_pool_free`。已修复。错误由 Eric Sesterhenn 指出。
+
+1. 发布日期：2006年9月13日，星期三，14:22:51 PDT - Sumant Patro <Sumant.Patro@lsil.com>  
+   2. 当前版本：00.00.03.04  
+   3. 旧版本：00.00.03.03  
+
+   i. 添加重启通知  
+   ii. 减少发送到固件的最大命令数 1，使回复队列大小与固件可以支持的最大命令数相同。
+
+1. 发布日期：2006年8月22日，星期二，16:33:14 PDT - Sumant Patro <Sumant.Patro@lsil.com>  
+   2. 当前版本：00.00.03.03  
+   3. 旧版本：00.00.03.02  
+
+   i. 在宣布适配器失效之前向固件发送停止适配器命令并转储待处理的固件命令  
+   新变量用于设置调试级别  
+   ii. 将禁用中断设置为函数指针，因为 1068/1078 的中断不同  
+   iii. 帧计数优化。主帧可以包含 64 位 SGL 的 2 个 SGE 和 32 位 SGL 的 3 个 SGE  
+   iv. 添加用于命令完成的任务项  
+   v. 如果在触发 INIT 之前固件处于工作状态，现在我们向固件发送重置标志而不是仅发送就绪标志。这用于执行软重置  
+   vi. 更新 `megasas_ctrl_prop` 结构（基于固件结构）  
+   vii. 添加打印：固件现在处于就绪状态（初始化期间）
+
+1. 发布日期：2006年8月6日，星期日，22:49:52 PDT - Sumant Patro <Sumant.Patro@lsil.com>  
+   2. 当前版本：00.00.03.02  
+   3. 旧版本：00.00.03.01  
+
+   i. 添加了热插拔场景下的固件过渡状态
+
+1. 发布日期：2006年5月14日，星期日，22:49:52 PDT - Sumant Patro <Sumant.Patro@lsil.com>  
+   2. 当前版本：00.00.03.01  
+   3. 旧版本：00.00.02.04  
+
+   i. 添加了对 ZCR 控制器的支持  
+      新设备 ID 0x413 添加  
+   ii. 修复了在触发 INIT 命令之前禁用控制器中断的错误  
+      所需初始化完成后重新启用中断
+这是为了确保当控制器生成中断时，驱动程序已准备好处理这些中断。
+- Sumant Patro <Sumant.Patro@lsil.com>
+
+1 发布日期：2006年2月3日 星期三 14:31:44 PST - Sumant Patro <Sumant.Patro@lsil.com>
+2 当前版本：00.00.02.04
+3 旧版本：00.00.02.04
+
+i. 删除多余的 instance_lock
+
+移除多余的 instance_lock，并避免在错误处理程序中进行不安全的非同步访问。
+- Christoph Hellwig <hch@lst.de>
+
+1 发布日期：2006年2月3日 星期三 14:31:44 PST - Sumant Patro <Sumant.Patro@lsil.com>
+2 当前版本：00.00.02.04
+3 旧版本：00.00.02.04
+
+i. 支持 1078 类型（ppc IOP）控制器，设备 ID：0x60 添加
+在初始化期间，根据设备 ID 初始化模板成员，使用特定于 ppc 或 xscale 控制器的函数指针。
+- Sumant Patro <Sumant.Patro@lsil.com>
+
+1 发布日期：2006年2月3日 星期五 14:16:25 PST - Sumant Patro <Sumant.Patro@lsil.com>
+2 当前版本：00.00.02.04
+3 旧版本：00.00.02.02
+i. 注册 16 字节 CDB 功能到 SCSI 中间层
+
+“此补丁正确地将 megaraid_sas 控制硬件的 16 字节命令长度功能注册到 SCSI 中间层。所有 megaraid_sas 硬件都支持 16 字节 CDB。”
+
+- Joshua Giles <joshua_giles@dell.com>
+
+1 发布日期：2006年1月23日 星期一 14:09:01 PST - Sumant Patro <Sumant.Patro@lsil.com>
+2 当前版本：00.00.02.02
+3 旧版本：00.00.02.01
+
+i. 定义新模板来表示每种控制器家族（通过所使用的处理器识别）
+该模板将具有针对特定控制器家族初始化为适当值的定义。模板定义包含四个函数指针。在驱动程序初始化期间，函数指针将根据控制器家族类型设置。这一更改是为了支持具有不同处理器和不同寄存器集的新控制器。
+- Sumant Patro <Sumant.Patro@lsil.com>
+
+1 发布日期：2005年12月19日 星期一 14:36:26 PST - Sumant Patro <Sumant.Patro@lsil.com>
+2 当前版本：00.00.02.00-rc4
+3 旧版本：00.00.02.01
+
+i. 重新组织代码以消除 megasas_build_cmd 中的代码重复
+“megasas_build_cmd 中存在大量重复代码。将其从不同的代码路径中移出，并将 megasas_build_cmd 的其余部分合并到 megasas_queue_command 中。”
+
+- Christoph Hellwig <hch@lst.de>
+
+ii. 定义 MEGASAS_IOC_FIRMWARE32 以处理 64 位系统中的 32 位应用程序
+“如果设置了 CONFIG_COMPAT，则不能重新定义 MEGASAS_IOC_FIRMWARE，我们需要定义一个 MEGASAS_IOC_FIRMWARE32，以便原生二进制文件继续工作。”
+
+- Christoph Hellwig <hch@lst.de>

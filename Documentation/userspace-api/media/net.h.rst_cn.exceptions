@@ -1,0 +1,15 @@
+```plaintext
+# SPDX-License-Identifier: GPL-2.0
+
+# 忽略头文件名称
+ignore define _DVBNET_H_
+
+# 忽略旧的 ioctl 和结构体
+ignore ioctl __NET_ADD_IF_OLD
+ignore ioctl __NET_GET_IF_OLD
+ignore struct __dvb_net_if_old
+
+# 用于结构体 dvb_net_if 的宏
+replace define DVB_NET_FEEDTYPE_MPE :c:type:`dvb_net_if`
+replace define DVB_NET_FEEDTYPE_ULE :c:type:`dvb_net_if`
+```

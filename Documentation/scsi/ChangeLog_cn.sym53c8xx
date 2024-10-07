@@ -1,0 +1,403 @@
+2001年5月12日 周六 12:00 Gerard Roudier (groudier@club-internet.fr)
+* 版本 sym53c8xx-1.7.3c
+- 确保在读取 NVRAM 时清除 GPCNTL 中的 LEDC 位
+修复由 Stig Telfer <stig@api-networks.com> 提供
+- 从 SYM-2 回退支持 PCI 校验失败硬件的工作绕过方法
+- 检查至少收到 8 字节的 INQUIRY 响应，以确保第 7 字节（包含设备功能）有效
+- 对于内核版本 < 2.4.4，定义 scsi_set_pci_device() 为空函数
+- + 几处次要修改
+
+2001年4月7日 周六 19:30 Gerard Roudier (groudier@club-internet.fr)
+* 版本 sym53c8xx-1.7.3b
+- 修复脚本中未对齐的 LOAD 问题（之前用作虚拟读取）
+- 在 ncr_soft_reset() 中，仅在支持 ISTAT1 中 SRUN 位且脚本当前正在运行的情况下尝试中止当前操作，如 896 和 1010 手册建议
+- 在 CCB 中断路径中，不要假设 CCB 当前已排队到脚本。这并不总是正确的，特别是在 QUEUE FULL 状态之后或使用未标记命令时
+
+2001年3月4日 周日 18:30 Gerard Roudier (groudier@club-internet.fr)
+* 版本 sym53c8xx-1.7.3a
+- 修复 ncr_int_udc()（意外断开连接）处理中的一个问题。如果 DSA 不匹配 CCB，则可能会发生错误的内存写入
+2001年2月12日 周一 22:30 Gerard Roudier (groudier@club-internet.fr)
+* 版本 sym53c8xx-1.7.3
+- 支持 hppa
+小补丁由 Robert Hirst 发送给我
+- 由 Pamela Delaney 发送给我的 ia64 小补丁
+
+2001年2月6日 周二 13:30 Gerard Roudier (groudier@club-internet.fr)
+* 版本 sym53c8xx-1.7.3-pre1
+- 调用 pci_enable_device()，因为 AC 要求这样做
+- 从脚本中获取 CPU 使用的 BAR 饼干和实际的 PCI BAR 值
+最近的 PCI 芯片能够使用内部周期自行访问，但它们会将 BAR 值与目标地址进行比较以做出决策
+早期的芯片则简单地通过 PCI 事务从脚本中访问 I/O 寄存器
+现在用于从 BAR 饼干中反转实际 PCI BAR 值的 bus_dvma_to_mem() 接口已无用
+这一点已在邮件列表中讨论过，并得到了 PCI 代码维护者（Martin Mares）的认可
+- 合并针对 linux-2.4 的更改，当驱动程序静态链接到内核时，也在驱动对象中声明主机模板
+- 将 SCSI 消息大小增加到 12 字节，因为 8 字节对于 PPR 消息来说不够（修复）
+- 添加字段 'maxoffs_st'（ST数据传输的最大偏移量）
+C1010在DT模式下支持62的偏移量，但在ST模式下只支持31。因此，需要两个不同的最大SCSI偏移量值。用ST模式下的SCSI偏移量限制到'maxoffs_st'来替换显然错误的0x1f掩码。
+
+- 改进C1010-66的工作绕过方案。修订版1在DT DATA OUT阶段不需要额外的周期。
+
+- 添加一个缺失的字节序转换（abrt_tbl.addr）。
+
+- 对np结构进行轻微清理，以处理脚本中需要特殊对齐的字段。
+
+2000年9月24日 星期日 21:30 Gerard Roudier (groudier@club-internet.fr)
+* 版本 sym53c8xx-1.7.2
+- 移除之前驱动版本中为PPC添加的hack。
+
+- 添加FE_DAC特性位以区分64位PCI寻址（FE_DAC）和64位PCI接口（FE_64BIT）。
+
+- 删除启动命令行中的"ultra:"参数。
+此参数并不聪明，因为我们可以通过"sync:"来设置Ultra/Ultra2参数，并且对于Ultra3，我们可能希望传递PPR选项（目前只有DT时钟）。
+
+- 添加FE_VARCLK特性位，表明SCSI时钟频率可能会根据板卡设计而变化，因此，驱动程序应该尝试评估SCSI时钟。
+简化驱动程序确定SCSI时钟的方式：
+- ULTRA3 -> 160 MHz，ULTRA2 -> 80 MHz，否则为40 MHz
+如果设置了FE_VARCLK，则测量SCSI时钟频率
+- 移除已无用的FE_CLK80特性位
+- 增加对SYM53C875A的支持（Pamela Delaney）
+2000年7月26日星期三 23:30 Gerard Roudier (groudier@club-internet.fr)
+  * 版本 sym53c8xx-1.7.1
+  - 在PPC上通过proc文件系统提供OpenFirmware路径
+- 使用memcpy_toio()下载片上SRAM在PPC上不起作用。恢复之前的方法（从脚本中进行MEMORY MOVE）
+- 从几个#undef中移除尾随参数#2
+2000年7月9日星期日 16:30 Gerard Roudier (groudier@club-internet.fr)
+  * 版本 sym53c8xx-1.7.0
+  - 移除PROFILE C和SCRIPTS代码
+该功能并不是特别有用，因此鉴于驱动程序代码的复杂性增加，不再需要
+- 从FreeBSD sym-1.6.2驱动程序合并的内容：
+  * 明确驱动程序对实现弱内存排序架构所需内存屏障的要求
+* 简化了来自SCRIPTS的非法阶段和数据溢出错误处理。这些错误现在会通过中断立即报告给C代码。
+* 使残差处理代码与sym-1.6.2同步，并且对于Linux版本>=2.3.99，现在向用户报告`resid`。
+- 通用清理：
+  - 将屏障和IO/MMIO操作的定义移动到sym53c8xx_defs.h头文件中。现在这两个驱动程序共享这些定义。
+  - 移除了一些声称用于优化896但实际并无效果的未使用选项。
+  - 使用SCSI_NCR_IOMAPPED代替NCR_IOMAPPED。
+  - 移除了一些数据结构中的未使用字段。
+2000年5月11日 周四 12:40 Pam Delaney (pam.delaney@lsil.com)
+  * 版本号：sym53c8xx-1.6b
+  - 合并版本
+
+2000年4月24日 周一 12:00 Gerard Roudier (groudier@club-internet.fr)
+  * 版本号：sym53c8xx-1.5m
+  - 驱动程序设置例程返回值改为1（而不是0）。
+  - 不启用PCI DAC周期。这导致sparc64上的SYM534C896支持失效。问题由David S. Miller修复。
+
+2000年4月14日 周五 9:00 Pam Delaney (pam.delaney@lsil.com)
+  * 版本号：sym53c8xx-1.6b-9
+  - 添加了53C1010_66支持。
+  - 对完整性检查代码进行了小修正。
+- 移除了如果想要以 ultra 3 模式运行时的完整性检查要求  
+  2000年4月1日星期六 12:00 Gerard Roudier (groudier@club-internet.fr)  
+  * 版本 sym53c8xx-1.5l  
+  - 对 __sparc__ 的微小改动出现在 2.3.99-pre4.1 中，这与缓存行大小有关（？可能来自 David S Miller）
+
+- 确保对于提供 SCSI_DATA_NONE 方向的 Scsi_Cmnd 请求不会发生数据传输（当提供数据缓冲区时，这避免了 PCI 代码中的一些 BUG() 语句）  
+  2000年3月11日星期六 12:00 Gerard Roudier (groudier@club-internet.fr)  
+  * 版本 sym53c8xx-1.6b-5  
+  - 验证从 SCRIPTS 获取的预期数据传输方向
+
+- 添加对新的动态 DMA 映射内核接口的支持  
+  需要 Linux-2.3.47（已使用 pre-2.3.47-6 进行测试）  
+  感谢 David S. Miller 提供的初步更改，这些更改提供了有用的指导  
+
+- 从 scsi 命令结构（Scsi_Cmnd）获取数据传输方向（对于提供此信息的内核）  
+  2000年3月6日星期一 23:30 Gerard Roudier (groudier@club-internet.fr)  
+  * 版本 sym53c8xx-1.5k  
+  - 验证从 SCRIPTS 获取的预期数据传输方向  
+  - 恢复 'ncr_flush_done_cmds()' 中的更改，但在将命令排队到完成列表之前取消映射 scsi DMA 缓冲区
+- 对驱动程序版本 1.5j 中的代码进行了杂项（次要）修复  
+2000年2月14日星期一 4:00 Pam Delaney (pam.delaney@lsil.com)  
+  * 版本 sym53c8xx-pre-1.6b-2  
+- 更新了SCRIPTS对SWIDE条件的错误处理 - 去除任何对sbdl寄存器的读取。由于在某些特殊情况下，896和1010芯片会检查奇偶校验，因此需要这些更改。如果不在数据阶段，这将导致奇偶校验错误中断。这些更改基于FreeBSD驱动程序版本1.3.2中的更改。
+
+2000年2月20日星期日 11:00 Gerard Roudier (groudier@club-internet.fr)  
+  * 版本 sym53c8xx-1.5j  
+- 添加对新的动态DMA映射内核接口的支持  
+需要Linux-2.3.47（使用pre-2.3.47-6测试过）  
+非常感谢David S. Miller提供的初步更改，这些更改作为有用的指导，并且他审查了代码，并在Ultra-Sparc上测试了这个驱动程序版本。
+
+- 在提供早期内核支持的PCI包装器中修复了两个小错误，这些内核没有PCI设备结构  
+- 从提供该信息的内核中获取SCSI命令结构（Scsi_Cmnd）中的数据传输方向  
+- 修复了一个旧的bug，该bug仅影响配置了内核中的驱动程序配置选项时的896修订版1
+2000年1月14日，星期五，14:00，Pam Delaney (pam.delaney@lsil.com)
+* 版本：sym53c8xx-pre-1.6b-1
+- 合并并行驱动程序系列1.61和1.5e
+
+2000年1月11日，星期二，14:00，Pam Delaney (pam.delaney@lsil.com)
+* 版本：sym53c8xx-1.61
+- 增加了在宽-窄-宽SCSI配置下挂载磁盘的支持。
+- 修改ST模式下的偏移量最大为31，DT模式下的偏移量最大为62。
+- 基于1.60版本
+
+2000年1月10日，星期一，10:00，Pam Delaney (pam.delaney@lsil.com)
+* 版本：sym53c8xx-1.60
+- 增加了使用内核中的完整性检查代码的能力（可选）
+- 增加了PPR协商功能
+- 增加了对53C1010 Ultra 3部件的支持
+- 基于1.5f版本
+
+2000年1月8日，星期六，22:00，Gerard Roudier (groudier@club-internet.fr)
+* 版本：sym53c8xx-1.5h
+- 添加2000年的版权信息
+- 当总线检测错误时正确显示总线信号
+- 从DSM直接引入内核树的一些Sparc修复
+
+1999年12月6日，星期一，22:00，Gerard Roudier (groudier@club-internet.fr)
+* 版本：sym53c8xx-1.5g
+- 更改驱动程序在初始化时以及通过/proc文件系统写入的消息（主要是美化更改，包括打印PCI总线号和PCI设备/功能）
+- 在校准SCSI时钟时确保SCRIPTS处理器停止运行（初始化代码进行了部分重构）
+- 将变更移到 FreeBSD 的 sym_hipd 驱动程序
+- 在 MODIFY_DP/IGN_RESIDUE 代码和残余计算中进行了一些修复（从 FreeBSD 的 sym_hipd 驱动程序中移出）
+- 为使用 24C16 EEPROM 的 Tekram 板卡添加 NVRAM 支持
+这部分代码从 FreeBSD 的 sym_hipd 驱动程序中移出，因为它是第一个实现此功能的
+- 完全禁用所有双功能芯片的重叠 PCI 仲裁，因为我无法确定在哪些芯片版本上这是安全的
+- 添加对 SYM53C1510D 的支持（也适用于 ncr53c8xx）
+- 在需要或被请求时正确设置 PCI 延迟计时器
+- 删除旧的 PCI BIOS 接口，但通过一个简单的包装器保留内核 2.0 兼容性
+- 更新 Tekram 同步因子表
+- 修复一个小的 `printk` 错误，该错误可能在扩展错误（如未恢复的奇偶校验错误、数据溢出等）情况下导致系统崩溃
+（由 LSILOGIC 的 Pamela Delaney 提供）
+- 移除关于获取 io_request_lock 编译条件，因为它现在似乎已成为一个确定的功能
+- 将 `get_pages` 替换为 `GetPages`，因为自 Linux 2.3.27 版本起，希望 `get_pages` 总是作为内核符号使用
+### 翻译
+
+#### 对于内核版本 >= 2.3.27，不再需要 proc_dir 结构
+1999年10月3日 星期日 19:00 Gerard Roudier (groudier@club-internet.fr)
+* 版本 sym53c8xx-1.5f
+- 更改驱动程序检查 PCI 时钟频率的方式，以便超频到最高48 MHz的 PCI 总线不会被拒绝
+总线超频越多，驱动程序就越不能保证其对 SCSI 时钟的测量是正确的
+- 移植一些来自 sym_hipd 驱动程序的脚本中的次要改进
+- 移植来自 sym_hipd 驱动程序的 START QUEUE 脱队代码重写（在接收到错误的 SCSI 状态时）
+
+#### 1999年9月11日 星期六 11:00 Gerard Roudier (groudier@club-internet.fr)
+* 版本 sym53c8xx-1.5e
+- 新增对 linux-2.3.13 的 __setup 方案支持
+- 清理扩展错误状态处理：
+  使用每个错误类型 1 位
+- 在自动感应之前也保存扩展错误状态
+- 添加 FE_DIFF 芯片特性位以指示从 GPIO3 支持差分探测（825/825A/876/875）
+- 删除自始至终无用的特殊处理代码
+- 解决某些平台上 PCI 芯片被报告两次的问题
+- 添加一些冗余的 PCI 读取操作，以应对常见的桥接器行为问题（关于已发布写入刷新的问题）
+- 为那些需要处理真正有缺陷的桥接器的人添加一些条件性代码（他们将需要编辑源文件来尝试这些选项）
+- 正确处理（希望如此）jiffies 的循环
+- 恢复用于检测 875 的条目直到修订版本 0xff（我无意中删除了它 :））
+  - 将已弃用的 __initfunc() 替换为尚未弃用的 __init__。;-)
+  - 使用间接移动表重写 MESSAGE IN 脚本以使其更具通用性。现在接受任意大小的扩展消息（目前大小限制为 8，但若有必要，只需增加一个常量即可）
+  - 修复完全未经测试的 MDP 处理中的某个 bug，并在 MDP 处理和剩余值计算之间共享一些代码
+- 将数据传输剩余值计算为二进制补码整数（在数据溢出时返回正值，在数据不足时返回负值）
+- 为 linux-2.3.13 添加对某种“资源管理”的支持
+基本上，pci_dev 结构中的 BAR 已经变更为更复杂的形式
+- 移除一些已弃用的代码
+1999年6月5日 星期六 11:00 Gerard Roudier (groudier@club-internet.fr)
+    * 版本 sym53c8xx-1.5c
+    - 如果当前正在使用8位异步传输，则不在自动感应时进行协商
+- 仅在i386平台上检查SISL/RAID
+（有报告称该代码在PPC上存在问题）
+- 在收到谈判的MSG REJECT时，驱动程序试图重新启动SCRIPT处理器，尽管它已经在运行
+
+1999年5月29日 星期六 12:00 Gerard Roudier (groudier@club-internet.fr)
+    * 版本 sym53c8xx-1.5b
+    - 强制在自动感应之前进行协商
+这确保了驱动程序能够从接收到BUS DEVICE RESET消息的设备中获取感应数据（来自其他启动器）
+- 如果此目标报告RESET条件下的UNIT ATTENTION，则完成逻辑单元的所有断开连接的CCB
+- 添加控制命令 'cleardev'，允许向逻辑单元发送ABORT消息（用于测试目的）
+
+1999年5月25日 星期二 23:00 Gerard Roudier (groudier@club-internet.fr)
+    * 版本 sym53c8xx-1.5a
+    - 添加对任务中止和总线设备重置SCSI消息的支持，并实现与SCRIPTS的正确同步，以处理任务中止而不产生竞态条件
+- 当驱动程序被指示中止一个已断开连接的命令时，发送 ABORT 消息（如果未标记）或 ABORT TAG 消息（如果已标记），并以适当的错误完成该命令
+- 如果被中止的命令尚未开始，将其从启动队列中移除，并以错误完成
+- 添加控制命令 'resetdev'，允许向目标发送 BUS DEVICE RESET 消息（用于测试目的）
+- 清理一些未使用或无用的代码
+1999年5月21日星期五 Gerard Roudier (groudier@club-internet.fr)
+- 版本 sym53c8xx-1.5
+- 增加对带有Wide控制器的CHMOV的支持
+- 处理 SWIDE（在数据输入阶段使用Wide传输时，在字节计数为奇数时末尾出现低位残留）
+- 处理 IGNORE WIDE RESIDUE 消息
+- 从SCRIPTS中处理，当设备和控制器同时为奇数时进行一些优化（SWIDE存在且BUS上同时有IGNORE WIDE RESIDUE消息）
+- 在数据传输结束时检查数据 OVERRUN/UNDERRUN 条件，无论是否有 SWIDE 存在（数据输入阶段的 OVERRUN）或 SODL 已满（数据输出阶段的 UNDERRUN）
+- 处理 MODIFY DATA POINTER 消息
+这一问题无法通过脚本（SCRIPTS）处理，但希望不会经常发生。:)
+- 对SCSI消息处理进行了大量重写
+1999年5月9日星期日 11:00 Gerard Roudier (groudier@club-internet.fr)
+  * 版本 sym53c8xx-1.4
+  - 支持立即仲裁（IMMEDIATE ARBITRATION）
+  有关此特性的详细信息，请参阅README文件。
+  需要编译选项和引导选项的支持。
+  - 对LUN 0的重新选择模式中的脚本（SCRIPTS）进行了轻微优化。
+  - 使用更简单的算法来处理SCSI命令饥饿。
+    只使用两个标签计数器在flip/flop中，并且每3秒切换到另一个。
+  - 在SELECT指令之后但在测试PHASE之前在脚本（SCRIPTS）中执行一些工作。SYMBIOS表示此功能运行良好。（顺便说一句，只有Toshiba 3401B报告了问题）
+  - 测量PCI时钟速度，并且如果结果大于37 MHz，则不连接控制器。由于该算法（来自Stefan Esser）的精度优于2%，因此这应该是可行的。
+  - 修复了对SYM53C875E的误检测（被误识别为876）。
+- 修复对SYM53C810非A型（被误检测为810A）的误检测
+- 支持每个LUN最多256个TAG（CMD_PER_LUN）
+目前由于Linux限制，仅限于255个。:)
+- 支持最多508个活动命令（CAN_QUEUE）
+- 由Pamela Delaney <pam.delaney@lsil.com> 添加对53C895A的支持
+  53C895A包含896的所有特性，但只有一个通道，并且具有32位PCI总线。它使用双周期PCI数据传输实现64位PCI寻址。
+- 各种次要修复
+- 对README.ncr53c8xx文件的一些添加
+1999年4月15日 星期二 10:00 Gerard Roudier (groudier@club-internet.fr)
+  * 版本sym53c8xx-1.3e
+  - 支持任意数量的LUN（64个）（符合SPI2标准）
+（顺便说一句，这可能只在linux-2.2中才有用；-）
+
+1999年4月11日 星期日 10:00 Gerard Roudier (groudier@club-internet.fr)
+  * 版本sym53c8xx-1.3d
+  - 添加'hostid:#id'启动选项。此选项允许更改驱动程序用于控制器的默认SCSI ID
+- 使脚本不使用PCI的自主模式
+仍然有两处地方驱动程序使用了53C8XX系列的这个特性
+- 将一些数据结构（nvram 布局和驱动程序设置）移动到 sym53c8xx_defs.h 文件中。这样，两个驱动程序可以共享它们。
+- 将 MAX LUNS 设置为 16（而不是 8）
+1999年3月20日 星期六 Gerard Roudier (groudier@club-internet.fr)
+    * 版本 sym53c8xx-1.3b
+    - 添加对 NCR PQS PDS 的支持
+James Bottomley <James.Bottomley@columbiasc.ncr.com>
+    - 允许主机 ID 为 0
+- 支持超过 8 个控制器（实际上超过 40 个 :-)
+    - 添加 'excl=#ioaddr' 引导选项：排除控制器
+（版本 1.3a 驱动程序）
+
+1999年3月11日 星期四 Gerard Roudier (groudier@club-internet.fr)
+    * 版本 sym53c8xx-1.3   （8xx-896 驱动程序捆绑包）
+    - 由于驱动程序捆绑包，进行了与 ncr53c8xx-3.2 相当的更改
+（参见 Changelog.ncr53c8xx）
+    - 在首次芯片复位时执行正常的软复位，因为终止当前操作可能会引发中断，而此时中断处理程序尚未建立
+
+1999年3月6日 星期六 Gerard Roudier (groudier@club-internet.fr)
+    * 版本 sym53c8xx-1.2b
+    - 修复一个非常古老的 bug，如果设备拒绝协商会导致总线挂起。顺便说一句，相应的部分也需要清理，因此这次更改比预期的要大一些
+- 还有一些拼写错误导致 64 位编译失败（简单修复）
+1999年2月21日 星期日 Gerard Roudier (groudier@club-internet.fr)
+    * 版本 sym53c8xx-1.2a
+    - 中断处理的重写由于一个 1 位掩码的小错误破坏了 SBMC 中断处理。希望已修复
+如果 INQUIRY 来自一个分散列表，驱动程序会检查分散列表而不是数据。由于这种情况不应该发生，如果 `use_sg` 不为零，我们就会丢弃数据。
+
+1999年2月12日 星期五 Gerard Roudier (groudier@club-internet.fr)
+- 版本 sym53c8xx-1.2
+- 对中断处理和恢复机制进行了重大重写，以支持不符合标准的 SCSI 设备移除、插入以及可能在 SCSI 总线上发生的各种故障。
+希望现在这个驱动程序是不可破坏的，或者也许它只是相当脆弱。:-)
+非常感谢 Johnson Russell（Symbios）回答了我的问题，并提供了关于 SCSI 热插拔支持的有趣建议和评论。
+- 在驱动程序设置中添加了 'recovery' 选项
+- 与 CCS 设备协商 SYNC 数据传输
+- 正确处理 Linux 2.2 中的 64 位 PCI 地址寄存器
+由 Leonard Zubkoff 指出
+
+1999年1月31日 星期日 Gerard Roudier (groudier@club-internet.fr)
+- 版本 sym53c8xx-1.1a
+- 某些 896 芯片版本（目前所有版本 :-)) 可能在 SCRIPTS 运行时如果软复位位在错误的时间被设置会导致挂起。
+我们需要先终止当前的 SCRIPTS 操作，然后再复位芯片。这个修复是由 SYMBIOS/LSI 发给我的，我只是将其转换成了 ncr53c8xx 语法。
+除非我在转换过程中犯了错误，否则这个修复应该被认为是100%可靠的。:)
+
+1999年1月24日 星期日 Gerard Roudier (groudier@club-internet.fr)
+- 版本 sym53c8xx-1.1
+- 对 SCSI 奇偶校验错误处理进行了重大重写
+数据手册中关于此特性的信息是不完整的。
+我向SYMBIOS询问并得到了回复，其中包含了数据手册中确实缺失的解释。
+
+- 允许通过启动命令行使用 `ncr53c8xx=irqm:??` 来调整 `request_irq()` 的标志位，具体如下：
+  - 如果在 `irqm` 中设置了位 0x10，则不使用 `SA_SHIRQ` 标志位
+  - 如果在 `irqm` 中设置了位 0x20，则不使用 `SA_INTERRUPT` 标志位
+  默认情况下，驱动程序会同时使用 `SA_SHIRQ` 和 `SA_INTERRUPT`
+  当一个 IRQ 被 53C8XX 适配器和网络板共享时，可以使用选项 `ncr53c8xx=irqm:0x20`
+
+- 修复 64 位 PCI 地址寄存器计算的问题。（Lance Robinson）
+  - 修复大端模式下相位不匹配处理中的问题。（Michal Jaegermann）
+
+1999年1月1日星期五 Gerard Roudier (groudier@club-internet.fr)
+- 版本 sym53c8xx-1.0a
+  - 等待列表查找对于列表中的第一个命令不起作用
+  希望已经修复，但仅在纸上测试过。;)
+  - 删除了大部分针对 PPC 架构的特定代码，适用于 Linux-2.2
+  感谢 Cort
+- 进行了一些其他小改动
+1998年12月19日 星期六 21:00 Gerard Roudier (groudier@club-internet.fr)
+    * 版本 sym53c8xx-1.0
+    - 定义一些新的IO寄存器用于896（istat1、mbox0、mbox1）
+    - 根据从Symbios收到的头文件摘录，稍微调整了Symbios NVRAM 的布局
+    - 检查引导顺序中的PCI总线编号（在PCI-PCI桥接器后面使用一个快速PCI控制器似乎不太理想）
+    - 对于896修订版1禁用重叠PCI仲裁
+    - 减少阶段不匹配时的IO寄存器读取次数，通过一次读取DWORD而不是BYTE来实现
+
+1998年12月3日 星期四 24:00 Gerard Roudier (groudier@club-internet.fr)
+    * 版本 pre-sym53c8xx-0.18
+    - 今天下午我收到了一个来自Symbios的896，并开始用这个设备测试驱动程序。修复了三个小错误后，它能够正常工作，包括启用所有功能，包括从SCRIPTS处理阶段不匹配。由于此功能尚未经过足够测试，因此仍需要引导选项 'ncr53c8xx=specf:1' 来使驱动程序能够从SCRIPTS处理PM。
+
+1998年11月29日 星期日 18:00 Gerard Roudier (groudier@club-internet.fr)
+    * 版本 pre-sym53c8xx-0.17
+    - SISL RAID更改现在要求在编译用于正常IO时为 __i386__ 添加 remap_pci_mem() 相关内容
+    - 从SCRIPTS读取的PCI内存以确保排序实际上是放错位置的。顺便说一句，这可能解释了为什么那些关于排序有问题的PCI设备驱动程序表现得如此好。;-)
+    - 重写 ncr53c8xx_setup（引导命令行选项），因为二进制代码在我看来有些过于臃肿
+    - 在 wakeup_done 函数中简化代码
+
+1998年11月24日 星期二 23:00 Gerard Roudir (groudier@club-internet.fr)
+    * 版本 pre-sym53c8xx-0.16
+    - 添加SCSI_NCR_OPTIMIZE_896_1编译选项和 'optim' 引导选项
+    当设置时，驱动程序无条件地假定中断处理器是在命令完成时被调用的，然后清除INTF，扫描已完成队列，并在找到已完成的CCB时返回。如果没有找到已完成的CCB，则中断处理将照常进行
+    对于处理MA的896（从SCRIPTS处理），这可能会带来很大的性能提升，因为驱动程序将永远不会执行PCI读取事务，而只会执行可能被发布的PCI写入事务
+如果驱动程序不需要同时提高SIGP，这就完美了。
+即使有这种惩罚，我认为这仍然会工作得很好。
+显然，这种优化只有在IRQ不与另一个设备共享时才有意义。
+- 在标签的初始设置中仍有一个小bug需要修复。
+对于声称支持TGQ的设备，在系统启动时无法禁用TGQ。驱动程序至少使用了2作为队列深度，但没有跟踪用户设置中低于2的标签深度。
+1998年11月19日 周四 23:00 杰拉德·鲁迪埃 (groudier@club-internet.fr)
+* 版本 pre-sym53c8xx-0.15
+- 添加对896硬件LED控制的支持。
+- 忽略由SISL RAID（DAC 960）驱动的芯片。
+更改由莱昂纳德·祖布科夫发送并稍作修改。
+- 阻止810A修订版11和860修订版1使用基于缓存行的事务，因为这些早期芯片修订版可能在LOAD/STORE指令中使用此类事务（变通方法）。
+- 删除PCI初始化代码中的一些无用且冗余的部分。
+```
+不要在 __i386__ 中使用 readX()/writeX() 内核函数，因为它们为了处理 2.1.X 内核中的故障驱动程序而执行了无用的屏蔽操作。
+
+1998年11月11日星期三 Gerard Roudier (groudier@club-internet.fr)
+* 版本 pre-sym53c8xx-0.14
+- 当 default_tags > MAX_TAGS 时，驱动程序会出问题。希望这次已经双重修复。
+- 如果 PCI_COMMAND 寄存器中未设置 PCI_PARITY，则进行设置（PCI 修复）
+- 如果从 SCRIPTS 处理了相位不匹配，则打印一些消息
+
+1998年11月1日星期日 Gerard Roudier (groudier@club-internet.fr)
+* 版本 pre-sym53c8xx-0.13
+- 对设备检测代码进行了部分重写。这段代码已经被修补得太多，需要进行一些改进。
+移除所有不必要的平台相关修复，这些修复要么不需要，要么与其他驱动代码冲突作为临时解决方案。
+在调用 ncr_attach() 之前重新读取 NVRAM。这节省了栈空间，从而允许处理更多板卡。
+在 linux-2.0.X 下处理 64 位基地址。
+如果 PCI_COMMAND 寄存器中未设置 MASTER 位，则进行设置。
+
+1998年10月30日星期五 Gerard Roudier (groudier@club-internet.fr)
+* 版本 pre-sym53c8xx-0.12
+- 该死！我在源代码中留下了一条无效指令，导致 Alpha 平台上的驱动程序失效。希望这次已经修复。
+```
+不要在无效的情况下设置 PFEN。这样做可以确保 BOF 是活跃的，因为手册对于当 PFEN 和 BOF 同时被设置时芯片实际使用的是哪个特性描述得非常不清楚。
+
+1998年10月24日 星期六 杰拉德·鲁迪埃 (groudier@club-internet.fr)
+* 版本 pre-sym53c8xx-0.11
+- 对于超过 0x7f 的寄存器偏移量，LOAD/STORE 指令编译错误。这导致了对新寄存器 896 的访问出现问题。
+- 默认禁用脚本中的相位不匹配处理功能，因为目前的 896 rev.1 在启用此功能（以及上述 LOAD/STORE 修复应用后）时与驱动程序无法安全运行。
+将在解决该问题后将默认值改为“启用”。
+使用启动选项 'ncr53c8xx=specf:1' 可以启用此功能。
+- 实现一个规避措施（DEL 472 - 项目 5），该措施应允许驱动程序在 896 rev.1 上安全地启用硬件相位不匹配。
+
+1998年10月20日 星期二 杰拉德·鲁迪埃 (groudier@club-internet.fr)
+* 版本 pre-sym53c8xx-0.10
+- 将 53c876 描述添加到芯片表中。这仅用于打印控制器的正确名称。
+- 添加对 INQUIRY 数据的额外检查：
+  检查接收到的 INQUIRY 数据长度至少为 7 字节。INQUIRY 数据的第 7 字节包含设备特性位，驱动程序可能会因垃圾数据而混淆。同时检查外围设备资格。
+- 使用 1, 3, 5, ..., MAXTAGS * 2 + 1 的标签编号。之前的驱动程序可以使用从 1 到 253 之间的任何标签号，某些不符合标准的设备可能对较大的标签号存在问题。
+- 使用 NAME53C 和 NAME53C8XX 作为芯片家族名称前缀。
+试试使用 "sym53c" 和 "sym53c8xx" 替换 "ncr53c" 和 "ncr53c8xx"。 :-)
+
+1998年10月11日星期日 17:00 Gerard Roudier (groudier@club-internet.fr)
+* 版本 pre-sym53c8xx-0.9
+- 解决DEL-441问题第2项：针对53c876修订版<=5（0x15）的工作绕过方案
+- 将 `ncr_scatter()` 分解为两个函数，以确保在获得分散列表时代码优化最佳
+- 添加支持64位系统最多1太字节的代码。这可能还为时过早，但我希望完成这项工作
+
+1998年10月3日星期六 14:00 Gerard Roudier (groudier@club-internet.fr)
+* 版本 pre-sym53c8xx-0.8
+- 进行一些 io_mapped 测试并修复需要修正的部分
+- 在芯片赢得仲裁后等待SCSI选择完成或立即超时，因为在SCSI核心执行SCSI选择过程中执行脚本会至少在某些芯片修订版中中断选择过程
+- 如果设备在被带有ATN选择后没有进入MSG OUT阶段，则中断脚本。这种情况是无法恢复的，最好在卡住时失败

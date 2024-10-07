@@ -1,0 +1,68 @@
+```plaintext
+# SPDX 许可证标识符: GPL-2.0
+
+# 忽略头文件名称
+忽略 定义 _UAPI_DVBDMX_H_
+
+# 忽略限制常量
+忽略 定义 DMX_FILTER_SIZE
+
+# dmx_pes_type_t 枚举符号
+替换 枚举 dmx_ts_pes :c:type:`dmx_pes_type`
+替换 符号 DMX_PES_AUDIO0 :c:type:`dmx_pes_type`
+替换 符号 DMX_PES_VIDEO0 :c:type:`dmx_pes_type`
+替换 符号 DMX_PES_TELETEXT0 :c:type:`dmx_pes_type`
+替换 符号 DMX_PES_SUBTITLE0 :c:type:`dmx_pes_type`
+替换 符号 DMX_PES_PCR0 :c:type:`dmx_pes_type`
+替换 符号 DMX_PES_AUDIO1 :c:type:`dmx_pes_type`
+替换 符号 DMX_PES_VIDEO1 :c:type:`dmx_pes_type`
+替换 符号 DMX_PES_TELETEXT1 :c:type:`dmx_pes_type`
+替换 符号 DMX_PES_SUBTITLE1 :c:type:`dmx_pes_type`
+替换 符号 DMX_PES_PCR1 :c:type:`dmx_pes_type`
+替换 符号 DMX_PES_AUDIO2 :c:type:`dmx_pes_type`
+替换 符号 DMX_PES_VIDEO2 :c:type:`dmx_pes_type`
+替换 符号 DMX_PES_TELETEXT2 :c:type:`dmx_pes_type`
+替换 符号 DMX_PES_SUBTITLE2 :c:type:`dmx_pes_type`
+替换 符号 DMX_PES_PCR2 :c:type:`dmx_pes_type`
+替换 符号 DMX_PES_AUDIO3 :c:type:`dmx_pes_type`
+替换 符号 DMX_PES_VIDEO3 :c:type:`dmx_pes_type`
+替换 符号 DMX_PES_TELETEXT3 :c:type:`dmx_pes_type`
+替换 符号 DMX_PES_SUBTITLE3 :c:type:`dmx_pes_type`
+替换 符号 DMX_PES_PCR3 :c:type:`dmx_pes_type`
+替换 符号 DMX_PES_OTHER :c:type:`dmx_pes_type`
+
+# 忽略过时的符号
+忽略 定义 DMX_PES_AUDIO
+忽略 定义 DMX_PES_VIDEO
+忽略 定义 DMX_PES_TELETEXT
+忽略 定义 DMX_PES_SUBTITLE
+忽略 定义 DMX_PES_PCR
+
+# dmx_input_t 符号
+替换 枚举 dmx_input :c:type:`dmx_input`
+替换 符号 DMX_IN_FRONTEND :c:type:`dmx_input`
+替换 符号 DMX_IN_DVR :c:type:`dmx_input`
+
+# 结构体 dmx_sct_filter_params 的标志位
+替换 定义 DMX_CHECK_CRC :c:type:`dmx_sct_filter_params`
+替换 定义 DMX_ONESHOT :c:type:`dmx_sct_filter_params`
+替换 定义 DMX_IMMEDIATE_START :c:type:`dmx_sct_filter_params`
+
+# 一些类型定义应指向结构体或枚举
+替换 类型定义 dmx_filter_t :c:type:`dmx_filter`
+替换 类型定义 dmx_pes_type_t :c:type:`dmx_pes_type`
+替换 类型定义 dmx_input_t :c:type:`dmx_input`
+
+替换 符号 DMX_BUFFER_FLAG_HAD_CRC32_DISCARD :c:type:`dmx_buffer_flags`
+替换 符号 DMX_BUFFER_FLAG_TEI :c:type:`dmx_buffer_flags`
+替换 符号 DMX_BUFFER_PKT_COUNTER_MISMATCH :c:type:`dmx_buffer_flags`
+替换 符号 DMX_BUFFER_FLAG_DISCONTINUITY_DETECTED :c:type:`dmx_buffer_flags`
+替换 符号 DMX_BUFFER_FLAG_DISCONTINUITY_INDICATOR :c:type:`dmx_buffer_flags`
+
+替换 符号 DMX_OUT_DECODER :c:type:`dmx_output`
+替换 符号 DMX_OUT_TAP :c:type:`dmx_output`
+替换 符号 DMX_OUT_TS_TAP :c:type:`dmx_output`
+替换 符号 DMX_OUT_TSDEMUX_TAP :c:type:`dmx_output`
+
+替换 ioctl DMX_DQBUF dmx_qbuf
+```
