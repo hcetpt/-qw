@@ -1,0 +1,121 @@
+.. _process_statement_kernel:
+
+Linux 内核执行声明
+-------------------
+
+作为 Linux 内核的开发者，我们对我们的软件如何被使用以及我们的软件许可证如何得到执行有着浓厚的兴趣。遵守 GPL-2.0 的互惠共享义务对我们软件和社区的长期可持续性至关重要。虽然我们有权维护对社区贡献的独立版权利益，但我们共同认为确保个人执行行动以有利于我们社区的方式进行，并且不会对我们的软件生态系统健康和发展产生意外的负面影响，是至关重要的。为了防止无益的执行行动，我们同意代表我们自己及任何未来的版权继承人向 Linux 内核用户做出以下承诺：
+
+    尽管 GPL-2.0 中有终止条款的规定，我们同意采纳 GPL-3.0 中的以下条款作为我们在许可下关于任何非防御性权利主张的附加权限。然而，如果您停止所有违反本许可证的行为，则您的许可将（a）暂时恢复，除非且直到版权所有者明确并最终终止您的许可；或（b）永久恢复，如果版权所有者未能在您停止侵权后 60 天内通过合理方式通知您违反许可的情况。
+此外，如果版权所有者通过合理方式通知您违反了许可，并且这是您首次从该版权所有者处收到针对任何作品的违反许可的通知，并且您在收到通知后的 30 天内纠正了违规行为，则您从特定版权所有者的许可将永久恢复。
+我们提供这些保证的意图是为了鼓励更多地使用该软件。我们希望公司和个人能够使用、修改和分发此软件。我们希望以开放透明的方式与用户合作，消除有关我们对合规或执行期望的任何不确定性，这可能会限制我们软件的采用。我们认为法律行动是最后手段，只有当其他社区努力无法解决问题时才会采取。
+最后，一旦不合规问题得到解决，我们希望用户会感到欢迎加入我们在这个项目中的努力。共同合作，我们将更加强大。
+除下文特别注明外，我们仅代表我们自己发言，而不代表我们目前、过去或将来的任何雇主。
+- Laura Abbott
+  - Bjorn Andersson (Linaro)
+  - Andrea Arcangeli
+  - Neil Armstrong
+  - Jens Axboe
+  - Pablo Neira Ayuso
+  - Khalid Aziz
+  - Ralf Baechle
+  - Felipe Balbi
+  - Arnd Bergmann
+  - Ard Biesheuvel
+  - Tim Bird
+  - Paolo Bonzini
+  - Christian Borntraeger
+  - Mark Brown (Linaro)
+  - Paul Burton
+  - Javier Martinez Canillas
+  - Rob Clark
+  - Kees Cook (Google)
+  - Jonathan Corbet
+  - Dennis Dalessandro
+  - Vivien Didelot (Savoir-faire Linux)
+  - Hans de Goede
+  - Mel Gorman (SUSE)
+  - Sven Eckelmann
+  - Alex Elder (Linaro)
+  - Fabio Estevam
+  - Larry Finger
+  - Bhumika Goyal
+  - Andy Gross
+  - Juergen Gross
+  - Shawn Guo
+  - Ulf Hansson
+  - Stephen Hemminger (Microsoft)
+  - Tejun Heo
+  - Rob Herring
+  - Masami Hiramatsu
+  - Michal Hocko
+  - Simon Horman
+  - Johan Hovold (Hovold Consulting AB)
+  - Christophe JAILLET
+  - Olof Johansson
+  - Lee Jones (Linaro)
+  - Heiner Kallweit
+  - Srinivas Kandagatla
+  - Jan Kara
+  - Shuah Khan (Samsung)
+  - David Kershner
+  - Jaegeuk Kim
+  - Namhyung Kim
+  - Colin Ian King
+  - Jeff Kirsher
+  - Greg Kroah-Hartman (Linux Foundation)
+  - Christian König
+  - Vinod Koul
+  - Krzysztof Kozlowski
+  - Viresh Kumar
+  - Aneesh Kumar K.V
+  - Julia Lawall
+  - Doug Ledford
+  - Chuck Lever (Oracle)
+  - Daniel Lezcano
+  - Shaohua Li
+  - Xin Long
+  - Tony Luck
+  - Catalin Marinas (Arm Ltd)
+  - Mike Marshall
+  - Chris Mason
+  - Paul E. McKenney
+  - Arnaldo Carvalho de Melo
+  - David S. Miller
+  - Ingo Molnar
+  - Kuninori Morimoto
+  - Trond Myklebust
+  - Martin K. Petersen (Oracle)
+  - Borislav Petkov
+  - Jiri Pirko
+  - Josh Poimboeuf
+  - Sebastian Reichel (Collabora)
+  - Guenter Roeck
+  - Joerg Roedel
+  - Leon Romanovsky
+  - Steven Rostedt (VMware)
+  - Frank Rowand
+  - Ivan Safonov
+  - Anna Schumaker
+  - Jes Sorensen
+  - K.Y. Srinivasan
+  - David Sterba (SUSE)
+  - Heiko Stuebner
+  - Jiri Kosina (SUSE)
+  - Willy Tarreau
+  - Dmitry Torokhov
+  - Linus Torvalds
+  - Thierry Reding
+  - Rik van Riel
+  - Luis R. Rodriguez
+  - Geert Uytterhoeven (Glider bvba)
+  - Eduardo Valentin (Amazon.com)
+  - Daniel Vetter
+  - Linus Walleij
+  - Richard Weinberger
+  - Dan Williams
+  - Rafael J. Wysocki
+  - Arvind Yadav
+  - Masahiro Yamada
+  - Wei Yongjun
+  - Lv Zheng
+  - Marc Zyngier (Arm Ltd)

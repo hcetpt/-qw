@@ -1,0 +1,239 @@
+SPDX 许可声明标识符：(GPL-2.0 或 BSD-3-Clause)
+
+====================
+ISO 15765-2（ISO-TP）
+====================
+
+概述
+========
+
+ISO 15765-2，也称为 ISO-TP，是一种专门为在 CAN 网络上进行诊断通信定义的传输协议。它广泛应用于汽车行业，例如作为 UDSonCAN（ISO 14229-3）或排放相关诊断服务（ISO 15031-5）的传输协议。ISO-TP 可以在基于 CAN CC（即 Classic CAN）和 CAN FD（具有灵活数据速率的 CAN）的网络上使用。此外，它还设计为与使用 SAE J1939 作为数据链路层的 CAN 网络兼容（但这不是必需条件）。
+
+使用的规范
+-------------------
+
+* ISO 15765-2:2024 : 道路车辆 —— 控制器区域网络上的诊断通信（DoCAN）。第 2 部分：传输协议和网络层服务
+
+寻址方式
+----------
+
+最简单的情况下，ISO-TP 基于两种寻址模式来实现连接到同一网络的节点之间的通信：
+
+* 物理寻址通过两个特定节点地址实现，并用于一对一通信。
+* 功能寻址通过一个特定节点地址实现，并用于一对多通信。
+
+可以采用三种不同的寻址格式：
+
+* “正常”：每个地址仅由一个 CAN ID 表示。
+* “扩展”：每个地址由一个 CAN ID 加上 CAN 负载的第一个字节表示；两个地址之间的 CAN ID 和负载中的字节应当不同。
+* “混合”：每个地址由一个 CAN ID 加上 CAN 负载的第一个字节表示；两个地址之间的 CAN ID 不同，但附加的字节相同。
+
+传输协议及其关联帧类型
+---------------------------------------------
+
+当使用 ISO-TP 协议传输数据时，有效载荷可能适合在一个单独的 CAN 消息中传输，也可能不适合，这取决于协议产生的开销以及可选的扩展寻址。在第一种情况下，数据将一次性传输，使用所谓的单帧（SF）。在第二种情况下，ISO-TP 定义了一种多帧协议，在这种协议中，发送方通过首个帧（FF）提供要传输的 PDU 长度，并请求接收方发送一个流控制（FC）帧，该帧提供了最大支持的宏数据块大小（`blocksize`）以及组成该块的各个 CAN 消息之间的最小时间间隔（`stmin`）。一旦接收到这些信息，发送方开始发送包含数据有效载荷片段的帧（称为连续帧（CF）），并在每 `blocksize` 大小的数据块后停止，等待接收方确认，然后接收方应发送另一个流控制帧来通知发送方其是否准备好接收更多数据。
+
+如何使用 ISO-TP
+=================
+
+与其他 CAN 协议一样，Linux 网络子系统中内置了对 ISO-TP 栈的支持，即 Linux-CAN 或 SocketCAN，因此遵循相同的套接字 API。
+ISO-TP套接字的创建与基本使用
+--------------------------------------------
+
+要使用ISO-TP堆栈，需要包含头文件``#include <linux/can/isotp.h>``。然后可以使用``PF_CAN``协议族、``SOCK_DGRAM``类型（因为底层协议基于数据报设计）和``CAN_ISOTP``协议来创建一个套接字：
+
+.. code-block:: C
+
+    s = socket(PF_CAN, SOCK_DGRAM, CAN_ISOTP);
+
+在成功创建套接字之后，应当调用``bind(2)``将套接字绑定到所需的CAN接口；具体步骤如下：
+
+* 在传递给调用的sockaddr结构中指定TX CAN ID。
+* 如果没有通过套接字选项设置广播标志，则还应指定RX CAN ID。
+
+一旦绑定到接口，就可以使用通常的``read(2)``和``write(2)``系统调用来读取和写入套接字，也可以使用``send(2)``、``sendmsg(2)``、``recv(2)``和``recvmsg(2)``。与CAN_RAW套接字API不同的是，这些调用只发送和接收ISO-TP数据字段（实际的有效载荷）。地址信息和协议信息由ISO-TP堆栈根据创建套接字时提供的配置自动填充。同样地，在必要时（即当数据有效载荷的大小超过底层CAN总线的MTU时），堆栈会使用传输机制。
+用于SocketCAN的sockaddr结构为ISO-TP提供了扩展，具体如下：
+
+.. code-block:: C
+
+    struct sockaddr_can {
+        sa_family_t can_family;
+        int         can_ifindex;
+        union {
+            struct { canid_t rx_id, tx_id; } tp;
+        ..
+    } can_addr;
+    }
+
+* ``can_family`` 和 ``can_ifindex`` 与其他SocketCAN套接字相同。
+* ``can_addr.tp.rx_id`` 指定接收（RX）CAN ID，并将作为RX过滤器使用。
+* ``can_addr.tp.tx_id`` 指定发送（TX）CAN ID。
+
+ISO-TP套接字选项
+---------------------
+
+在创建ISO-TP套接字时，默认设置了合理的参数。可以通过``setsockopt(2)``进行修改，或者通过``getsockopt(2)``读回。
+一般选项
+~~~~~~~~~~~~~~~
+
+一般套接字选项可以通过``CAN_ISOTP_OPTS``选项名传递：
+
+.. code-block:: C
+
+    struct can_isotp_options opts;
+    ret = setsockopt(s, SOL_CAN_ISOTP, CAN_ISOTP_OPTS, &opts, sizeof(opts));
+
+其中``can_isotp_options``结构的内容如下：
+
+.. code-block:: C
+
+    struct can_isotp_options {
+        u32 flags;
+        u32 frame_txtime;
+        u8  ext_address;
+        u8  txpad_content;
+        u8  rxpad_content;
+        u8  rx_ext_address;
+    };
+
+* ``flags``：应用于ISO-TP堆栈默认行为的修饰符。可用的标志包括：
+
+  * ``CAN_ISOTP_LISTEN_MODE``：监听模式（不发送FC帧）；通常用作测试功能。
+* ``CAN_ISOTP_EXTEND_ADDR``：使用``ext_address``中指定的字节作为附加地址组件。如果单独使用，这将启用“混合”寻址格式；如果与``CAN_ISOTP_RX_EXT_ADDR``结合使用，则启用“扩展”寻址格式。
+* ``CAN_ISOTP_TX_PADDING``：启用发送帧的填充功能，使用 ``txpad_content`` 作为填充字节的值。
+* ``CAN_ISOTP_RX_PADDING``：启用接收帧的填充功能，使用 ``rxpad_content`` 作为填充字节的值。
+* ``CAN_ISOTP_CHK_PAD_LEN``：检查接收帧的正确填充长度。
+* ``CAN_ISOTP_CHK_PAD_DATA``：检查接收帧的填充字节是否与 ``rxpad_content`` 匹配；如果未指定 ``CAN_ISOTP_RX_PADDING``，则忽略此标志。
+* ``CAN_ISOTP_HALF_DUPLEX``：强制 ISO-TP 套接字工作在半双工模式（即传输机制在同一时间只能是接收或发送，不能同时进行）。
+* ``CAN_ISOTP_FORCE_TXSTMIN``：忽略从接收的 FC 中获取的 stmin；通常用于测试功能。
+* ``CAN_ISOTP_FORCE_RXSTMIN``：忽略依赖于 rx stmin 的 CFs；通常用于测试功能。
+* ``CAN_ISOTP_RX_EXT_ADDR``：在接收路径中使用 ``rx_ext_address`` 而不是 ``ext_address`` 作为扩展地址字节。如果与 ``CAN_ISOTP_EXTEND_ADDR`` 结合使用，此标志将启用“扩展”地址格式。
+* ``CAN_ISOTP_WAIT_TX_DONE``：在返回 `write(2)` 和 `send(2)` 调用之前等待帧发送完成（即阻塞写操作）。
+* ``CAN_ISOTP_SF_BROADCAST``：使用 1-to-N 功能寻址（不能与 ``CAN_ISOTP_CF_BROADCAST`` 同时指定）。
+* ``CAN_ISOTP_CF_BROADCAST``：使用无流量控制的1对N传输（不能与``CAN_ISOTP_SF_BROADCAST``同时指定）
+注意：这不在ISO 15765-2标准的覆盖范围内
+* ``CAN_ISOTP_DYN_FC_PARMS``：启用流量控制参数的动态更新
+* ``frame_txtime``：帧传输时间（在ISO标准中定义为N_As/N_Ar）；如果设置为``0``，则使用默认值（或最后设置的值）
+要将传输时间设置为``0``，应使用``CAN_ISOTP_FRAME_TXTIME_ZERO``宏（等于0xFFFFFFFF）
+* ``ext_address``：扩展地址字节，在指定了``CAN_ISOTP_EXTEND_ADDR``标志时使用
+* ``txpad_content``：用于发送帧填充的字节
+* ``rxpad_content``：用于接收帧填充的字节
+* ``rx_ext_address``：接收路径的扩展地址字节，在指定了``CAN_ISOTP_RX_EXT_ADDR``标志时使用
+
+流量控制选项
+~~~~~~~~~~~~~~
+
+流量控制（FC）选项可以通过使用``CAN_ISOTP_RECV_FC`` optname来提供接收ISO-TP PDU的通信参数
+```c
+// 定义结构体 can_isotp_fc_options 并设置选项
+struct can_isotp_fc_options fc_opts;
+int ret = setsockopt(s, SOL_CAN_ISOTP, CAN_ISOTP_RECV_FC, &fc_opts, sizeof(fc_opts));
+
+// 结构体 can_isotp_fc_options 的内容如下：
+//
+// ```c
+// struct can_isotp_fc_options {
+//     u8 bs;       // 在流控制帧中提供的块大小
+//     u8 stmin;    // 在流控制帧中提供的最小间隔时间；可以取以下值（其他值保留）：
+//                  // 0x00 - 0x7F：0 - 127 毫秒
+//                  // 0xF1 - 0xF9：100 微秒 - 900 微秒
+//     u8 wftmax;   // 在流控制帧中提供的最大等待帧数
+// };
+// ```
+
+// 链路层选项
+//
+// 链路层 (LL) 选项可以通过 `CAN_ISOTP_LL_OPTS` 选项名称传递：
+//
+// ```c
+// struct can_isotp_ll_options ll_opts;
+// ret = setsockopt(s, SOL_CAN_ISOTP, CAN_ISOTP_LL_OPTS, &ll_opts, sizeof(ll_opts));
+// ```
+//
+// 结构体 can_isotp_ll_options 的内容如下：
+//
+// ```c
+// struct can_isotp_ll_options {
+//     u8 mtu;      // 生成和接受的 CAN 帧类型，可以等于 `CAN_MTU`（用于经典 CAN 帧）或 `CANFD_MTU`（用于 CAN FD 帧）
+//     u8 tx_dl;    // 发送帧的最大有效载荷长度，可以取以下值之一：8, 12, 16, 20, 24, 32, 48, 64。超过 8 的值仅适用于 CAN FD 通信（即：`mtu = CANFD_MTU`）
+//     u8 tx_flags; // 在创建帧时设置到 `struct canfd_frame.flags` 中的标志位；仅适用于 CAN FD 通信（即：`mtu = CANFD_MTU`）
+// };
+// ```
+
+// 发送最小间隔时间（stmin）
+//
+// 可以使用 `CAN_ISOTP_TX_STMIN` 选项名称强制设置发送最小间隔时间（stmin），并提供一个以微秒为单位的 32 位无符号整数作为 stmin 值；这将覆盖接收方在流控制帧中发送的值：
+//
+// ```c
+// uint32_t stmin;
+// ret = setsockopt(s, SOL_CAN_ISOTP, CAN_ISOTP_TX_STMIN, &stmin, sizeof(stmin));
+// ```
+
+// 接收最小间隔时间（stmin）
+//
+// 可以使用 `CAN_ISOTP_RX_STMIN` 选项名称强制设置接收最小间隔时间（stmin），并提供一个以微秒为单位的 32 位无符号整数作为 stmin 值；接收到的时间戳与该值相差小于该值的连续帧将被忽略：
+//
+// ```c
+// uint32_t stmin;
+// ret = setsockopt(s, SOL_CAN_ISOTP, CAN_ISOTP_RX_STMIN, &stmin, sizeof(stmin));
+// ```
+
+// 多帧传输支持
+//
+// Linux 内核中的 ISO-TP 栈支持标准定义的多帧传输机制，但有以下限制：
+// * PDU 的最大大小由模块参数定义，并且在编译时设置了硬限制。
+// * 当正在进行传输时，后续对 `write(2)` 的调用将被阻塞，而对 `send(2)` 的调用将根据是否存在 `MSG_DONTWAIT` 标志来决定是阻塞还是失败。
+// * 不支持发送“等待帧”：当接收到第一帧时，决定是否可以完全接收 PDU。
+
+// 错误
+//
+// 报告给用户空间的错误如下：
+
+// 接收路径错误
+//
+// ============ ==============================================================
+// -ETIMEDOUT   数据接收超时
+// -EILSEQ      多帧接收期间序列号不匹配
+// -EBADMSG     数据接收时填充不正确
+// ============ ==============================================================
+
+// 发送路径错误
+//
+// ========== =================================================================
+// -ECOMM     流控制接收超时
+// -EMSGSIZE  流控制接收溢出
+// -EBADMSG   流控制接收时布局/填充不正确
+// ========== =================================================================
+
+// 示例
+//
+// 基本节点示例
+//
+// 以下示例实现了一个使用“正常”物理寻址的节点，其中 RX ID 等于 0x18DAF142，TX ID 等于 0x18DA42F1。所有选项都保留默认值。
+```
+```c
+int s;
+struct sockaddr_can addr;
+int ret;
+
+s = socket(PF_CAN, SOCK_DGRAM, CAN_ISOTP);
+if (s < 0)
+    exit(1);
+
+addr.can_family = AF_CAN;
+addr.can_ifindex = if_nametoindex("can0");
+addr.tp.tx_id = 0x18DA42F1 | CAN_EFF_FLAG;
+addr.tp.rx_id = 0x18DAF142 | CAN_EFF_FLAG;
+
+ret = bind(s, (struct sockaddr *)&addr, sizeof(addr));
+if (ret < 0)
+    exit(1);
+
+/* 现在可以使用 read(s, ...) 接收数据，并使用 write(s, ...) 发送数据 */
+```
+
+更多示例
+--------
+
+更完整（且复杂）的示例可以在 ``isotp*`` 用户空间工具中找到，这些工具作为 ``can-utils`` 实用程序的一部分发布在：
+https://github.com/linux-can/can-utils

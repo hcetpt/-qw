@@ -1,0 +1,129 @@
+IEEE 802.15.4 开发者指南
+===============================
+
+简介
+============
+IEEE 802.15.4 工作组专注于标准化最底层的两个层：介质访问控制（MAC）和物理层（PHY）。对于高层协议，主要有以下两种选择：
+
+- ZigBee - 来自 ZigBee 联盟的专有协议
+- 6LoWPAN - 在低速个人区域网络上运行的 IPv6 网络
+
+Linux-wpan 的目标是提供完整的 IEEE 802.15.4 和 6LoWPAN 协议实现。IEEE 802.15.4 是一个用于组织低速无线个人区域网络的协议栈。该协议栈由三个主要部分组成：
+
+- IEEE 802.15.4 层；我们选择使用标准的 Berkeley socket API 和通用的 Linux 网络栈来传输 IEEE 802.15.4 数据消息，并通过 netlink 协议进行配置/管理
+- MAC - 提供对共享信道的访问和可靠的数据传输
+- PHY - 表示设备驱动程序
+
+Socket API
+==========
+
+::
+
+    int sd = socket(PF_IEEE802154, SOCK_DGRAM, 0);
+
+地址族、套接字地址等定义在 include/net/af_ieee802154.h 头文件中，或者在用户空间包中的特殊头文件中（参见 https://linux-wpan.org/wpan-tools.html 或者 https://github.com/linux-wpan/wpan-tools 的 Git 树）
+
+6LoWPAN Linux 实现
+============================
+
+IEEE 802.15.4 标准规定了最大传输单元（MTU）为 127 字节，在启用安全功能后，实际的 MAC 负载约为 80 字节，无线链路的数据吞吐量为 250 kbps 或更低。6LoWPAN 适应格式 [RFC4944] 规定了如何在这些受限链路上传输 IPv6 数据报，考虑到无线传感器网络等应用中的带宽、内存或能源资源限制。[RFC4944] 定义了一个网格寻址头以支持子网转发，一个分片头以支持 IPv6 最小 MTU 要求 [RFC2460]，以及 IPv6 数据报的状态无压缩（LOWPAN_HC1 和 LOWPAN_HC2），以将相对较大的 IPv6 和 UDP 头部压缩到（在最佳情况下）几个字节。
+
+2011 年 9 月发布了标准更新 - [RFC6282]。它废弃了 HC1 和 HC2 压缩，并定义了 IPHC 编码格式，该格式用于此 Linux 实现中。
+
+所有与 6LoWPAN 相关的代码可以在文件 net/6lowpan/* 和 net/ieee802154/6lowpan/* 中找到。
+
+要设置一个 6LoWPAN 接口，需要：
+1. 添加 IEEE802.15.4 接口并设置频道和 PAN ID；
+2. 使用如下命令添加 6LoWPAN 接口：
+# ip link add link wpan0 name lowpan0 type lowpan
+3. 启动 'lowpan0' 接口
+
+驱动程序
+=======
+
+与 WiFi 类似，有几种类型的设备实现了 IEEE 802.15.4：
+
+1) 'HardMAC'。MAC 层在设备本身中实现，设备导出了一个管理（例如 MLME）和数据 API。
+2) 'SoftMAC' 或仅无线电。这类设备只是无线电收发器，可能具有一些加速功能，如自动 CRC 计算和比较、自动 ACK 处理、地址匹配等。
+这些类型的设备需要不同的方法来连接到 Linux 内核。
+
+HardMAC
+-------
+
+参见头文件 include/net/ieee802154_netdev.h。您需要实现 Linux net_device，其中 .type = ARPHRD_IEEE802154。数据通过普通的 sk_buff 与套接字家族代码交换。在接收到 skb 时，skb->cb 必须包含结构体 ieee802154_mac_cb 中描述的附加信息。在发送数据包时，skb->cb 用于向设备的 header_ops->create 函数提供附加数据。请注意，这些数据可能会被覆盖（当套接字代码提交 skb 到 qdisc 时），因此如果您稍后需要从该 cb 获取信息，请自行将其存储在 skb->data 中。
+要挂钩 MLME 接口，您需要使用指向 `struct ieee802154_mlme_ops` 实例的指针填充 `net_device` 的 `ml_priv` 字段。`assoc_req`、`assoc_resp`、`disassoc_req`、`start_req` 和 `scan_req` 这些字段是可选的。其他所有字段都是必需的。
+
+软 MAC（SoftMAC）
+-----------------
+
+MAC 是 IEEE 802.15.4 Linux 栈中的中间层。目前它提供了驱动程序注册和管理从接口的功能。
+注意：当前仅支持监视设备类型——这是用于网络嗅探器（如 Wireshark）的 IEEE 802.15.4 栈接口。
+这一层很快将得到扩展。
+请参阅头文件 `include/net/mac802154.h` 以及 `drivers/net/ieee802154/` 目录下的几个驱动程序。
+
+伪驱动程序（Fake Drivers）
+--------------------------
+
+此外，还有一个可用的驱动程序，该驱动程序模拟了一个具有 SoftMAC 接口的真实设备（fakelb - IEEE 802.15.4 环回驱动程序）。此选项提供了一种在不使用真实硬件的情况下测试和调试栈的可能性。
+
+设备驱动程序 API
+==================
+
+`include/net/mac802154.h` 定义了以下函数：
+
+.. c:function:: struct ieee802154_dev *ieee802154_alloc_device(size_t priv_size, struct ieee802154_ops *ops)
+
+分配一个与 IEEE 802.15.4 兼容的设备。
+
+.. c:function:: void ieee802154_free_device(struct ieee802154_dev *dev)
+
+释放已分配的设备。
+
+.. c:function:: int ieee802154_register_device(struct ieee802154_dev *dev)
+
+在系统中注册 PHY。
+### C函数声明翻译
+
+#### `void ieee802154_unregister_device(struct ieee802154_dev *dev)`
+释放已注册的PHY设备。
+
+#### `void ieee802154_rx_irqsafe(struct ieee802154_hw *hw, struct sk_buff *skb, u8 lqi)`
+通知802.15.4模块有一个新的接收帧在`skb`中，并附带了硬件设备提供的射频链路质量指示（LQI）。
+
+#### `void ieee802154_xmit_complete(struct ieee802154_hw *hw, struct sk_buff *skb, bool ifs_handling)`
+通知802.15.4模块`skb`中的帧已经被或即将通过硬件设备传输。
+
+### IEEE 802.15.4 操作结构体中必须实现的回调函数
+
+设备驱动程序至少需要在IEEE 802.15.4的操作结构体中实现以下回调函数：
+
+```c
+struct ieee802154_ops {
+    ...
+    int     (*start)(struct ieee802154_hw *hw);
+    void    (*stop)(struct ieee802154_hw *hw);
+    ...
+    int     (*xmit_async)(struct ieee802154_hw *hw, struct sk_buff *skb);
+    int     (*ed)(struct ieee802154_hw *hw, u8 *level);
+    int     (*set_channel)(struct ieee802154_hw *hw, u8 page, u8 channel);
+    ...
+};
+```
+
+#### `int start(struct ieee802154_hw *hw)`
+802.15.4模块调用此处理函数来初始化硬件设备。
+
+#### `void stop(struct ieee802154_hw *hw)`
+802.15.4模块调用此处理函数来清理硬件设备。
+
+#### `int xmit_async(struct ieee802154_hw *hw, struct sk_buff *skb)`
+802.15.4模块调用此处理函数来传输`skb`中的每个帧。
+
+#### `int ed(struct ieee802154_hw *hw, u8 *level)`
+802.15.4模块调用此处理函数来进行能量检测（Energy Detection）。
+
+#### `int set_channel(struct ieee802154_hw *hw, u8 page, u8 channel)`
+设置硬件设备以监听特定信道。
+此外，IEEE 802.15.4 设备的操作结构应该被填充。 
+
+如果需要更准确的翻译，请提供更多上下文信息。

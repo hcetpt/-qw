@@ -1,0 +1,131 @@
+```yaml
+# SPDX 许可证标识符: ((GPL-2.0 WITH Linux-syscall-note) 或 BSD-3-Clause)
+#
+# 作者: Chuck Lever <chuck.lever@oracle.com>
+#
+# 版权所有 © 2023，Oracle 及其关联公司
+#
+
+名称: handshake
+
+协议: genetlink
+
+文档: 请求传输层安全握手的 Netlink 协议
+定义:
+  -
+    类型: 枚举
+    名称: handler-class
+    值起始: 0
+    条目: [none, tlshd, max]
+  -
+    类型: 枚举
+    名称: msg-type
+    值起始: 0
+    条目: [unspec, clienthello, serverhello]
+  -
+    类型: 枚举
+    名称: auth
+    值起始: 0
+    条目: [unspec, unauth, psk, x509]
+
+属性集:
+  -
+    名称: x509
+    属性:
+      -
+        名称: cert
+        类型: s32
+      -
+        名称: privkey
+        类型: s32
+  -
+    名称: accept
+    属性:
+      -
+        名称: sockfd
+        类型: s32
+      -
+        名称: handler-class
+        类型: u32
+        枚举: handler-class
+      -
+        名称: message-type
+        类型: u32
+        枚举: msg-type
+      -
+        名称: timeout
+        类型: u32
+      -
+        名称: auth-mode
+        类型: u32
+        枚举: auth
+      -
+        名称: peer-identity
+        类型: u32
+        多属性: true
+      -
+        名称: certificate
+        类型: nest
+        嵌套属性: x509
+        多属性: true
+      -
+        名称: peername
+        类型: 字符串
+  -
+    名称: done
+    属性:
+      -
+        名称: status
+        类型: u32
+      -
+        名称: sockfd
+        类型: s32
+      -
+        名称: remote-auth
+        类型: u32
+        多属性: true
+
+操作:
+  列表:
+    -
+      名称: ready
+      文档: 通知处理程序有新的握手请求等待
+      通知: accept
+    -
+      名称: accept
+      文档: 处理程序检索下一个排队的握手请求
+      属性集: accept
+      标志: [admin-perm]
+      执行:
+        请求:
+          属性:
+            - handler-class
+        回复:
+          属性:
+            - sockfd
+            - message-type
+            - timeout
+            - auth-mode
+            - peer-identity
+            - certificate
+            - peername
+    -
+      名称: done
+      文档: 处理程序报告握手完成
+      属性集: done
+      执行:
+        请求:
+          属性:
+            - status
+            - sockfd
+            - remote-auth
+
+多播组:
+  列表:
+    -
+      名称: none
+    -
+      名称: tlshd
+```
+
+这是将原文翻译成中文的结果。

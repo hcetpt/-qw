@@ -1,0 +1,209 @@
+```yaml
+# SPDX 许可证标识符: ((GPL-2.0 WITH Linux-syscall-note) 或 BSD-3-Clause)
+
+名称: nlctrl
+协议: genetlink-legacy
+用户API头文件: linux/genetlink.h
+
+文档: |
+  genetlink 元家族，用于暴露内核中注册的所有 genetlink 家族（包括自身）的信息
+
+定义:
+  -
+    名称: op-flags
+    类型: 标志
+    枚举名称:
+    条目:
+      - admin-perm
+      - cmd-cap-do
+      - cmd-cap-dump
+      - cmd-cap-haspol
+      - uns-admin-perm
+  -
+    名称: attr-type
+    枚举名称: netlink-attribute-type
+    类型: 枚举
+    条目:
+      - invalid
+      - flag
+      - u8
+      - u16
+      - u32
+      - u64
+      - s8
+      - s16
+      - s32
+      - s64
+      - binary
+      - string
+      - nul-string
+      - nested
+      - nested-array
+      - bitfield32
+      - sint
+      - uint
+
+属性集:
+  -
+    名称: ctrl-attrs
+    名称前缀: ctrl-attr-
+    属性:
+      -
+        名称: family-id
+        类型: u16
+      -
+        名称: family-name
+        类型: string
+      -
+        名称: version
+        类型: u32
+      -
+        名称: hdrsize
+        类型: u32
+      -
+        名称: maxattr
+        类型: u32
+      -
+        名称: ops
+        类型: indexed-array
+        子类型: nest
+        嵌套属性: op-attrs
+      -
+        名称: mcast-groups
+        类型: indexed-array
+        子类型: nest
+        嵌套属性: mcast-group-attrs
+      -
+        名称: policy
+        类型: nest-type-value
+        类型值: [policy-id, attr-id]
+        嵌套属性: policy-attrs
+      -
+        名称: op-policy
+        类型: nest-type-value
+        类型值: [op-id]
+        嵌套属性: op-policy-attrs
+      -
+        名称: op
+        类型: u32
+  -
+    名称: mcast-group-attrs
+    名称前缀: ctrl-attr-mcast-grp-
+    枚举名称:
+    属性:
+      -
+        名称: name
+        类型: string
+      -
+        名称: id
+        类型: u32
+  -
+    名称: op-attrs
+    名称前缀: ctrl-attr-op-
+    枚举名称:
+    属性:
+      -
+        名称: id
+        类型: u32
+      -
+        名称: flags
+        类型: u32
+        枚举: op-flags
+        枚举作为标志: true
+  -
+    名称: policy-attrs
+    名称前缀: nl-policy-type-attr-
+    枚举名称:
+    属性:
+      -
+        名称: type
+        类型: u32
+        枚举: attr-type
+      -
+        名称: min-value-s
+        类型: s64
+      -
+        名称: max-value-s
+        类型: s64
+      -
+        名称: min-value-u
+        类型: u64
+      -
+        名称: max-value-u
+        类型: u64
+      -
+        名称: min-length
+        类型: u32
+      -
+        名称: max-length
+        类型: u32
+      -
+        名称: policy-idx
+        类型: u32
+      -
+        名称: policy-maxtype
+        类型: u32
+      -
+        名称: bitfield32-mask
+        类型: u32
+      -
+        名称: mask
+        类型: u64
+      -
+        名称: pad
+        类型: pad
+  -
+    名称: op-policy-attrs
+    名称前缀: ctrl-attr-policy-
+    枚举名称:
+    属性:
+      -
+        名称: do
+        类型: u32
+      -
+        名称: dump
+        类型: u32
+
+操作:
+  枚举模型: 方向性
+  名称前缀: ctrl-cmd-
+  列表:
+    -
+      名称: getfamily
+      文档: 获取/转储 genetlink 家族
+      属性集: ctrl-attrs
+      执行:
+        请求:
+          值: 3
+          属性:
+            - family-name
+        回复: &all-attrs
+          值: 1
+          属性:
+            - family-id
+            - family-name
+            - hdrsize
+            - maxattr
+            - mcast-groups
+            - ops
+            - version
+      转储:
+        回复: *all-attrs
+    -
+      名称: getpolicy
+      文档: 获取/转储 genetlink 策略
+      属性集: ctrl-attrs
+      转储:
+        请求:
+          值: 10
+          属性:
+            - family-name
+            - family-id
+            - op
+        回复:
+          值: 10
+          属性:
+            - family-id
+            - op-policy
+            - policy
+```

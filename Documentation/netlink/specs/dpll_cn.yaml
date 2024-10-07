@@ -1,0 +1,444 @@
+# SPDX 许可证标识符: ((GPL-2.0 WITH Linux-syscall-note) 或 BSD-3-Clause)
+
+名称: dpll
+
+文档: DPLL 子系统
+
+定义:
+  -
+    类型: 枚举
+    名称: mode
+    文档: |
+      DPLL 支持的工作模式，区分 DPLL 如何选择其输入之一进行同步。DPLL_A_MODE 属性的有效值。
+    项:
+      -
+        名称: manual
+        文档: 输入只能通过向 DPLL 发送请求来选择。
+        值: 1
+      -
+        名称: automatic
+        文档: 最高优先级的输入引脚由 DPLL 自动选择。
+    显示最大值: 是
+  -
+    类型: 枚举
+    名称: lock-status
+    文档: |
+      提供有关 DPLL 设备锁定状态的信息。DPLL_A_LOCK_STATUS 属性的有效值。
+    项:
+      -
+        名称: unlocked
+        文档: |
+          DPLL 尚未锁定到任何有效输入（或通过将 DPLL_A_MODE 设置为 DPLL_MODE_DETACHED 强制解锁）。
+        值: 1
+      -
+        名称: locked
+        文档: |
+          DPLL 已锁定到一个有效的信号，但没有保持功能可用。
+      -
+        名称: locked-ho-acq
+        文档: |
+          DPLL 已锁定且已获取保持功能。
+      -
+        名称: holdover
+        文档: |
+          DPLL 处于保持状态——丢失了有效锁定或因断开所有引脚而被强制（只有在 DPLL 锁定状态为 DPLL_LOCK_STATUS_LOCKED_HO_ACQ 时才可能；如果不是，则 DPLL 的锁定状态应保持为 DPLL_LOCK_STATUS_UNLOCKED）。
+    显示最大值: 是
+  -
+    类型: 枚举
+    名称: lock-status-error
+    文档: |
+      如果前一次状态变更由于故障导致，此枚举提供关于 DPLL 设备锁定状态错误的信息。DPLL_A_LOCK_STATUS_ERROR 属性的有效值。
+    项:
+      -
+        名称: none
+        文档: |
+          DPLL 设备锁定状态在无错误的情况下发生了变化。
+        值: 1
+      -
+        名称: undefined
+        文档: |
+          DPLL 设备锁定状态由于未定义的错误发生了变化。驱动程序在此情况下填写该值，因为无法获得合适的精确错误类型。
+      -
+        名称: media-down
+        文档: |
+          DPLL 设备锁定状态因关联的媒体失效而发生变化。
+          例如，如果 DPLL 设备之前锁定在一个类型的引脚上（PIN_TYPE_SYNCE_ETH_PORT）。
+      -
+        名称: fractional-frequency-offset-too-high
+        文档: |
+          媒体上的 RX 和 TX 符号率之间的 FFO（分数频率偏移）过高。
+          例如，如果 DPLL 设备之前锁定在一个类型的引脚上（PIN_TYPE_SYNCE_ETH_PORT）。
+    显示最大值: 是
+  -
+    类型: 常量
+    名称: temp-divider
+    值: 1000
+    文档: |
+      温度除数允许用户空间计算出具有三位小数精度的温度。
+      DPLL_A_TEMP / DPLL_TEMP_DIVIDER 的值是温度值的整数部分。
+### 翻译成中文：
+
+值 `(DPLL_A_TEMP % DPLL_TEMP_DIVIDER)` 是温度值的小数部分。
+
+- 
+  - 类型：枚举（enum）
+  - 名称：type
+  - 文档：DPLL的类型，有效值为`DPLL_A_TYPE`属性
+  - 枚举项：
+    - 名称：pps
+      - 文档：DPLL产生每秒脉冲信号
+      - 值：1
+    - 名称：eec
+      - 文档：DPLL驱动以太网设备时钟
+  - 最大渲染：true
+- 
+  - 类型：枚举（enum）
+  - 名称：pin-type
+  - 文档：定义可能的引脚类型，有效值为`DPLL_A_PIN_TYPE`属性
+  - 枚举项：
+    - 名称：mux
+      - 文档：聚合另一层可选引脚
+      - 值：1
+    - 名称：ext
+      - 文档：外部输入
+    - 名称：synce-eth-port
+      - 文档：以太网端口PHY恢复的时钟
+    - 名称：int-oscillator
+      - 文档：设备内部振荡器
+    - 名称：gnss
+      - 文档：GNSS恢复的时钟
+  - 最大渲染：true
+- 
+  - 类型：枚举（enum）
+  - 名称：pin-direction
+  - 文档：定义可能的引脚方向，有效值为`DPLL_A_PIN_DIRECTION`属性
+  - 枚举项：
+    - 名称：input
+      - 文档：引脚用作信号输入
+      - 值：1
+    - 名称：output
+      - 文档：引脚用于输出信号
+  - 最大渲染：true
+- 
+  - 类型：常量（const）
+  - 名称：pin-frequency-1-hz
+  - 值：1
+- 
+  - 类型：常量（const）
+  - 名称：pin-frequency-10-khz
+  - 值：10000
+- 
+  - 类型：常量（const）
+  - 名称：pin-frequency-77_5-khz
+  - 值：77500
+- 
+  - 类型：常量（const）
+  - 名称：pin-frequency-10-mhz
+  - 值：10000000
+- 
+  - 类型：枚举（enum）
+  - 名称：pin-state
+  - 文档：定义可能的引脚状态，有效值为`DPLL_A_PIN_STATE`属性
+  - 枚举项：
+    - 名称：connected
+      - 文档：引脚连接，相位锁定环的活动输入
+      - 值：1
+    - 名称：disconnected
+      - 文档：引脚未连接，不被视为有效输入
+    - 名称：selectable
+      - 文档：引脚启用自动输入选择
+  - 最大渲染：true
+- 
+  - 类型：标志（flags）
+  - 名称：pin-capabilities
+  - 文档：定义可能的引脚功能，有效标志为`DPLL_A_PIN_CAPABILITIES`属性
+  - 枚举项：
+    - 名称：direction-can-change
+      - 文档：引脚方向可以改变
+    - 名称：priority-can-change
+      - 文档：引脚优先级可以改变
+    - 名称：state-can-change
+      - 文档：引脚状态可以改变
+- 
+  - 类型：常量（const）
+  - 名称：phase-offset-divider
+  - 值：1000
+  - 文档：相位偏移除数允许用户空间计算引脚与DPLL设备之间的测量信号相位差值，精度为三位小数
+  - 值 `(DPLL_A_PHASE_OFFSET / DPLL_PHASE_OFFSET_DIVIDER)` 是测量相位偏移值的整数部分
+  - 值 `(DPLL_A_PHASE_OFFSET % DPLL_PHASE_OFFSET_DIVIDER)` 是测量相位偏移值的小数部分
+
+属性集：
+- 
+  - 名称：dpll
+  - 枚举名称：dpll_a
+  - 属性：
+    - 名称：id
+      - 类型：u32
+    - 名称：module-name
+      - 类型：string
+    - 名称：pad
+      - 类型：pad
+    - 名称：clock-id
+      - 类型：u64
+    - 名称：mode
+      - 类型：u32
+      - 枚举：mode
+    - 名称：mode-supported
+      - 类型：u32
+      - 枚举：mode
+      - 多属性：true
+    - 名称：lock-status
+      - 类型：u32
+      - 枚举：lock-status
+    - 名称：temp
+      - 类型：s32
+    - 名称：type
+      - 类型：u32
+      - 枚举：type
+    - 名称：lock-status-error
+      - 类型：u32
+      - 枚举：lock-status-error
+- 
+  - 名称：pin
+  - 枚举名称：dpll_a_pin
+  - 属性：
+    - 名称：id
+      - 类型：u32
+    - 名称：parent-id
+      - 类型：u32
+    - 名称：module-name
+      - 类型：string
+    - 名称：pad
+      - 类型：pad
+    - 名称：clock-id
+      - 类型：u64
+    - 名称：board-label
+      - 类型：string
+    - 名称：panel-label
+      - 类型：string
+    - 名称：package-label
+      - 类型：string
+    - 名称：type
+      - 类型：u32
+      - 枚举：pin-type
+    - 名称：direction
+      - 类型：u32
+      - 枚举：pin-direction
+    - 名称：frequency
+      - 类型：u64
+    - 名称：frequency-supported
+      - 类型：nest
+      - 多属性：true
+      - 嵌套属性：frequency-range
+    - 名称：frequency-min
+      - 类型：u64
+    - 名称：frequency-max
+      - 类型：u64
+    - 名称：prio
+      - 类型：u32
+    - 名称：state
+      - 类型：u32
+      - 枚举：pin-state
+    - 名称：capabilities
+      - 类型：u32
+      - 枚举：pin-capabilities
+    - 名称：parent-device
+      - 类型：nest
+      - 多属性：true
+      - 嵌套属性：pin-parent-device
+    - 名称：parent-pin
+      - 类型：nest
+      - 多属性：true
+      - 嵌套属性：pin-parent-pin
+    - 名称：phase-adjust-min
+      - 类型：s32
+    - 名称：phase-adjust-max
+      - 类型：s32
+    - 名称：phase-adjust
+      - 类型：s32
+    - 名称：phase-offset
+      - 类型：s64
+    - 名称：fractional-frequency-offset
+      - 类型：sint
+      - 文档：RX和TX在与引脚相关的媒体上的符号率之间的FFO（分数频率偏移）：(rx_frequency-tx_frequency)/rx_frequency
+        - 值以PPM（百万分之一）表示
+        - 例如，对于类型为PIN_TYPE_SYNCE_ETH_PORT的引脚实现
+- 
+  - 名称：pin-parent-device
+  - 子集：pin
+  - 属性：
+    - 名称：parent-id
+    - 名称：direction
+    - 名称：prio
+    - 名称：state
+    - 名称：phase-offset
+- 
+  - 名称：pin-parent-pin
+  - 子集：pin
+  - 属性：
+    - 名称：parent-id
+    - 名称：state
+- 
+  - 名称：frequency-range
+  - 子集：pin
+  - 属性：
+    - 名称：frequency-min
+    - 名称：frequency-max
+
+操作：
+- 枚举名称：dpll_cmd
+- 列表：
+  - 
+    - 名称：device-id-get
+    - 文档：获取符合给定属性的DPLL设备ID
+    - 属性集：dpll
+    - 标志：[admin-perm]
+    - 操作：
+      - 预处理：dpll-lock-doit
+      - 后处理：dpll-unlock-doit
+      - 请求：
+        - 属性：
+          - module-name
+          - clock-id
+          - type
+      - 回复：
+        - 属性：
+          - id
+  - 
+    - 名称：device-get
+    - 文档：获取DPLL设备列表（转储）或单个DPLL设备的属性
+    - 属性集：dpll
+    - 标志：[admin-perm]
+    - 操作：
+      - 预处理：dpll-pre-doit
+      - 后处理：dpll-post-doit
+      - 请求：
+        - 属性：
+          - id
+      - 回复：&dev-attrs
+        - 属性：
+          - id
+          - module-name
+          - mode
+          - mode-supported
+          - lock-status
+          - lock-status-error
+          - temp
+          - clock-id
+          - type
+      - 转储：
+        - 回复：*dev-attrs
+  - 
+    - 名称：device-set
+    - 文档：设置DPLL设备的属性
+    - 属性集：dpll
+    - 标志：[admin-perm]
+    - 操作：
+      - 预处理：dpll-pre-doit
+      - 后处理：dpll-post-doit
+      - 请求：
+        - 属性：
+          - id
+  - 
+    - 名称：device-create-ntf
+    - 文档：关于设备出现的通知
+    - 通知：device-get
+    - 多播组：monitor
+  - 
+    - 名称：device-delete-ntf
+    - 文档：关于设备消失的通知
+    - 通知：device-get
+    - 多播组：monitor
+  - 
+    - 名称：device-change-ntf
+    - 文档：关于设备配置更改的通知
+    - 通知：device-get
+    - 多播组：monitor
+  - 
+    - 名称：pin-id-get
+    - 文档：获取符合给定属性的引脚ID
+    - 属性集：pin
+    - 标志：[admin-perm]
+    - 操作：
+      - 预处理：dpll-lock-doit
+      - 后处理：dpll-unlock-doit
+      - 请求：
+        - 属性：
+          - module-name
+          - clock-id
+          - board-label
+          - panel-label
+          - package-label
+          - type
+      - 回复：
+        - 属性：
+          - id
+  - 
+    - 名称：pin-get
+    - 文档：获取引脚及其属性列表
+    - 属性集：pin
+    - 标志：[admin-perm]
+    - 操作：
+      - 预处理：dpll-pin-pre-doit
+      - 后处理：dpll-pin-post-doit
+      - 请求：
+        - 属性：
+          - id
+      - 回复：&pin-attrs
+        - 属性：
+          - id
+          - board-label
+          - panel-label
+          - package-label
+          - type
+          - frequency
+          - frequency-supported
+          - capabilities
+          - parent-device
+          - parent-pin
+          - phase-adjust-min
+          - phase-adjust-max
+          - phase-adjust
+          - fractional-frequency-offset
+      - 转储：
+        - 请求：
+          - 属性：
+            - id
+        - 回复：*pin-attrs
+  - 
+    - 名称：pin-set
+    - 文档：设置目标引脚的属性
+    - 属性集：pin
+    - 标志：[admin-perm]
+    - 操作：
+      - 预处理：dpll-pin-pre-doit
+      - 后处理：dpll-pin-post-doit
+      - 请求：
+        - 属性：
+          - id
+          - frequency
+          - direction
+          - prio
+          - state
+          - parent-device
+          - parent-pin
+          - phase-adjust
+  - 
+    - 名称：pin-create-ntf
+    - 文档：关于引脚出现的通知
+    - 通知：pin-get
+    - 多播组：monitor
+  - 
+    - 名称：pin-delete-ntf
+    - 文档：关于引脚消失的通知
+    - 通知：pin-get
+    - 多播组：monitor
+  - 
+    - 名称：pin-change-ntf
+    - 文档：关于引脚配置更改的通知
+    - 通知：pin-get
+    - 多播组：monitor
+
+多播组：
+- 列表：
+  - 名称：monitor

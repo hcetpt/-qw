@@ -1,0 +1,389 @@
+```yaml
+# SPDX 许可证标识符: ((GPL-2.0 WITH Linux-syscall-note) 或 BSD-3-Clause)
+
+名称: mptcp_pm
+协议: genetlink-legacy
+文档: 多路径 TCP
+C 家族名称: mptcp-pm-name
+C 版本名称: mptcp-pm-ver
+最大值定义: true
+内核策略: 每个操作
+命令计数名称: --mptcp-pm-cmd-after-last
+
+定义:
+  -
+    类型: 枚举
+    名称: 事件类型
+    枚举名称: mptcp-event-type
+    名称前缀: mptcp-event-
+    条目:
+     -
+      名称: 未指定
+      文档: 未使用的事件
+     -
+      名称: 创建
+      文档:
+        标记, 地址族, saddr4 | saddr6, daddr4 | daddr6, sport, dport
+        一个新的 MPTCP 连接已被创建。这是分配内存和发送 ADD_ADDR 的好时机（如果需要）。根据流量模式，可能需要很长时间才会发送 MPTCP_EVENT_ESTABLISHED
+     -
+      名称: 建立
+      文档:
+        标记, 地址族, saddr4 | saddr6, daddr4 | daddr6, sport, dport
+        MPTCP 连接已建立（可以开始新的子流）
+     -
+      名称: 关闭
+      文档:
+        标记
+        一个 MPTCP 连接已停止
+     -
+      名称: 公告
+      值: 6
+      文档:
+        标记, 对端 ID, 地址族, daddr4 | daddr6 [, dport]
+        对等方已宣布了一个新地址
+     -
+      名称: 移除
+      文档:
+        标记, 对端 ID
+        对等方丢失了一个地址
+     -
+      名称: 子连接建立
+      值: 10
+      文档:
+        标记, 地址族, 本地 ID, 对端 ID, saddr4 | saddr6, daddr4 | daddr6, sport, dport, 备份, 接口索引 [, 错误]
+        新的子流已建立。不应设置 `错误`
+     -
+      名称: 子连接关闭
+      文档:
+        标记, 地址族, 本地 ID, 对端 ID, saddr4 | saddr6, daddr4 | daddr6, sport, dport, 备份, 接口索引 [, 错误]
+        子流已关闭。如果检测到此子流中的错误，则可能会设置错误（sk_err 的副本）
+     -
+      名称: 子流优先级变更
+      值: 13
+      文档:
+        标记, 地址族, 本地 ID, 对端 ID, saddr4 | saddr6, daddr4 | daddr6, sport, dport, 备份, 接口索引 [, 错误]
+        子流的优先级已更改。不应设置 `错误`
+     -
+      名称: 监听器创建
+      值: 15
+      文档:
+        地址族, sport, saddr4 | saddr6
+        创建了一个新的 PM 监听器
+```
+```yaml
+name: listener-closed
+doc: 家庭, 运动, saddr4 | saddr6
+        一个PM监听器被关闭
+attribute-sets:
+  -
+    name: address
+    name-prefix: mptcp-pm-addr-attr-
+    attributes:
+      -
+        name: unspec
+        type: unused
+        value: 0
+      -
+        name: family
+        type: u16
+      -
+        name: id
+        type: u8
+      -
+        name: addr4
+        type: u32
+        byte-order: big-endian
+      -
+        name: addr6
+        type: binary
+        checks:
+          exact-len: 16
+      -
+        name: port
+        type: u16
+        byte-order: big-endian
+      -
+        name: flags
+        type: u32
+      -
+        name: if-idx
+        type: s32
+  -
+    name: subflow-attribute
+    name-prefix: mptcp-subflow-attr-
+    attributes:
+      -
+        name: unspec
+        type: unused
+        value: 0
+      -
+        name: token-rem
+        type: u32
+      -
+        name: token-loc
+        type: u32
+      -
+        name: relwrite-seq
+        type: u32
+      -
+        name: map-seq
+        type: u64
+      -
+        name: map-sfseq
+        type: u32
+      -
+        name: ssn-offset
+        type: u32
+      -
+        name: map-datalen
+        type: u16
+      -
+        name: flags
+        type: u32
+      -
+        name: id-rem
+        type: u8
+      -
+        name: id-loc
+        type: u8
+      -
+        name: pad
+        type: pad
+  -
+    name: endpoint
+    name-prefix: mptcp-pm-endpoint-
+    attributes:
+      -
+        name: addr
+        type: nest
+        nested-attributes: address
+  -
+    name: attr
+    name-prefix: mptcp-pm-attr-
+    attr-cnt-name: --mptcp-attr-after-last
+    attributes:
+      -
+        name: unspec
+        type: unused
+        value: 0
+      -
+        name: addr
+        type: nest
+        nested-attributes: address
+      -
+        name: rcv-add-addrs
+        type: u32
+      -
+        name: subflows
+        type: u32
+      -
+        name: token
+        type: u32
+      -
+        name: loc-id
+        type: u8
+      -
+        name: addr-remote
+        type: nest
+        nested-attributes: address
+  -
+    name: event-attr
+    enum-name: mptcp-event-attr
+    name-prefix: mptcp-attr-
+    attributes:
+      -
+        name: unspec
+        type: unused
+        value: 0
+      -
+        name: token
+        type: u32
+      -
+        name: family
+        type: u16
+      -
+        name: loc-id
+        type: u8
+      -
+        name: rem-id
+        type: u8
+      -
+        name: saddr4
+        type: u32
+        byte-order: big-endian
+      -
+        name: saddr6
+        type: binary
+        checks:
+          min-len: 16
+      -
+        name: daddr4
+        type: u32
+        byte-order: big-endian
+      -
+        name: daddr6
+        type: binary
+        checks:
+          min-len: 16
+      -
+        name: sport
+        type: u16
+        byte-order: big-endian
+      -
+        name: dport
+        type: u16
+        byte-order: big-endian
+      -
+        name: backup
+        type: u8
+      -
+        name: error
+        type: u8
+      -
+        name: flags
+        type: u16
+      -
+        name: timeout
+        type: u32
+      -
+        name: if_idx
+        type: u32
+      -
+        name: reset-reason
+        type: u32
+      -
+        name: reset-flags
+        type: u32
+      -
+        name: server-side
+        type: u8
+
+operations:
+  list:
+    -
+      name: unspec
+      doc: 未使用
+      value: 0
+    -
+      name: add-addr
+      doc: 添加端点
+      attribute-set: endpoint
+      dont-validate: [ strict ]
+      flags: [ uns-admin-perm ]
+      do: &add-addr-attrs
+        request:
+          attributes:
+            - addr
+    -
+      name: del-addr
+      doc: 删除端点
+      attribute-set: endpoint
+      dont-validate: [ strict ]
+      flags: [ uns-admin-perm ]
+      do: *add-addr-attrs
+    -
+      name: get-addr
+      doc: 获取端点信息
+      attribute-set: attr
+      dont-validate: [ strict ]
+      flags: [ uns-admin-perm ]
+      do: &get-addr-attrs
+        request:
+          attributes:
+           - addr
+           - token
+        reply:
+          attributes:
+           - addr
+      dump:
+        reply:
+         attributes:
+           - addr
+    -
+      name:  flush-addrs
+      doc: 清空地址
+      attribute-set: endpoint
+      dont-validate: [ strict ]
+      flags: [ uns-admin-perm ]
+      do: *add-addr-attrs
+    -
+      name: set-limits
+      doc: 设置协议限制
+      attribute-set: attr
+      dont-validate: [ strict ]
+      flags: [ uns-admin-perm ]
+      do: &mptcp-limits
+        request:
+          attributes:
+            - rcv-add-addrs
+            - subflows
+    -
+      name: get-limits
+      doc: 获取协议限制
+      attribute-set: attr
+      dont-validate: [ strict ]
+      do: &mptcp-get-limits
+        request:
+           attributes:
+            - rcv-add-addrs
+            - subflows
+        reply:
+          attributes:
+            - rcv-add-addrs
+            - subflows
+    -
+      name: set-flags
+      doc: 更改端点标志
+      attribute-set: attr
+      dont-validate: [ strict ]
+      flags: [ uns-admin-perm ]
+      do: &mptcp-set-flags
+        request:
+          attributes:
+            - addr
+            - token
+            - addr-remote
+    -
+      name: announce
+      doc: 宣告新的子流
+      attribute-set: attr
+      dont-validate: [ strict ]
+      flags: [ uns-admin-perm ]
+      do: &announce-add
+        request:
+          attributes:
+            - addr
+            - token
+    -
+      name: remove
+      doc: 宣告移除
+      attribute-set: attr
+      dont-validate: [ strict ]
+      flags: [ uns-admin-perm ]
+      do:
+        request:
+         attributes:
+           - token
+           - loc-id
+    -
+      name: subflow-create
+      doc: 待完成
+      attribute-set: attr
+      dont-validate: [ strict ]
+      flags: [ uns-admin-perm ]
+      do: &sf-create
+        request:
+          attributes:
+            - addr
+            - token
+            - addr-remote
+    -
+      name: subflow-destroy
+      doc: 待完成
+      attribute-set: attr
+      dont-validate: [ strict ]
+      flags: [ uns-admin-perm ]
+      do: *sf-create
+```
+
+这是将提供的 YAML 文件翻译成中文的版本。注意，一些文档字符串可能需要根据上下文进一步调整以确保准确性和可读性。

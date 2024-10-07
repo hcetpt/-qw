@@ -1,0 +1,180 @@
+```yaml
+# SPDX 许可证标识符: ((GPL-2.0 WITH Linux-syscall-note) 或 BSD-3-Clause)
+
+名称: rt-addr
+协议: netlink-raw
+协议号: 0
+
+文档:
+  通过 rtnetlink 进行地址配置
+
+定义:
+  -
+    名称: ifaddrmsg
+    类型: 结构体
+    成员:
+      -
+        名称: ifa-family
+        类型: u8
+      -
+        名称: ifa-prefixlen
+        类型: u8
+      -
+        名称: ifa-flags
+        类型: u8
+        枚举: ifa-flags
+        枚举作为标志: true
+      -
+        名称: ifa-scope
+        类型: u8
+      -
+        名称: ifa-index
+        类型: u32
+  -
+    名称: ifa-cacheinfo
+    类型: 结构体
+    成员:
+      -
+        名称: ifa-prefered
+        类型: u32
+      -
+        名称: ifa-valid
+        类型: u32
+      -
+        名称: cstamp
+        类型: u32
+      -
+        名称: tstamp
+        类型: u32
+
+  -
+    名称: ifa-flags
+    类型: 标志
+    项:
+      -
+        名称: secondary
+      -
+        名称: nodad
+      -
+        名称: optimistic
+      -
+        名称: dadfailed
+      -
+        名称: homeaddress
+      -
+        名称: deprecated
+      -
+        名称: tentative
+      -
+        名称: permanent
+      -
+        名称: managetempaddr
+      -
+        名称: noprefixroute
+      -
+        名称: mcautojoin
+      -
+        名称: stable-privacy
+
+属性集:
+  -
+    名称: addr-attrs
+    属性:
+      -
+        名称: ifa-address
+        类型: 二进制
+        显示提示: ipv4
+      -
+        名称: ifa-local
+        类型: 二进制
+        显示提示: ipv4
+      -
+        名称: ifa-label
+        类型: 字符串
+      -
+        名称: ifa-broadcast
+        类型: 二进制
+        显示提示: ipv4
+      -
+        名称: ifa-anycast
+        类型: 二进制
+      -
+        名称: ifa-cacheinfo
+        类型: 二进制
+        结构体: ifa-cacheinfo
+      -
+        名称: ifa-multicast
+        类型: 二进制
+      -
+        名称: ifa-flags
+        类型: u32
+        枚举: ifa-flags
+        枚举作为标志: true
+      -
+        名称: ifa-rt-priority
+        类型: u32
+      -
+        名称: ifa-target-netnsid
+        类型: 二进制
+      -
+        名称: ifa-proto
+        类型: u8
+
+操作:
+  固定头部: ifaddrmsg
+  枚举模型: 方向性
+  列表:
+    -
+      名称: newaddr
+      文档: 添加新地址
+      属性集: addr-attrs
+      操作:
+        请求:
+          值: 20
+          属性: &ifaddr-all
+            - ifa-family
+            - ifa-flags
+            - ifa-prefixlen
+            - ifa-scope
+            - ifa-index
+            - ifa-address
+            - ifa-label
+            - ifa-local
+            - ifa-cacheinfo
+    -
+      名称: deladdr
+      文档: 删除地址
+      属性集: addr-attrs
+      操作:
+        请求:
+          值: 21
+          属性:
+            - ifa-family
+            - ifa-flags
+            - ifa-prefixlen
+            - ifa-scope
+            - ifa-index
+            - ifa-address
+            - ifa-local
+    -
+      名称: getaddr
+      文档: 获取地址信息
+      属性集: addr-attrs
+      获取:
+        请求:
+          值: 22
+          属性:
+            - ifa-index
+        响应:
+          值: 20
+          属性: *ifaddr-all
+
+多播组:
+  列表:
+    -
+      名称: rtnlgrp-ipv4-ifaddr
+      值: 5
+    -
+      名称: rtnlgrp-ipv6-ifaddr
+      值: 9
+```

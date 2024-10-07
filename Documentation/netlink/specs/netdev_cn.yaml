@@ -1,0 +1,609 @@
+# SPDX 许可证标识符: ((GPL-2.0 WITH Linux-syscall-note) 或 BSD-3-Clause)
+
+名称: netdev
+
+文档:
+  netdev 通过通用 Netlink 的配置
+
+定义:
+  -
+    类型: 标志
+    名称: xdp-act
+    最大渲染: true
+    项:
+      -
+        名称: basic
+        文档:
+          所有驱动程序支持的 XDP 功能集 (XDP_ABORTED, XDP_DROP, XDP_PASS, XDP_TX)
+      -
+        名称: redirect
+        文档:
+          网络设备支持 XDP_REDIRECT
+      -
+        名称: ndo-xmit
+        文档:
+          此功能表明网络设备是否实现了 ndo_xdp_xmit 回调
+      -
+        名称: xsk-zerocopy
+        文档:
+          此功能表明网络设备是否支持零复制模式下的 AF_XDP
+      -
+        名称: hw-offload
+        文档:
+          此功能表明网络设备是否支持 XDP 硬件卸载
+      -
+        名称: rx-sg
+        文档:
+          此功能表明网络设备是否在驱动程序 NAPI 回调中实现了非线性 XDP 缓冲区支持
+      -
+        名称: ndo-xmit-sg
+        文档:
+          此功能表明网络设备是否在 ndo_xdp_xmit 回调中实现了非线性 XDP 缓冲区支持
+  -
+    类型: 标志
+    名称: xdp-rx-metadata
+    项:
+      -
+        名称: timestamp
+        文档:
+          设备能够通过 bpf_xdp_metadata_rx_timestamp() 暴露接收硬件时间戳
+      -
+        名称: hash
+        文档:
+          设备能够通过 bpf_xdp_metadata_rx_hash() 暴露接收数据包哈希值
+      -
+        名称: vlan-tag
+        文档:
+          设备能够通过 bpf_xdp_metadata_rx_vlan_tag() 暴露接收数据包的 VLAN 标签
+  -
+    类型: 标志
+    名称: xsk-flags
+    项:
+      -
+        名称: tx-timestamp
+        文档:
+          驱动程序支持对出站数据包进行硬件时间戳处理
+```yaml
+- 
+  name: tx-checksum
+  doc: 驱动支持L3校验和硬件卸载
+
+- 
+  name: queue-type
+  type: enum
+  entries: [rx, tx]
+
+- 
+  name: qstats-scope
+  type: flags
+  entries: [queue]
+
+attribute-sets:
+  - 
+    name: dev
+    attributes:
+      - 
+        name: ifindex
+        doc: 网络设备的ifindex
+        type: u32
+        checks:
+          min: 1
+
+      - 
+        name: pad
+        type: pad
+
+      - 
+        name: xdp-features
+        doc: 启用的xdp特性位掩码
+        type: u64
+        enum: xdp-act
+
+      - 
+        name: xdp-zc-max-segs
+        doc: ZC驱动支持的最大片段数
+        type: u32
+        checks:
+          min: 1
+
+      - 
+        name: xdp-rx-metadata-features
+        doc: 支持的XDP接收元数据特性位掩码，更多详情请参阅Documentation/networking/xdp-rx-metadata.rst
+        type: u64
+        enum: xdp-rx-metadata
+
+      - 
+        name: xsk-features
+        doc: 启用的AF_XDP特性位掩码
+        type: u64
+        enum: xsk-flags
+
+  - 
+    name: page-pool
+    attributes:
+      - 
+        name: id
+        doc: 页面池实例的唯一ID
+        type: uint
+        checks:
+          min: 1
+          max: u32-max
+
+      - 
+        name: ifindex
+        doc: |
+          此页面池所属网络设备的ifindex。
+          如果页面池分配给的网络设备已被销毁，则可能会报告为0（页面池可能比其网络设备更持久，因为它们等待所有内存被归还）。
+        type: u32
+        checks:
+          min: 1
+          max: s32-max
+
+      - 
+        name: napi-id
+        doc: 使用此页面池实例的NAPI ID
+        type: uint
+        checks:
+          min: 1
+          max: u32-max
+
+      - 
+        name: inflight
+        type: uint
+        doc: |
+          对此页面池的未完成引用数量（已分配但尚未释放的页面）。
+          已分配的页面可能保存在套接字接收队列、驱动接收环、页面池回收环、页面池缓存等中。
+```
+```yaml
+-
+  name: inflight-mem
+  type: uint
+  doc: |
+    飞行中页面占用的内存量
+-
+  name: detach-time
+  type: uint
+  doc: |
+    页面池被驱动程序分离时的CLOCK_BOOTTIME秒数。一旦页面池被分离，就不能再用于分配内存。
+页面池会在所有从其分配的内存被释放后真正消失。“分离”的页面池不能“重新连接”，它们只是在等待消失。
+如果页面池尚未分离且仍可用于分配新内存，则此属性不存在。
+-
+  name: page-pool-info
+  subset-of: page-pool
+  attributes:
+    -
+      name: id
+    -
+      name: ifindex
+-
+  name: page-pool-stats
+  doc: |
+    页面池统计信息，请参阅struct page_pool_stats文档获取单个统计信息的信息。
+  attributes:
+    -
+      name: info
+      doc: 页面池标识信息
+      type: nest
+      nested-attributes: page-pool-info
+    -
+      name: alloc-fast
+      type: uint
+      value: 8 # 预留一些attr ids以备后续需要更多元数据
+    -
+      name: alloc-slow
+      type: uint
+    -
+      name: alloc-slow-high-order
+      type: uint
+    -
+      name: alloc-empty
+      type: uint
+    -
+      name: alloc-refill
+      type: uint
+    -
+      name: alloc-waive
+      type: uint
+    -
+      name: recycle-cached
+      type: uint
+    -
+      name: recycle-cache-full
+      type: uint
+    -
+      name: recycle-ring
+      type: uint
+    -
+      name: recycle-ring-full
+      type: uint
+    -
+      name: recycle-released-refcnt
+      type: uint
+-
+  name: napi
+  attributes:
+    -
+      name: ifindex
+      doc: NAPI实例所属网卡的ifindex
+      type: u32
+      checks:
+        min: 1
+    -
+      name: id
+      doc: NAPI实例的ID
+      type: u32
+    -
+      name: irq
+      doc: 与NAPI关联的中断向量号
+      type: u32
+    -
+      name: pid
+      doc: NAPI线程的PID（如果NAPI配置为线程模式）。如果NAPI不是线程模式（即使用正常的softirq上下文），则该属性不存在。
+      type: u32
+-
+  name: queue
+  attributes:
+    -
+      name: id
+      doc: 队列索引；大多数队列类型的索引类似于C数组，从0开始到队列计数减1结束。队列索引限定于一个接口和队列类型。
+```
+```yaml
+type: u32
+-
+  name: ifindex
+  doc: 网络设备所属队列的ifindex
+type: u32
+  checks:
+    min: 1
+-
+  name: type
+  doc: 队列类型为rx或tx。每种队列类型定义了一个独立的ID空间
+type: u32
+  enum: queue-type
+-
+  name: napi-id
+  doc: 服务于该队列的NAPI实例的ID
+type: u32
+
+-
+  name: qstats
+  doc: |
+    获取设备统计信息，范围限定在设备或队列上
+这些统计信息扩展（并部分重复）了struct rtnl_link_stats64中的统计信息
+`scope`属性的值决定了统计信息是如何聚合的。当聚合到整个设备时，
+统计信息表示自上次显式重置设备以来发生的事件总数（即不是像改变队列数量这样的重新配置）
+然而，当按每个队列报告时，统计信息可能不会加总到总的事件数，仅会报告当前活跃的对象，
+并且很可能报告的是自上次重新配置以来的事件数
+attributes:
+-
+  name: ifindex
+  doc: 统计信息所属网络设备的ifindex
+type: u32
+  checks:
+    min: 1
+-
+  name: queue-type
+  doc: 队列类型为rx或tx，用于queue-id
+type: u32
+  enum: queue-type
+-
+  name: queue-id
+  doc: 队列ID，如果统计信息限定在一个单个队列实例上
+```
+类型: u32
+      -
+        名称: scope
+        说明: |
+          应该使用哪种对象类型来遍历统计数据
+类型: uint
+        枚举: qstats-scope
+      -
+        名称: rx-packets
+        说明: |
+          成功接收并传递给堆栈的线包数量
+对于支持XDP的驱动程序，XDP被视为堆栈的第一层，
+因此被XDP消耗的数据包仍然在此处计数
+类型: uint
+        值: 8 # 预留一些属性ID，以防我们以后需要更多元数据
+      -
+        名称: rx-bytes
+        说明: 成功接收的字节数，参见`rx-packets`
+类型: uint
+      -
+        名称: tx-packets
+        说明: |
+          成功发送的线包数量。当数据包进入设备内存时（通常这意味着设备已经发出了DMA完成通知）
+即认为数据包已成功发送
+类型: uint
+      -
+        名称: tx-bytes
+        说明: 成功发送的字节数，参见`tx-packets`
+类型: uint
+      -
+        名称: rx-alloc-fail
+        说明: |
+          在Rx数据路径上skb或缓冲区分配失败的次数
+分配失败可能会导致数据包丢失，也可能不会，这取决于
+驱动程序实现以及系统是否能快速恢复
+类型: uint
+      -
+        名称: rx-hw-drops
+        说明: |
+          进入设备但从未离开的所有数据包的数量，
+包括但不限于：由于缺少缓冲区空间、处理错误、显式或隐式策略和数据包过滤器而丢弃的数据包
+类型: uint
+      -
+        名称: rx-hw-drop-overruns
+        说明: |
+          由于瞬时资源不足（例如缓冲区空间、主机描述符等）而导致的数据包丢弃数量
+类型：无符号整数
+      -
+        名称：rx-csum-complete
+        说明：被标记为CHECKSUM_COMPLETE的报文数量
+类型：无符号整数
+      -
+        名称：rx-csum-unnecessary
+        说明：被标记为CHECKSUM_UNNECESSARY的报文数量
+类型：无符号整数
+      -
+        名称：rx-csum-none
+        说明：设备未进行校验和处理的报文数量
+类型：无符号整数
+      -
+        名称：rx-csum-bad
+        说明： |
+          校验和错误的报文数量。这些报文不会被丢弃，
+          但仍然会被传递到协议栈
+类型：无符号整数
+      -
+        名称：rx-hw-gro-packets
+        说明： |
+          由设备将较小的报文合并成较大报文的数量
+仅统计使用HW-GRO网卡特性进行合并的报文，
+          不统计LRO合并的报文
+类型：无符号整数
+      -
+        名称：rx-hw-gro-bytes
+        说明：参见`rx-hw-gro-packets`
+类型：无符号整数
+      -
+        名称：rx-hw-gro-wire-packets
+        说明： |
+          使用HW-GRO网卡特性将多个较小报文合并成较大报文的数量。
+          不统计LRO合并的报文
+类型：无符号整数
+      -
+        名称：rx-hw-gro-wire-bytes
+        说明：参见`rx-hw-gro-wire-packets`
+类型：无符号整数
+      -
+        名称：rx-hw-drop-ratelimits
+        说明： |
+          由于接收报文的比特率超过设备速率限制而被设备丢弃的报文数量
+```yaml
+type: uint
+      -
+        name: tx-hw-drops
+        doc: |
+          到达设备但从未离开设备的数据包数量，包括因处理错误等原因被丢弃的数据包，
+          以及受显式定义的策略和数据包过滤标准影响的数据包
+type: uint
+      -
+        name: tx-hw-drop-errors
+        doc: 因无效或格式错误而被丢弃的数据包数量
+type: uint
+      -
+        name: tx-csum-none
+        doc: |
+          不需要设备计算校验和的数据包数量
+type: uint
+      -
+        name: tx-needs-csum
+        doc: |
+          需要设备计算校验和的数据包数量
+type: uint
+      -
+        name: tx-hw-gso-packets
+        doc: |
+          需要由设备分割成更小数据包的数据包数量
+type: uint
+      -
+        name: tx-hw-gso-bytes
+        doc: 参见 `tx-hw-gso-packets`
+type: uint
+      -
+        name: tx-hw-gso-wire-packets
+        doc: |
+          通过处理 `tx-hw-gso-packets` 生成的线程大小的数据包数量
+type: uint
+      -
+        name: tx-hw-gso-wire-bytes
+        doc: 参见 `tx-hw-gso-wire-packets`
+type: uint
+      -
+        name: tx-hw-drop-ratelimits
+        doc: |
+          由于发送数据包的比特率超过设备速率限制而被设备丢弃的数据包数量
+type: uint
+      -
+        name: tx-stop
+        doc: |
+          驱动程序暂停从堆栈接受新的发送数据包到此队列的次数，因为队列已满
+          注意：如果设备支持并启用了 BQL，则网络堆栈将避免一次排队大量数据
+```
+```yaml
+type: uint
+      -
+        name: tx-wake
+        doc: |
+          驱动重新开始接受来自堆栈的发送请求到此队列的次数
+type: uint
+
+operations:
+  list:
+    -
+      name: dev-get
+      doc: 获取/转储关于netdev的信息
+attribute-set: dev
+      do:
+        request:
+          attributes:
+            - ifindex
+        reply: &dev-all
+          attributes:
+            - ifindex
+            - xdp-features
+            - xdp-zc-max-segs
+            - xdp-rx-metadata-features
+            - xsk-features
+      dump:
+        reply: *dev-all
+    -
+      name: dev-add-ntf
+      doc: 设备出现的通知
+notify: dev-get
+      mcgrp: mgmt
+    -
+      name: dev-del-ntf
+      doc: 设备消失的通知
+notify: dev-get
+      mcgrp: mgmt
+    -
+      name: dev-change-ntf
+      doc: 设备配置更改的通知
+notify: dev-get
+      mcgrp: mgmt
+    -
+      name: page-pool-get
+      doc: |
+        获取/转储关于Page Pools的信息
+（仅列出与net_device关联的Page Pools。）
+      attribute-set: page-pool
+      do:
+        request:
+          attributes:
+            - id
+        reply: &pp-reply
+          attributes:
+            - id
+            - ifindex
+            - napi-id
+            - inflight
+            - inflight-mem
+            - detach-time
+      dump:
+        reply: *pp-reply
+      config-cond: page-pool
+    -
+      name: page-pool-add-ntf
+      doc: Page Pool出现的通知
+notify: page-pool-get
+      mcgrp: page-pool
+      config-cond: page-pool
+    -
+      name: page-pool-del-ntf
+      doc: Page Pool消失的通知
+notify: page-pool-get
+      mcgrp: page-pool
+      config-cond: page-pool
+    -
+      name: page-pool-change-ntf
+      doc: Page Pool配置更改的通知
+notify: page-pool-get
+      mcgrp: page-pool
+      config-cond: page-pool
+    -
+      name: page-pool-stats-get
+      doc: 获取Page Pool统计信息
+```
+```yaml
+属性集: page-pool-stats
+执行:
+  请求:
+    属性:
+      - 信息
+  回复: &pp-stats-reply
+    属性:
+      - 信息
+      - 快速分配
+      - 慢速分配
+      - 高阶慢速分配
+      - 空分配
+      - 重新填充分配
+      - 放弃分配
+      - 回收缓存
+      - 缓存满回收
+      - 回收环
+      - 环满回收
+      - 已释放引用计数的回收
+转储:
+  回复: *pp-stats-reply
+配置条件: page-pool-stats
+-
+  名称: queue-get
+  文档: 从内核获取队列信息
+仅报告已配置的队列（而非所有可用的硬件队列）
+属性集: queue
+执行:
+  请求:
+    属性:
+      - ifindex
+      - 类型
+      - id
+  回复: &queue-get-op
+    属性:
+      - id
+      - 类型
+      - napi-id
+      - ifindex
+转储:
+  请求:
+    属性:
+      - ifindex
+  回复: *queue-get-op
+-
+  名称: napi-get
+  文档: 获取系统上配置的NAPI实例的信息
+属性集: napi
+执行:
+  请求:
+    属性:
+      - id
+  回复: &napi-get-op
+    属性:
+      - id
+      - ifindex
+      - irq
+      - pid
+转储:
+  请求:
+    属性:
+      - ifindex
+  回复: *napi-get-op
+-
+  名称: qstats-get
+  文档: |
+    获取/转储详细的统计信息。报告哪些统计信息取决于设备和驱动程序，以及驱动程序是否为每个队列存储软件计数器
+属性集: qstats
+转储:
+  请求:
+    属性:
+      - ifindex
+      - 范围
+  回复:
+    属性:
+      - ifindex
+      - 队列类型
+      - 队列id
+      - 接收数据包
+      - 接收字节
+      - 发送数据包
+      - 发送字节
+
+多播组:
+  列表:
+    -
+      名称: mgmt
+    -
+      名称: page-pool
+```

@@ -1,0 +1,2397 @@
+阅读该死的论文！
+
+本文档描述了与RCU（Read-Copy-Update）相关的出版物，并附有相应的BibTeX条目。部分出版物可以在http://www.rdrop.com/users/paulmck/RCU/找到。对于其他出版物，浏览器和搜索引擎通常可以找到您需要的内容。
+
+最早的类似于RCU的机制在1980年被Kung和Lehman [Kung80]提出，他们建议使用垃圾收集器来延迟销毁并行二叉搜索树中的节点，以简化其实现。这种方法在有垃圾收集器的环境中效果很好，但大多数生产用垃圾收集器会带来显著的开销。
+
+1982年，Manber和Ladner [Manber82, Manber84]建议将销毁操作推迟到所有当前运行的线程终止时再进行，同样是为了并行二叉搜索树。这种做法适用于具有短生命周期线程的系统，例如K42研究操作系统。然而，Linux中的任务是长生命周期的，因此需要更多的方法。
+
+1986年，Hennessy、Osisek和Seigh [Hennessy89]引入了被动序列化，这是一种类似RCU的机制，依赖于VM/XA虚拟机管理程序中保证不引用数据结构的“静止状态”。然而，这一机制并未针对现代计算机系统进行优化，考虑到当时这些开销并不昂贵，这并不令人惊讶。尽管如此，被动序列化似乎是第一个在实际应用中使用的延迟销毁机制。此外，相关专利已经失效，因此如果需要的话，可以在非GPL软件中使用这种方法。（相比之下，RCU的实现仅允许在GPL或LGPL许可下使用。抱歉！！！）
+
+1987年，Rashid等人描述了一种懒惰的TLB刷新 [RichardRashid87a]。乍一看，这与RCU无关，但这篇论文启发了后来在DYNIX/ptx中实现的RCU所使用的更新侧批处理。1988年，Barbara Liskov发表了一篇关于Argus的描述，指出在某些情况下可以容忍使用过时的值。因此，这篇论文为使用陈旧数据提供了一些早期的理论依据。
+
+1990年，Pugh [Pugh90]指出，显式跟踪哪些线程正在读取特定的数据结构使得在存在非终止线程的情况下可以进行延迟释放。然而，这种显式的跟踪会增加读取侧的开销，在读取为主的场景中这是不可取的。虽然该算法确实尽力避免写入侧的竞争，并通过细粒度锁定设计来并行化其他写入侧开销，但有趣的是，1990年报告的性能优势现在还剩下多少。
+
+大约在同一时间，Andrews [Andrews91textbook]描述了“混沌松弛”，其中放松了收敛数值算法中迭代之间的正常屏障，使得第$n$次迭代可能使用第$n-1$次甚至$n-2$次迭代的数据。这会引入误差，通常会减慢收敛速度，从而增加所需的迭代次数。然而，有时这种增加会被减少昂贵的屏障操作的数量所弥补，否则每次迭代结束时都需要同步线程。不幸的是，混沌松弛需要高度结构化的数据，如科学程序中使用的矩阵，因此不适用于操作系统内核中的大多数数据结构。
+
+1992年，Henry（现为Alexia）Massalin完成了她的博士论文，建议并行程序员在可行的情况下延迟处理以简化同步 [HMassalinPhD]。RCU对此建议进行了大量运用。
+1993年，Jacobson [Jacobson93] 口头描述了一种可能是最简单的延迟释放技术：在释放等待延迟释放的块之前简单地等待固定的时间。Jacobson 没有描述他在使用 SGI 的 Irix 内核时可能进行的任何写入端更改。Aju John 在1995年发表了一种类似的技术 [AjuJohn95]。如果读取线程持有引用的时间有一个明确的上限，那么这种方法效果很好，这在硬实时系统中可能是存在的。然而，如果这个时间被超过，可能是由于抢占、过多中断或超出预期的负载，可能会导致内存损坏，并且没有合理的诊断手段。因此，Jacobson 的技术不适合用于生产操作系统内核，除非这些内核能够为所有操作提供硬实时响应保证。
+
+同样是在1995年，Pu 等人 [Pu95a] 应用了类似于 Pugh 的读端跟踪技术，以允许在一个商业 Unix 操作系统中重新插拔算法。然而，这种重新插拔仅允许一个读取者一次。第二年，同一组研究人员扩展了他们的技术，允许多个读取者 [Cowan96a]。他们的方法需要内存屏障（从而导致流水线停顿），但减少了内存延迟、竞争和锁定开销。
+
+1995年还见证了 DYNIX/ptx 的 RCU 机制首次发表 [Slingwine95]，该机制针对现代 CPU 架构进行了优化，并成功应用于 DYNIX/ptx 内核中的多种情况。相应的会议论文于1998年发表 [McKenney98]。
+
+1999年，Tornado 和 K42 团队描述了他们的“代”机制，这一机制与 RCU 非常相似 [Gamsa99]。这些操作系统广泛使用 RCU 替代“存在锁”，大大简化了锁定层次结构，并有助于避免死锁。
+
+2000年，发生了一次电子邮件交流，可能会导致又一次独立发明类似 RCU 的技术 [RustyRussell2000a, RustyRussell2000b]。然而，2001年看到了第一次涉及 Linux 的 RCU 演讲 [McKenney01a] 在 OLS 上。接下来的一年，大量的 RCU 补丁被提出 [McKenney02a]，而 dcache 中使用 RCU 的首次描述也在同年出现 [Linder02a]。
+
+同样在2002年，Michael [Michael02b, Michael02a] 提出了“危险指针”技术，通过延迟数据结构的销毁来简化非阻塞同步（无等待同步、无锁同步和无阻塞同步都是非阻塞同步的例子）。相应的期刊文章于2004年发表 [MagedMichael04a]。这种技术消除了锁定，减少了竞争，减少了读取者的内存延迟，并且并行化了写入者的流水线停顿和内存延迟。然而，这些技术仍然在读取端引入了显著的开销形式的内存屏障。
+
+Sun 的研究人员在同一时期也进行了类似的工作 [HerlihyLM02]。这些技术可以看作是内外反转的引用计数，其中计数由指向特定数据结构的危险指针数量表示，而不是数据结构内部更传统的计数字段。内外反转引用计数的关键优势在于它们可以存储在永生变量中，从而允许避免访问和删除之间的竞态条件。
+同样地，RCU 可以被视为一种“批量引用计数”，其中某种形式的引用计数器覆盖了在特定时间段内由给定 CPU 或线程进行的所有引用。这个时间段与 RCU 宽限期有关，但不一定完全相同。在经典的 RCU 中，引用计数器是 “bitmask” 字段中的每个 CPU 的位，每个这样的位覆盖了在此前宽限期内可能由相应 CPU 进行的所有引用。当然，RCU 也可以从其他角度来理解。
+
+2003 年，K42 小组描述了如何使用 RCU 来创建可热插拔的操作系统功能实现 [Appavoo03a]。同年还有一篇论文描述了 System V IPC 的 RCU 实现 [Arcangeli03]（这是基于 Hugh Dickins 的建议 [Dickins02a] 和 Mingming Cao 的实现 [MingmingCao2002IPCRCU]），并在《Linux Journal》上介绍了 RCU [McKenney03a]。
+
+2004 年，《Linux Journal》发表了一篇关于在 dcache 中使用 RCU 的文章 [McKenney04a]，对几种不同 CPU 上的锁机制与 RCU 的性能进行了比较 [McKenney04b]，一篇描述在多个操作系统内核中使用 RCU 的博士论文 [PaulEdwardMcKenneyPhD]，一篇描述如何使 RCU 对软实时应用安全的论文 [Sarma04c]，以及一篇描述 SELinux 性能与 RCU 的论文 [JamesMorris04b]。
+
+2005 年进一步将 RCU 适应于实时使用，允许抢占 RCU 实时关键部分 [PaulMcKenney05a, PaulMcKenney05b]。
+
+2006 年，RCU 论文首次获得最佳论文奖 [ThomasEHart2006a]，并且进一步研究了高效的可抢占 RCU 实现 [PaulEMcKenney2006b]，但优先级提升 RCU 读端关键部分的问题仍然难以解决。一个允许在读端关键部分中进行通用阻塞的 RCU 实现出现 [PaulEMcKenney2006c]，Robert Olsson 描述了一个 RCU 保护的 trie-hash 组合 [RobertOlsson2006a]。
+
+2007 年，2006 年获奖的 RCU 论文的期刊版本发布 [ThomasEHart2007a]，同时还有展示使用 Promela 和 Spin 机械验证 Oleg Nesterov 的 QRCU 优化的论文 [PaulEMcKenney2007QRCUspin]，描述可抢占 RCU 的设计文档 [PaulEMcKenney2007PreemptibleRCU]，以及 LWN 的三部分系列文章《什么是 RCU？》[PaulEMcKenney2007WhatIsRCUFundamentally, PaulEMcKenney2008WhatIsRCUUsage, PaulEMcKenney2008WhatIsRCUAPI]。
+
+2008 年，一篇关于实时 RCU 的期刊论文发布 [DinakarGuniguntala2008IBMSysJ]，一篇描述 Linux 如何改变 RCU 而非 RCU 改变 Linux 的历史 [PaulEMcKenney2008RCUOSR]，以及一篇关于分层 RCU 的设计概述 [PaulEMcKenney2008HierarchicalRCU]。
+
+2009 年引入了用户级 RCU 算法 [PaulEMcKenney2009MaliciousURCU]，现在由 Mathieu Desnoyers 维护 [MathieuDesnoyers2009URCU] [MathieuDesnoyersPhD]。TINY_RCU [PaulEMcKenney2009BloatWatchRCU] 出现了，还有加速 RCU [PaulEMcKenney2009expeditedRCU]。可调整大小的 RCU 保护哈希表问题现在可能找到了解决方案 [JoshTriplett2009RPHash]。一些学术研究人员现在使用 RCU 来解决他们的并行问题 [HariKannan2009DynamicAnalysisRCU]。
+2010年实现了一个更简单的可抢占RCU（Read-Copy-Update）实现，基于TREE_RCU [PaulEMcKenney2010SimpleOptRCU]、lockdep-RCU [PaulEMcKenney2010LockdepRCU]、另一种可调整大小的RCU保护哈希表 [HerbertXu2010RCUResizeHash]（这个版本消耗更多内存，但允许任意更改哈希函数，以满足网络代码中避免DoS攻击的需求）、实现了带有原子节点移动的2009年RCU保护哈希表 [JoshTriplett2010RPHash]、更新了RCU API [PaulEMcKenney2010RCUAPI]。
+
+2011年标志着Nick Piggin的完全无锁dentry搜索的引入 [LinusTorvalds2011Linux2:6:38:rc1:NPigginVFS]、使用软件事务内存来保护并发更新的RCU保护红黑树（虽然奇怪但真实！）[PhilHoward2011RCUTMRBTree]、另一种RCU保护可调整大小的哈希表 [Triplett:2011:RPHash]、3.0版RCU火车残局 [PaulEMcKenney2011RCU3.0trainwreck]、以及Neil Brown的“Meet the Lockers”文章 [NeilBrown2011MeetTheLockers]。一些学术研究探讨了RCU在调试中的应用 [Seyster:2011:RFA:2075416.2075425]。
+
+2012年，Josh Triplett凭借其关于RCU保护可调整大小哈希表以及内存屏障与读取侧遍历顺序之间关系的研究获得了博士学位：如果更新者所做的更改方向与读取侧遍历方向相反，则更新者只需执行一个内存屏障指令；但如果方向相同，则更新者需要在每次更新之间等待一个宽限期 [JoshTriplettPhD]。同样在2012年，在经过十七年的尝试后，一篇关于RCU的论文终于被顶级学术期刊《IEEE Transactions on Parallel and Distributed Systems》接受 [MathieuDesnoyers2012URCU]。西班牙的一组研究人员将用户级RCU应用于人群模拟 [GuillermoVigueras2012RCUCrowd]，而欧洲的另一组研究人员则基于分离逻辑提出了RCU的形式化描述 [AlexeyGotsman2012VerifyGraceExtended]，并在2013年的欧洲编程研讨会上发表 [AlexeyGotsman2013ESOPRCU]。
+
+Bibtex条目：
+
+```bibtex
+@article{Kung80,
+    author = "H. T. Kung and Q. Lehman",
+    title = "Concurrent Manipulation of Binary Search Trees",
+    year = "1980",
+    month = "September",
+    journal = "ACM Transactions on Database Systems",
+    volume = "5",
+    number = "3",
+    pages = "354-382",
+    annotation = {
+        使用垃圾收集器在所有人完成数据处理后清理数据。
+        
+        我找到的最早的类似RCU使用的例子。
+        http://portal.acm.org/citation.cfm?id=320619&dl=GUIDE,
+        [查看日期：2007年12月3日]
+    }
+}
+
+@techreport{Manber82,
+    author = "Udi Manber and Richard E. Ladner",
+    title = "Concurrency Control in a Dynamic Search Structure",
+    institution = "Department of Computer Science, University of Washington",
+    address = "Seattle, Washington",
+    year = "1982",
+    number = "82-01-01",
+    month = "January",
+    pages = "28",
+    annotation = {
+        被Manber84取代。
+        
+        描述了并发AVL树的实现。使用垃圾收集机制来处理树中节点的并发使用和删除，但缺乏读复制锁定中执行历史摘要的概念。
+    }
+}
+```
+保持一个完整的过程列表，这些过程在某个节点需要被删除时是活跃的，并且会等待所有这些过程终止后才允许该节点被重用。这一点没有详细描述——如果进程ID空间足够大以至于不会发生重叠的话，可以想象使用进程ID来实现。
+
+这种限制使得该算法不适合用于包含长期运行进程的系统中。此外，在具有大量进程的系统中，它会产生完全无法接受的开销。最后，它是特定于AVL树的。
+
+引用了Kung80，因此不是独立发明，但这是第一个不依赖自动垃圾收集器的类似RCU（Read-Copy-Update）使用的机制。
+
+@article{Manber84
+,author="Udi Manber 和 Richard E. Ladner"
+,title="动态搜索结构中的并发控制"
+,Year="1984"
+,Month="九月"
+,journal="ACM数据库系统汇刊"
+,volume="9"
+,number="3"
+,pages="439-455"
+,annotation={
+	描述了一个并发AVL树实现。使用了一种垃圾回收机制来处理树中节点的并发使用和删除，但缺乏读复制锁定（read-copy-locking）的概念中的执行历史摘要。
+
+保持一个完整的过程列表，这些过程在某个节点需要被删除时是活跃的，并且会等待所有这些过程终止后才允许该节点被重用。这一点没有详细描述——如果进程ID空间足够大以至于不会发生重叠的话，可以想象使用进程ID来实现。
+}
+这段限制使得该算法不适用于包含长期运行进程的系统。它也在具有大量进程的系统中产生了完全不可接受的开销。最后，它是特定于AVL树的。
+
+@Conference{RichardRashid87a
+,Author="Richard Rashid 和 Avadis Tevanian 和 Michael Young 和 David Golub 和 Robert Baron 和 David Black 和 William Bolosky 和 Jonathan Chew"
+,Title="面向分页单处理器和多处理器架构的机器独立虚拟内存管理"
+,Booktitle="{第二届编程语言和操作系统架构支持研讨会}"
+,Publisher="计算机协会"
+,Month="十月"
+,Year="1987"
+,pages="31-39"
+,Address="加州帕洛阿尔托"
+,note="可获取：
+\url{http://www.cse.ucsc.edu/~randal/221/rashid-machvm.pdf}
+[查看日期为2005年2月17日]"
+,annotation={
+	描述了懒惰的TLB刷新技术，其中在重用某个虚拟地址范围之前等待每个CPU通过调度时钟中断。没有描述如何确定所有CPU确实经历了这样的中断，但有许多简单的方法可以实现这一点。
+
+需要注意的是，仅仅等待固定的时间是没有意义的，因为某个CPU可能会在长时间内禁用中断。
+}
+}
+
+@article{BarbaraLiskov1988ArgusCACM
+,author = {Barbara Liskov}
+,title = {使用 Argus 进行分布式编程}
+,journal = {ACM 通讯}
+,volume = {31}
+,number = {3}
+,year = {1988}
+,issn = {0001-0782}
+,pages = {300--312}
+,doi = {http://doi.acm.org/10.1145/42392.42399}
+,publisher = {ACM}
+,address = {纽约，纽约，美国}
+,annotation={
+	在第307页顶部：“为了使报告的总额保持最新，必须处理存款和取款冲突。可以通过返回稍微过时的总和来避免这些冲突。”依赖于语义——有时近似数值是可以接受的。
+}
+}
+
+@techreport{Hennessy89
+,author="James P. Hennessy 和 Damian L. Osisek 和 Joseph W. Seigh II"
+,title="多任务环境中的被动序列化"
+,institution="美国专利商标局"
+,address="华盛顿特区"
+,year="1989"
+,number="美国专利 4,809,168（已失效）"
+,month="二月"
+,pages="11"
+}
+
+@techreport{Pugh90
+,author="William Pugh"
+,title="跳表的并发维护"
+,institution="马里兰大学计算机科学系高级计算机科学研究所"
+,address="马里兰州大学公园"
+,year="1990"
+,number="CS-TR-2222.1"
+,month="六月"
+,annotation={
+	并发访问跳表。既有弱搜索也有强搜索。
+使用“垃圾队列”的概念，但没有真正有效清理垃圾的方法。
+
+似乎是一个类似于RCU机制的独立发明。
+}
+}
+
+# 原先是Adams91，参见syncrefs.bib
+```bibtex
+@Book{Andrews91textbook
+,Author="Gregory R. Andrews"
+,title="并行编程：原理与实践"
+,Publisher="本杰明·卡明斯出版社"
+,Year="1991"
+,annotation={
+	书中描述了“混沌松弛”技术，这是一种数值分析方法，允许多处理器通过使用可能过时的数据来避免同步开销。
+
+看起来这种方法是另一种独立发明的RCU类似功能——但这种技术受限于不需要回收。
+}
+}
+
+@phdthesis{HMassalinPhD
+,author="H. Massalin"
+,title="合成：基本操作系统服务的有效实现"
+,school="哥伦比亚大学"
+,address="纽约市，纽约州"
+,year="1992"
+,annotation={
+	大规模优化编译器
+无等待技术
+好的建议：推迟工作以避免同步。见第90页（PDF第106页），第5.4节，第四点
+}
+}
+
+@unpublished{Jacobson93
+,author="Van Jacobson"
+,title="通过延迟释放避免读侧锁定"
+,year="1993"
+,month="九月"
+,note="私人交流"
+,annotation={
+	使用固定时间延迟来近似优雅期。非常简单，但在高负载下可能会随机损坏内存。
+
+独立发明的RCU类似机制
+}
+}
+
+@Conference{AjuJohn95
+,Author="Aju John"
+,Title="动态vnodes的设计与实现"
+,Booktitle="{USENIX 1995冬季会议}"
+,Publisher="USENIX协会"
+,Month="一月"
+,Year="1995"
+,pages="11-23"
+,Address="路易斯安那州新奥尔良"
+,note="可获取：
+\url{https://www.usenix.org/publications/library/proceedings/neworl/full_papers/john.a}
+[查看日期：2010年10月1日]"
+,annotation={
+	将vnodes老化出缓存，并由内核参数设置固定时间。不清楚所有竞态条件是否都正确处理了。
+}
+}
+```
+默认使用了20分钟的时间，这在DoS攻击或病毒扫描期间肯定不适合。
+
+显然独立发明了一种类似RCU的机制。
+
+```
+@conference{Pu95a
+,Author = "Calton Pu and Tito Autrey and Andrew Black and Charles Consel and Crispin Cowan and Jon Inouye and Lakshmi Kethana and Jonathan Walpole and Ke Zhang"
+,Title = "乐观增量专业化：简化商业操作系统"
+,Booktitle = "第15届ACM操作系统原理研讨会 (SOSP'95)"
+,address = "科罗拉多州 Copper Mountain"
+,month="十二月"
+,year="1995"
+,pages="314-321"
+,annotation={
+	使用了一个重新插入器（replugger），但带有一个标志来指示当前是否有使用者正在使用资源。仅允许一个读者同时访问
+}
+}
+
+@conference{Cowan96a
+,Author = "Crispin Cowan and Tito Autrey and Charles Krasic and Calton Pu and Jonathan Walpole"
+,Title = "快速并发动态链接适用于自适应操作系统"
+,Booktitle = "可配置分布式系统国际会议 (ICCDS'96)"
+,address = "马里兰州 Annapolis"
+,month="五月"
+,year="1996"
+,pages="108"
+,isbn="0-8186-7395-8"
+,annotation={
+	使用了一个重新插入器（replugger），但带有一个计数器来指示当前是否有使用者正在使用资源。允许多个读者访问
+}
+}
+
+@techreport{Slingwine95
+,author="John D. Slingwine 和 Paul E. McKenney"
+,title="通过执行历史和线程监控实现降低开销的互斥及在多处理器系统中维持一致性的方法与装置"
+,institution="美国专利商标局"
+,address="华盛顿特区"
+,year="1995"
+,number="美国专利 5,442,758"
+,month="八月"
+,annotation={
+	描述了并行RCU基础设施。包括NUMA方面的内容（位图结构可以反映计算机系统的总线结构）
+
+另一个独立发明的类似RCU的机制，但这次是“真正的”RCU！
+}
+}
+
+@techreport{Slingwine97
+,author="John D. Slingwine 和 Paul E. McKenney"
+,title="使用线程活动摘要在多计算机系统中维持数据一致性的方法"
+,institution="美国专利商标局"
+,address="华盛顿特区"
+,year="1997"
+,number="美国专利 5,608,893"
+,month="三月"
+,pages="19"
+,annotation={
+	描述了使用RCU同步一对SMP/NUMA计算机系统之间的数据
+}
+}
+
+@techreport{Slingwine98
+,author="John D. Slingwine 和 Paul E. McKenney"
+,title="通过执行历史和线程监控实现降低开销的互斥及在多处理器系统中维持一致性的方法与装置"
+,institution="美国专利商标局"
+,address="华盛顿特区"
+,year="1998"
+,number="美国专利 5,727,209"
+,month="三月"
+,annotation={
+	描述了通过复制数据项然后将其替换到数据结构中的原子更新方法
+}
+}
+
+@Conference{McKenney98
+,Author="Paul E. McKenney 和 John D. Slingwine"
+,Title="读取-复制-更新：使用执行历史解决并发问题"
+,Booktitle="并行与分布式计算系统"
+,Month="十月"
+,Year="1998"
+,pages="509-518"
+,Address="内华达州 Las Vegas"
+,annotation={
+	描述并分析了DYNIX/ptx中的RCU机制。描述了其应用于链表更新和日志缓冲区刷新
+}
+}
+```
+定义“静默状态”。包括测量和分析评估。
+来源：http://www.rdrop.com/users/paulmck/RCU/rclockpdcsproof.pdf （查看日期：2007年12月3日）
+
+---
+
+```
+@Conference{Gamsa99,
+    Author = "Ben Gamsa and Orran Krieger and Jonathan Appavoo and Michael Stumm",
+    Title = "Tornado: Maximizing Locality and Concurrency in a Shared Memory Multiprocessor Operating System",
+    Booktitle = "{Proceedings of the 3\textsuperscript{rd} Symposium on Operating System Design and Implementation}",
+    Month = "February",
+    Year = "1999",
+    pages = "87-100",
+    Address = "New Orleans, LA",
+    annotation = {
+        使用类似于RCU的机制在K42/Tornado中。这是另一个独立发明的RCU。
+        特别参见第7-9页（第5节）。
+        http://www.usenix.org/events/osdi99/full_papers/gamsa/gamsa.pdf
+        （查看日期：2006年8月30日）
+    }
+}
+```
+
+---
+
+```
+@unpublished{RustyRussell2000a,
+    Author = "Rusty Russell",
+    Title = "Re: modular net drivers",
+    month = "June",
+    year = "2000",
+    day = "23",
+    note = "Available: \url{http://oss.sgi.com/projects/netdev/archive/2000-06/msg00250.html} [Viewed April 10, 2006]",
+    annotation = {
+        Phil Rumpf 和 Rusty Russell 提出的早期RCU方案。
+        又一个独立发明的RCU。
+        模块卸载算法概述。
+        出现在net-dev邮件列表中。
+    }
+}
+```
+
+---
+
+```
+@unpublished{RustyRussell2000b,
+    Author = "Rusty Russell",
+    Title = "Re: modular net drivers",
+    month = "June",
+    year = "2000",
+    day = "24",
+    note = "Available: \url{http://oss.sgi.com/projects/netdev/archive/2000-06/msg00254.html} [Viewed April 10, 2006]",
+    annotation = {
+        Phil Rumpf 和 Rusty Russell 提出的早期RCU方案。
+    }
+}
+```
+```
+出现在 net-dev 邮件列表中
+}
+
+@unpublished{McKenney01b
+,作者="Paul E. McKenney 和 Dipankar Sarma"
+,标题="Linux 中的 Read-Copy Update 互斥"
+,月份="二月"
+,年份="2001"
+,备注="可用：
+\url{http://lse.sourceforge.net/locking/rcu/rcupdate_doc.html}
+[查看日期：2004年10月18日]"
+,注释={
+	典型的 Linux 文档关于 RCU
+}
+}
+
+@techreport{Slingwine01
+,作者="John D. Slingwine 和 Paul E. McKenney"
+,标题="一种用于减少开销互斥并保持多处理器系统中一致性，利用执行历史和线程监控的方法和装置"
+,机构="美国专利商标局"
+,地址="华盛顿特区"
+,年份="2001"
+,编号="美国专利 6,219,690"
+,月份="四月"
+,注释={
+	RCU 的“模式改变”方面。可以认为是一种懒惰的屏障
+}
+}
+
+@Conference{McKenney01a
+,作者="Paul E. McKenney、Jonathan Appavoo、Andi Kleen、Orran Krieger、Rusty Russell、Dipankar Sarma 和 Maneesh Soni"
+,标题="Read-Copy Update"
+,书名="{Ottawa Linux Symposium}"
+,月份="七月"
+,年份="2001"
+,备注="可用：
+\url{http://www.linuxsymposium.org/2001/abstracts/readcopy.php}
+\url{http://www.rdrop.com/users/paulmck/RCU/rclock_OLS.2001.05.01c.pdf}
+[查看日期：2004年6月23日]"
+,注释={
+	描述了 RCU，并提出了一些在 Linux 内核中实现和使用它的补丁
+}
+}
+
+@unpublished{McKenney01f
+,作者="Paul E. McKenney"
+,标题="{RFC:} 允许无锁遍历插入列表的补丁"
+,月份="十月"
+,年份="2001"
+,备注="可用：
+\url{http://marc.theaimsgroup.com/?l=linux-kernel&m=100259266316456&w=2}
+[查看日期：2004年6月23日]"
+,注释={
+	内存屏障和 Alpha 线程。100 条消息，不算太多...
+}
+}
+
+@unpublished{Spraul01
+,作者="Manfred Spraul"
+,标题="Re: {RFC:} 允许无锁遍历插入列表的补丁"
+,月份="十月"
+,年份="2001"
+,备注="可用：
+\url{http://marc.theaimsgroup.com/?l=linux-kernel&m=100264675012867&w=2}
+[查看日期：2004年6月23日]"
+,注释={
+	建议将内存屏障埋入 Linux 的列表操作原语中
+}
+}
+
+@unpublished{LinusTorvalds2001a
+,作者="Linus Torvalds"
+,标题="{Re:} {[Lse-tech]} {Re:} {RFC:} 允许无锁遍历插入列表的补丁"
+,月份="十月"
+,年份="2001"
+,备注="可用：
+\url{https://lore.kernel.org/r/Pine.LNX.4.33.0110131015410.8707-100000@penguin.transmeta.com}
+[查看日期：2004年8月21日]"
+,注释={
+}
+}
+
+@unpublished{Blanchard02a
+,作者="Anton Blanchard"
+,标题="一些 RCU dcache 和 ratcache 结果"
+,月份="三月"
+,年份="2002"
+,备注="可用：
+\url{http://marc.theaimsgroup.com/?l=linux-kernel&m=101637107412972&w=2}
+[查看日期：2004年10月18日]"
+}
+
+@conference{Michael02b
+,作者="Maged M. Michael"
+,标题="高性能动态无锁哈希表和基于列表的集合"
+,年份="2002"
+,月份="八月"
+,书名="{第14届年度 ACM 并行算法与架构研讨会}"
+,页码="73-82"
+,注释={
+	如标题所述...
+}
+}
+
+@Conference{Linder02a
+,作者="Hanna Linder、Dipankar Sarma 和 Maneesh Soni"
+,标题="目录项缓存的可扩展性"
+,书名="{Ottawa Linux Symposium}"
+,月份="六月"
+,年份="2002"
+,页码="289-300"
+,注释={
+	测量了 Linux 2.4 内核目录项缓存（dcache）的可扩展性，并测量了一些可扩展性改进
+}
+}
+
+@Conference{McKenney02a
+,作者="Paul E. McKenney、Dipankar Sarma、Andrea Arcangeli、Andi Kleen、Orran Krieger 和 Rusty Russell"
+,标题="Read-Copy Update"
+,书名="{Ottawa Linux Symposium}"
+,月份="六月"
+,年份="2002"
+,页码="338-367"
+,备注="可用：
+\url{http://www.linux.org.uk/~ajh/ols2002_proceedings.pdf.gz}
+[查看日期：2004年6月23日]"
+,注释={
+	展示了并比较了几种 Linux 内核中的 RCU 实现
+}
+}
+
+@unpublished{Sarma02a
+,作者="Dipankar Sarma"
+,标题="specweb99: dcache 可扩展性结果"
+,月份="七月"
+,年份="2002"
+,备注="可用：
+\url{http://marc.theaimsgroup.com/?l=linux-kernel&m=102645767914212&w=2}
+[查看日期：2004年6月23日]"
+,注释={
+	比较了 fastwalk 和 RCU 对于 dcache 的性能。RCU 获胜
+}
+```
+```bibtex
+@unpublished{Barbieri02,
+    Author = "Luca Barbieri",
+    Title = "Re: {[PATCH]} Initial support for struct {vfs\_cred}",
+    month = "August",
+    year = "2002",
+    note = "Available: \url{http://marc.theaimsgroup.com/?l=linux-kernel&m=103082050621241&w=2} [Viewed: June 23, 2004]",
+    annotation = {
+        Suggested RCU for vfs\_shared\_cred
+    }
+}
+
+@conference{Michael02a,
+    author = "Maged M. Michael",
+    title = "Safe Memory Reclamation for Dynamic Lock-Free Objects Using Atomic Reads and Writes",
+    Year = "2002",
+    Month = "August",
+    booktitle = "{Proceedings of the 21\textsuperscript{st} Annual ACM Symposium on Principles of Distributed Computing}",
+    pages = "21-30",
+    annotation = {
+        Each thread keeps an array of pointers to items that it is currently referencing. Sort of an inside-out garbage collection mechanism, but one that requires the accessing code to explicitly state its needs. Also requires read-side memory barriers on most architectures
+    }
+}
+
+@unpublished{Dickins02a,
+    author = "Hugh Dickins",
+    title = "Use RCU for System-V IPC",
+    year = "2002",
+    month = "October",
+    note = "private communication"
+}
+
+@InProceedings{HerlihyLM02,
+    author = "Maurice Herlihy and Victor Luchangco and Mark Moir",
+    title = "The Repeat Offender Problem: A Mechanism for Supporting Dynamic-Sized, Lock-Free Data Structures",
+    booktitle = "Proceedings of 16\textsuperscript{th} International Symposium on Distributed Computing",
+    year = 2002,
+    month = "October",
+    pages = "339-353"
+}
+
+@unpublished{Sarma02b,
+    Author = "Dipankar Sarma",
+    Title = "Some dcache\_rcu benchmark numbers",
+    month = "October",
+    year = "2002",
+    note = "Available: \url{http://marc.theaimsgroup.com/?l=linux-kernel&m=103462075416638&w=2} [Viewed June 23, 2004]",
+    annotation = {
+        Performance of dcache RCU on kernbench for 16x NUMA-Q and 1x, 2x, and 4x systems. RCU does no harm, and helps on 16x
+    }
+}
+
+@unpublished{MingmingCao2002IPCRCU,
+    Author = "Mingming Cao",
+    Title = "[PATCH] updated ipc lock patch",
+    month = "October",
+    year = "2002",
+    note = "Available: \url{https://lore.kernel.org/r/3DB86B05.447E7410@us.ibm.com} [Viewed February 15, 2014]",
+    annotation = {
+        Mingming Cao's patch to introduce RCU to SysV IPC
+    }
+}
+
+@unpublished{LinusTorvalds2003a,
+    Author = "Linus Torvalds",
+    Title = "Re: {[PATCH]} small fixes in brlock.h",
+    month = "March",
+    year = "2003",
+    note = "Available: \url{https://lore.kernel.org/r/Pine.LNX.4.44.0303091831560.2129-100000@home.transmeta.com} [Viewed March 13, 2006]",
+    annotation = {
+        Linus suggests replacing brlock with RCU and/or seqlocks: 'It's entirely possible that the current user could be replaced by RCU and/or seqlocks, and we could get rid of brlocks entirely.' Stephen Hemminger responds by replacing them with RCU
+    }
+}
+
+@article{Appavoo03a,
+    author = "J. Appavoo and K. Hui and C. A. N. Soules and R. W. Wisniewski and D. M. {Da Silva} and O. Krieger and M. A. Auslander and D. J. Edelsohn and B. Gamsa and G. R. Ganger and P. McKenney and M. Ostrowski and B. Rosenburg and M. Stumm and J. Xenidis",
+    title = "Enabling Autonomic Behavior in Systems Software With Hot Swapping",
+    Year = "2003",
+    Month = "January",
+    journal = "IBM Systems Journal",
+    volume = "42",
+    number = "1",
+    pages = "60-76",
+    annotation = {
+        Use of RCU to enable hot-swapping for autonomic behavior in K42
+    }
+}
+
+@unpublished{Seigh03,
+    author = "Joseph W. {Seigh II}",
+    title = "Read Copy Update",
+    Year = "2003",
+    Month = "March",
+    note = "email correspondence",
+    annotation = {
+        Described the relationship of the VM/XA passive serialization to RCU
+    }
+}
+
+@Conference{Arcangeli03,
+    Author = "Andrea Arcangeli and Mingming Cao and Paul E. McKenney and Dipankar Sarma",
+    Title = "Using Read-Copy Update Techniques for {System V IPC} in the {Linux} 2.5 Kernel",
+    Booktitle = "Proceedings of the 2003 USENIX Annual Technical Conference (FREENIX Track)",
+    Publisher = "USENIX Association",
+    year = "2003",
+    month = "June",
+    pages = "297-310",
+    annotation = {
+        Compared updated RCU implementations for the Linux kernel, and described System V IPC use of RCU, including order-of-magnitude performance improvements
+    }
+}
+```
+
+以上是您提供的参考文献的中文翻译。如果有任何特定部分需要进一步解释或调整，请告诉我！
+以下是提供的文献引用的中文翻译：
+
+```latex
+@conference{Soules03a
+,作者="Craig A. N. Soules 和 Jonathan Appavoo 和 Kevin Hui 和 Dilma Da Silva 和 Gregory R. Ganger 和 Orran Krieger 和 Michael Stumm 和 Robert W. Wisniewski 和 Marc Auslander 和 Michal Ostrowski 和 Bryan Rosenburg 和 Jimi Xenidis"
+,标题="系统对在线重配置的支持"
+,书名="2003 USENIX年度技术会议论文集"
+,出版社="USENIX协会"
+,年份="2003"
+,月份="六月"
+,页码="141-154"
+}
+
+@article{McKenney03a
+,作者="Paul E. McKenney"
+,标题="在Linux 2.5内核中使用RCU"
+,年份="2003"
+,月份="十月"
+,期刊="Linux Journal"
+,卷号="1"
+,期号="114"
+,页码="18-26"
+,备注="可获取： \url{http://www.linuxjournal.com/article/6993} [查看日期：2007年11月14日]"
+,注释={
+	介绍了RCU，附带著名的老人与顽童漫画
+}
+}
+
+@unpublished{Sarma03a
+,作者="Dipankar Sarma"
+,标题="RCU低延迟补丁"
+,月份="十二月"
+,年份="2003"
+,备注="邮件ID：20031222180114.GA2248@in.ibm.com"
+,注释={
+	dipankar/ct.2004.03.27/RCUll.2003.12.22.patch
+}
+}
+
+@techreport{Friedberg03a
+,作者="Stuart A. Friedberg"
+,标题="无锁通配符搜索数据结构和方法"
+,机构="美国专利商标局"
+,地址="华盛顿特区"
+,年份="2003"
+,编号="美国专利6,662,184"
+,月份="十二月"
+,页码="112"
+,注释={
+	将RCU应用于通配符搜索Patricia树以允许无同步查找。RCU用于保留已删除节点一段时间后再释放它们
+}
+}
+
+@article{McKenney04a
+,作者="Paul E. McKenney 和 Dipankar Sarma 和 Maneesh Soni"
+,标题="通过RCU扩展dcache"
+,年份="2004"
+,月份="一月"
+,期刊="Linux Journal"
+,卷号="1"
+,期号="118"
+,页码="38-46"
+,注释={
+	介绍dcache和RCU的读者友好文章
+	http://www.linuxjournal.com/node/7124
+	[查看日期：2010年12月26日]
+}
+}
+
+@conference{McKenney04b
+,作者="Paul E. McKenney"
+,标题="不同CPU上的RCU与锁定性能对比"
+,书名="linux.conf.au"
+,月份="一月"
+,年份="2004"
+,地点="澳大利亚阿德莱德"
+,备注="可获取： \url{http://www.linux.org.au/conf/2004/abstracts.html#90} \url{http://www.rdrop.com/users/paulmck/RCU/lockperf.2004.01.17a.pdf} [查看日期：2004年6月23日]"
+,注释={
+	比较了RCU与其他锁定原语在多种CPU（x86、Opteron、Itanium和PPC）上的性能
+}
+}
+
+@unpublished{Sarma04a
+,作者="Dipankar Sarma"
+,标题="{[PATCH]} 适用于低延迟的RCU（实验性）"
+,月份="三月"
+,年份="2004"
+,备注="\url{http://marc.theaimsgroup.com/?l=linux-kernel&m=108003746402892&w=2}"
+,注释={
+	主题：dipankar/2004.03.23/rcu-low-lat.1.patch
+}
+}
+
+@unpublished{Sarma04b
+,作者="Dipankar Sarma"
+,标题="Re: {[PATCH]} 适用于低延迟的RCU（实验性）"
+,月份="三月"
+,年份="2004"
+,备注="\url{http://marc.theaimsgroup.com/?l=linux-kernel&m=108016474829546&w=2}"
+,注释={
+	dipankar/rcuth.2004.03.24/rcu-throttle.patch
+}
+}
+
+@unpublished{Spraul04a
+,作者="Manfred Spraul"
+,标题="[RFC] 0/5 RCU锁更新"
+,月份="五月"
+,年份="2004"
+,备注="可获取： \url{http://marc.theaimsgroup.com/?l=linux-kernel&m=108546407726602&w=2} [查看日期：2004年6月23日]"
+,注释={
+	RCU层次位图补丁
+}
+}
+
+@unpublished{Steiner04a
+,作者="Jack Steiner"
+,标题="Re: [Lse-tech] [RFC, PATCH] 1/5 RCU锁更新：添加每CPU批量计数器"
+,月份="五月"
+,年份="2004"
+,备注="可获取： \url{http://marc.theaimsgroup.com/?l=linux-kernel&m=108551764515332&w=2} [查看日期：2004年6月23日]"
+,注释={
+	使用Manfred Spraul的补丁后，RCU在512 CPU的SGI上运行良好。补丁可在以下链接找到：
+	https://lore.kernel.org/r/40AC9823.6020709@colorfullife.com （拆分变量到缓存行）
+	https://lore.kernel.org/r/Pine.LNX.4.44.0405222141260.11106-100000@dbl.q-ag.de （cpu_quiet()补丁）
+	https://lore.kernel.org/r/200405250535.i4P5ZJo8017583@dbl.q-ag.de （0/5）
+	https://lore.kernel.org/r/200405250535.i4P5ZKAQ017591@dbl.q-ag.de （1/5）
+	https://lore.kernel.org/r/20040525203215.GB5127@sgi.com （适用于Jack）
+	https://lore.kernel.org/r/200405250535.i4P5ZLiR017599@dbl.q-ag.de （2/5）
+	https://lore.kernel.org/r/200405250535.i4P5ZMFt017607@dbl.q-ag.de （3/5）
+	https://lore.kernel.org/r/200405250535.i4P5ZN6g017615@dbl.q-ag.de （4/5）
+	https://lore.kernel.org/r/200405250535.i4P5ZO7I017623@dbl.q-ag.de （5/5）
+}
+}
+
+@conference{Sarma04c
+,作者="Dipankar Sarma 和 Paul E. McKenney"
+,标题="使RCU适用于深亚毫秒响应实时应用"
+,书名="2004 USENIX年度技术会议论文集（FREENIX部分）"
+,出版社="USENIX协会"
+,年份="2004"
+,月份="六月"
+,页码="182-191"
+,注释={
+	描述并比较了Linux RCU实现中的一些修改，使其更适合实时应用
+https://www.usenix.org/conference/2004-usenix-annual-technical-conference/making-rcu-safe-deep-sub-millisecond-response
+	[查看日期：2012年7月26日]
+}
+}
+
+@article{MagedMichael04a
+,作者="Maged M. Michael"
+,标题="危险指针：无锁对象的安全内存回收"
+,年份="2004"
+,月份="六月"
+,期刊="IEEE Transactions on Parallel and Distributed Systems"
+,卷号="15"
+,期号="6"
+,页码="491-504"
+,URL="可获取： \url{http://www.research.ibm.com/people/m/michael/ieeetpds-2004.pdf} [查看日期：2005年3月1日]"
+,注释={
+	新的权威危险指针引用
+}
+}
+
+@phdthesis{PaulEdwardMcKenneyPhD
+,作者="Paul E. McKenney"
+,标题="利用延迟销毁：操作系统内核中读取-复制-更新技术的分析"
+,学校="俄勒冈健康与科学大学OGI科学与工程学院"
+,年份="2004"
+,注释={
+	描述了RCU实现，并提出了对应于多个操作系统内核中常见RCU使用的模式
+http://www.rdrop.com/users/paulmck/RCU/RCUdissertation.2004.07.14e1.pdf
+	[查看日期：2004年10月15日]
+}
+}
+
+@unpublished{PaulEMcKenney2004rcu:dereference
+,作者="Dipankar Sarma"
+,标题="Re: RCU : 抽象化RCU解引用 [5/5]"
+,月份="八月"
+,年份="2004"
+,备注="可获取： \url{https://lore.kernel.org/r/20040807192424.GF3936@in.ibm.com} [查看日期：2010年6月8日]"
+,注释={
+	引入rcu_dereference()
+}
+}
+
+@unpublished{JimHouston04a
+,作者="Jim Houston"
+,标题="{[RFC&PATCH] 替代RCU实现}"
+,月份="八月"
+,年份="2004"
+,备注="可获取： \url{https://lore.kernel.org/r/1093873222.984.12.camel@new.localdomain} [查看日期：2005年2月17日]"
+,注释={
+	在rcu_read_lock()和rcu_read_unlock()中使用活动代码来实现RCU，使得RCU可以在没有调度时钟中断的CPU上运行
+}
+}
+```
+```bibtex
+@unpublished{TomHart04a
+,作者="Thomas E. Hart"
+,标题="硕士论文：将无锁技术应用于Linux内核"
+,月份="十月"
+,年份="2004"
+,备注="可获取：
+\url{http://www.cs.toronto.edu/~tomhart/masters_thesis.html}
+[查看日期为2004年10月15日]"
+,注释={
+	提出比较RCU与Linux内核中的无锁方法
+}
+}
+
+@unpublished{Vaddagiri04a
+,作者="Srivatsa Vaddagiri"
+,标题="主题：[RFC] 使用RCU进行tcp_ehash查找"
+,月份="十月"
+,年份="2004"
+,备注="可获取：
+\url{http://marc.theaimsgroup.com/?t=109395731700004&r=1&w=2}
+[查看日期为2004年10月18日]"
+,注释={
+	Srivatsa的RCU补丁用于tcp_ehash查找
+}
+}
+
+@unpublished{Thirumalai04a
+,作者="Ravikiran Thirumalai"
+,标题="主题：[补丁集] 无锁fd查找 0/5"
+,月份="十月"
+,年份="2004"
+,备注="可获取：
+\url{http://marc.theaimsgroup.com/?t=109144217400003&r=1&w=2}
+[查看日期为2004年10月18日]"
+,注释={
+	Ravikiran的无锁FD补丁
+}
+}
+
+@unpublished{Thirumalai04b
+,作者="Ravikiran Thirumalai"
+,标题="主题：回复[补丁集] 无锁fd查找 0/5"
+,月份="十月"
+,年份="2004"
+,备注="可获取：
+\url{http://marc.theaimsgroup.com/?l=linux-kernel&m=109152521410459&w=2}
+[查看日期为2004年10月18日]"
+,注释={
+	Ravikiran的无锁FD补丁
+}
+}
+
+@unpublished{PaulEMcKenney2004rcu:assign:pointer
+,作者="Paul E. McKenney"
+,标题="{[PATCH 1/3] RCU: 移除\url{rcu_assign_pointer()}中的内存屏障}"
+,月份="十月"
+,年份="2004"
+,备注="可获取：
+\url{https://lore.kernel.org/r/20041023202723.GA1930@us.ibm.com}
+[查看日期为2010年6月8日]"
+,注释={
+	引入rcu_assign_pointer()
+}
+}
+
+@unpublished{JamesMorris04a
+,作者="James Morris"
+,标题="{[PATCH 2/3] SELinux} 可扩展性 - 将{AVC}转换为{RCU}"
+,日期="15"
+,月份="十一月"
+,年份="2004"
+,备注="\url{http://marc.theaimsgroup.com/?l=linux-kernel&m=110054979416004&w=2}"
+,注释={
+	James Morris在LKML上发布了Kaigai Kohei的补丁
+[查看日期为2004年12月10日]
+	Kaigai的补丁位于https://lore.kernel.org/r/200409271057.i8RAvcA1007873@mailsv.bs1.fc.nec.co.jp
+}
+}
+
+@unpublished{JamesMorris04b
+,作者="James Morris"
+,标题="最近在{SELinux}内核性能方面的进展"
+,月份="十二月"
+,年份="2004"
+,备注="可获取：
+\url{http://www.livejournal.com/users/james_morris/2153.html}
+[查看日期为2004年12月10日]"
+,注释={
+	RCU有助于提高SELinux性能。  ;-)  发表在LWN上
+}
+}
+
+@unpublished{PaulMcKenney2005RCUSemantics
+,作者="Paul E. McKenney 和 Jonathan Walpole"
+,标题="{RCU} 语义：首次尝试"
+,月份="一月"
+,年份="2005"
+,日期="30"
+,备注="可获取：
+\url{http://www.rdrop.com/users/paulmck/RCU/rcu-semantics.2005.01.30a.pdf}
+[查看日期为2009年12月6日]"
+,注释={
+	早期RCU语义的推导
+}
+}
+
+@unpublished{PaulMcKenney2005e
+,作者="Paul E. McKenney"
+,标题="实时抢占和{RCU}"
+,月份="三月"
+,年份="2005"
+,日期="17"
+,备注="可获取：
+\url{https://lore.kernel.org/r/20050318002026.GA2693@us.ibm.com}
+[查看日期为2005年9月5日]"
+,注释={
+	首次发布展示如何安全地适应RCU以用于可抢占的RCU读侧关键段
+}
+}
+
+@unpublished{EsbenNeilsen2005a
+,作者="Esben Neilsen"
+,标题="回复：实时抢占和{RCU}"
+,月份="三月"
+,年份="2005"
+,日期="18"
+,备注="可获取：
+\url{https://lore.kernel.org/r/Pine.OSF.4.05.10503181336310.2466-100000@da410.phys.au.dk}
+[查看日期为2006年3月30日]"
+,注释={
+	Esben Neilsen建议在读侧抑制优雅期处理，以实现简单但可行的实时RCU。缺点是无限长的优雅期…… 但对于实验和测试来说是可以接受的
+}
+}
+```
+```bibtex
+@unpublished{TomHart05a
+,作者="Thomas E. Hart 和 Paul E. McKenney 和 Angela Demke Brown"
+,标题="高效的内存回收对于快速无锁数据结构是必要的"
+,月份="三月"
+,年份="2005"
+,备注="可获取：\url{ftp://ftp.cs.toronto.edu/csrg-technical-reports/515/} [查看日期：2005年3月4日]"
+,注释={
+	比较了RCU、QBSR和EBSR。RCU在读取为主的负载中表现最佳。;-)
+}
+}
+
+@unpublished{JonCorbet2005DeprecateSyncKernel
+,作者="Jonathan Corbet"
+,标题="API变更：synchronize_kernel()已弃用"
+,月份="五月"
+,日期="3"
+,年份="2005"
+,备注="可获取：\url{http://lwn.net/Articles/134484/} [查看日期：2005年5月3日]"
+,注释={
+	Jon Corbet描述了用synchronize_rcu()和synchronize_sched()取代synchronize_kernel()
+}
+}
+
+@unpublished{PaulMcKenney05a
+,作者="Paul E. McKenney"
+,标题="{[RFC]} {RCU} 和 {CONFIG_PREEMPT_RT} 进展"
+,月份="五月"
+,年份="2005"
+,备注="可获取：\url{https://lore.kernel.org/r/20050510012444.GA3011@us.ibm.com} [查看日期：2005年5月13日]"
+,注释={
+	首次发布了适用于CONFIG_PREEMPT_RT环境的基于锁的延迟释放补丁
+}
+}
+
+@conference{PaulMcKenney05b
+,作者="Paul E. McKenney 和 Dipankar Sarma"
+,标题="实现SMP硬件上的Linux内核硬实时响应"
+,书名="linux.conf.au 2005"
+,月份="四月"
+,年份="2005"
+,地点="澳大利亚堪培拉"
+,备注="可获取：\url{http://www.rdrop.com/users/paulmck/RCU/realtimeRCU.2005.04.23a.pdf} [查看日期：2005年5月13日]"
+,注释={
+	实现实时目标，使RCU更友好
+	http://lca2005.linux.org.au/Papers/Paul%20McKenney/Towards%20Hard%20Realtime%20Response%20from%20the%20Linux%20Kernel/LKS.2005.04.22a.pdf
+}
+}
+
+@unpublished{PaulEMcKenneyHomePage
+,作者="Paul E. McKenney"
+,标题="{Paul} {E.} {McKenney}"
+,月份="五月"
+,年份="2005"
+,备注="可获取：\url{http://www.rdrop.com/users/paulmck/} [查看日期：2005年5月25日]"
+,注释={
+	Paul McKenney的个人主页
+}
+}
+
+@unpublished{PaulEMcKenneyRCUPage
+,作者="Paul E. McKenney"
+,标题="读-复制-更新 (RCU)"
+,月份="五月"
+,年份="2005"
+,备注="可获取：\url{http://www.rdrop.com/users/paulmck/RCU} [查看日期：2005年5月25日]"
+,注释={
+	Paul McKenney的RCU页面
+}
+}
+
+@unpublished{JosephSeigh2005a
+,作者="Joseph Seigh"
+,标题="{RCU}+{SMR} (危险指针)"
+,月份="七月"
+,年份="2005"
+,备注="个人通信"
+,注释={
+	Joe Seigh宣布了他的atomic-ptr-plus项目
+	http://sourceforge.net/projects/atomic-ptr-plus/
+}
+}
+
+@unpublished{JosephSeigh2005b
+,作者="Joseph Seigh"
+,标题="无锁同步原语"
+,月份="七月"
+,日期="6"
+,年份="2005"
+,备注="可获取：\url{http://sourceforge.net/projects/atomic-ptr-plus/} [查看日期：2005年8月8日]"
+,注释={
+	Joe Seigh的atomic-ptr-plus项目
+}
+}
+
+@unpublished{PaulMcKenney2005c
+,作者="Paul E. McKenney"
+,标题="{[RFC,PATCH] RCU} 和 {CONFIG_PREEMPT_RT} 合理补丁"
+,月份="八月"
+,日期="1"
+,年份="2005"
+,备注="可获取：\url{https://lore.kernel.org/r/20050801171137.GA1754@us.ibm.com} [查看日期：2006年3月14日]"
+,注释={
+	首次发布的基于计数器的实时RCU补丁发布到LKML
+}
+}
+
+@unpublished{PaulMcKenney2005d
+,作者="Paul E. McKenney"
+,标题="回复：[转发：回复：[补丁] 实时抢占，-RT-2.6.13-rc4-V0.7.52-01]"
+,月份="八月"
+,日期="8"
+,年份="2005"
+,备注="可获取：\url{https://lore.kernel.org/r/20050808144216.GA1307@us.ibm.com} [查看日期：2006年3月14日]"
+,注释={
+	首次发布的基于计数器的实时RCU补丁发布到LKML，但修复了各种不同配置参数组合下的功能问题
+}
+}
+
+@unpublished{PaulMcKenney2005rcutorture
+,作者="Paul E. McKenney"
+,标题="{[PATCH]} {RCU} 折磨测试"
+,月份="十月"
+,日期="1"
+,年份="2005"
+,备注="可获取：\url{https://lore.kernel.org/r/20051001182056.GA1613@us.ibm.com} [查看日期：2006年3月14日]"
+,注释={
+	首次发布的rcutorture补丁
+}
+}
+```
+```bibtex
+@unpublished{DavidSMiller2006HashedLocking
+,作者="David S. Miller"
+,标题="回复：[{补丁}, {征求意见}] {RCU} : {内存不足}避免和更低延迟"
+,月份="一月"
+,日期="6"
+,年份="2006"
+,备注="可用：
+\url{https://lore.kernel.org/r/20060106.231054.43576567.davem@davemloft.net}
+[查看日期为2012年2月29日]"
+,注释={
+	David Miller对哈希锁数组的看法：曾经非常喜欢它，但每次他认为有机会使用这种技术时，
+	总会有其他方法证明更优越。分区或RCU。;-)
+}
+}
+
+@conference{ThomasEHart2006a
+,作者="Thomas E. Hart 和 Paul E. McKenney 和 Angela Demke Brown"
+,标题="使无锁同步更快：内存回收的性能影响"
+,书名="第20届IEEE国际并行与分布式处理研讨会"
+,月份="四月"
+,日期="25-29"
+,地点="希腊罗得岛"
+,备注="可用：
+\url{http://www.rdrop.com/users/paulmck/RCU/hart_ipdps06.pdf}
+[查看日期为2008年4月28日]"
+,注释={
+	比较QSBR、HPBR、EBR和无锁引用计数
+http://www.cs.toronto.edu/~tomhart/perflab/ipdps06.tgz
+}
+}
+
+@unpublished{NickPiggin2006radixtree
+,作者="Nick Piggin"
+,标题="[补丁 3/3] radix-tree: 使用RCU的无锁读取侧"
+,月份="六月"
+,日期="20"
+,年份="2006"
+,备注="可用：
+\url{https://lore.kernel.org/r/20060408134707.22479.33814.sendpatchset@linux.site}
+[查看日期为2008年3月25日]"
+,注释={
+	使用RCU保护的radix树
+}
+}
+
+@Conference{PaulEMcKenney2006b
+,作者="Paul E. McKenney 和 Dipankar Sarma 和 Ingo Molnar 和 Suparna Bhattacharya"
+,标题="扩展RCU以适应实时和嵌入式工作负载"
+,书名="{Ottawa Linux Symposium}"
+,月份="七月"
+,年份="2006"
+,页码="v2 123-138"
+,备注="可用：
+\url{http://www.linuxsymposium.org/2006/view_abstract.php?content_key=184}
+\url{http://www.rdrop.com/users/paulmck/RCU/OLSrtRCU.2006.08.11a.pdf}
+[查看日期为2007年1月1日]"
+,注释={
+	描述了如何改进-rt实现中的实时RCU
+}
+}
+
+@unpublished{WikipediaRCU
+,作者="Paul E. McKenney 和 Chris Purcell 和 Algae 和 Ben Schumin 和 Gaius Cornelius 和 Qwertyus 和 Neil Conway 和 Sbw 和 Blainster 和 Canis Rufus 和 Zoicon5 和 Anome 和 Hal Eisen"
+,标题="读-复制-更新"
+,月份="七月"
+,日期="8"
+,年份="2006"
+,备注="\url{https://en.wikipedia.org/wiki/Read-copy-update}"
+,注释={
+	截至2006年7月8日的Wikipedia RCU页面
+[查看日期为2006年8月21日]
+}
+}
+
+@Conference{NickPiggin2006LocklessPageCache
+,作者="Nick Piggin"
+,标题="Linux中的无锁页面缓存——介绍、进展、性能"
+,书名="{Ottawa Linux Symposium}"
+,月份="七月"
+,年份="2006"
+,页码="v2 249-254"
+,备注="可用：
+\url{http://www.linuxsymposium.org/2006/view_abstract.php?content_key=184}
+[查看日期为2009年1月11日]"
+,注释={
+	使用RCU保护的radix树实现无锁页面缓存
+}
+}
+
+@unpublished{PaulEMcKenney2006c
+,作者="Paul E. McKenney"
+,标题="可睡眠的RCU"
+,月份="十月"
+,日期="9"
+,年份="2006"
+,备注="可用：
+\url{http://lwn.net/Articles/202847/}
+修订版：
+\url{http://www.rdrop.com/users/paulmck/RCU/srcu.2007.01.14a.pdf}
+[查看日期为2006年8月21日]"
+,注释={
+	LWN文章介绍了SRCU
+}
+}
+
+@unpublished{RobertOlsson2006a
+,作者="Robert Olsson 和 Stefan Nilsson"
+,标题="TRASH: 动态LC-trie和哈希数据结构"
+,月份="八月"
+,日期="18"
+,年份="2006"
+,备注="\url{http://www.nada.kth.se/~snilsson/publications/TRASH/trash.pdf}"
+,注释={
+	使用RCU保护的动态trie-hash组合
+[查看日期为2011年3月4日]
+}
+}
+
+@unpublished{ChristophHellwig2006RCU2SRCU
+,作者="Christoph Hellwig"
+,标题="回复：{[-mm 补丁 1/4]} RCU: 分割经典RCU"
+,月份="九月"
+,日期="28"
+,年份="2006"
+,备注="可用：
+\url{https://lore.kernel.org/r/20060928142616.GA20185@infradead.org}
+[查看日期为2008年3月27日]"
+}
+
+@unpublished{PaulEMcKenneyRCUusagePage
+,作者="Paul E. McKenney"
+,标题="RCU Linux使用情况"
+,月份="十月"
+,年份="2006"
+,备注="可用：
+\url{http://www.rdrop.com/users/paulmck/RCU/linuxusage.html}
+[查看日期为2007年1月14日]"
+,注释={
+	Paul McKenney的RCU页面显示了Linux内核中RCU使用的图表
+}
+}
+
+@unpublished{PaulEMcKenneyRCUusageRawDataPage
+,作者="Paul E. McKenney"
+,标题="Linux内核中的读-复制-更新（RCU）使用情况"
+,月份="十月"
+,年份="2006"
+,备注="可用：
+\url{http://www.rdrop.com/users/paulmck/RCU/linuxusage/rculocktab.html}
+[查看日期为2007年1月14日]"
+,注释={
+	Paul McKenney的RCU页面显示了表格形式的Linux内核中RCU使用情况，并链接到相应的cscope数据库
+}
+}
+
+@unpublished{GauthamShenoy2006RCUrwlock
+,作者="Gautham R. Shenoy"
+,标题="[补丁 4/5] lock_cpu_hotplug: 重新设计 — 轻量级实现lock_cpu_hotplug"
+,月份="十月"
+,日期="26"
+,年份="2006"
+,备注="可用：
+\url{https://lore.kernel.org/r/20061026105731.GE11803@in.ibm.com}
+[查看日期为2009年1月26日]"
+,注释={
+	基于RCU的读写锁，在没有写入者的情况下允许读者无需内存屏障或原子指令即可继续
+}
+}
+```
+如果写入者出现，读者当然必须按照读写锁的语义等待。这是一个递归锁。
+
+```
+@unpublished{JensAxboe2006SlowSRCU
+,Author="Jens Axboe"
+,Title="回复：[补丁] cpufreq：将 \url{cpufreq_tsc()} 标记为 \url{core_initcall_sync}"
+,month="十一月"
+,year="2006"
+,day=17
+,note="可获取：\url{https://lore.kernel.org/r/20061117092925.GT7164@kernel.dk} [查看日期：2007年5月28日]"
+,annotation={
+	SRCU 的宽限期对 Jens 来说太慢了，即使在速度提高了三倍之后
+加速版 SRCU 可在 https://lore.kernel.org/r/20061118002845.GF2632@us.ibm.com 获取
+}
+}
+
+@unpublished{OlegNesterov2006QRCU
+,Author="Oleg Nesterov"
+,Title="回复：[补丁] cpufreq：将 {\tt cpufreq_tsc()} 标记为 {\tt core_initcall_sync}"
+,month="十一月"
+,year="2006"
+,day=19
+,note="可获取：\url{https://lore.kernel.org/r/20061119190027.GA3676@oleg} [查看日期：2007年5月28日]"
+,annotation={
+	QRCU 的初步版本。随后有扩展/修正版本
+曾经是 OlegNesterov2007QRCU，现在时间已校正
+}
+}
+
+@unpublished{OlegNesterov2006aQRCU
+,Author="Oleg Nesterov"
+,Title="回复：[RFC, 补丁 1/2] qrcu：{"快速"} srcu 实现"
+,month="十一月"
+,year="2006"
+,day=30
+,note="可获取：\url{https://lore.kernel.org/r/20061130015714.GC1350@oleg} [查看日期：2008年11月26日]"
+,annotation={
+	QRCU 的扩展/修正版本
+曾经是 OlegNesterov2007aQRCU，现在时间已校正
+}
+}
+
+@unpublished{EvgeniyPolyakov2006RCUslowdown
+,Author="Evgeniy Polyakov"
+,Title="延迟工作的不良影响"
+,month="十二月"
+,year="2006"
+,day=05
+,note="可获取：\url{http://www.ioremap.net/node/41} [查看日期：2008年10月28日]"
+,annotation={
+	将 RCU 用作纯延迟会导致 Linux 内核中的 skbs 减速2.5倍
+}
+}
+
+@inproceedings{ChrisMatthews2006ClusteredObjectsRCU
+,author = {Matthews, Chris 和 Coady, Yvonne 和 Appavoo, Jonathan}
+,title = {可移植事件：一种用于可扩展系统基础设施的编程模型}
+,booktitle = {PLOS '06：第三届编程语言和操作系统研讨会论文集}
+,year = {2006}
+,isbn = {1-59593-577-0}
+,pages = {11}
+,location = {圣何塞，加利福尼亚州}
+,doi = {http://doi.acm.org/10.1145/1215995.1216006}
+,publisher = {ACM}
+,address = {纽约，纽约州，美国}
+,annotation={
+	使用 K42 的类似 RCU 的功能来管理集群对象的生命周期
+}
+}
+
+@article{DilmaDaSilva2006K42
+,author = {Silva, Dilma Da 和 Krieger, Orran 和 Wisniewski, Robert W. 和 Waterland, Amos 和 Tam, David 和 Baumann, Andrew}
+,title = {K42：一个操作系统研究的基础设施}
+,journal = {SIGOPS Oper. Syst. Rev.}
+,volume = {40}
+,number = {2}
+,year = {2006}
+,issn = {0163-5980}
+,pages = {34--42}
+,doi = {http://doi.acm.org/10.1145/1131322.1131333}
+,publisher = {ACM}
+,address = {纽约，纽约州，美国}
+,annotation={
+	描述了 K42 各代与 RCU 的关系
+}
+}
+```
+```bibtex
+# CoreyMinyard2007list_splice_rcu
+@unpublished{CoreyMinyard2007list:splice:rcu
+,作者="Corey Minyard 和 Paul E. McKenney"
+,标题="{[PATCH]} 添加一个 {RCU} 版本的列表拼接"
+,月份="一月"
+,年份="2007"
+,日期=3
+,备注="可获取：
+\url{https://lore.kernel.org/r/20070103152738.GA16063@localdomain}
+[查看于2007年5月28日]"
+,注释={
+	为 list_splice_rcu() 提供补丁
+}
+}
+
+@unpublished{PaulEMcKenney2007rcubarrier
+,作者="Paul E. McKenney"
+,标题="{RCU} 和不可卸载的模块"
+,月份="一月"
+,日期="14"
+,年份="2007"
+,备注="可获取：
+\url{http://lwn.net/Articles/217484/}
+[查看于2007年11月22日]"
+,注释={
+	LWN 文章介绍了 rcu_barrier() 原语
+}
+}
+
+@unpublished{PeterZijlstra2007SyncBarrier
+,作者="Peter Zijlstra 和 Ingo Molnar"
+,标题="{[PATCH 3/7]} barrier：一个可扩展的同步屏障"
+,月份="一月"
+,年份="2007"
+,日期=28
+,备注="可获取：
+\url{https://lore.kernel.org/r/20070128120509.719287000@programming.kicks-ass.net}
+[查看于2008年3月27日]"
+,注释={
+	类似于 RCU 的实现，适用于频繁更新和罕见读取者！
+	被 QRCU 吸收。也许...
+}
+}
+
+@unpublished{PaulEMcKenney2007BoostRCU
+,作者="Paul E. McKenney"
+,标题="优先级提升的 {RCU} 读端临界区"
+,月份="二月"
+,日期="5"
+,年份="2007"
+,备注="\url{http://lwn.net/Articles/220677/}"
+,注释={
+	LWN 文章介绍了 RCU 优先级提升
+	修订版：
+	http://www.rdrop.com/users/paulmck/RCU/RCUbooststate.2007.04.16a.pdf
+	[查看于2007年9月7日]
+}
+}
+
+@unpublished{PaulMcKenney2007QRCUpatch
+,作者="Paul E. McKenney"
+,标题="{[PATCH]} {QRCU} 带无锁快速路径"
+,月份="二月"
+,年份="2007"
+,日期=24
+,备注="可获取：
+\url{https://lore.kernel.org/r/20070225062349.GA17468@linux.vnet.ibm.com}
+[查看于2008年3月27日]"
+,注释={
+	为 QRCU 提供无锁快速路径的补丁
+}
+}
+
+@article{JonathanAppavoo2007K42RCU
+,作者 = {Appavoo, Jonathan 和 Silva, Dilma Da 和 Krieger, Orran 和 Auslander, Marc 和 Ostrowski, Michal 和 Rosenburg, Bryan 和 Waterland, Amos 和 Wisniewski, Robert W. 和 Xenidis, Jimi 和 Stumm, Michael 和 Soares, Livio}
+,标题 = {在 SMMP 操作系统中分发对象的经验}
+,期刊 = {ACM Trans. Comput. Syst.}
+,卷号 = {25}
+,期号 = {3}
+,年份 = {2007}
+,ISSN = {0734-2071}
+,页码 = {6/1--6/52}
+,DOI = {http://doi.acm.org/10.1145/1275517.1275518}
+,出版商 = {ACM}
+,地址 = {美国纽约州纽约市}
+,注释={
+	RCU 在 K42 中的作用
+}
+}
+
+@conference{RobertOlsson2007Trash
+,作者="Robert Olsson 和 Stefan Nilsson"
+,标题="{TRASH}: 一种动态 {LC}-trie 和哈希数据结构"
+,会议="高性能交换与路由研讨会 (HPSR'07)"
+,月份="五月"
+,年份="2007"
+,备注="可获取：
+\url{http://ieeexplore.ieee.org/xpl/freeabs_all.jsp?arnumber=4281239}
+[查看于2010年10月1日]"
+,注释={
+	受 RCU 保护的动态 trie-hash 结合体
+}
+}
+
+@conference{PeterZijlstra2007ConcurrentPagecacheRCU
+,作者="Peter Zijlstra"
+,标题="并发页面缓存"
+,会议="Linux 研讨会"
+,月份="六月"
+,年份="2007"
+,地点="加拿大渥太华"
+,备注="可获取：
+\url{http://ols.108.redhat.com/2007/Reprints/zijlstra-Reprint.pdf}
+[查看于2008年4月14日]"
+,注释={
+	允许 RCU 读者和并发更新的页面缓存修改
+}
+}
+
+@unpublished{PaulEMcKenney2007whatisRCU
+,作者="Paul E. McKenney"
+,标题="什么是 {RCU}?"
+,年份="2007"
+,月份="07"
+,备注="可获取：
+\url{http://www.rdrop.com/users/paulmck/RCU/whatisRCU.html}
+[查看于2007年7月6日]"
+,注释={
+	描述了 Linux 内核中的 RCU
+}
+}
+```
+```bibtex
+@unpublished{PaulEMcKenney2007QRCUspin
+,作者="Paul E. McKenney"
+,标题="使用 {Promela} 和 {Spin} 验证并行算法"
+,月份="八月"
+,日期="1"
+,年份="2007"
+,备注="可获取：\url{http://lwn.net/Articles/243851/} [查阅日期：2007年9月8日]"
+,注释={
+	LWN 文章描述了 Promela 和 spin，并且以 Oleg Nesterov 的 QRCU 为例（包括 Paul McKenney 的快速路径）
+	合并的补丁位于：\url{https://lore.kernel.org/r/20070225062349.GA17468@linux.vnet.ibm.com}
+}
+}
+
+@unpublished{PaulEMcKenney2007WG21DDOatomics
+,作者="Paul E. McKenney 和 Hans-J. Boehm 和 Lawrence Crowl"
+,标题="C++ 数据依赖排序：原子性和内存模型"
+,月份="八月"
+,日期="3"
+,年份="2007"
+,备注="可获取：\url{http://open-std.org/jtc1/sc22/wg21/docs/papers/2008/n2664.htm} [查阅日期：2009年12月7日]"
+,注释={
+	C++ 中的 RCU，第一部分和第二部分
+}
+}
+
+@unpublished{PaulEMcKenney2007WG21DDOannotation
+,作者="Paul E. McKenney 和 Lawrence Crowl"
+,标题="C++ 数据依赖排序：函数注解"
+,月份="九月"
+,日期="18"
+,年份="2008"
+,备注="可获取：\url{http://open-std.org/jtc1/sc22/wg21/docs/papers/2008/n2782.htm} [查阅日期：2009年12月7日]"
+,注释={
+	C++ 中的 RCU，第二部分，多次更新
+}
+}
+
+@unpublished{PaulEMcKenney2007PreemptibleRCUPatch
+,作者="Paul E. McKenney"
+,标题="[PATCH RFC 0/9] {RCU}: 可抢占的 {RCU}"
+,月份="九月"
+,日期="10"
+,年份="2007"
+,备注="可获取：\url{https://lore.kernel.org/r/20070910183004.GA3299@linux.vnet.ibm.com} [查阅日期：2007年10月25日]"
+,注释={
+	可抢占 RCU 的最终补丁到 -rt。（后来的补丁被合并到了主线。）
+}
+}
+
+@unpublished{PaulEMcKenney2007PreemptibleRCU
+,作者="Paul E. McKenney"
+,标题="可抢占读复制更新的设计"
+,月份="十月"
+,日期="8"
+,年份="2007"
+,备注="可获取：\url{http://lwn.net/Articles/253651/} [查阅日期：2007年10月25日]"
+,注释={
+	LWN 文章描述了可抢占 RCU 的设计
+}
+}
+
+@article{ThomasEHart2007a
+,作者="Thomas E. Hart 和 Paul E. McKenney 和 Angela Demke Brown 和 Jonathan Walpole"
+,标题="无锁同步中的内存回收性能"
+,期刊="J. Parallel Distrib. Comput."
+,卷号={67}
+,期号="12"
+,年份="2007"
+,ISSN="0743-7315"
+,页码="1270--1285"
+,DOI="http://dx.doi.org/10.1016/j.jpdc.2007.04.010"
+,出版商="Academic Press, Inc."
+,地址="美国佛罗里达州奥兰多"
+,注释={
+	比较 QSBR、HPBR、EBR 和无锁引用计数
+	ThomasEHart2006a 的期刊版本
+}
+}
+
+@unpublished{MathieuDesnoyers2007call:rcu:schedNeeded
+,作者="Mathieu Desnoyers"
+,标题="Re: [patch 1/2] {Linux} 内核标记 - 支持多个探测器"
+,月份="十二月"
+,日期="20"
+,年份="2007"
+,备注="可获取：\url{https://lore.kernel.org/r/20071220142540.GB22523@Krystal} [查阅日期：2008年3月27日]"
+,注释={
+	请求 call_rcu_sched() 和 rcu_barrier_sched()
+}
+}
+
+########################################################################
+#
+#	"什么是 RCU？" LWN 系列
+#
+#	http://lwn.net/Articles/262464/ （什么是 RCU，根本上？）
+#	http://lwn.net/Articles/263130/ （RCU 的用法是什么？）
+#	http://lwn.net/Articles/264090/ （RCU 的 API 是什么？）
+
+@unpublished{PaulEMcKenney2007WhatIsRCUFundamentally
+,作者="Paul E. McKenney 和 Jonathan Walpole"
+,标题="什么是 {RCU}，根本上？"
+,月份="十二月"
+,日期="17"
+,年份="2007"
+,备注="可获取：\url{http://lwn.net/Articles/262464/} [查阅日期：2007年12月27日]"
+,注释={
+	阐述了 RCU 的三个基本组成部分：(1) 发布订阅机制，(2) 等待现有读者完成，以及 (3) 维护多个版本
+}
+}
+
+@unpublished{PaulEMcKenney2008WhatIsRCUUsage
+,作者="Paul E. McKenney"
+,标题="什么是 {RCU}？ 第二部分：用法"
+,月份="一月"
+,日期="4"
+,年份="2008"
+,备注="可获取：\url{http://lwn.net/Articles/263130/} [查阅日期：2008年1月4日]"
+,注释={
+	阐述了 RCU 的六种用途：
+	1. RCU 是一种读写锁的替代品
+	2. RCU 是一种受限的引用计数机制
+	3. RCU 是一种批量引用计数机制
+	4. RCU 是一种简陋的垃圾收集器
+	5. RCU 是一种提供存在保证的方法
+	6. RCU 是一种等待事物完成的方法
+}
+}
+
+@unpublished{PaulEMcKenney2008WhatIsRCUAPI
+,作者="Paul E. McKenney"
+,标题="{RCU} 第三部分：{RCU} API"
+,月份="一月"
+,日期="17"
+,年份="2008"
+,备注="可获取：\url{http://lwn.net/Articles/264090/} [查阅日期：2008年1月10日]"
+,注释={
+	概述了 Linux 内核中的 RCU API 并简要介绍了 RCU 的参考文献
+}
+}
+```
+#
+#	“什么是RCU？” LWN系列
+#
+########################################################################
+
+@unpublished{SteveRostedt2008dyntickRCUpatch
+,Author="Steven Rostedt 和 Paul E. McKenney"
+,Title="{[PATCH]} 添加对动态时钟和可抢占RCU的支持"
+,month="一月"
+,day="29"
+,year="2008"
+,note="可用：
+\url{https://lore.kernel.org/r/Pine.LNX.4.58.0801291113350.20371@gandalf.stny.rr.com}
+[查看日期：2008年3月27日]"
+,annotation={
+	防止可抢占RCU不必要的唤醒动态时钟空闲CPU的补丁
+}
+}
+
+@unpublished{PaulEMcKenney2008LKMLDependencyOrdering
+,Author="Paul E. McKenney"
+,Title="回复：[PATCH 02/22 -v7] 添加对GCC分析器的基本支持"
+,month="二月"
+,day="1"
+,year="2008"
+,note="可用：
+\url{https://lore.kernel.org/r/20080202214124.GA28612@linux.vnet.ibm.com}
+[查看日期：2008年10月18日]"
+,annotation={
+	解释违反依赖顺序的编译器问题
+}
+}
+
+@Conference{PaulEMcKenney2008Beijing
+,Author="Paul E. McKenney"
+,Title="在Linux中引入技术 或者：将您的技术引入Linux需要将大量Linux引入您的技术！"
+,Booktitle="2008 Linux开发者研讨会 - 中国"
+,Publisher="OSS中国"
+,Month="二月"
+,Year="2008"
+,Address="中国北京"
+,note="可用：
+\url{http://www.rdrop.com/users/paulmck/RCU/TechIntroLinux.2008.02.19a.pdf}
+[查看日期：2008年8月12日]"
+}
+
+@unpublished{PaulEMcKenney2008dynticksRCU
+,Author="Paul E. McKenney 和 Steven Rostedt"
+,Title="集成和验证动态时钟和可抢占RCU"
+,month="四月"
+,day="24"
+,year="2008"
+,note="可用：
+\url{http://lwn.net/Articles/279077/}
+[查看日期：2008年4月24日]"
+,annotation={
+	描述使用Promela和Spin验证（并修复！）动态时钟/RCU接口的方法
+}
+}
+
+@article{DinakarGuniguntala2008IBMSysJ
+,author="D. Guniguntala 和 P. E. McKenney 和 J. Triplett 和 J. Walpole"
+,title="用于支持共享内存多处理器系统上实时应用的读取-复制-更新机制"
+,Year="2008"
+,Month="五月"
+,journal="IBM系统杂志"
+,volume="47"
+,number="2"
+,pages="221-236"
+,annotation={
+	RCU，实时RCU，可睡眠RCU，性能
+http://www.research.ibm.com/journal/sj/472/guniguntala.pdf
+[查看日期：2008年4月24日]
+}
+}
+
+@unpublished{LaiJiangshan2008NewClassicAlgorithm
+,Author="Lai Jiangshan"
+,Title="[{RFC}][{PATCH}] RCU经典：回调处理的新算法"
+,month="六月"
+,day="3"
+,year="2008"
+,note="可用：
+\url{https://lore.kernel.org/r/4844BE83.5010401@cn.fujitsu.com}
+[查看日期：2008年12月10日]"
+,annotation={
+	更新了RCU经典算法。引入了多尾列表来处理RCU回调，并将通用代码提取到__call_rcu()中
+}
+}
+
+@article{PaulEMcKenney2008RCUOSR
+,author="Paul E. McKenney 和 Jonathan Walpole"
+,title="将技术引入Linux内核：一个案例研究"
+,Year="2008"
+,journal="SIGOPS操作系统评论"
+,volume="42"
+,number="5"
+,pages="4--17"
+,issn="0163-5980"
+,doi={http://doi.acm.org/10.1145/1400097.1400099}
+,publisher="ACM"
+,address="美国纽约"
+,annotation={
+	Linux对RCU的改变远大于RCU对Linux的改变
+http://portal.acm.org/citation.cfm?doid=1400097.1400099
+}
+}
+
+@unpublished{ManfredSpraul2008StateMachineRCU
+,Author="Manfred Spraul"
+,Title="[{RFC}, {PATCH}] 基于状态机的RCU"
+,month="八月"
+,day="21"
+,year="2008"
+,note="可用：
+\url{https://lore.kernel.org/r/48AD8969.7060900@colorfullife.com}
+[查看日期：2008年12月8日]"
+,annotation={
+	基于状态的RCU。此补丁的一个关键点是分离了动态时钟处理中的NMI和IRQ
+}
+}
+
+@unpublished{ManfredSpraul2008dyntickIRQNMI
+,Author="Manfred Spraul"
+,Title="回复：[{RFC}, {PATCH}] 可扩展的经典RCU实现v4"
+,month="九月"
+,day="6"
+,year="2008"
+,note="可用：
+\url{https://lore.kernel.org/r/48C2B1D2.5070801@colorfullife.com}
+[查看日期：2008年12月8日]"
+,annotation={
+	Manfred指出我的尝试中需要修复的问题，即分离层次RCU的动态时钟接口中的IRQ和NMI处理
+}
+}
+
+# 曾经是PaulEMcKenney2011cyclicRCU
+@techreport{PaulEMcKenney2008cyclicRCU
+,author="Paul E. McKenney"
+,title="使用读取-复制-更新高效支持一致的循环搜索"
+,institution="美国专利商标局"
+,address="华盛顿特区"
+,year="2008"
+,number="美国专利7,426,511"
+,month="九月"
+,pages="23"
+,annotation={
+	维护额外的一层间接引用，以允许读者限制自己所需的快照。仅允许一次更新
+}
+}
+```bibtex
+@unpublished{PaulEMcKenney2008HierarchicalRCU
+,Author="Paul E. McKenney"
+,Title="分层RCU"
+,month="十一月"
+,day="3"
+,year="2008"
+,note="\url{http://lwn.net/Articles/305782/}"
+,annotation={
+	基于组合树的RCU优雅期检测，允许其处理数千个CPU
+[2008年11月6日查看]
+}
+}
+
+@unpublished{PaulEMcKenney2009BloatwatchRCU
+,Author="Paul E. McKenney"
+,Title="回复：[PATCH fyi] RCU：bloatchwatch版"
+,month="一月"
+,day="14"
+,year="2009"
+,note="可用：
+\url{https://lore.kernel.org/r/20090114202044.GJ6734@linux.vnet.ibm.com}
+[2009年1月15日查看]"
+,annotation={
+	适用于单处理器嵌入式应用的小型RCU实现——也用于说明目的
+}
+}
+
+@conference{PaulEMcKenney2009MaliciousURCU
+,Author="Paul E. McKenney"
+,Title="使用恶意用户级RCU来折磨RCU基础算法"
+,Booktitle="linux.conf.au 2009"
+,month="一月"
+,year="2009"
+,address="澳大利亚霍巴特"
+,note="可用：
+\url{http://www.rdrop.com/users/paulmck/RCU/urcutorture.2009.01.22a.pdf}
+[2009年2月2日查看]"
+,annotation={
+	实时RCU和折磨测试RCU使用
+}
+}
+
+@unpublished{MathieuDesnoyers2009URCU
+,Author="Mathieu Desnoyers"
+,Title="[{RFC} git树] Linux的用户空间RCU（urcu）"
+,month="二月"
+,day="5"
+,year="2009"
+,note="\url{http://lttng.org/urcu}"
+,annotation={
+	Mathieu Desnoyers的用户空间RCU实现
+git://lttng.org/userspace-rcu.git
+	http://lttng.org/cgi-bin/gitweb.cgi?p=userspace-rcu.git
+	http://lttng.org/urcu
+	https://lore.kernel.org/r/20090206030543.GB8560@Krystal
+}
+}
+
+@unpublished{PaulEMcKenney2009LWNBloatWatchRCU
+,Author="Paul E. McKenney"
+,Title="RCU：bloatchwatch版"
+,month="三月"
+,day="17"
+,year="2009"
+,note="可用：
+\url{http://lwn.net/Articles/323929/}
+[2009年3月20日查看]"
+,annotation={
+	单处理器假设允许简化RCU实现
+}
+}
+
+@unpublished{EvgeniyPolyakov2009EllipticsNetwork
+,Author="Evgeniy Polyakov"
+,Title="椭圆网络"
+,month="四月"
+,day="17"
+,year="2009"
+,note="可用：
+\url{http://www.ioremap.net/projects/elliptics}
+[2009年4月30日查看]"
+,annotation={
+	具有事务功能的分布式哈希表，使用椭圆哈希函数分配数据
+}
+}
+
+@unpublished{PaulEMcKenney2009expeditedRCU
+,Author="Paul E. McKenney"
+,Title="[{PATCH} -tip 0/3] 加速‘大锤’RCU优雅期"
+,month="六月"
+,day="25"
+,year="2009"
+,note="可用：
+\url{https://lore.kernel.org/r/20090625160706.GA9467@linux.vnet.ibm.com}
+[2009年8月16日查看]"
+,annotation={
+	首次发布加速RCU并被接受进入-tip
+}
+}
+
+@unpublished{PaulEMcKenney2009fastRTRCU
+,Author="Paul E. McKenney"
+,Title="[{PATCH} {RFC} -tip 0/4] RCU清理和简化可抢占RCU"
+,month="七月"
+,day="23"
+,year="2009"
+,note="可用：
+\url{https://lore.kernel.org/r/20090724001429.GA17374@linux.vnet.ibm.com}
+[2009年8月15日查看]"
+,annotation={
+	首次发布简单快速的可抢占RCU
+}
+}
+
+@unpublished{JoshTriplett2009RPHash
+,Author="Josh Triplett"
+,Title="通过相对论编程实现可扩展并发哈希表"
+,month="九月"
+,year="2009"
+,note="Linux Plumbers Conference演讲"
+,annotation={
+	与哈希表相关的RP乐趣
+被JoshTriplett2010RPHash取代
+}
+}
+
+@phdthesis{MathieuDesnoyersPhD
+, title  = "低影响操作系统追踪"
+, author = "Mathieu Desnoyers"
+, school = "蒙特利尔理工学院"
+, month  = "十二月"
+, year   = 2009
+,note="可用：
+\url{http://www.lttng.org/pub/thesis/desnoyers-dissertation-2009-12.pdf}
+[2009年12月9日查看]"
+,annotation={
+	第6章（第97页）涵盖用户级RCU
+}
+}
+```
+```bibtex
+@unpublished{RelativisticProgrammingWiki
+,作者="Josh Triplett 和 Paul E. McKenney 和 Jonathan Walpole"
+,标题="相对论编程"
+,月份="九月"
+,年份="2009"
+,备注="可用：
+\url{http://wiki.cs.pdx.edu/rp/}
+[访问日期：2009年12月9日]"
+,注释={
+	主要的相对论编程Wiki
+}
+}
+
+@conference{PaulEMcKenney2009DeterministicRCU
+,作者="Paul E. McKenney"
+,标题="多核系统中的确定性同步：RCU的作用"
+,会议名称="第十一届实时Linux研讨会"
+,月份="九月"
+,年份="2009"
+,地点="德国德累斯顿"
+,备注="可用：
+\url{http://www.rdrop.com/users/paulmck/realtime/paper/DetSyncRCU.2009.08.18a.pdf}
+[访问日期：2009年1月14日]"
+}
+
+@unpublished{PaulEMcKenney2009HuntingHeisenbugs
+,作者="Paul E. McKenney"
+,标题="追踪海森虫"
+,月份="十一月"
+,年份="2009"
+,日期="1"
+,备注="可用：
+\url{http://paulmck.livejournal.com/14639.html}
+[访问日期：2010年6月4日]"
+,注释={
+	Tree RCU中第一天出现的bug，追踪了很长时间
+}
+}
+
+@unpublished{MathieuDesnoyers2009defer:rcu
+,作者="Mathieu Desnoyers"
+,标题="内核RCU：缩小struct rcu_head的大小"
+,月份="十二月"
+,年份="2009"
+,备注="可用：
+\url{https://lore.kernel.org/r/20091018232918.GA7385@Krystal}
+[访问日期：2009年12月29日]"
+,注释={
+	Mathieu提出使用固定大小的线程池来实现defer_rcu()
+}
+}
+
+@unpublished{MathieuDesnoyers2009VerifPrePub
+,作者="Mathieu Desnoyers 和 Paul E. McKenney 和 Michel R. Dagenais"
+,标题="用于形式验证并行算法的多核系统建模"
+,月份="十二月"
+,年份="2009"
+,备注="提交给IEEE TPDS"
+,注释={
+	用于Mathieu的用户级RCU机械正确性证明的OOMem模型
+}
+}
+
+@unpublished{MathieuDesnoyers2009URCUPrePub
+,作者="Mathieu Desnoyers 和 Paul E. McKenney 和 Alan Stern 和 Michel R. Dagenais 和 Jonathan Walpole"
+,标题="读取-复制-更新在用户级别的实现"
+,月份="十二月"
+,年份="2010"
+,url=\url{http://www.computer.org/csdl/trans/td/2012/02/ttd2012020375-abs.html}
+,注释={
+	RCU概述、需求、半正式语义、用户级RCU使用场景、三类RCU实现、无等待RCU更新、RCU宽限期批处理、更新开销，
+	http://www.rdrop.com/users/paulmck/RCU/urcu-main-accepted.2011.08.30a.pdf
+	http://www.rdrop.com/users/paulmck/RCU/urcu-supp-accepted.2011.08.30a.pdf
+	被MathieuDesnoyers2012URCU取代
+}
+}
+
+@inproceedings{HariKannan2009DynamicAnalysisRCU
+,作者 = {Kannan, Hari}
+,标题 = {在多处理器中解耦元数据访问顺序}
+,会议名称 = {MICRO 42: 第42届年度IEEE/ACM国际微架构研讨会}
+,年份 = {2009}
+,isbn = {978-1-60558-798-1}
+,页码 = {381--390}
+,地点 = {纽约州纽约市}
+,doi = {http://doi.acm.org/10.1145/1669112.1669161}
+,出版商 = {ACM}
+,地址 = {纽约州纽约市}
+,注释={
+	使用RCU保护动态分析中使用的元数据
+}
+}
+
+@conference{PaulEMcKenney2010SimpleOptRCU
+,作者="Paul E. McKenney"
+,标题="通过优化实现简化"
+,会议名称="linux.conf.au 2010"
+,月份="一月"
+,年份="2010"
+,地点="新西兰惠灵顿"
+,备注="可用：
+\url{http://www.rdrop.com/users/paulmck/RCU/SimplicityThruOptimization.2010.01.21f.pdf}
+[访问日期：2010年10月10日]"
+,注释={
+	TREE_PREEMPT_RCU优化极大地简化了旧的PREEMPT_RCU实现
+}
+}
+
+@unpublished{PaulEMcKenney2010LockdepRCU
+,作者="Paul E. McKenney"
+,标题="Lockdep-RCU"
+,月份="二月"
+,年份="2010"
+,日期="1"
+,备注="\url{https://lwn.net/Articles/371986/}"
+,注释={
+	CONFIG_PROVE_RCU，或至少是早期版本
+[访问日期：2010年6月4日]
+}
+}
+
+@unpublished{AviKivity2010KVM2RCU
+,作者="Avi Kivity"
+,标题="[PATCH 37/40] KVM: 将最大虚拟CPU数增加到64"
+,月份="二月"
+,年份="2010"
+,备注="可用：
+\url{http://www.mail-archive.com/kvm@vger.kernel.org/msg28640.html}
+[访问日期：2010年3月20日]"
+,注释={
+	使用RCU使得KVM能够将虚拟操作系统大小从16个CPU增加到64个CPU
+}
+}
+
+@unpublished{HerbertXu2010RCUResizeHash
+,作者="Herbert Xu"
+,标题="桥接：添加核心IGMP监听支持"
+,月份="二月"
+,年份="2010"
+,备注="可用：
+\url{http://thread.gmane.org/gmane.linux.network/153338}
+[访问日期：2014年6月9日]"
+,注释={
+	使用一对list_head结构来支持RCU保护的可调整大小哈希表
+}
+}
+```
+```bibtex
+@mastersthesis{AbhinavDuggal2010Masters,
+  author = "Abhinav Duggal",
+  title = "Stopping Data Races Using Redflag",
+  school = "Stony Brook University",
+  year = "2010",
+  annotation = {
+    数据竞争检测器，包含RCU
+    \url{http://www.filesystems.org/docs/abhinav-thesis/abhinav_thesis.pdf}
+  }
+}
+
+@article{JoshTriplett2010RPHash,
+  author = "Josh Triplett and Paul E. McKenney and Jonathan Walpole",
+  title = "Scalable Concurrent Hash Tables via Relativistic Programming",
+  journal = "ACM Operating Systems Review",
+  year = 2010,
+  volume = 44,
+  number = 3,
+  month = "七月",
+  annotation = {
+    使用哈希表的RP乐趣
+    \url{http://portal.acm.org/citation.cfm?id=1842733.1842750}
+  }
+}
+
+@unpublished{PaulEMcKenney2010RCUAPI,
+  Author = "Paul E. McKenney",
+  Title = "The {RCU} {API}, 2010 版本",
+  month = "十二月",
+  day = "8",
+  year = "2010",
+  note = "\url{http://lwn.net/Articles/418853/}",
+  annotation = {
+    包括更新的软件工程特性
+    [2010年12月8日查看]
+  }
+}
+
+@mastersthesis{AndrejPodzimek2010masters,
+  author = "Andrej Podzimek",
+  title = "Read-Copy-Update for OpenSolaris",
+  school = "Charles University in Prague",
+  year = "2010",
+  note = "\url{https://andrej.podzimek.org/thesis.pdf} [2011年1月31日查看]",
+  annotation = {
+    回顾RCU实现并为OpenSolaris创建了几种实现
+    从RCU读取端原语驱动静止状态检测，大致类似于Jim Houston的方法
+  }
+}
+
+@unpublished{LinusTorvalds2011Linux2:6:38:rc1:NPigginVFS,
+  Author = "Linus Torvalds",
+  Title = "Linux 2.6.38-rc1",
+  month = "一月",
+  year = "2011",
+  note = "\url{https://lore.kernel.org/r/AANLkTimajU0x1v6y3rH2+jr-bZ=tNLs1S_agXdGGAa3S@mail.gmail.com} [2011年3月4日查看]",
+  annotation = {
+    基于RCU的名称查找位于另一端——绝对不是噱头。它是一些非常优秀的东西，并消除了最后的主要全局锁，这确实会对某些内核负载造成伤害。
+    dentry锁不再是一个大的序列化问题。真正好的是，即使对于单线程负载（在SMP内核上），它实际上也大大提高了性能，因为它消除了路径组件查找中最昂贵的部分，即每次组件查找时的d_lock。因此，在一些极其路径查找密集型的负载上，我看到了30-50%的改进。
+  }
+}
+
+@techreport{JoshTriplett2011RPScalableCorrectOrdering,
+  author = {Josh Triplett and Philip W. Howard and Paul E. McKenney and Jonathan Walpole},
+  title = {Scalable Correct Memory Ordering via Relativistic Programming},
+  year = {2011},
+  number = {11-03},
+  institution = {Portland State University},
+  note = {\url{http://www.cs.pdx.edu/pdfs/tr1103.pdf}}
+}
+
+@inproceedings{PhilHoward2011RCUTMRBTree,
+  author = {Philip W. Howard and Jonathan Walpole},
+  title = {A Relativistic Enhancement to Software Transactional Memory},
+  booktitle = {Proceedings of the 3rd USENIX conference on Hot topics in parallelism},
+  series = {HotPar'11},
+  year = {2011},
+  location = {Berkeley, CA},
+  pages = {1--6},
+  numpages = {6},
+  url = {http://www.usenix.org/event/hotpar11/tech/final_files/Howard.pdf},
+  publisher = {USENIX Association},
+  address = {Berkeley, CA, USA}
+}
+
+@techreport{PaulEMcKenney2011cyclicparallelRCU,
+  author = "Paul E. McKenney and Jonathan Walpole",
+  title = "Efficient Support of Consistent Cyclic Search With Read-Copy Update and Parallel Updates",
+  institution = "US Patent and Trademark Office",
+  address = "Washington, DC",
+  year = "2011",
+  number = "US Patent 7,953,778",
+  month = "五月",
+  pages = "34",
+  annotation = {
+    维护一个代号数组以跟踪正在进行的更新，并保持额外的一层间接引用，以便读者可以将自己限制在所需的数据结构快照中
+  }
+}
+
+@inproceedings{Triplett:2011:RPHash,
+  author = {Triplett, Josh and McKenney, Paul E. and Walpole, Jonathan},
+  title = {Resizable, Scalable, Concurrent Hash Tables via Relativistic Programming},
+  booktitle = {Proceedings of the 2011 USENIX Annual Technical Conference},
+  month = {六月},
+  year = {2011},
+  pages = {145--158},
+  numpages = {14},
+  url = {http://www.usenix.org/event/atc11/tech/final_files/Triplett.pdf},
+  publisher = {The USENIX Association},
+  address = {Portland, OR USA}
+}
+
+@unpublished{PaulEMcKenney2011RCU3.0trainwreck,
+  Author = "Paul E. McKenney",
+  Title = "3.0 and {RCU}: 什么出了错",
+  month = "七月",
+  day = "27",
+  year = "2011",
+  note = "\url{http://lwn.net/Articles/453002/}",
+  annotation = {
+    对Linux内核3.0中的RCU事故的分析
+    [2011年7月27日查看]
+  }
+}
+
+@unpublished{NeilBrown2011MeetTheLockers,
+  Author = "Neil Brown",
+  Title = "Meet the {Lockers}",
+  month = "八月",
+  day = "3",
+  year = "2011",
+  note = "\url{http://lwn.net/Articles/453685/} [2011年9月2日查看]",
+  annotation = {
+    将Locker家族作为锁定、引用计数、RCU和seqlock的类比
+  }
+}
+
+@inproceedings{Seyster:2011:RFA:2075416.2075425,
+  author = {Seyster, Justin and Radhakrishnan, Prabakar and Katoch, Samriti and Duggal, Abhinav and Stoller, Scott D. and Zadok, Erez},
+  title = {Redflag: 一种用于分析内核级并发的框架},
+  booktitle = {第11届国际算法与架构并行处理会议论文集 - 第一部分},
+  series = {ICA3PP'11},
+  year = {2011},
+  isbn = {978-3-642-24649-4},
+  location = {澳大利亚墨尔本},
+  pages = {66--79},
+  numpages = {14},
+  url = {http://dl.acm.org/citation.cfm?id=2075416.2075425},
+  acmid = {2075425},
+  publisher = {Springer-Verlag},
+  address = {柏林, 海德堡}
+}
+
+@phdthesis{JoshTriplettPhD,
+  author = "Josh Triplett",
+  title = "Relativistic Causal Ordering: 一种用于可扩展并发数据结构的记忆模型",
+  school = "Portland State University",
+  year = "2012",
+  annotation = {
+    RCU保护的哈希表，屏障与读取端遍历顺序
+  }
+}
+```
+如果更新器所做的更改与读取侧遍历顺序相反，则更新器只需执行一条内存屏障指令；但如果方向相同，则更新器需要在各个更新之间等待一段宽限期。
+
+```
+@article{MathieuDesnoyers2012URCU
+,Author="Mathieu Desnoyers 和 Paul E. McKenney 和 Alan Stern 和 Michel R. Dagenais 和 Jonathan Walpole"
+,Title="用户级实现的读-复制-更新"
+,journal="IEEE 并行与分布式系统汇刊"
+,volume={23}
+,year="2012"
+,issn="1045-9219"
+,pages="375-382"
+,doi="http://doi.ieeecomputersociety.org/10.1109/TPDS.2011.159"
+,publisher="IEEE 计算机学会"
+,address="美国加利福尼亚州洛斯阿拉米托斯"
+,annotation={
+	RCU 概述，期望特性，半形式化语义，用户级 RCU 使用场景，三类 RCU 实现，无阻塞 RCU 更新，RCU 宽限期批处理，更新开销，
+	http://www.rdrop.com/users/paulmck/RCU/urcu-main-accepted.2011.08.30a.pdf
+	http://www.rdrop.com/users/paulmck/RCU/urcu-supp-accepted.2011.08.30a.pdf
+	http://www.computer.org/cms/Computer.org/dl/trans/td/2012/02/extras/ttd2012020375s.pdf
+}
+}
+
+@inproceedings{AustinClements2012RCULinux:mmapsem
+,author = {Austin Clements 和 Frans Kaashoek 和 Nickolai Zeldovich}
+,title = {使用 RCU 平衡树实现可扩展地址空间}
+,booktitle = {编程语言和操作系统架构支持（ASPLOS 2012）}
+,month = {三月}
+,year = {2012}
+,pages = {199--210}
+,numpages = {12}
+,publisher = {ACM}
+,address = {英国伦敦}
+,url="http://people.csail.mit.edu/nickolai/papers/clements-bonsai.pdf"
+}
+
+@unpublished{PaulEMcKenney2012ELCbattery
+,Author="Paul E. McKenney"
+,Title="使 RCU 适用于电池供电设备"
+,month="二月"
+,day="15"
+,year="2012"
+,note="可用：
+\url{http://www.rdrop.com/users/paulmck/RCU/RCUdynticks.2012.02.15b.pdf}
+[访问日期 2012 年 3 月 1 日]"
+,annotation={
+	RCU_FAST_NO_HZ, 第二轮
+}
+}
+
+@article{GuillermoVigueras2012RCUCrowd
+,author = {Vigueras, Guillermo 和 Orduña, Juan M. 和 Lozano, Miguel}
+,day = {25}
+,doi = {10.1007/s11227-012-0766-x}
+,issn = {0920-8542}
+,journal = {超级计算期刊}
+,keywords = {linux, 模拟}
+,month = 四月
+,posted-at = {2012-05-03 09:12:04}
+,priority = {2}
+,title = {{基于读-复制-更新的并行服务器用于分布式人群模拟}}
+,url = {http://dx.doi.org/10.1007/s11227-012-0766-x}
+,year = {2012}
+}
+
+@unpublished{JonCorbet2012ACCESS:ONCE
+,Author="Jon Corbet"
+,Title="{ACCESS\_ONCE()}"
+,month="八月"
+,day="1"
+,year="2012"
+,note="\url{http://lwn.net/Articles/508991/}"
+,annotation={
+	一些简单的特定编译器优化，促使使用 ACCESS_ONCE()
+}
+}
+
+@unpublished{AlexeyGotsman2012VerifyGraceExtended
+,Author="Alexey Gotsman 和 Noam Rinetzky 和 Hongseok Yang"
+,Title="使用宽限验证高并发算法（扩展版）"
+,month="七月"
+,day="10"
+,year="2012"
+,note="\url{http://software.imdea.org/~gotsman/papers/recycling-esop13-ext.pdf}"
+,annotation={
+	RCU 使用分离逻辑公式
+}
+}
+
+@unpublished{PaulMcKenney2012RCUUsage
+,Author="Paul E. McKenney 和 Silas Boyd-Wickizer 和 Jonathan Walpole"
+,Title="{RCU} 在 Linux 内核中的使用：十年之后"
+,month="九月"
+,day="17"
+,year="2012"
+,url=http://rdrop.com/users/paulmck/techreports/survey.2012.09.17a.pdf
+,note="技术报告 paulmck.2012.09.17"
+,annotation={
+	无-CBs CPU 的 RCU 第一个变体概述
+}
+}
+
+@unpublished{JonCorbet2012NOCB
+,Author="Jon Corbet"
+,Title="重定位 RCU 回调函数"
+,month="十月"
+,day="31"
+,year="2012"
+,note="\url{http://lwn.net/Articles/522262/}"
+,annotation={
+	无-CBs CPU 的 RCU 第一个变体概述
+}
+}
+
+@phdthesis{JustinSeyster2012PhD
+,author="Justin Seyster"
+,title="使用基于编译器的工具进行内核级并发运行时验证"
+,school="石溪大学"
+,year="2012"
+,annotation={
+	寻找数据竞争，包括涉及 RCU 的数据竞争
+提案：
+	http://www.fsl.cs.sunysb.edu/docs/jseyster-proposal/redflag.pdf
+	博士论文：
+	http://www.fsl.cs.sunysb.edu/docs/jseyster-dissertation/redflag.pdf
+}
+}
+
+@unpublished{PaulEMcKenney2013RCUUsage
+,Author="Paul E. McKenney 和 Silas Boyd-Wickizer 和 Jonathan Walpole"
+,Title="{RCU} 在 {Linux} 内核中的使用：十年之后"
+,month="二月"
+,day="24"
+,year="2013"
+,note="\url{http://rdrop.com/users/paulmck/techreports/RCUUsage.2013.02.24a.pdf}"
+,annotation={
+	Linux 内核中 RCU 的使用情况
+}
+}
+
+@inproceedings{AlexeyGotsman2013ESOPRCU
+,author = {Alexey Gotsman 和 Noam Rinetzky 和 Hongseok Yang}
+,title = {使用宽限验证并发内存回收算法}
+,booktitle = {ESOP'13: 欧洲编程研讨会}
+,year = {2013}
+,pages = {249--269}
+,publisher = {Springer}
+,address = {意大利罗马}
+,annotation={
+	http://software.imdea.org/~gotsman/papers/recycling-esop13.pdf
+}
+}
+
+@unpublished{PaulEMcKenney2013NoTinyPreempt
+,Author="Paul E. McKenney"
+,Title="简化 RCU"
+,month="三月"
+,day="6"
+,year="2013"
+,note="\url{http://lwn.net/Articles/541037/}"
+,annotation={
+	去除 TINY_PREEMPT_RCU
+}
+}
+```
+您提供的文本似乎不完整。请提供完整的句子或段落，以便我能够帮助您翻译成中文。如果您有任何其他问题或需要特定的帮助，请随时告诉我！

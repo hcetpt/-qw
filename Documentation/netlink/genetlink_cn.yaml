@@ -1,0 +1,362 @@
+```yaml
+# SPDX 许可证标识符: ((GPL-2.0 WITH Linux-syscall-note) 或 BSD-3-Clause)
+%YAML 1.2
+---
+$id: http://kernel.org/schemas/netlink/genetlink-legacy.yaml#
+$schema: https://json-schema.org/draft-07/schema
+
+# 常量定义
+$defs:
+  uint:
+    type: integer
+    minimum: 0
+  len-or-define:
+    type: [string, integer]
+    pattern: ^[0-9A-Za-z_-]+( - 1)?$  # 允许名称后跟“ - 1”
+    minimum: 0
+  len-or-limit:
+    # 字面整数或基于固定宽度类型（如 u8-min, u16-max 等）的限制
+    type: [string, integer]
+    pattern: ^[su](8|16|32|64)-(min|max)$
+    minimum: 0
+
+# 规范模式
+title: 协议
+description: genetlink 协议规范
+type: object
+required: [name, doc, attribute-sets, operations]
+additionalProperties: false
+properties:
+  name:
+    description: genetlink 家族的名称
+    type: string
+  doc:
+    type: string
+  protocol:
+    description: 模式兼容性级别，默认为 "genetlink"
+    enum: [genetlink]
+  uapi-header:
+    description: uAPI 头文件路径，默认为 linux/${family-name}.h
+    type: string
+
+  definitions:
+    description: 类型和常量定义（枚举、标志、宏定义）列表
+    type: array
+    items:
+      type: object
+      required: [type, name]
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+        header:
+          description: 对于 C 兼容语言，已经定义该值的头文件
+          type: string
+        type:
+          enum: [const, enum, flags]
+        doc:
+          type: string
+        # 对于 const
+        value:
+          description: 对于 const - 值
+          type: [string, integer]
+        # 对于 enum 和 flags
+        value-start:
+          description: 对于 enum 或 flags 的第一个值的字面初始化器
+          type: [string, integer]
+        entries:
+          description: 对于 enum 或 flags 的值数组
+          type: array
+          items:
+            oneOf:
+              - type: string
+              - type: object
+                required: [name]
+                additionalProperties: false
+                properties:
+                  name:
+                    type: string
+                  value:
+                    type: integer
+                  doc:
+                    type: string
+        render-max:
+          description: 渲染此枚举的最大成员
+          type: boolean
+
+  attribute-sets:
+    description: 本家族属性空间的定义
+```
+```yaml
+type: array
+items:
+  description: 单个属性空间的定义
+type: object
+required: [name, attributes]
+additionalProperties: False
+properties:
+  name:
+    description: |
+      在其他定义中引用此空间时使用的名称，在规范之外不使用
+    type: string
+  name-prefix:
+    description: |
+      属性的C枚举名称前缀。默认值为family[name]-set[name]-a-
+    type: string
+  enum-name:
+    description: 属性类型的枚举名称
+    type: string
+  doc:
+    description: 空间的文档说明
+    type: string
+  subset-of:
+    description: |
+      此空间作为逻辑部分所属的另一个空间的名称。子空间可用于定义在嵌套中使用的有限属性组
+    type: string
+  attributes:
+    description: 空间中的属性列表
+    type: array
+    items:
+      type: object
+      required: [name]
+      additionalProperties: False
+      properties:
+        name:
+          type: string
+        type: *attr-type
+          enum: [unused, pad, flag, binary,
+                 uint, sint, u8, u16, u32, u64, s32, s64,
+                 string, nest, indexed-array, nest-type-value]
+        doc:
+          description: 属性的文档说明
+          type: string
+        value:
+          description: 代表此属性的uAPI枚举项的值
+          $ref: '#/$defs/uint'
+        type-value:
+          description: 从nest-type-value属性类型中提取的值的名称
+          type: array
+          items:
+            type: string
+        byte-order:
+          enum: [little-endian, big-endian]
+        multi-attr:
+          type: boolean
+        nested-attributes:
+          description: 在属性内部使用的空间（子空间）的名称
+```
+```yaml
+type: string
+enum:
+  description: 用于属性的枚举类型的名称
+
+type: string
+enum-as-flags:
+  description: |
+    将枚举视为标志。在大多数情况下，枚举要么用作标志，要么用作值。
+    但是，在某些情况下，两种形式都是必要的。在这种情况下，头部包含枚举形式，
+    而特定属性可能会请求将值转换为位字段。
+type: boolean
+checks:
+  description: 内核输入验证
+type: object
+  additionalProperties: False
+  properties:
+    flags-mask:
+      description: 基于哪个标志常量生成掩码（仅适用于无符号标量类型）
+type: string
+    min:
+      description: 整型属性的最小值
+$ref: '#/$defs/len-or-limit'
+    max:
+      description: 整型属性的最大值
+$ref: '#/$defs/len-or-limit'
+    min-len:
+      description: 二进制属性的最小长度
+$ref: '#/$defs/len-or-define'
+    max-len:
+      description: 字符串或二进制属性的最大长度
+$ref: '#/$defs/len-or-define'
+    exact-len:
+      description: 字符串或二进制属性的确切长度
+```
+```yaml
+$ref: '#/$defs/len-or-define'
+sub-type: *attr-type
+display-hint: &display-hint
+  description: |
+    可选的格式指示符，仅用于在显示此类型值时选择正确的格式化机制。
+enum: [ hex, mac, fddi, ipv4, ipv6, uuid ]
+
+# 确保name-prefix不在子集中出现（子集继承命名）
+dependencies:
+  name-prefix:
+    not:
+      required: [ subset-of ]
+  subset-of:
+    not:
+      required: [ name-prefix ]
+
+# 如果不在子集定义中，则需要type属性
+if:
+  properties:
+    subset-of:
+      not:
+        type: string
+then:
+  properties:
+    attributes:
+      items:
+        required: [ type ]
+
+operations:
+  description: 协议支持的操作
+type: object
+required: [ list ]
+additionalProperties: False
+properties:
+  enum-model:
+    description: |
+      为操作分配值的模型。
+      "unified" 是推荐的模型，所有消息类型都属于单个枚举。
+      "directional" 将发送到内核和从内核接收的消息分别进行枚举。
+  enum: [ unified ]
+  name-prefix:
+    description: |
+      命令C枚举名称的前缀。名称通过将前缀与命令的大写名称拼接而成，其中破折号被替换为下划线。
+  type: string
+  enum-name:
+    description: 包含命令的枚举类型的名称。
+  type: string
+  async-prefix:
+    description: 与name-prefix相同，但用于将通知和事件渲染为单独的枚举。
+  type: string
+  async-enum:
+    description: 包含通知/事件的枚举类型的名称。
+  type: string
+  list:
+    description: 操作列表
+    type: array
+    items:
+      type: object
+      additionalProperties: False
+      required: [ name, doc ]
+      properties:
+        name:
+          description: 操作的名称，也定义了其在uAPI中的C枚举值。
+```
+
+希望这个翻译对你有帮助！如果还有其他问题，请随时告诉我。
+```yaml
+type: string
+doc:
+  description: 命令的文档说明
+type: string
+value:
+  description: 在 uAPI 中枚举值
+$ref: '#/$defs/uint'
+attribute-set:
+  description: |
+    定义此命令请求和响应中直接使用的属性空间
+type: string
+flags: &cmd_flags
+  description: 命令标志
+type: array
+  items:
+    enum: [admin-perm]
+dont-validate:
+  description: 内核属性验证标志
+type: array
+  items:
+    enum: [strict, dump, dump-strict]
+config-cond:
+  description: |
+    控制操作存在的内核配置选项名称（不带 'CONFIG_' 前缀）
+type: string
+do: &subop-type
+  description: 主命令处理器
+type: object
+  additionalProperties: False
+  properties:
+    request: &subop-attr-list
+      description: 给定命令请求消息的定义
+type: object
+      additionalProperties: False
+      properties:
+        attributes:
+          description: |
+            来自属性集的属性名称（不是完整的属性定义，只是名称）
+type: array
+          items:
+            type: string
+    reply: *subop-attr-list
+    pre:
+      description: 用于在主回调之前运行的功能的钩子（pre_doit 或 start）
+```
+```yaml
+type: string
+post:
+  description: 在主回调（post_doit 或 done）之后运行的函数的钩子
+
+type: string
+dump: *subop-type
+notify:
+  description: 与该通知共享回复类型的命令名称
+
+type: string
+event:
+  type: object
+  additionalProperties: False
+  properties:
+    attributes:
+      description: 通知的属性显式列表
+
+type: array
+items:
+  type: string
+mcgrp:
+  description: 生成给定通知的多播组名称
+
+type: string
+mcast-groups:
+  description: 多播组列表
+
+type: object
+required: [ list ]
+additionalProperties: False
+properties:
+  list:
+    description: 组列表
+
+type: array
+items:
+  type: object
+  required: [ name ]
+  additionalProperties: False
+  properties:
+    name:
+      description: |
+        用于定义和定义值的组名称
+
+type: string
+flags: *cmd_flags
+
+kernel-family:
+  description: 用于内核 C 代码生成的附加全局属性
+
+type: object
+additionalProperties: False
+properties:
+  headers:
+    description: |
+      应包含在生成代码源中的额外头文件列表
+
+type: array
+items:
+  type: string
+sock-priv:
+  description: |
+    内核中用于存储套接字状态的类型名称。该类型/结构是内核内部的，
+    并且在规范中未定义
+```
+类型：字符串

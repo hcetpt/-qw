@@ -1,0 +1,133 @@
+```yaml
+# SPDX 许可证标识符: ((GPL-2.0 WITH Linux-syscall-note) 或 BSD-3-Clause)
+
+名称: fou
+
+协议: genetlink-legacy
+
+文档: |
+  Foo-over-UDP
+C 家族名称: fou-genl-name
+C 版本名称: fou-genl-version
+最大值由宏定义: true
+内核策略: 全局
+
+定义:
+  -
+    类型: 枚举
+    名称: encap_type
+    前缀: fou-encap-
+    枚举名称:
+    条目: [ unspec, direct, gue ]
+
+属性集:
+  -
+    名称: fou
+    前缀: fou-attr-
+    属性:
+      -
+        名称: unspec
+        类型: 未使用
+        值: 0
+      -
+        名称: port
+        类型: u16
+        字节序: 大端
+      -
+        名称: af
+        类型: u8
+      -
+        名称: ipproto
+        类型: u8
+      -
+        名称: type
+        类型: u8
+      -
+        名称: remcsum_nopartial
+        类型: 标志位
+      -
+        名称: local_v4
+        类型: u32
+      -
+        名称: local_v6
+        类型: 二进制
+        检查:
+          最小长度: 16
+      -
+        名称: peer_v4
+        类型: u32
+      -
+        名称: peer_v6
+        类型: 二进制
+        检查:
+          最小长度: 16
+      -
+        名称: peer_port
+        类型: u16
+        字节序: 大端
+      -
+        名称: ifindex
+        类型: s32
+
+操作:
+  列表:
+    -
+      名称: unspec
+      文档: 未使用
+      值: 0
+
+    -
+      名称: add
+      文档: 添加端口
+      属性集: fou
+
+      不验证: [ 严格, 倾倒 ]
+      标志: [ 管理权限 ]
+
+      执行:
+        请求: &all_attrs
+          属性:
+            - port
+            - ipproto
+            - type
+            - remcsum_nopartial
+            - local_v4
+            - peer_v4
+            - local_v6
+            - peer_v6
+            - peer_port
+            - ifindex
+
+    -
+      名称: del
+      文档: 删除端口
+      属性集: fou
+
+      不验证: [ 严格, 倾倒 ]
+      标志: [ 管理权限 ]
+
+      执行:
+        请求: &select_attrs
+          属性:
+            - af
+            - ifindex
+            - port
+            - peer_port
+            - local_v4
+            - peer_v4
+            - local_v6
+            - peer_v6
+
+    -
+      名称: get
+      文档: 获取隧道信息
+      属性集: fou
+      不验证: [ 严格, 倾倒 ]
+
+      执行:
+        请求: *select_attrs
+        响应: *all_attrs
+
+      倾倒:
+        响应: *all_attrs
+```

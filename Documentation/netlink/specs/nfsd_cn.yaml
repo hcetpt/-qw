@@ -1,0 +1,227 @@
+```yaml
+# SPDX 许可证标识符: ((GPL-2.0 WITH Linux-syscall-note) 或 BSD-3-Clause)
+
+名称: nfsd
+协议: genetlink
+用户空间头文件: linux/nfsd_netlink.h
+
+文档: 通过通用 netlink 进行 NFSD 配置
+属性集:
+  -
+    名称: rpc-status
+    属性:
+      -
+        名称: xid
+        类型: u32
+        字节序: 大端
+      -
+        名称: flags
+        类型: u32
+      -
+        名称: prog
+        类型: u32
+      -
+        名称: version
+        类型: u8
+      -
+        名称: proc
+        类型: u32
+      -
+        名称: service_time
+        类型: s64
+      -
+        名称: pad
+        类型: pad
+      -
+        名称: saddr4
+        类型: u32
+        字节序: 大端
+        显示提示: ipv4
+      -
+        名称: daddr4
+        类型: u32
+        字节序: 大端
+        显示提示: ipv4
+      -
+        名称: saddr6
+        类型: binary
+        显示提示: ipv6
+      -
+        名称: daddr6
+        类型: binary
+        显示提示: ipv6
+      -
+        名称: sport
+        类型: u16
+        字节序: 大端
+      -
+        名称: dport
+        类型: u16
+        字节序: 大端
+      -
+        名称: compound-ops
+        类型: u32
+        多属性: 是
+  -
+    名称: server
+    属性:
+      -
+        名称: threads
+        类型: u32
+        多属性: 是
+      -
+        名称: gracetime
+        类型: u32
+      -
+        名称: leasetime
+        类型: u32
+      -
+        名称: scope
+        类型: string
+  -
+    名称: version
+    属性:
+      -
+        名称: major
+        类型: u32
+      -
+        名称: minor
+        类型: u32
+      -
+        名称: enabled
+        类型: flag
+  -
+    名称: server-proto
+    属性:
+      -
+        名称: version
+        类型: nest
+        嵌套属性: version
+        多属性: 是
+  -
+    名称: sock
+    属性:
+      -
+        名称: addr
+        类型: binary
+      -
+        名称: transport-name
+        类型: string
+  -
+    名称: server-sock
+    属性:
+      -
+        名称: addr
+        类型: nest
+        嵌套属性: sock
+        多属性: 是
+  -
+    名称: pool-mode
+    属性:
+      -
+        名称: mode
+        类型: string
+      -
+        名称: npools
+        类型: u32
+
+操作:
+  列表:
+    -
+      名称: rpc-status-get
+      文档: 获取待处理的 nfsd rpc
+      属性集: rpc-status
+      导出:
+        回复:
+          属性:
+            - xid
+            - flags
+            - prog
+            - version
+            - proc
+            - service_time
+            - saddr4
+            - daddr4
+            - saddr6
+            - daddr6
+            - sport
+            - dport
+            - compound-ops
+    -
+      名称: threads-set
+      文档: 设置运行线程数
+      属性集: server
+      标志: [ admin-perm ]
+      执行:
+        请求:
+          属性:
+            - threads
+            - gracetime
+            - leasetime
+            - scope
+    -
+      名称: threads-get
+      文档: 获取运行线程数
+      属性集: server
+      执行:
+        回复:
+          属性:
+            - threads
+            - gracetime
+            - leasetime
+            - scope
+    -
+      名称: version-set
+      文档: 设置启用的 nfs 版本
+      属性集: server-proto
+      标志: [ admin-perm ]
+      执行:
+        请求:
+          属性:
+            - version
+    -
+      名称: version-get
+      文档: 获取启用的 nfs 版本
+      属性集: server-proto
+      执行:
+        回复:
+          属性:
+            - version
+    -
+      名称: listener-set
+      文档: 设置运行的 nfs socket
+      属性集: server-sock
+      标志: [ admin-perm ]
+      执行:
+        请求:
+          属性:
+            - addr
+    -
+      名称: listener-get
+      文档: 获取运行的 nfs 监听器
+      属性集: server-sock
+      执行:
+        回复:
+          属性:
+            - addr
+    -
+      名称: pool-mode-set
+      文档: 设置当前服务器池模式
+      属性集: pool-mode
+      标志: [ admin-perm ]
+      执行:
+        请求:
+          属性:
+            - mode
+    -
+      名称: pool-mode-get
+      文档: 获取关于服务器池模式的信息
+      属性集: pool-mode
+      执行:
+        回复:
+          属性:
+            - mode
+            - npools
+```
+
+这是您请求的 YAML 格式的中文翻译。如果有任何问题或需要进一步修改，请告知。

@@ -1,0 +1,97 @@
+```
+# 这里描述了Linux中的认证/关联以及去认证/去关联流程
+#
+# 可以使用 http://www.websequencediagrams.com/ 的服务将此内容转换为图表
+
+参与者 userspace
+参与者 mac80211
+参与者 driver
+
+如果需要认证（非FT）
+    userspace -> mac80211: 认证
+
+如果已认证或正在认证
+    mac80211 -> driver: sta_state(AP, 不存在)
+    mac80211 -> driver: bss_info_changed(清除BSSID)
+否则 已关联
+    在 mac80211 和 driver 上的注释
+        类似于去认证/去关联，但不发送
+        BA会话停止及去认证/去关联帧
+    结束注释
+结束
+
+mac80211 -> driver: 配置(信道, 信道类型)
+mac80211 -> driver: bss_info_changed(设置BSSID, 基本速率位图)
+mac80211 -> driver: sta_state(AP, 存在)
+
+如果没有已知的探测请求数据
+    mac80211 -> driver: 发送定向探测请求
+    driver -> mac80211: 接收探测响应
+结束
+
+mac80211 -> driver: 发送认证帧
+driver -> mac80211: 接收认证帧
+
+如果是WEP共享密钥认证
+    mac80211 -> driver: 发送认证帧
+    driver -> mac80211: 接收认证帧
+结束
+
+mac80211 -> driver: sta_state(AP, 已认证)
+mac80211 -> userspace: 接收认证帧
+
+结束
+
+userspace -> mac80211: 关联
+如果是已认证或已关联
+    在 mac80211 和 driver 上的注释
+        类似于认证清理
+    结束
+结束
+
+如果之前未认证（非FT）
+    mac80211 -> driver: 配置(信道, 信道类型)
+    mac80211 -> driver: bss_info_changed(设置BSSID, 基本速率位图)
+    mac80211 -> driver: sta_state(AP, 存在)
+    mac80211 -> driver: sta_state(AP, 已认证)
+结束
+mac80211 -> driver: 发送关联
+driver -> mac80211: 接收关联响应
+在 mac80211 上的注释
+    初始化速率控制
+mac80211 -> driver: sta_state(AP, 已关联)
+
+如果不使用WPA
+    mac80211 -> driver: sta_state(AP, 已授权)
+结束
+
+mac80211 -> driver: 设置QoS参数
+
+mac80211 -> driver: bss_info_changed(QoS, HT, 已关联带AID)
+mac80211 -> userspace: 已关联
+
+在 userspace 左侧的注释
+    现在已关联
+
+如果使用WPA
+    在 userspace 上的注释
+        执行四次握手
+        （数据帧）
+    结束注释
+    userspace -> mac80211: 已授权
+    mac80211 -> driver: sta_state(AP, 已授权)
+结束
+
+userspace -> mac80211: 去认证/去关联
+mac80211 -> driver: 停止BA会话
+mac80211 -> driver: 发送去认证/去关联
+mac80211 -> driver: 清除帧
+mac80211 -> driver: sta_state(AP, 已关联)
+mac80211 -> driver: sta_state(AP, 已认证)
+mac80211 -> driver: sta_state(AP, 存在)
+mac80211 -> driver: sta_state(AP, 不存在)
+mac80211 -> driver: 关闭节能模式
+mac80211 -> driver: bss_info_changed(清除BSSID, 未关联, 无QoS, ...)
+mac80211 -> driver: 配置(信道类型为非HT)
+mac80211 -> userspace: 断开连接
+```
